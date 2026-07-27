@@ -43,7 +43,7 @@ export function initialiseUniverse(){
 
 export function renderUniverse(camera, entered){
 
-    universe.time += 0.0035;
+    universe.time++;
 
     canvas.width = universe.width;
     canvas.height = universe.height;
