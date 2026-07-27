@@ -99,7 +99,11 @@ export function renderBranchNodes(ctx, camera, branchNodes){
             ctx.textAlign = "center";
             ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter`;
 
-            ctx.fillText(node.subtitle, x, y + radius + Math.max(16, 22*camera.zoom));
+            ctx.fillText(
+            node.subtitle,
+            x,
+            y + radius + Math.max(6, 12 * camera.zoom)
+        );
 
         }
 
