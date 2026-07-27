@@ -100,12 +100,11 @@ export function renderBranchNodes(ctx, camera, branchNodes){
             ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter`;
 
             ctx.fillText(
-            node.subtitle,
-            x,
-            y + radius + Math.max(6, 12 * camera.zoom)
-        );
-
-        }
+                node.subtitle,
+                x,
+                y + radius + 8
+            )
+        };
 
     });
 
