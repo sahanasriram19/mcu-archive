@@ -53,7 +53,7 @@ export function drawStars(camera) {
 
         star.twinkle += star.speed;
 
-        const t = universe.time * 0.015;
+        const t = universe.time * 0.008;
 
         const driftAmount =
             250 * (0.3 + star.depth);
