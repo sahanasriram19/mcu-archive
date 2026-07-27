@@ -56,11 +56,11 @@
 }
 
 #movie-details-poster{
-    flex:0 0 38%;
+    flex:0 0 40%;
     display:flex;
-    align-items:stretch;
-    justify-content:stretch;
-    background:#000;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
 }
 
 #movie-details-poster img{
@@ -83,10 +83,10 @@
 }
 
 #movie-details-body{
-    flex:1;
-    min-width:0;
-    padding:24px;
+    flex:0 0 48%;
+    padding:24px 22px;
     overflow-y:auto;
+    min-width:0;
 }
 
 #movie-details-kicker{
