@@ -77,7 +77,7 @@ export function drawStars(camera) {
         );
 
         const drift =
-            universe.time * 0.0015;
+            universe.time * 0.003;
 
         screen.x +=
             Math.cos(drift + star.driftOffset) * 12;
