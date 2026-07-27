@@ -1122,5 +1122,19 @@
       "Thor"
     ],
     "poster": ""
-  }
+  },
+{
+    "id": "punisher-last-kill",
+    "title": "The Punisher: Last Kill",
+    "type": "special",
+    "phase": 6,
+    "saga": "Multiverse Saga",
+    "release": "2026-05-12",
+    "timeline": 67,
+    "characters": [
+        "Frank Castle"
+    ],
+    "poster": ""
+}
+
 ]
