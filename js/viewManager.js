@@ -50,20 +50,6 @@ export function setView(key){
     archive.view = key;
     currentView = key;
 
-    // Remembered across reloads (see app.js) so refreshing
-    // the page lands back on whatever view was open instead
-    // of always resetting to the landing screen.
-    try{
-
-        localStorage.setItem("mcuLastView", key);
-
-    } catch(err){
-
-        // Private browsing / storage disabled — not fatal,
-        // reload just won't restore the view this time.
-
-    }
-
     //----------------------------------
     // Layout — nodes ease toward these
     // new targets on their own, every

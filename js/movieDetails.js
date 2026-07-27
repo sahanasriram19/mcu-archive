@@ -8,6 +8,8 @@
 // poster image whenever TMDB has them.
 //==================================================
 
+import { fetchDetails } from "./posters.js";
+
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
 
@@ -88,38 +90,9 @@ function formatDate(release){
 
 }
 
-export function showMovieDetails(node){
+let openNode = null;
 
-    const url = posterUrlFor(node);
-
-    posterEl.innerHTML = url
-        ? `<img src="${url}" alt="${node.title}">`
-        : `<div id="movie-details-noposter">${node.title}</div>`;
-
-    kickerEl.textContent =
-        node.type === "show" ? "Disney+ Series" :
-        node.type === "special" ? "Marvel Special" :
-        "Feature Film";
-
-    titleEl.textContent = node.title;
-
-    const metaParts = [];
-
-    if(node.release) metaParts.push(formatDate(node.release));
-
-    if(node.phase !== undefined && node.phase !== null && node.phase >= 1){
-
-        metaParts.push("Phase " + node.phase);
-
-    }
-
-    if(typeof node.rating === "number" && node.rating > 0){
-
-        metaParts.push("★ " + node.rating.toFixed(1));
-
-    }
-
-    metaEl.textContent = metaParts.join("  ·  ");
+function renderExtras(node){
 
     if(node.trailerUrl){
 
@@ -130,23 +103,6 @@ export function showMovieDetails(node){
 
         trailerEl.removeAttribute("href");
         trailerEl.style.display = "none";
-
-    }
-
-    overviewEl.textContent = node.overview ||
-        "No synopsis available yet for this entry.";
-
-    if(node.characters && node.characters.length){
-
-        charactersEl.innerHTML =
-            `<div id="movie-details-characters-label">Featuring</div>` +
-            node.characters
-                .map(c => `<span class="character-chip">${c}</span>`)
-                .join("");
-
-    } else {
-
-        charactersEl.innerHTML = "";
 
     }
 
@@ -184,6 +140,75 @@ export function showMovieDetails(node){
         castEl.innerHTML = "";
 
     }
+
+}
+
+export function showMovieDetails(node){
+
+    openNode = node;
+
+    const url = posterUrlFor(node);
+
+    posterEl.innerHTML = url
+        ? `<img src="${url}" alt="${node.title}">`
+        : `<div id="movie-details-noposter">${node.title}</div>`;
+
+    kickerEl.textContent =
+        node.type === "show" ? "Disney+ Series" :
+        node.type === "special" ? "Marvel Special" :
+        "Feature Film";
+
+    titleEl.textContent = node.title;
+
+    const metaParts = [];
+
+    if(node.release) metaParts.push(formatDate(node.release));
+
+    if(node.phase !== undefined && node.phase !== null && node.phase >= 1){
+
+        metaParts.push("Phase " + node.phase);
+
+    }
+
+    if(typeof node.rating === "number" && node.rating > 0){
+
+        metaParts.push("★ " + node.rating.toFixed(1));
+
+    }
+
+    metaEl.textContent = metaParts.join("  ·  ");
+
+    overviewEl.textContent = node.overview ||
+        "No synopsis available yet for this entry.";
+
+    if(node.characters && node.characters.length){
+
+        charactersEl.innerHTML =
+            `<div id="movie-details-characters-label">Featuring</div>` +
+            node.characters
+                .map(c => `<span class="character-chip">${c}</span>`)
+                .join("");
+
+    } else {
+
+        charactersEl.innerHTML = "";
+
+    }
+
+    // Shows whatever's already cached immediately (usually
+    // nothing yet — cast/trailer are no longer prefetched
+    // for every title, see posters.js), then fetches them
+    // now that the card is actually open, and re-renders
+    // once they land. Guarded against the person having
+    // already closed this card or opened a different one
+    // by the time the fetch resolves.
+    renderExtras(node);
+
+    fetchDetails(node).then(()=>{
+
+        if(openNode === node) renderExtras(node);
+
+    });
 
     overlay.classList.add("open");
 

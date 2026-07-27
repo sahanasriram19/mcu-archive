@@ -13,7 +13,6 @@ import {
 
 import { updateArchive } from "./archive.js";
 import { setView } from "./viewManager.js";
-import { VIEWS } from "./views.js";
 
 import "./input.js";
 import { initialisePanel } from "../ui/panel.js";
@@ -67,11 +66,6 @@ button.addEventListener("click", () => enter("complete"));
 // is already imported BY this file —
 // exporting something back the other
 // way would be a circular import.
-// Doesn't touch localStorage, so a
-// reload still resumes wherever you
-// were; this is just a way to see the
-// landing screen again within the same
-// visit.
 //----------------------------------
 
 window.addEventListener("mcu:go-to-landing", () => {
@@ -81,35 +75,6 @@ window.addEventListener("mcu:go-to-landing", () => {
     viewport.style.display = "none";
 
 });
-
-//----------------------------------
-// Reload restore — setView() stashes
-// whichever view is active into
-// localStorage every time it's called
-// (see viewManager.js). If that's set,
-// skip the landing screen entirely and
-// go straight back to it instead of
-// making the person click Enter again.
-//----------------------------------
-
-let lastView = null;
-
-try{
-
-    lastView = localStorage.getItem("mcuLastView");
-
-} catch(err){
-
-    // Private browsing / storage disabled — falls back to
-    // showing the landing screen as normal.
-
-}
-
-if(lastView && VIEWS.some(v => v.key === lastView)){
-
-    enter(lastView);
-
-}
 
 //==========================================
 // INITIALISE

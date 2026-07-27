@@ -214,9 +214,19 @@ async function fetchPoster(node){
 
         }
 
-        // Feeds the click-to-view details card (see
-        // movieDetails.js) — harmless to set even if
-        // poster_path was missing above.
+        // Cast and trailer are NOT fetched here anymore —
+        // see fetchDetails() below. Every poster used to
+        // also pull full cast + trailer data upfront, which
+        // tripled the number of requests in flight (80
+        // titles × 3 calls each) and, since browsers cap
+        // concurrent connections per origin at ~6, that left
+        // poster searches for later-batched titles queued
+        // behind cast/trailer calls for earlier ones —
+        // posters loading slowly even though the layout
+        // itself had already finished animating. Cast and
+        // trailer are only actually needed once someone
+        // opens that title's details card, so they're
+        // fetched then instead, on demand.
         if(match){
 
             if(match.overview) node.overview = match.overview;
@@ -227,9 +237,10 @@ async function fetchPoster(node){
 
             }
 
-            node.cast = await fetchCast(matchedEndpoint, match.id);
-
-            node.trailerUrl = await fetchTrailer(matchedEndpoint, match.id);
+            // Kept so fetchDetails() can pull cast/trailer
+            // later without needing to search again.
+            node.tmdbId = match.id;
+            node.tmdbEndpoint = matchedEndpoint;
 
         }
 
@@ -240,6 +251,28 @@ async function fetchPoster(node){
         console.warn("Poster lookup failed for", node.title, err);
 
     }
+
+}
+
+//--------------------------------------------------
+// Cast + trailer, fetched on demand — called by
+// movieDetails.js the moment a card is opened, not
+// upfront for every title. Safe to call more than
+// once for the same node; it only actually fetches
+// the first time.
+//--------------------------------------------------
+
+export async function fetchDetails(node){
+
+    if(node.detailsLoaded) return;
+
+    if(!node.tmdbId || !node.tmdbEndpoint) return;
+
+    node.detailsLoaded = true;
+
+    node.cast = await fetchCast(node.tmdbEndpoint, node.tmdbId);
+
+    node.trailerUrl = await fetchTrailer(node.tmdbEndpoint, node.tmdbId);
 
 }
 
@@ -256,9 +289,9 @@ async function fetchPoster(node){
 // posters pop in.
 //==================================================
 
-const BATCH_SIZE = 6;
+const BATCH_SIZE = 8;
 
-const BATCH_DELAY_MS = 220;
+const BATCH_DELAY_MS = 140;
 
 export function loadPosters(graph){
 

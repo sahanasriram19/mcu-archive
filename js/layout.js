@@ -29,9 +29,7 @@ function phaseSubtitle(members){
     const min = Math.min(...years);
     const max = Math.max(...years);
 
-    const range = min === max ? `${min}` : `${min}–${max}`;
-
-    return `${range} · ${members.length} titles`;
+    return min === max ? `${min}` : `${min}–${max}`;
 
 }
 
@@ -234,14 +232,20 @@ export function layoutComplete(nodes){
 // one overlapping its neighbours.
 //--------------------------------------------------
 
-const PHASE_GRID_X = 2600;
-const PHASE_GRID_Y = 2600;
+const PHASE_GRID_X = 2800;
+const PHASE_GRID_Y = 2800;
 
 const PHASE_TOP_ROW_COUNT = 4;
 
+// Radius large enough that arc-spacing comfortably clears
+// a poster width even at n=17 (Phase 4) — this is the same
+// fix that made Complete MCU's switch fast: give
+// resolveOverlaps very little correcting to do in the first
+// place, rather than relying on many iterations to untangle
+// a tightly-packed starting position.
 function phaseRingRadius(n){
 
-    return 560 + Math.max(0, n-6)*32;
+    return 620 + Math.max(0, n-6)*55;
 
 }
 
@@ -278,9 +282,7 @@ export function layoutPhases(nodes){
             phase,
             key: "phase"+phase,
             label: "PHASE "+phase,
-            subtitle: [phase] ?
-                `${[phase]} — ${phaseSubtitle(groups[phase])}` :
-                phaseSubtitle(groups[phase]),
+            subtitle: phaseSubtitle(groups[phase]),
             x: (col - (rowCount-1)/2) * PHASE_GRID_X,
             y: (row - 0.5) * PHASE_GRID_Y
 
