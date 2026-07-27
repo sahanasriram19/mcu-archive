@@ -24,7 +24,7 @@ export const CONFIG = {
 
     ENERGY_COUNT: 280,
 
-    NEBULA_COUNT: 6,
+    NEBULA_COUNT: 4,
 
     SHOOTING_STAR_COUNT: 8
 
