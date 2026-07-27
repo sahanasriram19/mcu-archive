@@ -19,9 +19,10 @@
 }
 
 #movie-details-card{
+    position:relative;
     display:flex;
-    width:min(940px, 94vw);
-    height:540px;
+    width:min(820px, 90vw);   /* was 880px */
+    height:560px;
     overflow:hidden;
     background:rgba(17,22,30,.92);
     border:1px solid rgba(255,255,255,.1);
@@ -56,7 +57,8 @@
 }
 
 #movie-details-poster{
-    flex:0 0 40%;
+    flex:0 0 40%;      /* keep poster the same visual size */
+    background:#000;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -83,10 +85,10 @@
 }
 
 #movie-details-body{
-    flex:1;
-    padding:24px 22px;
-    overflow-y:auto;
+    flex:1;            /* fill ALL remaining space */
     min-width:0;
+    padding:24px;
+    overflow-y:auto;
 }
 
 #movie-details-kicker{
