@@ -1,0 +1,77 @@
+#landing {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+#landing-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent !important; /* Forcefully removes any hidden card background */
+    padding: 0;
+    margin: 0;
+    
+    /* Moves both the image and button up and down together */
+    animation: float 2s ease-in-out infinite;
+}
+
+#landing-card img {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    border-radius: 4px; /* Optional: adds a slight corner curve to match the logo image */
+}
+
+#landing-card p {
+    font-size: clamp(.8rem, 2vw, 1rem);
+    line-height: 1.6;
+    color: var(--muted);
+    margin-bottom: 24px;
+}
+
+#enterButton {
+    /* Sits cleanly underneath the glowing logo */
+    margin-top: 24px; 
+    padding: clamp(10px, 2.5vw, 15px) clamp(24px, 6vw, 40px);
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Independent hover pop effect for the button */
+#enterButton:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 10px #ff2a34, 
+                0 0 20px rgba(255, 0, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 20px #ff254a, 
+                0 0 40px hsl(352, 100%, 55%), 
+                0 0 60px rgba(105, 5, 5, 0.6);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

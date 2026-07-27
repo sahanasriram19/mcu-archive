@@ -1,0 +1,84 @@
+:root{
+    --bg:#090B10;
+    --panel:#11161E;
+    --text:#F4F4F4;
+    --muted:#9097A4;
+    --accent:#E62429;
+    --border:rgba(255,255,255,.08);
+    --radius:18px;
+    --transition:.3s ease;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    width:100%;
+    height:100%;
+}
+
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Inter,Arial,sans-serif;
+}
+
+button{
+    font:inherit;
+}
+
+/* ==========================================================
+   CHARACTER JOURNEY PANEL
+   ========================================================== */
+
+.character-panel{
+
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+
+    margin-top:18px;
+
+}
+
+.character-item{
+
+    padding:12px 14px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    color:white;
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    transition:.2s;
+
+}
+
+.character-item:hover{
+
+    background:rgba(255,255,255,.12);
+
+    transform:translateX(6px);
+
+}
+
+.character-item.active{
+
+    background:#38bdf8;
+
+    color:black;
+
+    font-weight:700;
+
+}

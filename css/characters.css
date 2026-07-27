@@ -1,0 +1,191 @@
+.character-panel{
+
+    position:fixed;
+
+    right:0;
+    top:0;
+
+    width:360px;
+    height:100%;
+
+    background:#111827;
+
+    border-left:1px solid rgba(255,255,255,.08);
+
+    overflow:auto;
+
+    transition:.35s;
+
+    z-index:100;
+
+}
+
+.character-panel.hidden{
+
+    transform:translateX(100%);
+
+}
+
+.character-header{
+
+    padding:24px;
+
+}
+
+.character-header h2{
+
+    margin:0 0 16px;
+
+    color:white;
+
+}
+
+.character-header input{
+
+    width:100%;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1f2937;
+
+    color:white;
+
+}
+
+.character-entry{
+
+    padding:18px 24px;
+
+    cursor:pointer;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+    transition:.2s;
+
+}
+
+.character-entry:hover{
+
+    background:#1d4ed8;
+
+}
+
+.character-name{
+
+    color:white;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+
+/*------------------------------------------
+Character Journey Dropdown
+------------------------------------------*/
+
+.character-dropdown{
+
+    overflow:hidden;
+
+    max-height:0;
+
+    opacity:0;
+
+    transition:
+        max-height .35s ease,
+        opacity .25s ease,
+        margin-top .25s ease;
+
+    margin-top:0;
+
+}
+
+.character-dropdown.open{
+
+    max-height:700px;
+
+    opacity:1;
+
+    margin-top:8px;
+
+}
+
+.character-btn{
+
+    width:100%;
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    color:white;
+
+    padding:10px 14px;
+
+    margin-bottom:8px;
+
+    border-radius:12px;
+
+    font-size:13px;
+
+    font-weight:500;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    text-align:left;
+
+}
+
+.character-btn:hover{
+
+    background:rgba(255,255,255,.12);
+
+    border-color:rgba(255,255,255,.2);
+
+    transform:translateX(4px);
+
+}
+
+.character-btn:last-child{
+
+    margin-bottom:0;
+
+}
+
+.view-panel-btn.has-dropdown{
+
+    position:relative;
+
+}
+
+.view-panel-btn.has-dropdown::after{
+
+    content:"▾";
+
+    position:absolute;
+
+    right:14px;
+
+    top:50%;
+
+    transform:translateY(-50%) rotate(0deg);
+
+    transition:.25s;
+
+    opacity:.7;
+
+}
+
+.view-panel-btn.has-dropdown.expanded::after{
+
+    transform:translateY(-50%) rotate(180deg);
+
+}

@@ -1,0 +1,14 @@
+.node{
+    position:absolute;
+    width:140px;
+    height:190px;
+    border-radius:16px;
+    background:#222;
+    border:1px solid rgba(255,255,255,.12);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    user-select:none;
+    box-shadow:0 0 30px rgba(0,0,0,.4);
+}
