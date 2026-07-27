@@ -83,7 +83,7 @@
 }
 
 #movie-details-body{
-    flex:0 0 48%;
+    flex:1;
     padding:24px 22px;
     overflow-y:auto;
     min-width:0;
