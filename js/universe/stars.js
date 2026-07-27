@@ -80,10 +80,10 @@ export function drawStars(camera) {
             universe.time * 0.0015;
 
         screen.x +=
-            Math.cos(drift + star.driftOffset) * 3;
+            Math.cos(drift + star.driftOffset) * 12;
 
         screen.y +=
-            Math.sin(drift + star.driftOffset * 1.3) * 3;
+            Math.sin(drift + star.driftOffset * 1.3) * 12;
 
         if (
 
