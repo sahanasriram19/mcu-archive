@@ -6,20 +6,16 @@ export const camera = {
     targetX: 0,
     targetY: 0,
 
-    zoom: 1,
-    targetZoom: 1,
+    // Landing camera starts further out so more of
+    // the star field is visible.
+    zoom: 0.28,
+    targetZoom: 0.28,
 
-    // 0.2 used to be the floor here, but Complete MCU's own
-    // default zoom is 0.10 — once you scrolled in past 0.2,
-    // the wheel handler's clamp meant you could never scroll
-    // back out past 0.2, i.e. never back to how the view
-    // actually loaded. Set below the smallest view zoom in
-    // views.js, with a little headroom to spare.
     minZoom: 0.07,
-
     maxZoom: 4,
 
     positionSmoothing: 0.09,
+
     zoomSmoothing: 0.045
 
 };
@@ -34,14 +30,14 @@ export function updateCamera(){
         (camera.targetY - camera.y) *
         camera.positionSmoothing;
 
-   const zoomSpeed =
-    camera.targetZoom > camera.zoom
-        ? 0.04   // zooming in
-        : 0.05;   // zooming out
+    // Slightly faster zoom than before
+    const zoomSpeed =
+        camera.targetZoom > camera.zoom
+            ? 0.08
+            : 0.09;
 
     camera.zoom +=
         (camera.targetZoom - camera.zoom) *
         zoomSpeed;
-
 
 }

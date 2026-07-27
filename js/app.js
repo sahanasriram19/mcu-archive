@@ -28,11 +28,9 @@ const button = document.getElementById("enterButton");
 
 let entered = false;
 
-// Hide the archive until Enter is pressed
+// Hide archive until Enter
 viewport.style.display = "none";
 
-//----------------------------------
-// initialiseGraph() is async
 //----------------------------------
 
 const graphReady = initialiseGraph();
@@ -49,6 +47,7 @@ button.addEventListener("click", async () => {
 
         await graphReady;
 
+        // Let the view choose its own camera.
         setView("complete");
 
         initialisePanel();
@@ -63,11 +62,10 @@ button.addEventListener("click", async () => {
 
 initialiseUniverse();
 
-// Initialise character UI once
 initCharacterPanel();
 
 //==========================================
-// GAME LOOP
+// LOOP
 //==========================================
 
 function loop(){
