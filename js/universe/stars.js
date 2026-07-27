@@ -53,17 +53,17 @@ export function drawStars(camera) {
 
         star.twinkle += star.speed;
 
-        const t = universe.time * 0.01;
+        const t = universe.time * 0.006;
 
         const worldX =
             star.baseX +
             Math.cos(t + star.driftOffset) *
-            star.driftRadius;
+            (40 * star.depth);
 
         const worldY =
             star.baseY +
-            Math.sin(t + star.driftOffset * 1.35) *
-            star.driftRadius;
+            Math.sin(t * 0.8 + star.driftOffset) *
+            (25 * star.depth);
 
         const screen = worldToScreen(
 
@@ -75,15 +75,6 @@ export function drawStars(camera) {
             height
 
         );
-
-        const drift =
-            universe.time * 0.003;
-
-        screen.x +=
-            Math.cos(drift + star.driftOffset) * 12;
-
-        screen.y +=
-            Math.sin(drift + star.driftOffset * 1.3) * 12;
 
         if (
 
