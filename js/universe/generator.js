@@ -28,12 +28,27 @@ import {
 // STAR
 //==================================================
 
+//==================================================
+// STAR
+//==================================================
+
 function createStar() {
+
+    const x = random(-CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE);
+    const y = random(-CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE);
 
     return {
 
-        x: random(-CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE),
-        y: random(-CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE),
+        // Original position
+        x,
+        y,
+
+        // Used for slow floating animation
+        baseX: x,
+        baseY: y,
+
+        driftRadius: random(2, 8),
+        driftOffset: random(0, Math.PI * 2),
 
         radius: random(.35, 2.2),
 
