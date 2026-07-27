@@ -38,7 +38,7 @@ export const VIEWS = [
         // so landing the camera there opens on the very
         // start of the timeline, not partway through it.
         edges: { mode: "timelineTrail" },
-        camera: { x: 0, y: 0, zoom: 0.28 }
+        camera: { x: 0, y: 0, zoom: 0.40 }
     },
 
     {
