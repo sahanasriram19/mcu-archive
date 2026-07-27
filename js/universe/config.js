@@ -20,7 +20,7 @@ export const CONFIG = {
 
     HERO_STAR_COUNT: 120,
 
-    DUST_COUNT: 0,
+    DUST_COUNT: 50,
 
     ENERGY_COUNT: 180,
 
