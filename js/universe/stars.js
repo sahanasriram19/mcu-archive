@@ -53,7 +53,7 @@ export function drawStars(camera) {
 
         star.twinkle += star.speed;
 
-        const t = universe.time * 0.00025;
+        const t = universe.time * 0.01;
 
         const worldX =
             star.baseX +
