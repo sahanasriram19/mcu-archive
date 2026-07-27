@@ -13,7 +13,6 @@ import {
 
 import { updateArchive } from "./archive.js";
 import { setView } from "./viewManager.js";
-import { VIEWS } from "./views.js";
 
 import "./input.js";
 import { initialisePanel } from "../ui/panel.js";
@@ -29,13 +28,16 @@ const button = document.getElementById("enterButton");
 
 let entered = false;
 
+// Hide the archive until Enter is pressed
+viewport.style.display = "none";
+
 //----------------------------------
 // initialiseGraph() is async
 //----------------------------------
 
 const graphReady = initialiseGraph();
 
-async function enter(viewKey){
+button.addEventListener("click", async () => {
 
     landing.style.display = "none";
 
@@ -47,44 +49,13 @@ async function enter(viewKey){
 
         await graphReady;
 
-        setView(viewKey);
+        setView("complete");
 
         initialisePanel();
 
     }
 
-}
-
-button.addEventListener("click", () => enter("complete"));
-
-//----------------------------------
-// Reload restore — setView() stashes
-// whichever view is active into
-// localStorage every time it's called
-// (see viewManager.js). If that's set,
-// skip the landing screen entirely and
-// go straight back to it instead of
-// making the person click Enter again.
-//----------------------------------
-
-let lastView = null;
-
-try{
-
-    lastView = localStorage.getItem("mcuLastView");
-
-} catch(err){
-
-    // Private browsing / storage disabled — falls back to
-    // showing the landing screen as normal.
-
-}
-
-if(lastView && VIEWS.some(v => v.key === lastView)){
-
-    enter(lastView);
-
-}
+});
 
 //==========================================
 // INITIALISE
@@ -92,14 +63,14 @@ if(lastView && VIEWS.some(v => v.key === lastView)){
 
 initialiseUniverse();
 
-// Initialise the character UI ONCE
+// Initialise character UI once
 initCharacterPanel();
 
 //==========================================
 // GAME LOOP
 //==========================================
 
-function loop() {
+function loop(){
 
     updateCamera();
 
