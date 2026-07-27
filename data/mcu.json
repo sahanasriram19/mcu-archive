@@ -1,1140 +1,1140 @@
 [
-  {
-    "id": "ironman",
-    "title": "Iron Man",
-    "type": "movie",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2008-05-02",
-    "timeline": 5,
-    "colour": "226,89,107",
-    "characters": [
-      "Tony Stark"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "hulk1",
-    "title": "The Incredible Hulk",
-    "type": "movie",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2008-06-13",
-    "timeline": 8,
-    "colour": "123,212,122",
-    "characters": [
-      "Bruce Banner"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "ironman2",
-    "title": "Iron Man 2",
-    "type": "movie",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2010-05-07",
-    "timeline": 7,
-    "colour": "226,89,107",
-    "characters": [
-      "Tony Stark",
-      "Natasha Romanoff"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "thor1",
-    "title": "Thor",
-    "type": "movie",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2011-05-06",
-    "timeline": 9,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor",
-      "Loki"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "cap1",
-    "title": "Captain America: The First Avenger",
-    "type": "movie",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2011-07-22",
-    "timeline": 2,
-    "colour": "91,141,239",
-    "characters": [
-      "Steve Rogers"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "avengers1",
-    "title": "The Avengers",
-    "type": "movie",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2012-05-04",
-    "timeline": 10,
-    "colour": "232,183,75",
-    "characters": [
-      "Tony Stark",
-      "Steve Rogers",
-      "Thor",
-      "Bruce Banner",
-      "Natasha Romanoff",
-      "Clint Barton",
-      "Loki"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "ironman3",
-    "title": "Iron Man 3",
-    "type": "movie",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2013-05-03",
-    "timeline": 13,
-    "colour": "226,89,107",
-    "characters": [
-      "Tony Stark"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "thor2",
-    "title": "Thor: The Dark World",
-    "type": "movie",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2013-11-08",
-    "timeline": 12,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor",
-      "Loki"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "cap2",
-    "title": "Captain America: The Winter Soldier",
-    "type": "movie",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2014-04-04",
-    "timeline": 15,
-    "colour": "91,141,239",
-    "characters": [
-      "Steve Rogers",
-      "Natasha Romanoff"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "gotg1",
-    "title": "Guardians of the Galaxy",
-    "type": "movie",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2014-08-01",
-    "timeline": 17,
-    "colour": "155,140,246",
-    "characters": [
-      "Star-Lord"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "avengers2",
-    "title": "Avengers: Age of Ultron",
-    "type": "movie",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2015-05-01",
-    "timeline": 23,
-    "colour": "232,183,75",
-    "characters": [
-      "Tony Stark",
-      "Steve Rogers",
-      "Thor",
-      "Bruce Banner",
-      "Natasha Romanoff",
-      "Clint Barton",
-      "Wanda Maximoff",
-      "Vision"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "antman1",
-    "title": "Ant-Man",
-    "type": "movie",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2015-07-17",
-    "timeline": 24,
-    "colour": "217,148,79",
-    "characters": [
-      "Scott Lang"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "cacw",
-    "title": "Captain America: Civil War",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2016-05-06",
-    "timeline": 29,
-    "colour": "91,141,239",
-    "characters": [
-      "Steve Rogers",
-      "Tony Stark",
-      "Natasha Romanoff",
-      "Peter Parker",
-      "Clint Barton",
-      "Wanda Maximoff",
-      "Vision",
-      "Scott Lang"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "drstrange1",
-    "title": "Doctor Strange",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2016-11-04",
-    "timeline": 32,
-    "colour": "155,140,246",
-    "characters": [
-      "Stephen Strange"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "gotg2",
-    "title": "Guardians of the Galaxy Vol. 2",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2017-05-05",
-    "timeline": 18,
-    "colour": "155,140,246",
-    "characters": [
-      "Star-Lord"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "spiderman1",
-    "title": "Spider-Man: Homecoming",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2017-07-07",
-    "timeline": 35,
-    "colour": "210,60,60",
-    "characters": [
-      "Peter Parker",
-      "Tony Stark"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "thor3",
-    "title": "Thor: Ragnarok",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2017-11-03",
-    "timeline": 36,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor",
-      "Loki"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "blackpanther1",
-    "title": "Black Panther",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2018-02-16",
-    "timeline": 34,
-    "colour": "98,201,141",
-    "characters": [
-      "T'Challa"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "infinitywar",
-    "title": "Avengers: Infinity War",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2018-04-27",
-    "timeline": 39,
-    "colour": "232,183,75",
-    "characters": [
-      "Tony Stark",
-      "Steve Rogers",
-      "Thor",
-      "Stephen Strange",
-      "Clint Barton",
-      "Natasha Romanoff",
-      "Bruce Banner",
-      "Loki",
-      "T'Challa",
-      "Scott Lang",
-      "Vision"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "antmanwasp",
-    "title": "Ant-Man and the Wasp",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2018-07-06",
-    "timeline": 38,
-    "colour": "217,148,79",
-    "characters": [
-      "Scott Lang"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "captainmarvel1",
-    "title": "Captain Marvel",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2019-03-08",
-    "timeline": 4,
-    "colour": "219,180,60",
-    "characters": [
-      "Carol Danvers"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "endgame",
-    "title": "Avengers: Endgame",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2019-04-26",
-    "timeline": 40,
-    "colour": "232,183,75",
-    "characters": [
-      "Tony Stark",
-      "Steve Rogers",
-      "Thor",
-      "Bruce Banner",
-      "Natasha Romanoff",
-      "Clint Barton",
-      "Stephen Strange",
-      "Wanda Maximoff",
-      "T'Challa",
-      "Carol Danvers",
-      "Scott Lang",
-      "Vision",
-      "Peter Parker"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "spidermanffh",
-    "title": "Spider-Man: Far From Home",
-    "type": "movie",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2019-07-02",
-    "timeline": 52,
-    "colour": "210,60,60",
-    "characters": [
-      "Peter Parker"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "wandavision",
-    "title": "WandaVision",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-01-15",
-    "timeline": 47,
-    "colour": "226,89,107",
-    "characters": [
-      "Wanda Maximoff",
-      "Vision",
-      "Agatha Harkness"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "falconwintersoldier",
-    "title": "The Falcon and the Winter Soldier",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-03-19",
-    "timeline": 50,
-    "colour": "91,141,239",
-    "characters": [
-      "Sam Wilson",
-      "Bucky Barnes"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "blackwidow",
-    "title": "Black Widow",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-07-09",
-    "timeline": 31,
-    "colour": "180,70,80",
-    "characters": [
-      "Natasha Romanoff",
-      "Yelena Belova"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "loki1",
-    "title": "Loki (Season 1)",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-06-09",
-    "timeline": 41,
-    "colour": "90,190,150",
-    "characters": [
-      "Loki"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "whatif1",
-    "title": "What If...? (Season 1)",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-08-11",
-    "timeline": 43,
-    "colour": "140,90,220",
-    "characters": [
-      "The Watcher"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "shangchi",
-    "title": "Shang-Chi and the Legend of the Ten Rings",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-09-03",
-    "timeline": 49,
-    "colour": "210,120,60",
-    "characters": [
-      "Shang-Chi"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "eternals",
-    "title": "Eternals",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-11-05",
-    "timeline": 51,
-    "colour": "210,190,140",
-    "characters": [
-      "Sersi",
-      "Ikaris"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "hawkeye",
-    "title": "Hawkeye",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-11-24",
-    "timeline": 55,
-    "colour": "150,90,60",
-    "characters": [
-      "Clint Barton",
-      "Kate Bishop",
-      "Yelena Belova",
-      "Wilson Fisk"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "spidermannwh",
-    "title": "Spider-Man: No Way Home",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2021-12-17",
-    "timeline": 53,
-    "colour": "210,60,60",
-    "characters": [
-      "Peter Parker"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "moonknight",
-    "title": "Moon Knight",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-03-30",
-    "timeline": 56,
-    "colour": "220,220,220",
-    "characters": [
-      "Marc Spector"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "drstrange2",
-    "title": "Doctor Strange in the Multiverse of Madness",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-05-06",
-    "timeline": 54,
-    "colour": "155,140,246",
-    "characters": [
-      "Stephen Strange",
-      "Wanda Maximoff"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "msmarvel",
-    "title": "Ms. Marvel",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-06-08",
-    "timeline": 60,
-    "colour": "230,150,60",
-    "characters": [
-      "Kamala Khan"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "thor4",
-    "title": "Thor: Love and Thunder",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-07-08",
-    "timeline": 61,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor",
-      "Jane Foster"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "shehulk",
-    "title": "She-Hulk: Attorney at Law",
-    "type": "show",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-08-18",
-    "timeline": 59,
-    "colour": "110,190,110",
-    "characters": [
-      "Jennifer Walters"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "werewolfbynight",
-    "title": "Werewolf by Night",
-    "type": "special",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-10-07",
-    "timeline": 63,
-    "colour": "120,60,60",
-    "characters": [
-      "Jack Russell"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "blackpanther2",
-    "title": "Black Panther: Wakanda Forever",
-    "type": "movie",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-11-11",
-    "timeline": 57,
-    "colour": "98,201,141",
-    "characters": [
-      "Shuri"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "gotgholiday",
-    "title": "The Guardians of the Galaxy Holiday Special",
-    "type": "special",
-    "phase": 4,
-    "saga": "multiverse",
-    "release": "2022-11-25",
-    "timeline": 64,
-    "colour": "155,140,246",
-    "characters": [
-      "Star-Lord"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "antmanquantumania",
-    "title": "Ant-Man and the Wasp: Quantumania",
-    "type": "movie",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2023-02-17",
-    "timeline": 65,
-    "colour": "217,148,79",
-    "characters": [
-      "Scott Lang"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "gotg3",
-    "title": "Guardians of the Galaxy Vol. 3",
-    "type": "movie",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2023-05-05",
-    "timeline": 66,
-    "colour": "155,140,246",
-    "characters": [
-      "Star-Lord"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "secretinvasion",
-    "title": "Secret Invasion",
-    "type": "show",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2023-06-21",
-    "timeline": 67,
-    "colour": "90,110,90",
-    "characters": [
-      "Nick Fury"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "themarvels",
-    "title": "The Marvels",
-    "type": "movie",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2023-11-10",
-    "timeline": 68,
-    "colour": "219,180,60",
-    "characters": [
-      "Carol Danvers",
-      "Kamala Khan",
-      "Monica Rambeau"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "echo",
-    "title": "Echo",
-    "type": "show",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2024-01-09",
-    "timeline": 58,
-    "colour": "170,110,70",
-    "characters": [
-      "Maya Lopez"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "deadpoolwolverine",
-    "title": "Deadpool & Wolverine",
-    "type": "movie",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2024-07-26",
-    "timeline": 48,
-    "colour": "180,30,30",
-    "characters": [
-      "Deadpool",
-      "Wolverine"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "agathaallalong",
-    "title": "Agatha All Along",
-    "type": "show",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2024-09-18",
-    "timeline": 69,
-    "colour": "120,60,140",
-    "characters": [
-      "Agatha Harkness"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "cap4",
-    "title": "Captain America: Brave New World",
-    "type": "movie",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2025-02-14",
-    "timeline": 71,
-    "colour": "91,141,239",
-    "characters": [
-      "Sam Wilson"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "daredevilbornagain1",
-    "title": "Daredevil: Born Again (Season 1)",
-    "type": "show",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2025-03-04",
-    "timeline": 70,
-    "colour": "150,20,20",
-    "characters": [
-      "Matt Murdock"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "thunderbolts",
-    "title": "Thunderbolts*",
-    "type": "movie",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2025-05-02",
-    "timeline": 72,
-    "colour": "90,90,110",
-    "characters": [
-      "Yelena Belova",
-      "Bucky Barnes"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "ironheart",
-    "title": "Ironheart",
-    "type": "show",
-    "phase": 5,
-    "saga": "multiverse",
-    "release": "2025-06-24",
-    "timeline": 62,
-    "colour": "200,60,60",
-    "characters": [
-      "Riri Williams"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "fantasticfour",
-    "title": "The Fantastic Four: First Steps",
-    "type": "movie",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2025-07-25",
-    "timeline": 73,
-    "colour": "90,150,190",
-    "characters": [
-      "Reed Richards",
-      "Sue Storm"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "eyesofwakanda",
-    "title": "Eyes of Wakanda",
-    "type": "show",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2025-08-06",
-    "timeline": 1,
-    "colour": "98,201,141",
-    "characters": [],
-    "poster": ""
-  },
-  {
-    "id": "marvelzombies",
-    "title": "Marvel Zombies",
-    "type": "show",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2025-09-15",
-    "timeline": 46,
-    "colour": "110,140,90",
-    "characters": [],
-    "poster": ""
-  },
-  {
-    "id": "wonderman",
-    "title": "Wonder Man",
-    "type": "show",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2026-01-27",
-    "timeline": 74,
-    "colour": "210,170,90",
-    "characters": [
-      "Simon Williams"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "daredevilbornagain2",
-    "title": "Daredevil: Born Again (Season 2)",
-    "type": "show",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2026-03-04",
-    "timeline": 75,
-    "colour": "150,20,20",
-    "characters": [
-      "Matt Murdock"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "spidermanbnd",
-    "title": "Spider-Man: Brand New Day",
-    "type": "movie",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2026-07-31",
-    "timeline": 76,
-    "colour": "210,60,60",
-    "characters": [
-      "Peter Parker"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "avengersdoomsday",
-    "title": "Avengers: Doomsday",
-    "type": "movie",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2026-12-18",
-    "timeline": 78,
-    "colour": "232,183,75",
-    "characters": [
-      "Doctor Doom"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "visionquest",
-    "title": "Vision Quest",
-    "type": "show",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2026-11-01",
-    "timeline": 77,
-    "colour": "170,60,200",
-    "characters": [
-      "Vision"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "secretwars",
-    "title": "Avengers: Secret Wars",
-    "type": "movie",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2027-12-17",
-    "timeline": 79,
-    "colour": "232,183,75",
-    "characters": [
-      "Doctor Doom"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "blade",
-    "title": "Blade",
-    "type": "movie",
-    "phase": 6,
-    "saga": "multiverse",
-    "release": "2027-06-01",
-    "timeline": 80,
-    "colour": "140,20,30",
-    "characters": [
-      "Blade"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "daredevil1",
-    "title": "Daredevil",
-    "type": "show",
-    "phase": 0,
-    "saga": "defenders",
-    "release": "2015-04-10",
-    "timeline": 21,
-    "colour": "180,20,20",
-    "characters": [
-      "Matt Murdock"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "jessicajones1",
-    "title": "Jessica Jones",
-    "type": "show",
-    "phase": 0,
-    "saga": "defenders",
-    "release": "2015-11-20",
-    "timeline": 22,
-    "colour": "90,100,150",
-    "characters": [
-      "Jessica Jones"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "lukecage1",
-    "title": "Luke Cage",
-    "type": "show",
-    "phase": 0,
-    "saga": "defenders",
-    "release": "2016-09-30",
-    "timeline": 25,
-    "colour": "210,170,60",
-    "characters": [
-      "Luke Cage"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "ironfist1",
-    "title": "Iron Fist",
-    "type": "show",
-    "phase": 0,
-    "saga": "defenders",
-    "release": "2017-03-17",
-    "timeline": 26,
-    "colour": "60,180,120",
-    "characters": [
-      "Danny Rand"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "defenders1",
-    "title": "The Defenders",
-    "type": "show",
-    "phase": 0,
-    "saga": "defenders",
-    "release": "2017-08-18",
-    "timeline": 27,
-    "colour": "200,200,200",
-    "characters": [
-      "Matt Murdock",
-      "Jessica Jones",
-      "Luke Cage",
-      "Danny Rand"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "punisher1",
-    "title": "The Punisher",
-    "type": "show",
-    "phase": 0,
-    "saga": "defenders",
-    "release": "2017-11-17",
-    "timeline": 28,
-    "colour": "60,60,60",
-    "characters": [
-      "Frank Castle"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "iamgroot1",
-    "title": "I Am Groot (Season 1)",
-    "type": "special",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2022-08-10",
-    "timeline": 19,
-    "colour": "155,140,246",
-    "characters": [
-      "Groot"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "consultant",
-    "title": "The Consultant",
-    "type": "special",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2011-09-13",
-    "timeline": 6,
-    "colour": "226,89,107",
-    "characters": [
-      "Tony Stark"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "funnything",
-    "title": "A Funny Thing Happened on the Way to Thor's Hammer",
-    "type": "special",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2011-10-25",
-    "timeline": 3,
-    "colour": "91,141,239",
-    "characters": [
-      "Steve Rogers"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "item47",
-    "title": "Item 47",
-    "type": "special",
-    "phase": 1,
-    "saga": "infinity",
-    "release": "2012-09-25",
-    "timeline": 11,
-    "colour": "232,183,75",
-    "characters": [],
-    "poster": ""
-  },
-  {
-    "id": "agentcarteroneshot",
-    "title": "Agent Carter",
-    "type": "special",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2013-09-24",
-    "timeline": 14,
-    "colour": "150,90,60",
-    "characters": [
-      "Peggy Carter"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "allhailtheking",
-    "title": "All Hail the King",
-    "type": "special",
-    "phase": 2,
-    "saga": "infinity",
-    "release": "2014-02-04",
-    "timeline": 16,
-    "colour": "246,196,83",
-    "characters": [
-      "Trevor Slattery"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "teamthor",
-    "title": "Team Thor",
-    "type": "special",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2016-08-23",
-    "timeline": 30,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "teamthor2",
-    "title": "Team Thor: Part 2",
-    "type": "special",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2017-02-28",
-    "timeline": 33,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor"
-    ],
-    "poster": ""
-  },
-  {
-    "id": "teamdarryl",
-    "title": "Team Darryl",
-    "type": "special",
-    "phase": 3,
-    "saga": "infinity",
-    "release": "2018-02-20",
-    "timeline": 37,
-    "colour": "246,196,83",
-    "characters": [
-      "Thor"
-    ],
-    "poster": ""
-  },
-{
-    "id": "punisher-last-kill",
-    "title": "The Punisher: Last Kill",
-    "type": "special",
-    "phase": 6,
-    "saga": "Multiverse Saga",
-    "release": "2026-05-12",
-    "timeline": 67,
-    "characters": [
-        "Frank Castle"
-    ],
-    "poster": ""
-}
-
+    {
+        "id": "eyesofwakanda",
+        "title": "Eyes of Wakanda",
+        "type": "show",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2025-08-06",
+        "timeline": 1,
+        "colour": "98,201,141",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "cap1",
+        "title": "Captain America: The First Avenger",
+        "type": "movie",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2011-07-22",
+        "timeline": 2,
+        "colour": "91,141,239",
+        "characters": [
+            "Steve Rogers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "funnything",
+        "title": "A Funny Thing Happened on the Way to Thor's Hammer",
+        "type": "special",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2011-10-25",
+        "timeline": 3,
+        "colour": "91,141,239",
+        "characters": [
+            "Steve Rogers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "captainmarvel1",
+        "title": "Captain Marvel",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2019-03-08",
+        "timeline": 4,
+        "colour": "219,180,60",
+        "characters": [
+            "Carol Danvers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironman",
+        "title": "Iron Man",
+        "type": "movie",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2008-05-02",
+        "timeline": 5,
+        "colour": "226,89,107",
+        "characters": [
+            "Tony Stark"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "consultant",
+        "title": "The Consultant",
+        "type": "special",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2011-09-13",
+        "timeline": 6,
+        "colour": "226,89,107",
+        "characters": [
+            "Tony Stark"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironman2",
+        "title": "Iron Man 2",
+        "type": "movie",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2010-05-07",
+        "timeline": 7,
+        "colour": "226,89,107",
+        "characters": [
+            "Tony Stark",
+            "Natasha Romanoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "hulk1",
+        "title": "The Incredible Hulk",
+        "type": "movie",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2008-06-13",
+        "timeline": 8,
+        "colour": "123,212,122",
+        "characters": [
+            "Bruce Banner"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "thor1",
+        "title": "Thor",
+        "type": "movie",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2011-05-06",
+        "timeline": 9,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor",
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengers1",
+        "title": "The Avengers",
+        "type": "movie",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2012-05-04",
+        "timeline": 10,
+        "colour": "232,183,75",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor",
+            "Bruce Banner",
+            "Natasha Romanoff",
+            "Clint Barton",
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "item47",
+        "title": "Item 47",
+        "type": "special",
+        "phase": 1,
+        "saga": "infinity",
+        "release": "2012-09-25",
+        "timeline": 11,
+        "colour": "232,183,75",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "thor2",
+        "title": "Thor: The Dark World",
+        "type": "movie",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2013-11-08",
+        "timeline": 12,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor",
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironman3",
+        "title": "Iron Man 3",
+        "type": "movie",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2013-05-03",
+        "timeline": 13,
+        "colour": "226,89,107",
+        "characters": [
+            "Tony Stark"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "agentcarteroneshot",
+        "title": "Agent Carter",
+        "type": "special",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2013-09-24",
+        "timeline": 14,
+        "colour": "150,90,60",
+        "characters": [
+            "Peggy Carter"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "cap2",
+        "title": "Captain America: The Winter Soldier",
+        "type": "movie",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2014-04-04",
+        "timeline": 15,
+        "colour": "91,141,239",
+        "characters": [
+            "Steve Rogers",
+            "Natasha Romanoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "allhailtheking",
+        "title": "All Hail the King",
+        "type": "special",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2014-02-04",
+        "timeline": 16,
+        "colour": "246,196,83",
+        "characters": [
+            "Trevor Slattery"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "gotg1",
+        "title": "Guardians of the Galaxy",
+        "type": "movie",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2014-08-01",
+        "timeline": 17,
+        "colour": "155,140,246",
+        "characters": [
+            "Star-Lord"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "gotg2",
+        "title": "Guardians of the Galaxy Vol. 2",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2017-05-05",
+        "timeline": 18,
+        "colour": "155,140,246",
+        "characters": [
+            "Star-Lord"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "iamgroot1",
+        "title": "I Am Groot (Season 1)",
+        "type": "special",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2022-08-10",
+        "timeline": 19,
+        "colour": "155,140,246",
+        "characters": [
+            "Groot"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "daredevil1",
+        "title": "Daredevil",
+        "type": "show",
+        "phase": 0,
+        "saga": "defenders",
+        "release": "2015-04-10",
+        "timeline": 20,
+        "colour": "180,20,20",
+        "characters": [
+            "Matt Murdock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "jessicajones1",
+        "title": "Jessica Jones",
+        "type": "show",
+        "phase": 0,
+        "saga": "defenders",
+        "release": "2015-11-20",
+        "timeline": 21,
+        "colour": "90,100,150",
+        "characters": [
+            "Jessica Jones"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengers2",
+        "title": "Avengers: Age of Ultron",
+        "type": "movie",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2015-05-01",
+        "timeline": 22,
+        "colour": "232,183,75",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor",
+            "Bruce Banner",
+            "Natasha Romanoff",
+            "Clint Barton",
+            "Wanda Maximoff",
+            "Vision"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "antman1",
+        "title": "Ant-Man",
+        "type": "movie",
+        "phase": 2,
+        "saga": "infinity",
+        "release": "2015-07-17",
+        "timeline": 23,
+        "colour": "217,148,79",
+        "characters": [
+            "Scott Lang"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "lukecage1",
+        "title": "Luke Cage",
+        "type": "show",
+        "phase": 0,
+        "saga": "defenders",
+        "release": "2016-09-30",
+        "timeline": 24,
+        "colour": "210,170,60",
+        "characters": [
+            "Luke Cage"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironfist1",
+        "title": "Iron Fist",
+        "type": "show",
+        "phase": 0,
+        "saga": "defenders",
+        "release": "2017-03-17",
+        "timeline": 25,
+        "colour": "60,180,120",
+        "characters": [
+            "Danny Rand"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "defenders1",
+        "title": "The Defenders",
+        "type": "show",
+        "phase": 0,
+        "saga": "defenders",
+        "release": "2017-08-18",
+        "timeline": 26,
+        "colour": "200,200,200",
+        "characters": [
+            "Matt Murdock",
+            "Jessica Jones",
+            "Luke Cage",
+            "Danny Rand"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "punisher1",
+        "title": "The Punisher",
+        "type": "show",
+        "phase": 0,
+        "saga": "defenders",
+        "release": "2017-11-17",
+        "timeline": 27,
+        "colour": "60,60,60",
+        "characters": [
+            "Frank Castle"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "cacw",
+        "title": "Captain America: Civil War",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2016-05-06",
+        "timeline": 28,
+        "colour": "91,141,239",
+        "characters": [
+            "Steve Rogers",
+            "Tony Stark",
+            "Natasha Romanoff",
+            "Peter Parker",
+            "Clint Barton",
+            "Wanda Maximoff",
+            "Vision",
+            "Scott Lang"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "teamthor",
+        "title": "Team Thor",
+        "type": "special",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2016-08-23",
+        "timeline": 29,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "blackwidow",
+        "title": "Black Widow",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-07-09",
+        "timeline": 30,
+        "colour": "180,70,80",
+        "characters": [
+            "Natasha Romanoff",
+            "Yelena Belova"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "drstrange1",
+        "title": "Doctor Strange",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2016-11-04",
+        "timeline": 31,
+        "colour": "155,140,246",
+        "characters": [
+            "Stephen Strange"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "teamthor2",
+        "title": "Team Thor: Part 2",
+        "type": "special",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2017-02-28",
+        "timeline": 32,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "blackpanther1",
+        "title": "Black Panther",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2018-02-16",
+        "timeline": 33,
+        "colour": "98,201,141",
+        "characters": [
+            "T'Challa"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman1",
+        "title": "Spider-Man: Homecoming",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2017-07-07",
+        "timeline": 34,
+        "colour": "210,60,60",
+        "characters": [
+            "Peter Parker",
+            "Tony Stark"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "thor3",
+        "title": "Thor: Ragnarok",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2017-11-03",
+        "timeline": 35,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor",
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "teamdarryl",
+        "title": "Team Darryl",
+        "type": "special",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2018-02-20",
+        "timeline": 36,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "antmanwasp",
+        "title": "Ant-Man and the Wasp",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2018-07-06",
+        "timeline": 37,
+        "colour": "217,148,79",
+        "characters": [
+            "Scott Lang"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "infinitywar",
+        "title": "Avengers: Infinity War",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2018-04-27",
+        "timeline": 38,
+        "colour": "232,183,75",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor",
+            "Stephen Strange",
+            "Clint Barton",
+            "Natasha Romanoff",
+            "Bruce Banner",
+            "Loki",
+            "T'Challa",
+            "Scott Lang",
+            "Vision"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "endgame",
+        "title": "Avengers: Endgame",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2019-04-26",
+        "timeline": 39,
+        "colour": "232,183,75",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor",
+            "Bruce Banner",
+            "Natasha Romanoff",
+            "Clint Barton",
+            "Stephen Strange",
+            "Wanda Maximoff",
+            "T'Challa",
+            "Carol Danvers",
+            "Scott Lang",
+            "Vision",
+            "Peter Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "loki1",
+        "title": "Loki (Season 1)",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-06-09",
+        "timeline": 40,
+        "colour": "90,190,150",
+        "characters": [
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "whatif1",
+        "title": "What If...? (Season 1)",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-08-11",
+        "timeline": 41,
+        "colour": "140,90,220",
+        "characters": [
+            "The Watcher"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "marvelzombies",
+        "title": "Marvel Zombies",
+        "type": "show",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2025-09-15",
+        "timeline": 42,
+        "colour": "110,140,90",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "wandavision",
+        "title": "WandaVision",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-01-15",
+        "timeline": 43,
+        "colour": "226,89,107",
+        "characters": [
+            "Wanda Maximoff",
+            "Vision",
+            "Agatha Harkness"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "deadpoolwolverine",
+        "title": "Deadpool & Wolverine",
+        "type": "movie",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2024-07-26",
+        "timeline": 44,
+        "colour": "180,30,30",
+        "characters": [
+            "Deadpool",
+            "Wolverine"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "shangchi",
+        "title": "Shang-Chi and the Legend of the Ten Rings",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-09-03",
+        "timeline": 45,
+        "colour": "210,120,60",
+        "characters": [
+            "Shang-Chi"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "falconwintersoldier",
+        "title": "The Falcon and the Winter Soldier",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-03-19",
+        "timeline": 46,
+        "colour": "91,141,239",
+        "characters": [
+            "Sam Wilson",
+            "Bucky Barnes"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "eternals",
+        "title": "Eternals",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-11-05",
+        "timeline": 47,
+        "colour": "210,190,140",
+        "characters": [
+            "Sersi",
+            "Ikaris"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanffh",
+        "title": "Spider-Man: Far From Home",
+        "type": "movie",
+        "phase": 3,
+        "saga": "infinity",
+        "release": "2019-07-02",
+        "timeline": 48,
+        "colour": "210,60,60",
+        "characters": [
+            "Peter Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermannwh",
+        "title": "Spider-Man: No Way Home",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-12-17",
+        "timeline": 49,
+        "colour": "210,60,60",
+        "characters": [
+            "Peter Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "drstrange2",
+        "title": "Doctor Strange in the Multiverse of Madness",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-05-06",
+        "timeline": 50,
+        "colour": "155,140,246",
+        "characters": [
+            "Stephen Strange",
+            "Wanda Maximoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "hawkeye",
+        "title": "Hawkeye",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2021-11-24",
+        "timeline": 51,
+        "colour": "150,90,60",
+        "characters": [
+            "Clint Barton",
+            "Kate Bishop",
+            "Yelena Belova",
+            "Wilson Fisk"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "moonknight",
+        "title": "Moon Knight",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-03-30",
+        "timeline": 52,
+        "colour": "220,220,220",
+        "characters": [
+            "Marc Spector"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "blackpanther2",
+        "title": "Black Panther: Wakanda Forever",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-11-11",
+        "timeline": 53,
+        "colour": "98,201,141",
+        "characters": [
+            "Shuri"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "echo",
+        "title": "Echo",
+        "type": "show",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2024-01-09",
+        "timeline": 54,
+        "colour": "170,110,70",
+        "characters": [
+            "Maya Lopez"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "shehulk",
+        "title": "She-Hulk: Attorney at Law",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-08-18",
+        "timeline": 55,
+        "colour": "110,190,110",
+        "characters": [
+            "Jennifer Walters"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "msmarvel",
+        "title": "Ms. Marvel",
+        "type": "show",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-06-08",
+        "timeline": 56,
+        "colour": "230,150,60",
+        "characters": [
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "thor4",
+        "title": "Thor: Love and Thunder",
+        "type": "movie",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-07-08",
+        "timeline": 57,
+        "colour": "246,196,83",
+        "characters": [
+            "Thor",
+            "Jane Foster"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironheart",
+        "title": "Ironheart",
+        "type": "show",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2025-06-24",
+        "timeline": 58,
+        "colour": "200,60,60",
+        "characters": [
+            "Riri Williams"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "werewolfbynight",
+        "title": "Werewolf by Night",
+        "type": "special",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-10-07",
+        "timeline": 59,
+        "colour": "120,60,60",
+        "characters": [
+            "Jack Russell"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "gotgholiday",
+        "title": "The Guardians of the Galaxy Holiday Special",
+        "type": "special",
+        "phase": 4,
+        "saga": "multiverse",
+        "release": "2022-11-25",
+        "timeline": 60,
+        "colour": "155,140,246",
+        "characters": [
+            "Star-Lord"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "antmanquantumania",
+        "title": "Ant-Man and the Wasp: Quantumania",
+        "type": "movie",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2023-02-17",
+        "timeline": 61,
+        "colour": "217,148,79",
+        "characters": [
+            "Scott Lang"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "gotg3",
+        "title": "Guardians of the Galaxy Vol. 3",
+        "type": "movie",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2023-05-05",
+        "timeline": 62,
+        "colour": "155,140,246",
+        "characters": [
+            "Star-Lord"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "secretinvasion",
+        "title": "Secret Invasion",
+        "type": "show",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2023-06-21",
+        "timeline": 63,
+        "colour": "90,110,90",
+        "characters": [
+            "Nick Fury"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "themarvels",
+        "title": "The Marvels",
+        "type": "movie",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2023-11-10",
+        "timeline": 64,
+        "colour": "219,180,60",
+        "characters": [
+            "Carol Danvers",
+            "Kamala Khan",
+            "Monica Rambeau"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "agathaallalong",
+        "title": "Agatha All Along",
+        "type": "show",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2024-09-18",
+        "timeline": 65,
+        "colour": "120,60,140",
+        "characters": [
+            "Agatha Harkness"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "daredevilbornagain1",
+        "title": "Daredevil: Born Again (Season 1)",
+        "type": "show",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2025-03-04",
+        "timeline": 66,
+        "colour": "150,20,20",
+        "characters": [
+            "Matt Murdock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "cap4",
+        "title": "Captain America: Brave New World",
+        "type": "movie",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2025-02-14",
+        "timeline": 67,
+        "colour": "91,141,239",
+        "characters": [
+            "Sam Wilson"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "thunderbolts",
+        "title": "Thunderbolts*",
+        "type": "movie",
+        "phase": 5,
+        "saga": "multiverse",
+        "release": "2025-05-02",
+        "timeline": 68,
+        "colour": "90,90,110",
+        "characters": [
+            "Yelena Belova",
+            "Bucky Barnes"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour",
+        "title": "The Fantastic Four: First Steps",
+        "type": "movie",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2025-07-25",
+        "timeline": 69,
+        "colour": "90,150,190",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "wonderman",
+        "title": "Wonder Man",
+        "type": "show",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2026-01-27",
+        "timeline": 70,
+        "colour": "210,170,90",
+        "characters": [
+            "Simon Williams"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "daredevilbornagain2",
+        "title": "Daredevil: Born Again (Season 2)",
+        "type": "show",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2026-03-04",
+        "timeline": 71,
+        "colour": "150,20,20",
+        "characters": [
+            "Matt Murdock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "punisher-last-kill",
+        "title": "The Punisher: Last Kill",
+        "type": "special",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2026-05-12",
+        "timeline": 72,
+        "characters": [
+            "Frank Castle"
+        ],
+        "poster": "",
+        "colour": "30,30,30"
+    },
+    {
+        "id": "spidermanbnd",
+        "title": "Spider-Man: Brand New Day",
+        "type": "movie",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2026-07-31",
+        "timeline": 73,
+        "colour": "210,60,60",
+        "characters": [
+            "Peter Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "visionquest",
+        "title": "Vision Quest",
+        "type": "show",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2026-11-01",
+        "timeline": 74,
+        "colour": "170,60,200",
+        "characters": [
+            "Vision"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengersdoomsday",
+        "title": "Avengers: Doomsday",
+        "type": "movie",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2026-12-18",
+        "timeline": 75,
+        "colour": "232,183,75",
+        "characters": [
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "secretwars",
+        "title": "Avengers: Secret Wars",
+        "type": "movie",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2027-12-17",
+        "timeline": 76,
+        "colour": "232,183,75",
+        "characters": [
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "blade",
+        "title": "Blade",
+        "type": "movie",
+        "phase": 6,
+        "saga": "multiverse",
+        "release": "2027-06-01",
+        "timeline": 77,
+        "colour": "140,20,30",
+        "characters": [
+            "Blade"
+        ],
+        "poster": ""
+    }
 ]

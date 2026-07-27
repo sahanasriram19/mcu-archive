@@ -110,6 +110,27 @@
     margin-bottom:18px;
 }
 
+#movie-details-trailer{
+    display:none;
+    align-items:center;
+    gap:8px;
+    padding:9px 18px;
+    margin-bottom:20px;
+    border-radius:999px;
+    background:var(--accent);
+    color:white;
+    font-size:13px;
+    font-weight:600;
+    text-decoration:none;
+    letter-spacing:.02em;
+    transition:background var(--transition), transform var(--transition);
+}
+
+#movie-details-trailer:hover{
+    background:#ff3338;
+    transform:translateY(-1px);
+}
+
 #movie-details-overview{
     font-size:14px;
     line-height:1.65;

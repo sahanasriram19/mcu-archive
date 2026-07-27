@@ -36,20 +36,30 @@
 
 #enterButton {
     /* Sits cleanly underneath the glowing logo */
-    margin-top: 24px; 
-    padding: clamp(10px, 2.5vw, 15px) clamp(24px, 6vw, 40px);
-    border: none;
-    border-radius: 12px;
-    background: var(--accent);
+    margin-top: 24px;
+    padding: clamp(12px, 2.5vw, 17px) clamp(34px, 7vw, 52px);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ff3b41 0%, var(--accent) 55%, #b3161b 100%);
     color: white;
+    font-size: clamp(.95rem, 2vw, 1.1rem);
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    animation: pulse-glow 1.8s ease-in-out infinite alternate;
+    transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 /* Independent hover pop effect for the button */
 #enterButton:hover {
-    transform: scale(1.05);
-    opacity: 0.9;
+    transform: scale(1.06);
+    filter: brightness(1.12);
+}
+
+#enterButton:active {
+    transform: scale(0.97);
+    filter: brightness(0.95);
 }
 
 @keyframes pulse-glow {

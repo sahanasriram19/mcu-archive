@@ -19,6 +19,7 @@ overlay.innerHTML = `
             <div id="movie-details-kicker"></div>
             <h2 id="movie-details-title"></h2>
             <div id="movie-details-meta"></div>
+            <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
             <p id="movie-details-overview"></p>
             <div id="movie-details-characters"></div>
             <div id="movie-details-cast"></div>
@@ -33,6 +34,7 @@ const kickerEl = overlay.querySelector("#movie-details-kicker");
 const titleEl = overlay.querySelector("#movie-details-title");
 const metaEl = overlay.querySelector("#movie-details-meta");
 const overviewEl = overlay.querySelector("#movie-details-overview");
+const trailerEl = overlay.querySelector("#movie-details-trailer");
 const charactersEl = overlay.querySelector("#movie-details-characters");
 const castEl = overlay.querySelector("#movie-details-cast");
 
@@ -118,6 +120,18 @@ export function showMovieDetails(node){
     }
 
     metaEl.textContent = metaParts.join("  ·  ");
+
+    if(node.trailerUrl){
+
+        trailerEl.href = node.trailerUrl;
+        trailerEl.style.display = "inline-flex";
+
+    } else {
+
+        trailerEl.removeAttribute("href");
+        trailerEl.style.display = "none";
+
+    }
 
     overviewEl.textContent = node.overview ||
         "No synopsis available yet for this entry.";

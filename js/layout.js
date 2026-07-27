@@ -380,23 +380,33 @@ export function layoutChronology(nodes){
 
 }
 
-// Shared by both — a chunk's headline label is now the MCU
-// phase(s) it falls in ("PHASE 3", or "PHASE 2–3" if the
-// chunk straddles a boundary) rather than a bare index/year,
-// which wasn't meaningful on its own at a glance.
+// Shared by both — a chunk's headline label is the single
+// MCU phase most of its movies belong to. This used to show
+// a range ("PHASE 2–4") whenever a chunk straddled a phase
+// boundary, which for chunks touching Phase 0 (Defenders)
+// could read as an odd "PHASE 0–3" — a single representative
+// number reads more cleanly on the timeline.
 function phaseLabel(members){
 
-    const phases = members
+    const counts = {};
 
-        .map(m => m.phase)
+    members.forEach(m=>{
 
-        .filter(p => typeof p === "number");
+        if(typeof m.phase === "number"){
+
+            counts[m.phase] = (counts[m.phase]||0) + 1;
+
+        }
+
+    });
+
+    const phases = Object.keys(counts).map(Number);
 
     if(!phases.length) return "";
 
-    const min = Math.min(...phases), max = Math.max(...phases);
+    phases.sort((a,b)=> counts[b]-counts[a] || a-b);
 
-    return min === max ? `PHASE ${min}` : `PHASE ${min}–${max}`;
+    return `PHASE ${phases[0]}`;
 
 }
 

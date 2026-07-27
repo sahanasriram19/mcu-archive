@@ -53,38 +53,13 @@ export function drawDust(camera) {
             continue;
         }
 
-        const glow = ctx.createRadialGradient(
-
-            screen.x,
-
-            screen.y,
-
-            0,
-
-            screen.x,
-
-            screen.y,
-
-            dust.radius
-
-        );
-
-        glow.addColorStop(
-            0,
-            `rgba(255,255,255,${dust.alpha})`
-        );
-
-        glow.addColorStop(
-            0.5,
-            `rgba(180,220,255,${dust.alpha * 0.35})`
-        );
-
-        glow.addColorStop(
-            1,
-            "rgba(255,255,255,0)"
-        );
-
-        ctx.fillStyle = glow;
+        // A radial gradient here used to be recreated for
+        // every one of these particles, every frame — for
+        // something this small the visual difference from a
+        // gradient is negligible, but the allocation cost
+        // (700 CanvasGradient objects, 60 times a second)
+        // wasn't. A flat fill does effectively the same job.
+        ctx.fillStyle = `rgba(210,230,255,${dust.alpha * 0.8})`;
 
         ctx.beginPath();
 

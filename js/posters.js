@@ -129,6 +129,46 @@ async function fetchCast(endpoint, id){
 
 }
 
+async function fetchTrailer(endpoint, id){
+
+    const url =
+        `${TMDB_BASE}/${endpoint}/${id}/videos` +
+        `?api_key=${TMDB_API_KEY}`;
+
+    try{
+
+        const res = await fetch(url);
+
+        if(!res.ok) return null;
+
+        const data = await res.json();
+
+        const videos = (data.results || [])
+
+            .filter(v => v.site === "YouTube");
+
+        if(!videos.length) return null;
+
+        // Prefer an official trailer, then any trailer, then
+        // fall back to a teaser rather than showing nothing.
+        const pick =
+            videos.find(v => v.type === "Trailer" && v.official) ||
+            videos.find(v => v.type === "Trailer") ||
+            videos.find(v => v.type === "Teaser") ||
+            videos[0];
+
+        return `https://www.youtube.com/watch?v=${pick.key}`;
+
+    } catch(err){
+
+        console.warn("Trailer lookup failed for id", id, err);
+
+        return null;
+
+    }
+
+}
+
 async function fetchPoster(node){
 
     const title = searchTitle(node.title);
@@ -188,6 +228,8 @@ async function fetchPoster(node){
             }
 
             node.cast = await fetchCast(matchedEndpoint, match.id);
+
+            node.trailerUrl = await fetchTrailer(matchedEndpoint, match.id);
 
         }
 

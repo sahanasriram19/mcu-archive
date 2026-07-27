@@ -81,7 +81,7 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.fillStyle = "#FFFFFF";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `700 ${Math.max(24, 34 * camera.zoom)}px Inter`;
+        ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter`;
         ctx.shadowColor = "rgba(0,0,0,.6)";
         ctx.shadowBlur = 6 * camera.zoom;
 

@@ -13,6 +13,7 @@ import {
 
 import { updateArchive } from "./archive.js";
 import { setView } from "./viewManager.js";
+import { VIEWS } from "./views.js";
 
 import "./input.js";
 import { initialisePanel } from "../ui/panel.js";
@@ -35,7 +36,7 @@ viewport.style.display = "none";
 
 const graphReady = initialiseGraph();
 
-button.addEventListener("click", async () => {
+async function enter(viewKey){
 
     landing.style.display = "none";
 
@@ -48,13 +49,44 @@ button.addEventListener("click", async () => {
         await graphReady;
 
         // Let the view choose its own camera.
-        setView("complete");
+        setView(viewKey);
 
         initialisePanel();
 
     }
 
-});
+}
+
+button.addEventListener("click", () => enter("complete"));
+
+//----------------------------------
+// Reload restore — setView() stashes
+// whichever view is active into
+// localStorage every time it's called
+// (see viewManager.js). If that's set,
+// skip the landing screen entirely and
+// go straight back to it instead of
+// making the person click Enter again.
+//----------------------------------
+
+let lastView = null;
+
+try{
+
+    lastView = localStorage.getItem("mcuLastView");
+
+} catch(err){
+
+    // Private browsing / storage disabled — falls back to
+    // showing the landing screen as normal.
+
+}
+
+if(lastView && VIEWS.some(v => v.key === lastView)){
+
+    enter(lastView);
+
+}
 
 //==========================================
 // INITIALISE
