@@ -60,6 +60,29 @@ async function enter(viewKey){
 button.addEventListener("click", () => enter("complete"));
 
 //----------------------------------
+// Manual way back to landing (see
+// ui/panel.js — the "MCU Archive"
+// title is clickable). A custom event
+// rather than an export, since panel.js
+// is already imported BY this file —
+// exporting something back the other
+// way would be a circular import.
+// Doesn't touch localStorage, so a
+// reload still resumes wherever you
+// were; this is just a way to see the
+// landing screen again within the same
+// visit.
+//----------------------------------
+
+window.addEventListener("mcu:go-to-landing", () => {
+
+    landing.style.display = "flex";
+
+    viewport.style.display = "none";
+
+});
+
+//----------------------------------
 // Reload restore — setView() stashes
 // whichever view is active into
 // localStorage every time it's called
