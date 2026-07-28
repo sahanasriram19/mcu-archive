@@ -195,23 +195,20 @@ export async function showMovieDetails(node){
 
     }
 
-    // Cast/trailer aren't prefetched for every title (see
-    // posters.js) — but rather than opening the card empty
-    // and filling those in a moment later, wait for them
-    // here first so everything is already in place the
-    // instant the card becomes visible. In practice this is
-    // rarely a noticeable wait: input.js starts this same
     // fetchDetails() call as soon as the poster is hovered,
     // so by the time a click actually lands it has usually
     // already resolved (fetchDetails is a no-op the second
     // time it's called for a node that's already loaded/
     // loading, so this doesn't double the network cost).
-    await fetchDetails(node);
+        await fetchDetails(node);
 
-    if(openNode !== node) return;
+        if (openNode !== node) return;
 
-    renderExtras(node);
+        // Give the browser one frame to apply any updates
+        await new Promise(requestAnimationFrame);
 
-    overlay.classList.add("open");
+        renderExtras(node);
+
+        overlay.classList.add("open");
 
 }
