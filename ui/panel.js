@@ -6,6 +6,9 @@ import {
     setSelectedCharacter
 
 } from "../js/characters/characterJourney.js";
+
+import { initMovieSearch } from "./search.js";
+
 const viewport = document.getElementById("viewport");
 
 const panel = document.createElement("div");
@@ -14,6 +17,16 @@ panel.id = "view-panel";
 panel.innerHTML = `
     <div class="view-panel-title">MCU Archive</div>
     <div class="view-panel-subtitle">Choose a view and zoom</div>
+    <div class="search-container">
+
+        <input
+            id="movie-search"
+            type="text"
+            placeholder="Search movies or characters...">
+
+        <div id="movie-search-results"></div>
+
+    </div>
 
     <div class="view-panel-list"></div>
 `;
@@ -122,6 +135,7 @@ function refreshActive(){
 
 export function initialisePanel(){
 
+    initMovieSearch();
     refreshActive();
 
 }
