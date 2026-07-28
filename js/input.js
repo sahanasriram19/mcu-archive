@@ -22,6 +22,16 @@ const CLICK_TOLERANCE = 6;
 
 viewport.addEventListener("mousedown", e => {
 
+    if (
+        e.target.closest("#view-panel") ||
+        e.target.closest(".character-dropdown") ||
+        e.target.closest(".search-container") ||
+        e.target.closest("#movie-search-results") ||
+        e.target.closest("#movie-details-overlay")
+    ) {
+        return;
+    }
+
     dragging = true;
 
     lastX = e.clientX;
@@ -36,9 +46,20 @@ window.addEventListener("mouseup", e => {
 
     dragging = false;
 
+    // Ignore clicks that end on any UI element
+    if (
+        e.target.closest("#view-panel") ||
+        e.target.closest(".character-dropdown") ||
+        e.target.closest(".search-container") ||
+        e.target.closest("#movie-search-results") ||
+        e.target.closest("#movie-details-overlay")
+    ) {
+        return;
+    }
+
     const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
 
-    if(moved > CLICK_TOLERANCE) return;
+    if (moved > CLICK_TOLERANCE) return;
 
     const node = getNodeAtScreenPoint(
 
@@ -50,7 +71,7 @@ window.addEventListener("mouseup", e => {
 
     );
 
-    if(node) showMovieDetails(node);
+    if (node) showMovieDetails(node);
 
 });
 
