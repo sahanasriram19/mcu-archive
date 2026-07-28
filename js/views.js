@@ -24,7 +24,7 @@ export const VIEWS = [
         // Six separate mini mind maps rather than one
         // shared hub — see graph.js edgesPhaseSpokes.
         edges: { mode: "phaseSpokes" },
-        camera: { x: 0, y: 0, zoom: 0.18 }
+        camera: { x: 0, y: 0, zoom: 0.16 }
     },
 
     {
