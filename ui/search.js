@@ -183,7 +183,7 @@ export function initMovieSearch(){
 
         camera.targetX=node.x;
         camera.targetY=node.y;
-        camera.targetZoom=0.35;
+        camera.targetZoom=0.55;
 
         results=[];
 
