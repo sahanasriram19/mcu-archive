@@ -143,7 +143,7 @@ function renderExtras(node){
 
 }
 
-export function showMovieDetails(node){
+export async function showMovieDetails(node){
 
     openNode = node;
 
@@ -195,20 +195,22 @@ export function showMovieDetails(node){
 
     }
 
-    // Shows whatever's already cached immediately (usually
-    // nothing yet — cast/trailer are no longer prefetched
-    // for every title, see posters.js), then fetches them
-    // now that the card is actually open, and re-renders
-    // once they land. Guarded against the person having
-    // already closed this card or opened a different one
-    // by the time the fetch resolves.
+    // Cast/trailer aren't prefetched for every title (see
+    // posters.js) — but rather than opening the card empty
+    // and filling those in a moment later, wait for them
+    // here first so everything is already in place the
+    // instant the card becomes visible. In practice this is
+    // rarely a noticeable wait: input.js starts this same
+    // fetchDetails() call as soon as the poster is hovered,
+    // so by the time a click actually lands it has usually
+    // already resolved (fetchDetails is a no-op the second
+    // time it's called for a node that's already loaded/
+    // loading, so this doesn't double the network cost).
+    await fetchDetails(node);
+
+    if(openNode !== node) return;
+
     renderExtras(node);
-
-    fetchDetails(node).then(()=>{
-
-        if(openNode === node) renderExtras(node);
-
-    });
 
     overlay.classList.add("open");
 

@@ -3,6 +3,7 @@ import { graph } from "./graph.js";
 import { getCurrentView } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
+import { fetchDetails } from "./posters.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -73,6 +74,13 @@ window.addEventListener("mousemove", e => {
         );
 
         viewport.style.cursor = hovering ? "pointer" : "default";
+
+        // Get a head start on cast/trailer now, while the
+        // person is still deciding whether to click — by the
+        // time mouseup actually lands, this has often already
+        // resolved (fetchDetails is a safe no-op if it's
+        // already loaded/loading for this node).
+        if(hovering && !hovering.isBranch) fetchDetails(hovering);
 
         return;
 
