@@ -85,3 +85,20 @@
     transform: translateY(0px);
   }
 }
+
+@media (max-width: 600px){
+
+    #landing{
+        padding:20px;
+    }
+
+    #landing-card{
+        width:min(100%, 360px);
+    }
+
+    #landing-card img{
+        width:100%;
+        max-width:360px;
+    }
+
+}

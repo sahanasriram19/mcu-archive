@@ -302,3 +302,113 @@
     }
 
 }
+
+/* Loading state used while the card is already visible. */
+#movie-details-overlay #movie-details-cast-list.cast-loading{
+    min-height:116px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:.02em;
+}
+
+/* Touch-friendly responsive details card. */
+@media (max-width: 768px){
+
+    #movie-details-overlay{
+        align-items:flex-end;
+        padding:0;
+    }
+
+    #movie-details-card{
+        width:100%;
+        max-width:none;
+        height:min(92dvh, 760px);
+        max-height:92dvh;
+        border-radius:20px 20px 0 0;
+        flex-direction:column;
+        transform:translateY(18px);
+    }
+
+    #movie-details-overlay.open #movie-details-card{
+        transform:translateY(0);
+    }
+
+    #movie-details-poster{
+        flex:0 0 clamp(180px, 36dvh, 280px);
+        min-height:180px;
+    }
+
+    #movie-details-body{
+        padding:18px 18px calc(24px + env(safe-area-inset-bottom));
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    #movie-details-title{
+        font-size:21px;
+    }
+
+    #movie-details-overview{
+        font-size:13.5px;
+        line-height:1.6;
+    }
+
+    #movie-details-close{
+        top:10px;
+        right:10px;
+        width:40px;
+        height:40px;
+        font-size:24px;
+    }
+
+    #movie-details-overlay #movie-details-cast-list{
+        gap:10px;
+        padding-bottom:8px;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+    }
+
+    #movie-details-overlay #movie-details-cast-list::-webkit-scrollbar{
+        display:none;
+    }
+
+    #movie-details-overlay .cast-member{
+        flex:0 0 68px;
+        max-width:68px;
+    }
+
+    #movie-details-overlay .cast-avatar{
+        width:60px;
+        height:90px;
+        max-width:60px;
+        max-height:90px;
+    }
+
+    #movie-details-overlay .cast-avatar img{
+        width:60px;
+        height:90px;
+    }
+
+}
+
+@media (max-width: 420px){
+
+    #movie-details-card{
+        height:94dvh;
+        max-height:94dvh;
+    }
+
+    #movie-details-poster{
+        flex-basis:200px;
+        min-height:160px;
+    }
+
+    #movie-details-body{
+        padding-left:16px;
+        padding-right:16px;
+    }
+
+}

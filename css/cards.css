@@ -10,5 +10,10 @@
     justify-content:center;
     align-items:center;
     user-select:none;
+    cursor:pointer;
     box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+.node:hover{
+    cursor:pointer;
 }

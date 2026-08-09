@@ -91,6 +91,42 @@ async function searchEndpoint(endpoint, title, year){
 
 }
 
+async function preloadImage(src){
+
+    if(!src) return;
+
+    await new Promise(resolve => {
+
+        const img = new Image();
+
+        img.onload = async () => {
+
+            try{
+
+                if(img.decode){
+
+                    await img.decode();
+
+                }
+
+            } catch(err){
+
+                // The image loaded successfully even if decode()
+                // is unavailable or fails.
+            }
+
+            resolve();
+
+        };
+
+        img.onerror = () => resolve();
+
+        img.src = src;
+
+    });
+
+}
+
 async function fetchCast(endpoint, id){
 
     const url =
@@ -105,10 +141,9 @@ async function fetchCast(endpoint, id){
 
         const data = await res.json();
 
-        return (data.cast || [])
+        const cast = (data.cast || [])
 
             .slice(0, 8)
-
             .map(c => ({
 
                 name: c.name,
@@ -118,6 +153,20 @@ async function fetchCast(endpoint, id){
                     : null
 
             }));
+
+        // Do not consider the cast ready until its profile images
+        // have also been loaded and decoded by the browser. This
+        // prevents the details card from opening first and then
+        // visibly filling in the cast a moment later.
+        await Promise.all(
+
+            cast
+                .filter(member => member.photo)
+                .map(member => preloadImage(member.photo))
+
+        );
+
+        return cast;
 
     } catch(err){
 
@@ -214,19 +263,13 @@ async function fetchPoster(node){
 
         }
 
-        // Cast and trailer are NOT fetched here anymore —
-        // see fetchDetails() below. Every poster used to
-        // also pull full cast + trailer data upfront, which
-        // tripled the number of requests in flight (80
-        // titles × 3 calls each) and, since browsers cap
-        // concurrent connections per origin at ~6, that left
-        // poster searches for later-batched titles queued
-        // behind cast/trailer calls for earlier ones —
-        // posters loading slowly even though the layout
-        // itself had already finished animating. Cast and
-        // trailer are only actually needed once someone
-        // opens that title's details card, so they're
-        // fetched then instead, on demand.
+        // Start the cast request as soon as we know the TMDB
+        // title/id. We deliberately do NOT await it here, so
+        // poster loading stays fast. By the time a user opens
+        // a card, the cast is normally already cached and can
+        // be rendered immediately. If they click unusually
+        // early, fetchDetails() simply waits for this same
+        // in-flight promise instead of starting a second request.
         if(match){
 
             if(match.overview) node.overview = match.overview;
@@ -237,10 +280,21 @@ async function fetchPoster(node){
 
             }
 
-            // Kept so fetchDetails() can pull cast/trailer
-            // later without needing to search again.
+            // Keep the TMDB identity so detail data can be
+            // loaded without performing another title search.
             node.tmdbId = match.id;
             node.tmdbEndpoint = matchedEndpoint;
+
+            // Preload cast immediately. This is intentionally
+            // fire-and-forget: it runs alongside the rest of the
+            // poster loading and does not hold up the UI.
+            node.castPromise = fetchCast(
+                node.tmdbEndpoint,
+                node.tmdbId
+            ).then(cast => {
+                node.cast = cast;
+                return cast;
+            });
 
         }
 
@@ -264,15 +318,55 @@ async function fetchPoster(node){
 
 export async function fetchDetails(node){
 
-    if(node.detailsLoaded) return;
+    // A single promise is shared by every caller. This prevents a
+    // click from racing the poster lookup (the source of the
+    // "some cards have no cast yet" behaviour) and also prevents
+    // duplicate cast/trailer requests when hover/click happen close
+    // together.
+    if(node.detailsPromise) return node.detailsPromise;
 
-    if(!node.tmdbId || !node.tmdbEndpoint) return;
+    node.detailsPromise = (async () => {
 
-    node.detailsLoaded = true;
+        // Cards can be clicked before their staggered poster batch
+        // has reached them. Start that lookup immediately instead of
+        // opening the card with incomplete TMDB/cast information.
+        if(!node.posterPromise){
 
-    node.cast = await fetchCast(node.tmdbEndpoint, node.tmdbId);
+            node.posterPromise = fetchPoster(node);
 
-    node.trailerUrl = await fetchTrailer(node.tmdbEndpoint, node.tmdbId);
+        }
+
+        await node.posterPromise;
+
+        if(!node.tmdbId || !node.tmdbEndpoint){
+
+            node.cast = [];
+            node.trailerUrl = null;
+            return;
+
+        }
+
+        // Reuse the cast preload. fetchCast() now waits for the
+        // profile images to load/decode as well as the credits API.
+        const castPromise = node.castPromise || fetchCast(
+            node.tmdbEndpoint,
+            node.tmdbId
+        );
+
+        const [cast, trailerUrl] = await Promise.all([
+
+            castPromise,
+
+            fetchTrailer(node.tmdbEndpoint, node.tmdbId)
+
+        ]);
+
+        node.cast = cast;
+        node.trailerUrl = trailerUrl;
+
+    })();
+
+    return node.detailsPromise;
 
 }
 
@@ -316,7 +410,14 @@ export function loadPosters(graph){
 
         const batch = nodes.slice(i, i+BATCH_SIZE);
 
-        batch.forEach(node => fetchPoster(node));
+        batch.forEach(node => {
+
+            // Keep the promise on the node so detail cards can await
+            // the same in-flight TMDB lookup instead of guessing
+            // whether its metadata has arrived yet.
+            node.posterPromise = fetchPoster(node);
+
+        });
 
         i += BATCH_SIZE;
 

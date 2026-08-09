@@ -195,20 +195,24 @@ export async function showMovieDetails(node){
 
     }
 
-    // fetchDetails() call as soon as the poster is hovered,
-    // so by the time a click actually lands it has usually
-    // already resolved (fetchDetails is a no-op the second
-    // time it's called for a node that's already loaded/
-    // loading, so this doesn't double the network cost).
+    // Cast is preloaded during poster loading. Wait for that shared
+    // promise before revealing the card so the user never sees a
+    // blank/loading cast section appear after the modal opens.
+    trailerEl.style.display = "none";
+
+    try{
+
         await fetchDetails(node);
 
-        if (openNode !== node) return;
+    } catch(err){
 
-        // Give the browser one frame to apply any updates
-        await new Promise(requestAnimationFrame);
+        console.warn("Movie details lookup failed for", node.title, err);
 
-        renderExtras(node);
+    }
 
-        overlay.classList.add("open");
+    if(openNode !== node) return;
+
+    renderExtras(node);
+    overlay.classList.add("open");
 
 }
