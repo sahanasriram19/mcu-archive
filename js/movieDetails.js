@@ -40,7 +40,7 @@ const trailerEl = overlay.querySelector("#movie-details-trailer");
 const charactersEl = overlay.querySelector("#movie-details-characters");
 const castEl = overlay.querySelector("#movie-details-cast");
 
-function hideMovieDetails(){
+function hideMovieDetails() {
 
     overlay.classList.remove("open");
 
@@ -49,7 +49,7 @@ function hideMovieDetails(){
 overlay.addEventListener("click", e => {
 
     // Only closes on a click outside the card itself.
-    if(e.target === overlay) hideMovieDetails();
+    if (e.target === overlay) hideMovieDetails();
 
 });
 
@@ -58,13 +58,13 @@ overlay.querySelector("#movie-details-close")
 
 window.addEventListener("keydown", e => {
 
-    if(e.key === "Escape") hideMovieDetails();
+    if (e.key === "Escape") hideMovieDetails();
 
 });
 
-function posterUrlFor(node){
+function posterUrlFor(node) {
 
-    if(!node.poster) return "";
+    if (!node.poster) return "";
 
     return typeof node.poster === "string"
         ? node.poster
@@ -72,13 +72,13 @@ function posterUrlFor(node){
 
 }
 
-function formatDate(release){
+function formatDate(release) {
 
-    if(!release) return "";
+    if (!release) return "";
 
     const d = new Date(release);
 
-    if(isNaN(d)) return release;
+    if (isNaN(d)) return release;
 
     return d.toLocaleDateString(undefined, {
 
@@ -92,9 +92,9 @@ function formatDate(release){
 
 let openNode = null;
 
-function renderExtras(node){
+function renderExtras(node) {
 
-    if(node.trailerUrl){
+    if (node.trailerUrl) {
 
         trailerEl.href = node.trailerUrl;
         trailerEl.style.display = "inline-flex";
@@ -106,7 +106,7 @@ function renderExtras(node){
 
     }
 
-    if(node.cast && node.cast.length){
+    if (node.cast && node.cast.length) {
 
         castEl.innerHTML =
             `<div id="movie-details-cast-label">Cast</div>` +
@@ -117,7 +117,7 @@ function renderExtras(node){
                     .split(" ")
                     .map(w => w[0])
                     .join("")
-                    .slice(0,2)
+                    .slice(0, 2)
                     .toUpperCase();
 
                 const avatar = member.photo
@@ -143,7 +143,7 @@ function renderExtras(node){
 
 }
 
-export async function showMovieDetails(node){
+export async function showMovieDetails(node) {
 
     openNode = node;
 
@@ -155,22 +155,22 @@ export async function showMovieDetails(node){
 
     kickerEl.textContent =
         node.type === "show" ? "Disney+ Series" :
-        node.type === "special" ? "Marvel Special" :
-        "Feature Film";
+            node.type === "special" ? "Marvel Special" :
+                "Feature Film";
 
     titleEl.textContent = node.title;
 
     const metaParts = [];
 
-    if(node.release) metaParts.push(formatDate(node.release));
+    if (node.release) metaParts.push(formatDate(node.release));
 
-    if(node.phase !== undefined && node.phase !== null && node.phase >= 1){
+    if (node.phase !== undefined && node.phase !== null && node.phase >= 1) {
 
         metaParts.push("Phase " + node.phase);
 
     }
 
-    if(typeof node.rating === "number" && node.rating > 0){
+    if (typeof node.rating === "number" && node.rating > 0) {
 
         metaParts.push("★ " + node.rating.toFixed(1));
 
@@ -181,7 +181,7 @@ export async function showMovieDetails(node){
     overviewEl.textContent = node.overview ||
         "No synopsis available yet for this entry.";
 
-    if(node.characters && node.characters.length){
+    if (node.characters && node.characters.length) {
 
         charactersEl.innerHTML =
             `<div id="movie-details-characters-label">Featuring</div>` +
@@ -195,24 +195,30 @@ export async function showMovieDetails(node){
 
     }
 
-    // Cast is preloaded during poster loading. Wait for that shared
-    // promise before revealing the card so the user never sees a
-    // blank/loading cast section appear after the modal opens.
-    trailerEl.style.display = "none";
+    // Show the card immediately. Details are filled in as soon as
+    // their shared TMDB request resolves, rather than delaying the
+    // whole modal or opening it with permanently missing cast data.
+    castEl.innerHTML =
+        `<div id="movie-details-cast-label">Cast</div>` +
+        `<div id="movie-details-cast-list" class="cast-loading" aria-live="polite">
+            <span>Loading cast…</span>
+        </div>`;
 
-    try{
+    trailerEl.style.display = "none";
+    overlay.classList.add("open");
+
+    try {
 
         await fetchDetails(node);
 
-    } catch(err){
+    } catch (err) {
 
         console.warn("Movie details lookup failed for", node.title, err);
 
     }
 
-    if(openNode !== node) return;
+    if (openNode !== node) return;
 
     renderExtras(node);
-    overlay.classList.add("open");
 
 }

@@ -29,7 +29,7 @@ import {
 // — node.title itself (used for display) is untouched.
 //--------------------------------------------------
 
-function searchTitle(title){
+function searchTitle(title) {
 
     return title.replace(/\s*\([^)]*\)\s*/g, "").trim();
 
@@ -60,7 +60,7 @@ function searchTitle(title){
 //    matches exactly.
 //--------------------------------------------------
 
-async function searchEndpoint(endpoint, title, year){
+async function searchEndpoint(endpoint, title, year) {
 
     const url =
         `${TMDB_BASE}/search/${endpoint}` +
@@ -69,21 +69,21 @@ async function searchEndpoint(endpoint, title, year){
 
     const res = await fetch(url);
 
-    if(!res.ok) return null;
+    if (!res.ok) return null;
 
     const data = await res.json();
 
     const results = (data.results || []).filter(r => r.poster_path);
 
-    if(!results.length) return null;
+    if (!results.length) return null;
 
-    if(year){
+    if (year) {
 
         const dateField = endpoint === "tv" ? "first_air_date" : "release_date";
 
-        const exact = results.find(r => (r[dateField]||"").slice(0,4) === year);
+        const exact = results.find(r => (r[dateField] || "").slice(0, 4) === year);
 
-        if(exact) return exact;
+        if (exact) return exact;
 
     }
 
@@ -91,17 +91,17 @@ async function searchEndpoint(endpoint, title, year){
 
 }
 
-async function fetchCast(endpoint, id){
+async function fetchCast(endpoint, id) {
 
     const url =
         `${TMDB_BASE}/${endpoint}/${id}/credits` +
         `?api_key=${TMDB_API_KEY}`;
 
-    try{
+    try {
 
         const res = await fetch(url);
 
-        if(!res.ok) return [];
+        if (!res.ok) return [];
 
         const data = await res.json();
 
@@ -119,7 +119,7 @@ async function fetchCast(endpoint, id){
 
             }));
 
-    } catch(err){
+    } catch (err) {
 
         console.warn("Cast lookup failed for id", id, err);
 
@@ -129,17 +129,17 @@ async function fetchCast(endpoint, id){
 
 }
 
-async function fetchTrailer(endpoint, id){
+async function fetchTrailer(endpoint, id) {
 
     const url =
         `${TMDB_BASE}/${endpoint}/${id}/videos` +
         `?api_key=${TMDB_API_KEY}`;
 
-    try{
+    try {
 
         const res = await fetch(url);
 
-        if(!res.ok) return null;
+        if (!res.ok) return null;
 
         const data = await res.json();
 
@@ -147,7 +147,7 @@ async function fetchTrailer(endpoint, id){
 
             .filter(v => v.site === "YouTube");
 
-        if(!videos.length) return null;
+        if (!videos.length) return null;
 
         // Prefer an official trailer, then any trailer, then
         // fall back to a teaser rather than showing nothing.
@@ -159,7 +159,7 @@ async function fetchTrailer(endpoint, id){
 
         return `https://www.youtube.com/watch?v=${pick.key}`;
 
-    } catch(err){
+    } catch (err) {
 
         console.warn("Trailer lookup failed for id", id, err);
 
@@ -169,29 +169,29 @@ async function fetchTrailer(endpoint, id){
 
 }
 
-async function fetchPoster(node){
+async function fetchPoster(node) {
 
     const title = searchTitle(node.title);
-    const year = node.release ? node.release.slice(0,4) : "";
+    const year = node.release ? node.release.slice(0, 4) : "";
 
     // Primary endpoint per type, with a fallback endpoint
     // for "special" since that type covers both one-shot
     // short films and TV-style specials.
     const endpoints =
         node.type === "show" ? ["tv"] :
-        node.type === "special" ? ["movie","tv"] :
-        ["movie"];
+            node.type === "special" ? ["movie", "tv"] :
+                ["movie"];
 
-    try{
+    try {
 
         let match = null;
         let matchedEndpoint = null;
 
-        for(const endpoint of endpoints){
+        for (const endpoint of endpoints) {
 
             match = await searchEndpoint(endpoint, title, year);
 
-            if(match){
+            if (match) {
 
                 matchedEndpoint = endpoint;
                 break;
@@ -200,17 +200,17 @@ async function fetchPoster(node){
 
         }
 
-        if(match && match.poster_path){
+        if (match && match.poster_path) {
 
-           node.poster = {
+            node.poster = {
 
-            small: TMDB_IMAGE_BASES.small + match.poster_path,
+                small: TMDB_IMAGE_BASES.small + match.poster_path,
 
-            medium: TMDB_IMAGE_BASES.medium + match.poster_path,
+                medium: TMDB_IMAGE_BASES.medium + match.poster_path,
 
-            large: TMDB_IMAGE_BASES.large + match.poster_path
+                large: TMDB_IMAGE_BASES.large + match.poster_path
 
-        }; 
+            };
 
         }
 
@@ -221,11 +221,11 @@ async function fetchPoster(node){
         // be rendered immediately. If they click unusually
         // early, fetchDetails() simply waits for this same
         // in-flight promise instead of starting a second request.
-        if(match){
+        if (match) {
 
-            if(match.overview) node.overview = match.overview;
+            if (match.overview) node.overview = match.overview;
 
-            if(typeof match.vote_average === "number"){
+            if (typeof match.vote_average === "number") {
 
                 node.rating = match.vote_average;
 
@@ -249,7 +249,7 @@ async function fetchPoster(node){
 
         }
 
-    } catch(err){
+    } catch (err) {
 
         // A single missed poster shouldn't break the rest —
         // that node just keeps its placeholder card.
@@ -267,26 +267,26 @@ async function fetchPoster(node){
 // the first time.
 //--------------------------------------------------
 
-export async function fetchDetails(node){
+export async function fetchDetails(node) {
 
     // A single promise is shared by every caller. This prevents a
     // click from racing the poster lookup (the source of the
     // "some cards have no cast yet" behaviour) and also prevents
     // duplicate cast/trailer requests when hover/click happen close
     // together.
-    if(node.detailsPromise) return node.detailsPromise;
+    if (node.detailsPromise) return node.detailsPromise;
 
     node.detailsPromise = (async () => {
 
         // The poster search also discovers the TMDB id + endpoint.
         // Wait for it if it is still in flight.
-        if(node.posterPromise){
+        if (node.posterPromise) {
 
             await node.posterPromise;
 
         }
 
-        if(!node.tmdbId || !node.tmdbEndpoint){
+        if (!node.tmdbId || !node.tmdbEndpoint) {
 
             node.cast = [];
             node.trailerUrl = null;
@@ -294,17 +294,11 @@ export async function fetchDetails(node){
 
         }
 
-        // Cast is preloaded as soon as the poster lookup finds the
-        // TMDB title. Reuse that promise so opening the card never
-        // starts a second cast request. Trailer remains on-demand.
-        const castPromise = node.castPromise || fetchCast(
-            node.tmdbEndpoint,
-            node.tmdbId
-        );
-
+        // Cast and trailer are independent requests, so fetch them
+        // together rather than making the user wait for them in series.
         const [cast, trailerUrl] = await Promise.all([
 
-            castPromise,
+            fetchCast(node.tmdbEndpoint, node.tmdbId),
 
             fetchTrailer(node.tmdbEndpoint, node.tmdbId)
 
@@ -336,9 +330,9 @@ const BATCH_SIZE = 8;
 
 const BATCH_DELAY_MS = 140;
 
-export function loadPosters(graph){
+export function loadPosters(graph) {
 
-    if(TMDB_API_KEY === "YOUR_TMDB_API_KEY_HERE"){
+    if (TMDB_API_KEY === "YOUR_TMDB_API_KEY_HERE") {
 
         console.warn(
 
@@ -355,9 +349,9 @@ export function loadPosters(graph){
 
     let i = 0;
 
-    function nextBatch(){
+    function nextBatch() {
 
-        const batch = nodes.slice(i, i+BATCH_SIZE);
+        const batch = nodes.slice(i, i + BATCH_SIZE);
 
         batch.forEach(node => {
 
@@ -370,7 +364,7 @@ export function loadPosters(graph){
 
         i += BATCH_SIZE;
 
-        if(i < nodes.length){
+        if (i < nodes.length) {
 
             setTimeout(nextBatch, BATCH_DELAY_MS);
 
