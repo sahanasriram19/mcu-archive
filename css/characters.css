@@ -189,3 +189,20 @@ Character Journey Dropdown
     transform:translateY(-50%) rotate(180deg);
 
 }
+
+@media (max-width: 768px){
+
+    .character-panel{
+        width:100%;
+        max-width:none;
+    }
+
+    .character-header{
+        padding:18px 16px;
+    }
+
+    .character-entry{
+        padding:14px 16px;
+    }
+
+}
