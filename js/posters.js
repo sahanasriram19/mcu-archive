@@ -264,15 +264,47 @@ async function fetchPoster(node){
 
 export async function fetchDetails(node){
 
-    if(node.detailsLoaded) return;
+    // A single promise is shared by every caller. This prevents a
+    // click from racing the poster lookup (the source of the
+    // "some cards have no cast yet" behaviour) and also prevents
+    // duplicate cast/trailer requests when hover/click happen close
+    // together.
+    if(node.detailsPromise) return node.detailsPromise;
 
-    if(!node.tmdbId || !node.tmdbEndpoint) return;
+    node.detailsPromise = (async () => {
 
-    node.detailsLoaded = true;
+        // The poster search also discovers the TMDB id + endpoint.
+        // Wait for it if it is still in flight.
+        if(node.posterPromise){
 
-    node.cast = await fetchCast(node.tmdbEndpoint, node.tmdbId);
+            await node.posterPromise;
 
-    node.trailerUrl = await fetchTrailer(node.tmdbEndpoint, node.tmdbId);
+        }
+
+        if(!node.tmdbId || !node.tmdbEndpoint){
+
+            node.cast = [];
+            node.trailerUrl = null;
+            return;
+
+        }
+
+        // Cast and trailer are independent requests, so fetch them
+        // together rather than making the user wait for them in series.
+        const [cast, trailerUrl] = await Promise.all([
+
+            fetchCast(node.tmdbEndpoint, node.tmdbId),
+
+            fetchTrailer(node.tmdbEndpoint, node.tmdbId)
+
+        ]);
+
+        node.cast = cast;
+        node.trailerUrl = trailerUrl;
+
+    })();
+
+    return node.detailsPromise;
 
 }
 
@@ -316,7 +348,14 @@ export function loadPosters(graph){
 
         const batch = nodes.slice(i, i+BATCH_SIZE);
 
-        batch.forEach(node => fetchPoster(node));
+        batch.forEach(node => {
+
+            // Keep the promise on the node so detail cards can await
+            // the same in-flight TMDB lookup instead of guessing
+            // whether its metadata has arrived yet.
+            node.posterPromise = fetchPoster(node);
+
+        });
 
         i += BATCH_SIZE;
 

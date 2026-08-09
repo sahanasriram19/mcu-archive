@@ -3,121 +3,168 @@ import { graph } from "./graph.js";
 import { getCurrentView } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
-import { fetchDetails } from "./posters.js";
 
 const viewport = document.getElementById("viewport");
 
-let dragging = false;
-
+const pointers = new Map();
+let gestureStartX = 0;
+let gestureStartY = 0;
 let lastX = 0;
 let lastY = 0;
+let tapMoved = false;
+let pinchDistance = 0;
 
-// A mousedown/mouseup pair with barely any movement between
-// them is a click, not a drag-to-pan — this is what decides
-// which one happened.
-let downX = 0;
-let downY = 0;
+const CLICK_TOLERANCE = 8;
 
-const CLICK_TOLERANCE = 6;
+function isUiTarget(target){
 
-viewport.addEventListener("mousedown", e => {
-
-    if (
-        e.target.closest("#view-panel") ||
-        e.target.closest(".character-dropdown") ||
-        e.target.closest(".search-container") ||
-        e.target.closest("#movie-search-results") ||
-        e.target.closest("#movie-details-overlay")
-    ) {
-        return;
-    }
-
-    dragging = true;
-
-    lastX = e.clientX;
-    lastY = e.clientY;
-
-    downX = e.clientX;
-    downY = e.clientY;
-
-});
-
-window.addEventListener("mouseup", e => {
-
-    dragging = false;
-
-    // Ignore clicks that end on any UI element
-    if (
-        e.target.closest("#view-panel") ||
-        e.target.closest(".character-dropdown") ||
-        e.target.closest(".search-container") ||
-        e.target.closest("#movie-search-results") ||
-        e.target.closest("#movie-details-overlay")
-    ) {
-        return;
-    }
-
-    const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
-
-    if (moved > CLICK_TOLERANCE) return;
-
-    const node = getNodeAtScreenPoint(
-
-        e.clientX,
-        e.clientY,
-        camera,
-        graph.nodes,
-        getCurrentView()
-
+    return !!target.closest(
+        "#view-panel, .character-dropdown, .search-container, " +
+        "#movie-search-results, #movie-details-overlay, " +
+        ".character-panel"
     );
 
-    if (node) showMovieDetails(node);
+}
 
-});
+function clampZoom(value){
 
-window.addEventListener("mousemove", e => {
+    return Math.max(
+        camera.minZoom,
+        Math.min(camera.maxZoom, value)
+    );
 
-    if (!dragging){
+}
 
-        // Not panning — check whether the cursor is sitting
-        // over a poster, and swap in a pointer cursor if so,
-        // same idea as the close button already does via CSS
-        // (posters live on the canvas, not as DOM elements,
-        // so that has to happen here in JS instead).
-        const hovering = getNodeAtScreenPoint(
+function distance(a,b){
 
-            e.clientX,
-            e.clientY,
+    return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+
+}
+
+function startGesture(e){
+
+    if(isUiTarget(e.target)) return;
+
+    viewport.setPointerCapture?.(e.pointerId);
+
+    pointers.set(e.pointerId, {
+        x:e.clientX,
+        y:e.clientY
+    });
+
+    if(pointers.size === 1){
+
+        gestureStartX = e.clientX;
+        gestureStartY = e.clientY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        tapMoved = false;
+
+    } else if(pointers.size === 2){
+
+        const [a,b] = [...pointers.values()];
+
+        pinchDistance = Math.max(1, distance(a,b));
+
+    }
+
+}
+
+function moveGesture(e){
+
+    const point = pointers.get(e.pointerId);
+
+    if(!point) return;
+
+    const dx = e.clientX - point.x;
+    const dy = e.clientY - point.y;
+
+    point.x = e.clientX;
+    point.y = e.clientY;
+
+    if(pointers.size === 2){
+
+        const values = [...pointers.values()];
+        const currentDistance = Math.max(1, Math.hypot(
+            values[0].x-values[1].x,
+            values[0].y-values[1].y
+        ));
+
+        if(pinchDistance){
+
+            const factor = currentDistance / pinchDistance;
+
+            camera.targetZoom = clampZoom(
+                camera.targetZoom * factor
+            );
+
+        }
+
+        pinchDistance = currentDistance;
+        tapMoved = true;
+        return;
+
+    }
+
+    if(Math.hypot(
+        e.clientX-gestureStartX,
+        e.clientY-gestureStartY
+    ) > CLICK_TOLERANCE){
+
+        tapMoved = true;
+
+    }
+
+    camera.targetX -= dx / camera.zoom;
+    camera.targetY -= dy / camera.zoom;
+
+}
+
+function endGesture(e){
+
+    const point = pointers.get(e.pointerId);
+
+    if(!point) return;
+
+    const wasSinglePointer = pointers.size === 1;
+    const tapX = e.clientX;
+    const tapY = e.clientY;
+
+    pointers.delete(e.pointerId);
+
+    if(pointers.size < 2) pinchDistance = 0;
+
+    if(
+        wasSinglePointer &&
+        !tapMoved &&
+        !isUiTarget(e.target)
+    ){
+
+        const node = getNodeAtScreenPoint(
+            tapX,
+            tapY,
             camera,
             graph.nodes,
             getCurrentView()
-
         );
 
-        viewport.style.cursor = hovering ? "pointer" : "default";
-
-        // Get a head start on cast/trailer now, while the
-        // person is still deciding whether to click — by the
-        // time mouseup actually lands, this has often already
-        // resolved (fetchDetails is a safe no-op if it's
-        // already loaded/loading for this node).
-        if(hovering && !hovering.isBranch) fetchDetails(hovering);
-
-        return;
+        if(node) showMovieDetails(node);
 
     }
 
-    const dx = e.clientX - lastX;
+}
 
-    const dy = e.clientY - lastY;
+viewport.addEventListener("pointerdown", startGesture);
+viewport.addEventListener("pointermove", moveGesture);
+viewport.addEventListener("pointerup", endGesture);
+viewport.addEventListener("pointercancel", e => {
+    pointers.delete(e.pointerId);
+    pinchDistance = 0;
+    tapMoved = true;
+});
 
-    camera.targetX -= dx / camera.zoom;
-
-    camera.targetY -= dy / camera.zoom;
-
-    lastX = e.clientX;
-    lastY = e.clientY;
-
+viewport.addEventListener("pointerleave", () => {
+    viewport.style.cursor = "default";
 });
 
 viewport.addEventListener("wheel", e => {
@@ -126,11 +173,8 @@ viewport.addEventListener("wheel", e => {
 
     const factor = e.deltaY > 0 ? 0.8 : 1.2;
 
-    camera.targetZoom *= factor;
-
-    camera.targetZoom = Math.max(
-        camera.minZoom,
-        Math.min(camera.maxZoom, camera.targetZoom)
+    camera.targetZoom = clampZoom(
+        camera.targetZoom * factor
     );
 
-}, { passive: false });
+}, { passive:false });

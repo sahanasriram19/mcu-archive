@@ -195,20 +195,30 @@ export async function showMovieDetails(node){
 
     }
 
-    // fetchDetails() call as soon as the poster is hovered,
-    // so by the time a click actually lands it has usually
-    // already resolved (fetchDetails is a no-op the second
-    // time it's called for a node that's already loaded/
-    // loading, so this doesn't double the network cost).
+    // Show the card immediately. Details are filled in as soon as
+    // their shared TMDB request resolves, rather than delaying the
+    // whole modal or opening it with permanently missing cast data.
+    castEl.innerHTML =
+        `<div id="movie-details-cast-label">Cast</div>` +
+        `<div id="movie-details-cast-list" class="cast-loading" aria-live="polite">
+            <span>Loading cast…</span>
+        </div>`;
+
+    trailerEl.style.display = "none";
+    overlay.classList.add("open");
+
+    try{
+
         await fetchDetails(node);
 
-        if (openNode !== node) return;
+    } catch(err){
 
-        // Give the browser one frame to apply any updates
-        await new Promise(requestAnimationFrame);
+        console.warn("Movie details lookup failed for", node.title, err);
 
-        renderExtras(node);
+    }
 
-        overlay.classList.add("open");
+    if(openNode !== node) return;
+
+    renderExtras(node);
 
 }
