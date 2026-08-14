@@ -41,10 +41,12 @@ async function searchEndpoint(endpoint, title, year) {
         `&query=${encodeURIComponent(title)}`;
 
     const res = await fetch(url);
+    console.log("CAST RESPONSE:", res.status, url);
 
     if (!res.ok) return null;
 
     const data = await res.json();
+    console.log("CAST DATA:", data);
 
     const results = (data.results || [])
         .filter(r => r.poster_path);
@@ -116,6 +118,8 @@ async function preloadImage(src) {
 
 async function fetchCast(endpoint, id) {
 
+    console.log("CAST REQUEST:", endpoint, id);
+
     const url =
         `${TMDB_BASE}/${endpoint}/${id}/credits` +
         `?api_key=${TMDB_API_KEY}`;
@@ -123,6 +127,7 @@ async function fetchCast(endpoint, id) {
     try {
 
         const res = await fetch(url);
+        console.log("CAST RESPONSE:", res.status, url);
 
         if (!res.ok) {
 
@@ -137,6 +142,7 @@ async function fetchCast(endpoint, id) {
         }
 
         const data = await res.json();
+        console.log("CAST DATA:", data);
 
         const cast = (data.cast || [])
             .slice(0, 8)
@@ -182,6 +188,7 @@ async function fetchTrailer(endpoint, id) {
     try {
 
         const res = await fetch(url);
+        console.log("CAST RESPONSE:", res.status, url);
 
         if (!res.ok) {
 
@@ -196,6 +203,7 @@ async function fetchTrailer(endpoint, id) {
         }
 
         const data = await res.json();
+        console.log("CAST DATA:", data);
 
         const videos = (data.results || [])
             .filter(v => v.site === "YouTube");
@@ -361,52 +369,35 @@ async function fetchPoster(node) {
 //--------------------------------------------------
 export async function fetchDetails(node) {
 
-    // Don't create duplicate requests if the details
-    // request is already running.
     if (node.detailsPromise) {
-
         return node.detailsPromise;
-
     }
-
 
     node.detailsPromise = (async () => {
 
-
-        //--------------------------------------------------
-        // Make sure this node has been searched on TMDB.
-        //
-        // If poster loading hasn't reached this node yet,
-        // search for it NOW instead of waiting for the
-        // poster batch.
-        //--------------------------------------------------
-
+        // If this node hasn't been searched on TMDB yet,
+        // search for it immediately.
         if (!node.tmdbId || !node.tmdbEndpoint) {
-
             await fetchPoster(node);
-
         }
 
-
-        //--------------------------------------------------
-        // If TMDB still couldn't find the title, stop.
-        //--------------------------------------------------
-
+        // No TMDB match = nothing to request.
         if (!node.tmdbId || !node.tmdbEndpoint) {
 
             console.warn(
-                "No TMDB match found for:",
+                "No TMDB match for:",
                 node.title
             );
 
             return;
-
         }
 
-
-        //--------------------------------------------------
-        // Fetch cast and trailer simultaneously.
-        //--------------------------------------------------
+        console.log(
+            "Fetching cast for:",
+            node.title,
+            node.tmdbEndpoint,
+            node.tmdbId
+        );
 
         const [cast, trailer] = await Promise.all([
 
@@ -422,35 +413,30 @@ export async function fetchDetails(node) {
 
         ]);
 
-
-        //--------------------------------------------------
-        // Save the results.
-        //--------------------------------------------------
+        console.log(
+            "Cast received:",
+            node.title,
+            cast
+        );
 
         node.cast = cast;
-
         node.trailerUrl = trailer;
-
-
-        //--------------------------------------------------
-        // Details successfully loaded.
-        //--------------------------------------------------
 
         node.detailsLoaded = true;
 
     })().catch(err => {
 
-        console.warn(
-            "Details lookup failed for",
+        console.error(
+            "Details lookup failed:",
             node.title,
             err
         );
 
-        // Allow the next attempt to retry.
         node.detailsPromise = null;
 
     });
 
+    return node.detailsPromise;
 
 }
 
