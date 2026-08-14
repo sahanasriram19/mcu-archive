@@ -37,7 +37,10 @@ function clampZoom(value){
 
 function distance(a,b){
 
-    return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+    return Math.hypot(
+        a.clientX-b.clientX,
+        a.clientY-b.clientY
+    );
 
 }
 
@@ -64,7 +67,10 @@ function startGesture(e){
 
         const [a,b] = [...pointers.values()];
 
-        pinchDistance = Math.max(1, distance(a,b));
+        pinchDistance = Math.max(
+            1,
+            distance(a,b)
+        );
 
     }
 
@@ -82,17 +88,27 @@ function moveGesture(e){
     point.x = e.clientX;
     point.y = e.clientY;
 
+
+    //--------------------------------------------------
+    // Two-finger pinch zoom
+    //--------------------------------------------------
+
     if(pointers.size === 2){
 
         const values = [...pointers.values()];
-        const currentDistance = Math.max(1, Math.hypot(
-            values[0].x-values[1].x,
-            values[0].y-values[1].y
-        ));
+
+        const currentDistance = Math.max(
+            1,
+            Math.hypot(
+                values[0].x-values[1].x,
+                values[0].y-values[1].y
+            )
+        );
 
         if(pinchDistance){
 
-            const factor = currentDistance / pinchDistance;
+            const factor =
+                currentDistance / pinchDistance;
 
             camera.targetZoom = clampZoom(
                 camera.targetZoom * factor
@@ -102,9 +118,15 @@ function moveGesture(e){
 
         pinchDistance = currentDistance;
         tapMoved = true;
+
         return;
 
     }
+
+
+    //--------------------------------------------------
+    // Detect dragging
+    //--------------------------------------------------
 
     if(Math.hypot(
         e.clientX-gestureStartX,
@@ -115,10 +137,75 @@ function moveGesture(e){
 
     }
 
+
+    //--------------------------------------------------
+    // Pan camera
+    //--------------------------------------------------
+
     camera.targetX -= dx / camera.zoom;
     camera.targetY -= dy / camera.zoom;
 
 }
+
+
+//--------------------------------------------------
+// Change cursor depending on what is underneath it.
+//
+// Project/movie nodes get the clickable hand cursor.
+// Branch/category nodes and empty space keep the
+// normal cursor.
+//--------------------------------------------------
+
+function updateCursor(clientX, clientY){
+
+    if(isUiTarget(document.elementFromPoint(clientX, clientY))){
+
+        viewport.style.cursor = "default";
+
+        return;
+
+    }
+
+
+    const node = getNodeAtScreenPoint(
+        clientX,
+        clientY,
+        camera,
+        graph.nodes,
+        getCurrentView()
+    );
+
+
+    if(node && !node.isBranch){
+
+        viewport.style.cursor = "pointer";
+
+    } else {
+
+        viewport.style.cursor = "default";
+
+    }
+
+}
+
+
+//--------------------------------------------------
+// Mouse movement for cursor feedback.
+//
+// This does NOT fetch movie details. Details are only
+// loaded when the user actually clicks a project.
+//--------------------------------------------------
+
+viewport.addEventListener("pointermove", e => {
+
+    updateCursor(
+        e.clientX,
+        e.clientY
+    );
+
+    moveGesture(e);
+
+});
 
 function endGesture(e){
 
@@ -127,12 +214,22 @@ function endGesture(e){
     if(!point) return;
 
     const wasSinglePointer = pointers.size === 1;
+
     const tapX = e.clientX;
     const tapY = e.clientY;
 
     pointers.delete(e.pointerId);
 
-    if(pointers.size < 2) pinchDistance = 0;
+    if(pointers.size < 2){
+
+        pinchDistance = 0;
+
+    }
+
+
+    //--------------------------------------------------
+    // Open movie details on a click/tap.
+    //--------------------------------------------------
 
     if(
         wasSinglePointer &&
@@ -148,33 +245,77 @@ function endGesture(e){
             getCurrentView()
         );
 
-        if(node) showMovieDetails(node);
+
+        if(node && !node.isBranch){
+
+            showMovieDetails(node);
+
+        }
 
     }
 
 }
 
-viewport.addEventListener("pointerdown", startGesture);
-viewport.addEventListener("pointermove", moveGesture);
-viewport.addEventListener("pointerup", endGesture);
-viewport.addEventListener("pointercancel", e => {
-    pointers.delete(e.pointerId);
-    pinchDistance = 0;
-    tapMoved = true;
-});
 
-viewport.addEventListener("pointerleave", () => {
-    viewport.style.cursor = "default";
-});
+//--------------------------------------------------
+// Pointer events
+//--------------------------------------------------
+
+viewport.addEventListener(
+    "pointerdown",
+    startGesture
+);
+
+viewport.addEventListener(
+    "pointerup",
+    endGesture
+);
+
+viewport.addEventListener(
+    "pointercancel",
+    e => {
+
+        pointers.delete(e.pointerId);
+
+        pinchDistance = 0;
+
+        tapMoved = true;
+
+    }
+);
+
+
+//--------------------------------------------------
+// Reset cursor when leaving the viewport.
+//--------------------------------------------------
+
+viewport.addEventListener(
+    "pointerleave",
+    () => {
+
+        viewport.style.cursor = "default";
+
+    }
+);
+
+
+//--------------------------------------------------
+// Mouse wheel zoom
+//--------------------------------------------------
 
 viewport.addEventListener("wheel", e => {
 
     e.preventDefault();
 
-    const factor = e.deltaY > 0 ? 0.8 : 1.2;
+    const factor =
+        e.deltaY > 0
+            ? 0.8
+            : 1.2;
 
     camera.targetZoom = clampZoom(
         camera.targetZoom * factor
     );
 
-}, { passive:false });
+}, {
+    passive:false
+});
