@@ -29,9 +29,9 @@ let generated = false;
 
 //==================================================
 
-export function initialiseUniverse() {
+export function initialiseUniverse(){
 
-    if (generated) return;
+    if(generated) return;
 
     generateUniverse();
 
@@ -41,16 +41,14 @@ export function initialiseUniverse() {
 
 //==================================================
 
-export function renderUniverse(camera, entered) {
+export function renderUniverse(camera, entered){
 
     universe.time++;
 
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+    canvas.width = universe.width;
+    canvas.height = universe.height;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBackground();
 
@@ -66,7 +64,7 @@ export function renderUniverse(camera, entered) {
 
     drawShootingStars();
 
-    if (entered) {
+    if(entered){
 
         // Only Complete MCU has one shared hub in the
         // centre — Phases, the timeline trails, and
