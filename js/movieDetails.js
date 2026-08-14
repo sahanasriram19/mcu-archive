@@ -202,6 +202,15 @@ export async function showMovieDetails(node) {
     // loading, so this doesn't double the network cost).
         await fetchDetails(node);
 
+        console.log("DETAILS DEBUG:", {
+            title: node.title,
+            tmdbId: node.tmdbId,
+            tmdbEndpoint: node.tmdbEndpoint,
+            cast: node.cast,
+            castCount: node.cast?.length,
+            trailer: node.trailerUrl
+        });
+
         if (openNode !== node) return;
 
         // Give the browser one frame to apply any updates
