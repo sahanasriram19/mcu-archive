@@ -359,12 +359,10 @@ async function fetchPoster(node) {
 // These are fetched when the movie details card is
 // opened instead of upfront for every project.
 //--------------------------------------------------
-
 export async function fetchDetails(node) {
 
-    // If this node is already loading or has already
-    // finished loading, return the same promise.
-
+    // Don't create duplicate requests if the details
+    // request is already running.
     if (node.detailsPromise) {
 
         return node.detailsPromise;
@@ -372,36 +370,34 @@ export async function fetchDetails(node) {
     }
 
 
-    //--------------------------------------------------
-    // Start the details request
-    //--------------------------------------------------
-
     node.detailsPromise = (async () => {
 
 
         //--------------------------------------------------
-        // IMPORTANT:
+        // Make sure this node has been searched on TMDB.
         //
-        // Wait for the TMDB poster search to finish first.
-        // This guarantees that tmdbId and tmdbEndpoint
-        // have been populated before requesting cast.
+        // If poster loading hasn't reached this node yet,
+        // search for it NOW instead of waiting for the
+        // poster batch.
         //--------------------------------------------------
 
-        if (node.tmdbReady) {
+        if (!node.tmdbId || !node.tmdbEndpoint) {
 
-            await node.tmdbReady;
+            await fetchPoster(node);
 
         }
 
 
         //--------------------------------------------------
-        // If TMDB couldn't find this title, stop here.
+        // If TMDB still couldn't find the title, stop.
         //--------------------------------------------------
 
-        if (
-            !node.tmdbId ||
-            !node.tmdbEndpoint
-        ) {
+        if (!node.tmdbId || !node.tmdbEndpoint) {
+
+            console.warn(
+                "No TMDB match found for:",
+                node.title
+            );
 
             return;
 
@@ -409,8 +405,7 @@ export async function fetchDetails(node) {
 
 
         //--------------------------------------------------
-        // Cast and trailer are independent requests,
-        // so load them simultaneously.
+        // Fetch cast and trailer simultaneously.
         //--------------------------------------------------
 
         const [cast, trailer] = await Promise.all([
@@ -429,7 +424,7 @@ export async function fetchDetails(node) {
 
 
         //--------------------------------------------------
-        // Store results on the node
+        // Save the results.
         //--------------------------------------------------
 
         node.cast = cast;
@@ -438,8 +433,7 @@ export async function fetchDetails(node) {
 
 
         //--------------------------------------------------
-        // Only mark the details as loaded AFTER
-        // the requests have completed.
+        // Details successfully loaded.
         //--------------------------------------------------
 
         node.detailsLoaded = true;
@@ -452,20 +446,13 @@ export async function fetchDetails(node) {
             err
         );
 
-
-        //--------------------------------------------------
-        // Allow a future attempt to retry.
-        //--------------------------------------------------
-
+        // Allow the next attempt to retry.
         node.detailsPromise = null;
 
     });
 
 
-    return node.detailsPromise;
-
 }
-
 
 //==================================================
 // Fetch every node's poster in small staggered
@@ -476,9 +463,8 @@ export async function fetchDetails(node) {
 // to finish before requesting cast.
 //==================================================
 
-const BATCH_SIZE = 8;
-
-const BATCH_DELAY_MS = 140;
+const BATCH_SIZE = 12;
+const BATCH_DELAY_MS = 40;
 
 
 export function loadPosters(graph) {
