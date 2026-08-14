@@ -308,17 +308,71 @@ async function fetchPoster(node) {
 // the first time.
 //--------------------------------------------------
 
+<<<<<<< HEAD
 export async function fetchDetails(node) {
+=======
+export function fetchDetails(node){
+>>>>>>> 3bc0356 (fix movie detail card load issue)
 
-    if(node.detailsLoaded) return;
+    // If this node is already loading/loading has finished,
+    // return the existing promise instead of making another request.
+    if(node.detailsPromise){
 
-    if(!node.tmdbId || !node.tmdbEndpoint) return;
+        return node.detailsPromise;
 
-    node.detailsLoaded = true;
+    }
 
-    node.cast = await fetchCast(node.tmdbEndpoint, node.tmdbId);
+    node.detailsPromise = (async () => {
 
-    node.trailerUrl = await fetchTrailer(node.tmdbEndpoint, node.tmdbId);
+        // IMPORTANT:
+        // Wait for the poster/TMDB search to finish first.
+        // That search is what gives the node its tmdbId
+        // and tmdbEndpoint.
+        if(node.tmdbReady){
+
+            await node.tmdbReady;
+
+        }
+
+        // If TMDB couldn't find this title, there is nothing
+        // we can request for cast/trailer.
+        if(!node.tmdbId || !node.tmdbEndpoint){
+
+            return;
+
+        }
+
+        // Cast and trailer don't depend on each other,
+        // so fetch them at the same time.
+        const [cast, trailer] = await Promise.all([
+
+            fetchCast(node.tmdbEndpoint, node.tmdbId),
+
+            fetchTrailer(node.tmdbEndpoint, node.tmdbId)
+
+        ]);
+
+        node.cast = cast;
+
+        node.trailerUrl = trailer;
+
+        // Only mark it loaded AFTER the requests have completed.
+        node.detailsLoaded = true;
+
+    })().catch(err => {
+
+        console.warn(
+            "Details lookup failed for",
+            node.title,
+            err
+        );
+
+        // Allow a future click/hover to retry.
+        node.detailsPromise = null;
+
+    });
+
+    return node.detailsPromise;
 
 }
 
