@@ -41,12 +41,10 @@ async function searchEndpoint(endpoint, title, year) {
         `&query=${encodeURIComponent(title)}`;
 
     const res = await fetch(url);
-    console.log("CAST RESPONSE:", res.status, url);
 
     if (!res.ok) return null;
 
     const data = await res.json();
-    console.log("CAST DATA:", data);
 
     const results = (data.results || [])
         .filter(r => r.poster_path);
@@ -118,8 +116,6 @@ async function preloadImage(src) {
 
 async function fetchCast(endpoint, id) {
 
-    console.log("CAST REQUEST:", endpoint, id);
-
     const url =
         `${TMDB_BASE}/${endpoint}/${id}/credits` +
         `?api_key=${TMDB_API_KEY}`;
@@ -127,7 +123,6 @@ async function fetchCast(endpoint, id) {
     try {
 
         const res = await fetch(url);
-        console.log("CAST RESPONSE:", res.status, url);
 
         if (!res.ok) {
 
@@ -142,7 +137,6 @@ async function fetchCast(endpoint, id) {
         }
 
         const data = await res.json();
-        console.log("CAST DATA:", data);
 
         const cast = (data.cast || [])
             .slice(0, 8)
@@ -188,7 +182,6 @@ async function fetchTrailer(endpoint, id) {
     try {
 
         const res = await fetch(url);
-        console.log("CAST RESPONSE:", res.status, url);
 
         if (!res.ok) {
 
@@ -203,7 +196,6 @@ async function fetchTrailer(endpoint, id) {
         }
 
         const data = await res.json();
-        console.log("CAST DATA:", data);
 
         const videos = (data.results || [])
             .filter(v => v.site === "YouTube");
@@ -257,6 +249,7 @@ async function fetchPoster(node) {
         ? node.release.slice(0, 4)
         : "";
 
+
     // Primary endpoint based on node type.
     //
     // Special can be either a movie or TV entry,
@@ -271,11 +264,13 @@ async function fetchPoster(node) {
 
                 : ["movie"];
 
+
     try {
 
         let match = null;
 
         let matchedEndpoint = null;
+
 
         for (const endpoint of endpoints) {
 
@@ -334,6 +329,7 @@ async function fetchPoster(node) {
 
             }
 
+
             if (
                 typeof match.vote_average === "number"
             ) {
@@ -341,6 +337,7 @@ async function fetchPoster(node) {
                 node.rating = match.vote_average;
 
             }
+
 
             node.tmdbId = match.id;
 
@@ -366,22 +363,56 @@ async function fetchPoster(node) {
 //
 // These are fetched when the movie details card is
 // opened instead of upfront for every project.
+//
+// If the poster/TMDB search is already running,
+// fetchDetails() reuses that existing promise.
 //--------------------------------------------------
+
 export async function fetchDetails(node) {
 
+    //--------------------------------------------------
+    // Prevent duplicate details requests.
+    //--------------------------------------------------
+
     if (node.detailsPromise) {
+
         return node.detailsPromise;
+
     }
+
 
     node.detailsPromise = (async () => {
 
-        // If this node hasn't been searched on TMDB yet,
-        // search for it immediately.
+
+        //--------------------------------------------------
+        // If the TMDB search has already been started by
+        // loadPosters(), wait for THAT request.
+        //
+        // This prevents fetchDetails() from starting
+        // another search for the same movie.
+        //--------------------------------------------------
+
         if (!node.tmdbId || !node.tmdbEndpoint) {
-            await fetchPoster(node);
+
+            if (node.tmdbReady) {
+
+                await node.tmdbReady;
+
+            } else {
+
+                node.tmdbReady = fetchPoster(node);
+
+                await node.tmdbReady;
+
+            }
+
         }
 
-        // No TMDB match = nothing to request.
+
+        //--------------------------------------------------
+        // No TMDB match.
+        //--------------------------------------------------
+
         if (!node.tmdbId || !node.tmdbEndpoint) {
 
             console.warn(
@@ -390,14 +421,13 @@ export async function fetchDetails(node) {
             );
 
             return;
+
         }
 
-        console.log(
-            "Fetching cast for:",
-            node.title,
-            node.tmdbEndpoint,
-            node.tmdbId
-        );
+
+        //--------------------------------------------------
+        // Fetch cast + trailer simultaneously.
+        //--------------------------------------------------
 
         const [cast, trailer] = await Promise.all([
 
@@ -413,16 +443,17 @@ export async function fetchDetails(node) {
 
         ]);
 
-        console.log(
-            "Cast received:",
-            node.title,
-            cast
-        );
+
+        //--------------------------------------------------
+        // Store results on the node.
+        //--------------------------------------------------
 
         node.cast = cast;
+
         node.trailerUrl = trailer;
 
         node.detailsLoaded = true;
+
 
     })().catch(err => {
 
@@ -432,25 +463,33 @@ export async function fetchDetails(node) {
             err
         );
 
+
+        // Allow a future click to retry.
+
         node.detailsPromise = null;
 
     });
+
 
     return node.detailsPromise;
 
 }
 
+
 //==================================================
-// Fetch every node's poster in small staggered
-// batches.
+// LOAD POSTERS
+//
+// A small concurrency pool is used instead of launching
+// large batches with timed delays.
+//
+// This keeps the browser responsive and avoids flooding
+// TMDB with too many requests at once.
 //
 // The tmdbReady promise is stored on each node so
-// fetchDetails() can wait for the poster/TMDB search
-// to finish before requesting cast.
+// fetchDetails() can reuse an existing poster/TMDB search.
 //==================================================
 
-const BATCH_SIZE = 12;
-const BATCH_DELAY_MS = 40;
+const MAX_CONCURRENT = 4;
 
 
 export function loadPosters(graph) {
@@ -472,54 +511,75 @@ export function loadPosters(graph) {
 
     const nodes = graph.nodes;
 
-    let i = 0;
+    let nextIndex = 0;
 
 
     //--------------------------------------------------
-    // Process one batch
+    // Worker
+    //
+    // Each worker handles one TMDB search at a time.
+    // When it finishes, it takes the next available node.
     //--------------------------------------------------
 
-    function nextBatch() {
+    async function worker() {
 
-        const batch = nodes.slice(
-            i,
-            i + BATCH_SIZE
-        );
+        while (true) {
 
+            const index = nextIndex++;
 
-        //--------------------------------------------------
-        // IMPORTANT:
-        //
-        // Store the promise so fetchDetails() can wait
-        // until the TMDB search for this node is finished.
-        //--------------------------------------------------
+            if (index >= nodes.length) {
 
-        batch.forEach(node => {
+                return;
 
-            node.tmdbReady = fetchPoster(node);
-
-        });
+            }
 
 
-        i += BATCH_SIZE;
+            const node = nodes[index];
 
 
-        //--------------------------------------------------
-        // Schedule the next batch
-        //--------------------------------------------------
+            try {
 
-        if (i < nodes.length) {
+                //--------------------------------------------------
+                // Store the promise on the node.
+                //
+                // If the user opens this card while its poster
+                // is still loading, fetchDetails() can reuse
+                // this exact request.
+                //--------------------------------------------------
 
-            setTimeout(
-                nextBatch,
-                BATCH_DELAY_MS
-            );
+                node.tmdbReady = fetchPoster(node);
+
+                await node.tmdbReady;
+
+            } catch (err) {
+
+                console.warn(
+                    "Poster loading failed for:",
+                    node.title,
+                    err
+                );
+
+            }
 
         }
 
     }
 
 
-    nextBatch();
+    //--------------------------------------------------
+    // Start a small number of workers.
+    //--------------------------------------------------
+
+    const workerCount = Math.min(
+        MAX_CONCURRENT,
+        nodes.length
+    );
+
+
+    for (let i = 0; i < workerCount; i++) {
+
+        worker();
+
+    }
 
 }
