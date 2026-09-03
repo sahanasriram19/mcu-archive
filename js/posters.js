@@ -51,6 +51,32 @@ async function searchEndpoint(endpoint, title, year) {
 
     if (!results.length) return null;
 
+    const titleField =
+        endpoint === "tv"
+            ? "name"
+            : "title";
+
+    const normalise = value =>
+        String(value || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+
+    const requestedTitle = normalise(title);
+
+    // IMPORTANT:
+    // Never accept an unrelated title just because it
+    // happened to be the first TMDB search result.
+    //
+    // For example, searching "Blade" can return
+    // "Blade Runner" near the top of the results.
+    // We only accept an exact title match.
+    const exactTitle = results.filter(
+        r => normalise(r[titleField]) === requestedTitle
+    );
+
+    if (!exactTitle.length) return null;
+
     if (year) {
 
         const dateField =
@@ -58,15 +84,20 @@ async function searchEndpoint(endpoint, title, year) {
                 ? "first_air_date"
                 : "release_date";
 
-        const exact = results.find(
+        const exactYear = exactTitle.find(
             r => (r[dateField] || "").slice(0, 4) === year
         );
 
-        if (exact) return exact;
+        if (exactYear) return exactYear;
 
     }
 
-    return results[0];
+    // If TMDB has the exact title but its currently listed
+    // release year differs, use the exact-title result.
+    //
+    // This is important for unreleased/upcoming Marvel
+    // projects such as Blade.
+    return exactTitle[0];
 
 }
 
@@ -242,122 +273,6 @@ async function fetchTrailer(endpoint, id) {
 //--------------------------------------------------
 
 async function fetchPoster(node) {
-
-
-    //==================================================
-    // BLADE-ONLY FIX
-    //
-    // Do NOT change the normal search behavior for
-    // any other movie or show.
-    //
-    // "Blade" is ambiguous in TMDB search and can
-    // resolve to Blade Runner. The MCU Blade movie
-    // has TMDB ID 617127, so use that ID directly.
-    //==================================================
-
-    if (node.id === "blade") {
-
-        try {
-
-            const endpoint = "movie";
-
-            const id = 617127;
-
-
-            const url =
-                `${TMDB_BASE}/${endpoint}/${id}` +
-                `?api_key=${TMDB_API_KEY}`;
-
-
-            const res = await fetch(url);
-
-
-            if (!res.ok) {
-
-                console.warn(
-                    "Blade TMDB request failed:",
-                    res.status,
-                    res.statusText
-                );
-
-                return;
-
-            }
-
-
-            const match = await res.json();
-
-
-            //--------------------------------------------------
-            // Set Blade poster
-            //--------------------------------------------------
-
-            if (match.poster_path) {
-
-                node.poster = {
-
-                    small:
-                        TMDB_IMAGE_BASES.small +
-                        match.poster_path,
-
-                    medium:
-                        TMDB_IMAGE_BASES.medium +
-                        match.poster_path,
-
-                    large:
-                        TMDB_IMAGE_BASES.large +
-                        match.poster_path
-
-                };
-
-            }
-
-
-            //--------------------------------------------------
-            // Save Blade TMDB information
-            //--------------------------------------------------
-
-            if (match.overview) {
-
-                node.overview = match.overview;
-
-            }
-
-
-            if (
-                typeof match.vote_average === "number"
-            ) {
-
-                node.rating = match.vote_average;
-
-            }
-
-
-            node.tmdbId = id;
-
-            node.tmdbEndpoint = endpoint;
-
-
-        } catch (err) {
-
-            console.warn(
-                "Blade poster lookup failed:",
-                err
-            );
-
-        }
-
-
-        return;
-
-    }
-
-
-    //==================================================
-    // NORMAL LOOKUP
-    //
-    // This is the original logic and is untouched.
-    //==================================================
 
     const title = searchTitle(node.title);
 
@@ -602,7 +517,7 @@ export async function fetchDetails(node) {
 // TMDB with too many requests at once.
 //
 // The tmdbReady promise is stored on each node so
-// fetchDetails() can reuse the existing poster/TMDB search.
+// fetchDetails() can reuse an existing poster/TMDB search.
 //==================================================
 
 const MAX_CONCURRENT = 4;
