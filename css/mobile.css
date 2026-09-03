@@ -19,8 +19,6 @@
         font-size:11px;
     }
 
-    /* The "Choose a view and zoom" line — not
-       essential on a phone, drop it to save space. */
     .view-panel-subtitle{
         display:none;
     }
@@ -35,14 +33,9 @@
         font-size:11px;
     }
 
+
     /*----------------------------------------
-      2. Character Journeys dropdown — was being
-      squeezed into one cell of the 2-column grid
-      (see .view-panel-list), which is what made
-      the button/row stretch to the list's full
-      height when opened. Spanning both columns
-      and capping the height with its own scroll
-      fixes both.
+      2. Character Journeys dropdown
     ----------------------------------------*/
 
     .character-dropdown{
@@ -60,21 +53,24 @@
         font-size:12px;
     }
 
+
     /*----------------------------------------
-      3. Movie details card — poster was being
-      cropped (object-fit:cover) into a short,
-      wide box that doesn't match a portrait
-      poster's real proportions, cutting off
-      the top or bottom of the artwork. Switching
-      to object-fit:contain shows the whole
-      poster, and shrinking the box height a bit
-      further is the "minimise" part of the ask.
+      3. Movie details card — mobile only
+     
+      Give the poster its own portrait-shaped
+      area so the image can be substantially
+      larger without leaving large empty
+      horizontal space.
     ----------------------------------------*/
 
     #movie-details-poster{
-        flex:0 0 200px !important;
+        flex:0 0 auto !important;
+        width:min(62vw, 300px);
+        height:clamp(250px, 42dvh, 340px);
         min-height:0 !important;
+        align-self:center;
         background:#000;
+        aspect-ratio:2 / 3;
     }
 
     #movie-details-poster img{
@@ -84,12 +80,128 @@
         object-position:center center !important;
     }
 
+
+    /*----------------------------------------
+      Details section
+     
+      Make the information more compact so
+      the complete card fits inside the
+      mobile rectangle more comfortably.
+    ----------------------------------------*/
+
+    #movie-details-body{
+        padding:14px 16px calc(18px + env(safe-area-inset-bottom));
+    }
+
+    #movie-details-kicker{
+        font-size:9px;
+        margin-bottom:5px;
+    }
+
+    #movie-details-title{
+        font-size:18px;
+        line-height:1.15;
+        margin-bottom:7px;
+    }
+
+    #movie-details-meta{
+        font-size:11px;
+        margin-bottom:10px;
+    }
+
+    #movie-details-trailer{
+        padding:7px 14px;
+        margin-bottom:12px;
+        font-size:11px;
+    }
+
+    #movie-details-overview{
+        font-size:12px;
+        line-height:1.5;
+        margin-bottom:12px;
+    }
+
+
+    /*----------------------------------------
+      Characters
+    ----------------------------------------*/
+
+    #movie-details-characters-label,
+    #movie-details-overlay #movie-details-cast-label{
+        font-size:9px;
+        margin-bottom:7px;
+    }
+
+    #movie-details-overlay .character-chip{
+        padding:4px 9px;
+        margin:0 5px 5px 0;
+        font-size:10px;
+    }
+
+
+    /*----------------------------------------
+      Cast
+    ----------------------------------------*/
+
+    #movie-details-overlay #movie-details-cast{
+        margin-top:14px;
+        padding-top:12px;
+    }
+
+    #movie-details-overlay #movie-details-cast-list{
+        gap:10px;
+        padding-bottom:6px;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+    }
+
+    #movie-details-overlay #movie-details-cast-list::-webkit-scrollbar{
+        display:none;
+    }
+
+    #movie-details-overlay .cast-member{
+        flex:0 0 62px;
+        max-width:62px;
+    }
+
+    #movie-details-overlay .cast-avatar{
+        width:54px;
+        height:81px;
+        max-width:54px;
+        max-height:81px;
+        margin-bottom:5px;
+    }
+
+    #movie-details-overlay .cast-avatar img{
+        width:54px;
+        height:81px;
+    }
+
+    #movie-details-overlay .cast-name{
+        font-size:10px;
+    }
+
+    #movie-details-overlay .cast-character{
+        font-size:9px;
+    }
+
 }
+
+
+/*----------------------------------------
+  Extra-small phones
+----------------------------------------*/
 
 @media (max-width: 420px){
 
     #movie-details-poster{
-        flex:0 0 170px !important;
+        width:min(68vw, 280px);
+        height:clamp(235px, 40dvh, 310px);
+    }
+
+    #movie-details-body{
+        padding-left:14px;
+        padding-right:14px;
     }
 
 }

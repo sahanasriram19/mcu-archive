@@ -51,6 +51,32 @@ async function searchEndpoint(endpoint, title, year) {
 
     if (!results.length) return null;
 
+    const titleField =
+        endpoint === "tv"
+            ? "name"
+            : "title";
+
+    const normalise = value =>
+        String(value || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+
+    const requestedTitle = normalise(title);
+
+    // IMPORTANT:
+    // Never accept an unrelated title just because it
+    // happened to be the first TMDB search result.
+    //
+    // For example, searching "Blade" can return
+    // "Blade Runner" near the top of the results.
+    // We only accept an exact title match.
+    const exactTitle = results.filter(
+        r => normalise(r[titleField]) === requestedTitle
+    );
+
+    if (!exactTitle.length) return null;
+
     if (year) {
 
         const dateField =
@@ -58,15 +84,20 @@ async function searchEndpoint(endpoint, title, year) {
                 ? "first_air_date"
                 : "release_date";
 
-        const exact = results.find(
+        const exactYear = exactTitle.find(
             r => (r[dateField] || "").slice(0, 4) === year
         );
 
-        if (exact) return exact;
+        if (exactYear) return exactYear;
 
     }
 
-    return results[0];
+    // If TMDB has the exact title but its currently listed
+    // release year differs, use the exact-title result.
+    //
+    // This is important for unreleased/upcoming Marvel
+    // projects such as Blade.
+    return exactTitle[0];
 
 }
 
