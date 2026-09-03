@@ -79,7 +79,8 @@ export function setView(key){
 
     camera.targetY = view.camera.y;
 
-    camera.targetZoom = view.camera.zoom;
+    const isMobile = window.innerWidth <= 768;
+    camera.targetZoom = isMobile ? view.camera.zoom * 0.7 : view.camera.zoom;
 
 }
 
