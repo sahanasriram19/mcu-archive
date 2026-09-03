@@ -1,7 +1,23 @@
 /*==================================================
   MOBILE.CSS
 
-*/
+  Add this file LAST in index.html, after every other
+  stylesheet — e.g.:
+
+      <link rel="stylesheet" href="css/main.css">
+      <link rel="stylesheet" href="css/background.css">
+      <link rel="stylesheet" href="css/landing.css">
+      <link rel="stylesheet" href="css/world.css">
+      <link rel="stylesheet" href="css/cards.css">
+      <link rel="stylesheet" href="css/panel.css">
+      <link rel="stylesheet" href="css/characters.css">
+      <link rel="stylesheet" href="css/movieDetails.css">
+      <link rel="stylesheet" href="css/search.css">
+      <link rel="stylesheet" href="css/mobile.css">   <!-- add this line -->
+
+  It only contains overrides for phone-sized screens
+  (max-width: 768px) — nothing here touches desktop.
+==================================================*/
 
 @media (max-width: 768px){
 
