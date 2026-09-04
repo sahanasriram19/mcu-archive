@@ -33,6 +33,17 @@ function searchTitle(title) {
 // Run one TMDB search and return the best match
 //--------------------------------------------------
 
+function normalizeTitle(s) {
+
+    return (s || "")
+        .toLowerCase()
+        .replace(/[:.'’]/g, "")
+        .replace(/[-–—]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+}
+
 async function searchEndpoint(endpoint, title, year) {
 
     const url =
@@ -51,12 +62,44 @@ async function searchEndpoint(endpoint, title, year) {
 
     if (!results.length) return null;
 
-    if (year) {
+    const titleField = endpoint === "tv" ? "name" : "title";
 
-        const dateField =
-            endpoint === "tv"
-                ? "first_air_date"
-                : "release_date";
+    const dateField =
+        endpoint === "tv"
+            ? "first_air_date"
+            : "release_date";
+
+    // Only ever accept a result whose title actually matches
+    // (punctuation/case differences aside) — never TMDB's top
+    // search hit by popularity alone. That loose fallback is
+    // how a query for "Blade" ended up matching "Blade Runner":
+    // Runner is far more popular, and both contain the word
+    // "blade", so a plain results[0] fallback picked it every
+    // time. No match at all (a plain placeholder card) is a
+    // much better outcome than a confidently wrong poster.
+    const wanted = normalizeTitle(title);
+
+    const exactMatches = results.filter(
+        r => normalizeTitle(r[titleField]) === wanted
+    );
+
+    if (exactMatches.length) {
+
+        if (year) {
+
+            const exactWithYear = exactMatches.find(
+                r => (r[dateField] || "").slice(0, 4) === year
+            );
+
+            if (exactWithYear) return exactWithYear;
+
+        }
+
+        return exactMatches[0];
+
+    }
+
+    if (year) {
 
         const exact = results.find(
             r => (r[dateField] || "").slice(0, 4) === year
@@ -66,7 +109,7 @@ async function searchEndpoint(endpoint, title, year) {
 
     }
 
-    return results[0];
+    return null;
 
 }
 

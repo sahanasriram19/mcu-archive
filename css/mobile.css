@@ -1,0 +1,208 @@
+/*==================================================
+  MOBILE.CSS
+
+  Add this file LAST in index.html, after every other
+  stylesheet, so its rules take priority over the
+  existing mobile breakpoints already in panel.css /
+  characters.css / movieDetails.css:
+
+      <link rel="stylesheet" href="css/main.css">
+      <link rel="stylesheet" href="css/background.css">
+      <link rel="stylesheet" href="css/landing.css">
+      <link rel="stylesheet" href="css/world.css">
+      <link rel="stylesheet" href="css/cards.css">
+      <link rel="stylesheet" href="css/panel.css">
+      <link rel="stylesheet" href="css/characters.css">
+      <link rel="stylesheet" href="css/movieDetails.css">
+      <link rel="stylesheet" href="css/search.css">
+      <link rel="stylesheet" href="css/mobile.css">   <!-- add this line -->
+
+  Everything below is scoped to max-width: 768px (or
+  narrower) — desktop is completely untouched.
+==================================================*/
+
+@media (max-width: 768px){
+
+    /*----------------------------------------
+      1. Nav box ("MCU Archive" panel) — smaller
+    ----------------------------------------*/
+
+    #view-panel{
+        max-height:30vh;
+        padding:10px;
+        border-radius:14px;
+    }
+
+    .view-panel-title{
+        font-size:11px;
+    }
+
+    /* "Choose a view and zoom" — not essential
+       on a phone, drop it to save vertical space. */
+    .view-panel-subtitle{
+        display:none;
+    }
+
+    .view-panel-list{
+        gap:5px;
+    }
+
+    .view-panel-btn{
+        min-height:36px;
+        padding:8px;
+        font-size:11px;
+    }
+
+    /*----------------------------------------
+      2. Character Journeys dropdown
+
+      This was being placed as a sibling of the
+      view buttons inside .view-panel-list, which
+      is a 2-column grid on mobile — so the dropdown
+      got squeezed into a single grid cell, and its
+      own height (up to 700px when open) stretched
+      that entire row, making the "Character
+      Journeys" button look like it grew to the
+      size of the whole list. Spanning both columns
+      and capping its own height with an internal
+      scroll fixes both problems.
+    ----------------------------------------*/
+
+    .character-dropdown{
+        grid-column:1 / -1;
+    }
+
+    .character-dropdown.open{
+        max-height:220px;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .character-btn{
+        padding:8px 12px;
+        font-size:12px;
+    }
+
+    /*----------------------------------------
+      3. Movie details card — poster sizing
+
+      The poster was being fit into a short, wide
+      box using object-fit:cover, which crops a
+      tall movie poster's top or bottom off to
+      make it fill that mismatched shape.
+
+      The fix isn't "make the poster smaller" —
+      that just trades cropping for empty space on
+      the sides (object-fit:contain letterboxing,
+      which you explicitly don't want either).
+      Instead, the POSTER'S CONTAINER now uses the
+      poster's own real proportions (2:3, standard
+      for a movie poster) via aspect-ratio, sized
+      off the full card width. Because the box and
+      the image now share the same shape, the full
+      poster shows with no crop and no gaps — and
+      since it spans the full width instead of a
+      fixed small height, it's also considerably
+      bigger than before, with the details section
+      taking up whatever's left (and scrolling
+      internally if it runs long).
+    ----------------------------------------*/
+
+    #movie-details-overlay{
+        align-items:flex-end;
+        padding:0;
+    }
+
+    #movie-details-card{
+        flex-direction:column !important;
+        width:100% !important;
+        max-width:none !important;
+        height:min(94dvh, 780px) !important;
+        max-height:94dvh !important;
+        border-radius:20px 20px 0 0 !important;
+    }
+
+    #movie-details-poster{
+        flex:0 0 auto !important;
+        width:100%;
+        aspect-ratio:2 / 3;
+        max-height:58dvh;
+        min-height:0 !important;
+        background:#000;
+    }
+
+    #movie-details-poster img{
+        width:100% !important;
+        height:100% !important;
+        object-fit:cover !important;
+        object-position:center top !important;
+    }
+
+    #movie-details-body{
+        flex:1 1 auto !important;
+        min-height:0;
+        padding:16px 18px calc(20px + env(safe-area-inset-bottom)) !important;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    #movie-details-title{
+        font-size:19px !important;
+    }
+
+    #movie-details-overview{
+        font-size:13px !important;
+        line-height:1.55 !important;
+    }
+
+    #movie-details-close{
+        top:10px;
+        right:10px;
+        width:38px;
+        height:38px;
+        font-size:22px;
+    }
+
+    #movie-details-overlay #movie-details-cast-list{
+        gap:10px;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+    }
+
+    #movie-details-overlay #movie-details-cast-list::-webkit-scrollbar{
+        display:none;
+    }
+
+    #movie-details-overlay .cast-member{
+        flex:0 0 64px;
+        max-width:64px;
+    }
+
+    #movie-details-overlay .cast-avatar{
+        width:58px;
+        height:86px;
+        max-width:58px;
+        max-height:86px;
+    }
+
+    #movie-details-overlay .cast-avatar img{
+        width:58px;
+        height:86px;
+    }
+
+}
+
+/*----------------------------------------
+  Very small phones — trim a little further
+  so the details section doesn't get
+  squeezed to almost nothing under a very
+  tall poster.
+----------------------------------------*/
+
+@media (max-width: 380px){
+
+    #movie-details-poster{
+        max-height:50dvh;
+    }
+
+}
