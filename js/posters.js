@@ -93,31 +93,6 @@ async function searchEndpoint(endpoint, title, year) {
 
             if (exactWithYear) return exactWithYear;
 
-            // Several unrelated titles can share the exact
-            // same name (e.g. "The Consultant" is also a
-            // 2023 Amazon series, "The Defenders" is also a
-            // 1960s legal drama) — TMDB's default ordering
-            // is by popularity, not by which one is actually
-            // meant, so the wrong same-titled show could
-            // still win here. Picking whichever exact match
-            // has the closest release year to this project's
-            // own year is a much safer tiebreaker than
-            // popularity for disambiguating those cases.
-            const withYear = exactMatches.filter(r => r[dateField]);
-
-            if (withYear.length) {
-
-                const wantedYear = parseInt(year, 10);
-
-                withYear.sort((a, b) =>
-                    Math.abs(parseInt(a[dateField].slice(0, 4), 10) - wantedYear) -
-                    Math.abs(parseInt(b[dateField].slice(0, 4), 10) - wantedYear)
-                );
-
-                return withYear[0];
-
-            }
-
         }
 
         return exactMatches[0];
