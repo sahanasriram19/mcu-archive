@@ -44,6 +44,30 @@ function normalizeTitle(s) {
 
 }
 
+// TMDB often lists Marvel's shorter titles with a studio
+// prefix — "Marvel One-Shot: The Consultant", "Marvel's The
+// Defenders" — that a plain equality check will never match.
+// This recognizes the wanted title as either the whole title
+// or the tail end of it (", the consultant" inside "marvel
+// one-shot: the consultant"), so those still count as a real
+// match rather than being skipped entirely.
+function titleMatches(resultTitle, wanted) {
+
+    const t = normalizeTitle(resultTitle);
+
+    if (t === wanted) return true;
+
+    // Catches "Marvel One-Shot: The Consultant" / "Marvel's
+    // The Defenders" style prefixes. Deliberately NOT also
+    // checking startsWith(wanted + " ") here — that direction
+    // is what let "Blade Runner" match a search for "Blade"
+    // in the first place ("blade runner" starts with "blade ").
+    if (t.endsWith(" " + wanted)) return true;
+
+    return false;
+
+}
+
 async function searchEndpoint(endpoint, title, year) {
 
     const url =
@@ -70,32 +94,62 @@ async function searchEndpoint(endpoint, title, year) {
             : "release_date";
 
     // Only ever accept a result whose title actually matches
-    // (punctuation/case differences aside) — never TMDB's top
-    // search hit by popularity alone. That loose fallback is
-    // how a query for "Blade" ended up matching "Blade Runner":
-    // Runner is far more popular, and both contain the word
-    // "blade", so a plain results[0] fallback picked it every
-    // time. No match at all (a plain placeholder card) is a
-    // much better outcome than a confidently wrong poster.
+    // (allowing for a studio prefix like "Marvel One-Shot: X"
+    // or "Marvel's X", and punctuation/case differences) —
+    // never TMDB's top search hit by popularity alone. That
+    // loose fallback is how a query for "Blade" ended up
+    // matching "Blade Runner": Runner is far more popular, and
+    // both contain the word "blade", so a plain results[0]
+    // fallback picked it every time. No match at all (a plain
+    // placeholder card) is a much better outcome than a
+    // confidently wrong poster.
     const wanted = normalizeTitle(title);
 
-    const exactMatches = results.filter(
-        r => normalizeTitle(r[titleField]) === wanted
+    const candidates = results.filter(
+        r => titleMatches(r[titleField], wanted)
     );
 
-    if (exactMatches.length) {
+    if (candidates.length) {
 
+        // Year is the strongest signal available, and matters
+        // more than an exact title. Several unrelated titles
+        // can share the exact same name as a Marvel project
+        // (e.g. "The Consultant" is also a 2023 Amazon series,
+        // "The Defenders" is also a 1960s legal drama) — while
+        // the real Marvel entry is sometimes only findable
+        // under a longer studio-prefixed title ("Marvel
+        // One-Shot: The Consultant", "Marvel's The Defenders").
+        // A year-verified prefixed match is far more trustworthy
+        // than an unverified exact match from a different show
+        // entirely, so year gets checked first, across every
+        // candidate — not just the exact-title ones.
         if (year) {
 
-            const exactWithYear = exactMatches.find(
+            const withYear = candidates.filter(
                 r => (r[dateField] || "").slice(0, 4) === year
             );
 
-            if (exactWithYear) return exactWithYear;
+            if (withYear.length) {
+
+                const exactWithYear = withYear.find(
+                    r => normalizeTitle(r[titleField]) === wanted
+                );
+
+                return exactWithYear || withYear[0];
+
+            }
 
         }
 
-        return exactMatches[0];
+        // No year to corroborate with — only trust an exact
+        // title match at this point. A same-year-less prefixed
+        // match ("Marvel One-Shot: X") without any other
+        // confirmation is too easy to get wrong.
+        const exact = candidates.find(
+            r => normalizeTitle(r[titleField]) === wanted
+        );
+
+        if (exact) return exact;
 
     }
 
