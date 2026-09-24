@@ -1,0 +1,3 @@
+gitignore
+# Your personal TMDB API key (see js/tmdbKey.example.js)
+js/tmdbKey.js

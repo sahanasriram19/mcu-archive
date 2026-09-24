@@ -14,7 +14,14 @@ export const graph = {
     // used by the mind-map views — phase hubs in Complete
     // MCU and Phases, trunk waypoints in the timeline
     // trail views. Never movies, never posters.
-    branchNodes: []
+    branchNodes: [],
+
+    // What the mouse is over on the Complete MCU mind map
+    // (set by input.js, read by connections.js and
+    // branchNodes.js): nodeIndex = a hovered poster, phase =
+    // the phase whose branch should light up. Both null when
+    // nothing is hovered.
+    hover: { nodeIndex: null, phase: null }
 
 };
 
@@ -140,6 +147,8 @@ export function setBranchNodes(targets){
             prev.targetY = t.y;
             prev.label = t.label;
             prev.phase = t.phase;
+            prev.hint = t.hint || "";
+            prev.hintSubtitle = t.hintSubtitle || "";
             prev.subtitle = t.subtitle || "";
             prev.hidden = !!t.hidden;
             prev.memberIds = t.memberIds || [];
@@ -160,6 +169,8 @@ export function setBranchNodes(targets){
         node.memberIds = t.memberIds || [];
         node.hidden = !!t.hidden;
         node.phase = t.phase;
+        node.hint = t.hint || "";
+        node.hintSubtitle = t.hintSubtitle || "";
 
         branchMemory.set(t.key, { x: t.x, y: t.y });
 

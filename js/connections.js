@@ -1,4 +1,5 @@
 import { getCurrentView } from "./viewManager.js";
+import { PHASE_COLOURS } from "./branchNodes.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -55,6 +56,73 @@ function curveControls(from, to){
 
 }
 
+//--------------------------------------------------
+// HOVER HIGHLIGHT (Complete MCU mind map)
+//
+// Returns the set of edge indexes to light up, plus the
+// phase colour to light them in — or null if nothing is
+// hovered.
+//   Hovering a poster: its own branch, from the poster
+//   back through its parent titles and phase to the hub.
+//   Hovering a phase junction: that phase's whole branch.
+//--------------------------------------------------
+
+function hoverHighlight(graph){
+
+    const { nodeIndex, phase } = graph.hover;
+
+    if(nodeIndex === null && phase === null) return null;
+
+    const edges = graph.edges;
+
+    const set = new Set();
+
+    if(nodeIndex !== null){
+
+        // Each child has exactly one incoming edge in the
+        // mind-map tree, so "edge that ends here" = parent.
+        const parentEdge = new Map();
+
+        edges.forEach((edge, i) => parentEdge.set(String(edge.to), i));
+
+        let current = nodeIndex;
+
+        for(let guard = 0; guard < 20; guard++){
+
+            const i = parentEdge.get(String(current));
+
+            if(i === undefined) break;
+
+            set.add(i);
+
+            current = edges[i].from;
+
+            if(current === "hub") break;
+
+        }
+
+    } else {
+
+        const anchor = "branch:phase" + phase;
+
+        edges.forEach((edge, i) => {
+
+            const child = typeof edge.to === "number" ? graph.nodes[edge.to] : null;
+
+            if(edge.to === anchor || (child && child.phase === phase)) set.add(i);
+
+        });
+
+    }
+
+    if(!set.size) return null;
+
+    const colour = PHASE_COLOURS[phase] || "170,225,255";
+
+    return { set, colour };
+
+}
+
 export function renderConnections(ctx, camera, graph){
 
     if(!graph.edges.length) return;
@@ -103,9 +171,17 @@ export function renderConnections(ctx, camera, graph){
 
     const path = new Path2D();
 
+    // Hovered branch goes into its own path so it can be
+    // drawn brighter and in its phase colour on top.
+    const highlight = currentView === "complete" ? hoverHighlight(graph) : null;
+
+    const hiPath = highlight ? new Path2D() : null;
+
     let any = false;
 
-    graph.edges.forEach(edge=>{
+    graph.edges.forEach((edge, edgeIndex)=>{
+
+        const target = highlight && highlight.set.has(edgeIndex) ? hiPath : path;
 
         const from = resolveAnchor(edge.from, graph);
         const to = resolveAnchor(edge.to, graph);
@@ -125,7 +201,7 @@ export function renderConnections(ctx, camera, graph){
 
         ) return;
 
-        path.moveTo(x1, y1);
+        target.moveTo(x1, y1);
 
         if(edge.style === "curve"){
 
@@ -135,7 +211,7 @@ export function renderConnections(ctx, camera, graph){
             // branch visibly "grows" outward from the centre.
             const [c1x, c1y, c2x, c2y] = curveControls(from, to);
 
-            path.bezierCurveTo(
+            target.bezierCurveTo(
 
                 halfW + (c1x - camera.x) * camera.zoom,
                 halfH + (c1y - camera.y) * camera.zoom,
@@ -147,7 +223,7 @@ export function renderConnections(ctx, camera, graph){
 
         } else {
 
-            path.lineTo(x2, y2);
+            target.lineTo(x2, y2);
 
         }
 
@@ -169,6 +245,10 @@ export function renderConnections(ctx, camera, graph){
     //----------------------------------
 
     ctx.save();
+
+    // While a branch is highlighted, the rest of the map
+    // steps back so the highlighted one stands out.
+    if(highlight) ctx.globalAlpha = 0.4;
 
     ctx.globalCompositeOperation = "lighter";
 
@@ -195,6 +275,8 @@ export function renderConnections(ctx, camera, graph){
 
     ctx.save();
 
+    if(highlight) ctx.globalAlpha = 0.4;
+
     ctx.shadowColor = "rgba(255,255,255,1)";
     ctx.shadowBlur = 10 * camera.zoom;
 
@@ -204,6 +286,38 @@ export function renderConnections(ctx, camera, graph){
     ctx.stroke(path);
 
     ctx.restore();
+
+    //----------------------------------
+    // Highlighted branch — phase-coloured
+    // glow with a bright core, on top.
+    //----------------------------------
+
+    if(highlight){
+
+        ctx.save();
+
+        ctx.globalCompositeOperation = "lighter";
+
+        ctx.shadowColor = `rgba(${highlight.colour},1)`;
+        ctx.shadowBlur = 36 * camera.zoom;
+
+        ctx.strokeStyle = `rgba(${highlight.colour},.95)`;
+        ctx.lineWidth = Math.max(14 * camera.zoom, 3);
+
+        ctx.stroke(hiPath);
+
+        ctx.restore();
+
+        ctx.save();
+
+        ctx.strokeStyle = "rgba(255,255,255,.95)";
+        ctx.lineWidth = Math.max(3.5 * camera.zoom, 1.6);
+
+        ctx.stroke(hiPath);
+
+        ctx.restore();
+
+    }
 
     ctx.restore();
 

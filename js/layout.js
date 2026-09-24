@@ -242,6 +242,9 @@ export function layoutComplete(nodes){
             key: "phase"+phase,
             label: "",
             subtitle: "",
+            // Shown only while that branch is hovered.
+            hint: "PHASE "+phase,
+            hintSubtitle: phaseSubtitle(groups[phase]),
             x: Math.cos(centre) * MINDMAP_PHASE_RADIUS * sx,
             y: Math.sin(centre) * MINDMAP_PHASE_RADIUS * sy
 

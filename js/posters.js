@@ -77,7 +77,11 @@ async function searchEndpoint(endpoint, title, year) {
 
     const res = await fetch(url);
 
-    if (!res.ok) return null;
+    // A failed request (rate limit, TMDB down) must not look
+    // like "no match", or the lookup cache would remember
+    // this title as having no poster. Throwing sends it to
+    // fetchPoster's catch, which caches nothing.
+    if (!res.ok) throw new Error(`TMDB search failed (${res.status})`);
 
     const data = await res.json();
 
@@ -335,10 +339,145 @@ async function fetchTrailer(endpoint, id) {
 
 
 //--------------------------------------------------
+// LOOKUP CACHE
+//
+// Every visit used to run a fresh TMDB search for all 77
+// titles before any poster could appear. The result of a
+// search (which TMDB entry a title is, and its poster path)
+// almost never changes, so it's remembered in localStorage
+// and reused on the next visit — posters then start loading
+// immediately with no searches at all.
+//
+// Matches are kept for 14 days so overviews/ratings still
+// refresh now and then; "no match" results only for a day,
+// so a title TMDB adds art for later gets picked up soon.
+// Bump CACHE_KEY's version to force everyone to re-search
+// (e.g. after changing the matching rules above).
+//
+// Everything is wrapped in try/catch: storage can be full,
+// blocked, or missing (private windows), and then this just
+// quietly falls back to searching like before.
+//--------------------------------------------------
+
+const CACHE_KEY = "mcu-archive:tmdb-lookups:v1";
+
+const HIT_TTL = 14 * 24 * 60 * 60 * 1000;
+const MISS_TTL = 24 * 60 * 60 * 1000;
+
+let lookupCache = null;
+
+function loadCache() {
+
+    if (lookupCache) return lookupCache;
+
+    try {
+
+        lookupCache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {};
+
+    } catch (err) {
+
+        lookupCache = {};
+
+    }
+
+    return lookupCache;
+
+}
+
+let saveTimer = null;
+
+function saveCacheSoon() {
+
+    // Many lookups finish close together — write once
+    // after they settle instead of 77 separate writes.
+    clearTimeout(saveTimer);
+
+    saveTimer = setTimeout(() => {
+
+        try {
+
+            localStorage.setItem(CACHE_KEY, JSON.stringify(lookupCache));
+
+        } catch (err) { /* storage full or blocked — fine */ }
+
+    }, 500);
+
+}
+
+// Keyed by id + title so renaming a title in mcu.json
+// automatically triggers a fresh search for it.
+function cacheKeyFor(node) {
+
+    return node.id + "|" + node.title;
+
+}
+
+function readCachedLookup(node) {
+
+    const entry = loadCache()[cacheKeyFor(node)];
+
+    if (!entry) return null;
+
+    const ttl = entry.miss ? MISS_TTL : HIT_TTL;
+
+    if (Date.now() - entry.t > ttl) return null;
+
+    return entry;
+
+}
+
+function writeCachedLookup(node, entry) {
+
+    loadCache()[cacheKeyFor(node)] = { ...entry, t: Date.now() };
+
+    saveCacheSoon();
+
+}
+
+// Puts a match's details onto the node — shared by fresh
+// searches and cache hits so both behave identically.
+function applyMatch(node, { posterPath, overview, rating, id, endpoint }) {
+
+    if (posterPath) {
+
+        node.poster = {
+
+            small: TMDB_IMAGE_BASES.small + posterPath,
+
+            medium: TMDB_IMAGE_BASES.medium + posterPath,
+
+            large: TMDB_IMAGE_BASES.large + posterPath
+
+        };
+
+    }
+
+    if (overview) node.overview = overview;
+
+    if (typeof rating === "number") node.rating = rating;
+
+    node.tmdbId = id;
+
+    node.tmdbEndpoint = endpoint;
+
+}
+
+
+//--------------------------------------------------
 // Fetch poster / TMDB information
 //--------------------------------------------------
 
 async function fetchPoster(node) {
+
+    const cached = readCachedLookup(node);
+
+    if (cached) {
+
+        if (!cached.miss) applyMatch(node, cached);
+
+        return;
+
+    }
 
     const title = searchTitle(node.title);
 
@@ -389,56 +528,36 @@ async function fetchPoster(node) {
 
 
         //--------------------------------------------------
-        // Set poster
-        //--------------------------------------------------
-
-        if (match && match.poster_path) {
-
-            node.poster = {
-
-                small:
-                    TMDB_IMAGE_BASES.small +
-                    match.poster_path,
-
-                medium:
-                    TMDB_IMAGE_BASES.medium +
-                    match.poster_path,
-
-                large:
-                    TMDB_IMAGE_BASES.large +
-                    match.poster_path
-
-            };
-
-        }
-
-
-        //--------------------------------------------------
-        // Save TMDB information for later cast/trailer
-        // requests.
+        // Save what was found onto the node (poster, plus
+        // the TMDB id/endpoint that later cast/trailer
+        // requests need), and remember it for next visit.
         //--------------------------------------------------
 
         if (match) {
 
-            if (match.overview) {
+            const found = {
 
-                node.overview = match.overview;
+                posterPath: match.poster_path || null,
 
-            }
+                overview: match.overview || "",
 
+                rating: typeof match.vote_average === "number"
+                    ? match.vote_average
+                    : null,
 
-            if (
-                typeof match.vote_average === "number"
-            ) {
+                id: match.id,
 
-                node.rating = match.vote_average;
+                endpoint: matchedEndpoint
 
-            }
+            };
 
+            applyMatch(node, found);
 
-            node.tmdbId = match.id;
+            writeCachedLookup(node, found);
 
-            node.tmdbEndpoint = matchedEndpoint;
+        } else {
+
+            writeCachedLookup(node, { miss: true });
 
         }
 
@@ -597,8 +716,8 @@ export function loadPosters(graph) {
     ) {
 
         console.warn(
-            "TMDB API key not set — add yours in js/tmdbConfig.js to load real posters. " +
-            "Nodes will keep showing as plain stars until then."
+            "TMDB API key not set — copy js/tmdbKey.example.js to js/tmdbKey.js and add your key to load real posters. " +
+            "Titles will show as placeholder cards until then."
         );
 
         return;

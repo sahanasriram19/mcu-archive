@@ -1,6 +1,6 @@
 import { camera } from "./camera.js";
 import { graph } from "./graph.js";
-import { getCurrentView } from "./viewManager.js";
+import { getCurrentView, focusPhase, refitView } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
 
@@ -149,6 +149,103 @@ function moveGesture(e){
 
 
 //--------------------------------------------------
+// MIND MAP TARGETS (Complete MCU only)
+//
+// Besides posters, two things on the mind map are
+// clickable: a phase junction (the point a phase's
+// branch splits from) zooms into that phase, and the
+// Marvel logo zooms back out to the whole map.
+//--------------------------------------------------
+
+const JUNCTION_HIT_WORLD = 130;   // junction hit radius, world units...
+const JUNCTION_HIT_MIN_PX = 22;   // ...but never smaller than this on screen
+
+const HUB_HALF_W = 450;           // Marvel logo size, world units (see hub.js)
+const HUB_HALF_H = 200;
+
+function mindmapTargetAt(clientX, clientY){
+
+    if(getCurrentView() !== "complete") return null;
+
+    const halfW = window.innerWidth / 2;
+    const halfH = window.innerHeight / 2;
+
+    const radius = Math.max(JUNCTION_HIT_MIN_PX, JUNCTION_HIT_WORLD * camera.zoom);
+
+    for(const branch of graph.branchNodes){
+
+        if(!branch.key.startsWith("phase")) continue;
+
+        const x = halfW + (branch.x - camera.x) * camera.zoom;
+        const y = halfH + (branch.y - camera.y) * camera.zoom;
+
+        if(Math.hypot(clientX - x, clientY - y) <= radius){
+
+            return { type: "junction", phase: branch.phase };
+
+        }
+
+    }
+
+    const hx = halfW + (0 - camera.x) * camera.zoom;
+    const hy = halfH + (0 - camera.y) * camera.zoom;
+
+    if(
+        Math.abs(clientX - hx) <= HUB_HALF_W * camera.zoom &&
+        Math.abs(clientY - hy) <= HUB_HALF_H * camera.zoom
+    ){
+
+        return { type: "hub" };
+
+    }
+
+    return null;
+
+}
+
+//--------------------------------------------------
+// Hover highlight — mouse only (touch has no hover;
+// a tap still opens the poster's details as before).
+// Written to graph.hover, which connections.js and
+// branchNodes.js read to light up the branch.
+//--------------------------------------------------
+
+function clearHover(){
+
+    graph.hover.nodeIndex = null;
+    graph.hover.phase = null;
+
+}
+
+function updateHover(e, node, target){
+
+    if(e.pointerType !== "mouse" || pointers.size > 0 || getCurrentView() !== "complete"){
+
+        clearHover();
+
+        return;
+
+    }
+
+    if(node && !node.isBranch){
+
+        graph.hover.nodeIndex = graph.nodes.indexOf(node);
+        graph.hover.phase = node.phase;
+
+    } else if(target && target.type === "junction"){
+
+        graph.hover.nodeIndex = null;
+        graph.hover.phase = target.phase;
+
+    } else {
+
+        clearHover();
+
+    }
+
+}
+
+//--------------------------------------------------
 // Change cursor depending on what is underneath it.
 //
 // Project/movie nodes get the clickable hand cursor.
@@ -156,11 +253,16 @@ function moveGesture(e){
 // normal cursor.
 //--------------------------------------------------
 
-function updateCursor(clientX, clientY){
+function updateCursor(e){
+
+    const clientX = e.clientX;
+    const clientY = e.clientY;
 
     if(isUiTarget(document.elementFromPoint(clientX, clientY))){
 
         viewport.style.cursor = "default";
+
+        clearHover();
 
         return;
 
@@ -175,8 +277,12 @@ function updateCursor(clientX, clientY){
         getCurrentView()
     );
 
+    const target = (node && !node.isBranch) ? null : mindmapTargetAt(clientX, clientY);
 
-    if(node && !node.isBranch){
+    updateHover(e, node, target);
+
+
+    if((node && !node.isBranch) || target){
 
         viewport.style.cursor = "pointer";
 
@@ -198,10 +304,7 @@ function updateCursor(clientX, clientY){
 
 viewport.addEventListener("pointermove", e => {
 
-    updateCursor(
-        e.clientX,
-        e.clientY
-    );
+    updateCursor(e);
 
     moveGesture(e);
 
@@ -250,6 +353,14 @@ function endGesture(e){
 
             showMovieDetails(node);
 
+        } else {
+
+            const target = mindmapTargetAt(tapX, tapY);
+
+            if(target && target.type === "junction") focusPhase(target.phase);
+
+            else if(target && target.type === "hub") refitView();
+
         }
 
     }
@@ -294,6 +405,8 @@ viewport.addEventListener(
     () => {
 
         viewport.style.cursor = "default";
+
+        clearHover();
 
     }
 );

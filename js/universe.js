@@ -4,7 +4,7 @@
 //
 //==================================================
 
-import { ctx, canvas } from "./universe/renderer.js";
+import { ctx, beginFrame } from "./universe/renderer.js";
 import { universe } from "./universe/state.js";
 
 import { drawBackground } from "./universe/background.js";
@@ -45,10 +45,10 @@ export function renderUniverse(camera, entered){
 
     universe.time++;
 
-    canvas.width = universe.width;
-    canvas.height = universe.height;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clean state + high-DPI scale for this frame. (This used
+    // to be canvas.width = ... every frame, which rebuilt the
+    // whole canvas buffer 60 times a second.)
+    beginFrame();
 
     drawBackground();
 

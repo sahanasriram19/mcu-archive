@@ -14,7 +14,9 @@ const BASE_RADIUS = 72;     // circle size in world units, before zoom
 
 const PULSE = false;        // set true to bring back the gentle breathing effect
 
-const PHASE_COLOURS = {
+import { graph } from "./graph.js";
+
+export const PHASE_COLOURS = {
 
     0: "150,150,160",   // Defenders saga — steel grey
     1: "226,89,107",    // red
@@ -52,7 +54,16 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         // Nothing to show for an unlabelled branch (the hub,
         // and the phase junctions on the Complete MCU mind
         // map) — skip it rather than leave a bare glow circle.
-        if(!node.label && !node.subtitle) return;
+        // ...except while its branch is hovered on the mind
+        // map: then it shows its phase name as a hint.
+        const hovered = !!node.hint &&
+            graph.hover.phase !== null &&
+            node.phase === graph.hover.phase;
+
+        const label = node.label || (hovered ? node.hint : "");
+        const subtitle = node.subtitle || (hovered ? node.hintSubtitle : "");
+
+        if(!label && !subtitle) return;
 
         const pulse = PULSE ? (0.9 + Math.sin(node.pulse) * 0.1) : 1;
 
@@ -109,10 +120,10 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.textBaseline = "middle";
         ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter`;
 
-        if(node.label){
+        if(label){
 
-            ctx.strokeText(node.label, x, y);
-            ctx.fillText(node.label, x, y);
+            ctx.strokeText(label, x, y);
+            ctx.fillText(label, x, y);
 
         }
 
@@ -120,7 +131,7 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         // Subtitle (era + year range + count)
         //----------------------------------
 
-        if(node.subtitle){
+        if(subtitle){
 
             ctx.fillStyle = "rgba(255,255,255,.8)";
             ctx.textAlign = "center";
@@ -128,10 +139,10 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
             ctx.lineWidth = 3;
 
-            ctx.strokeText(node.subtitle, x, y + radius + 8);
+            ctx.strokeText(subtitle, x, y + radius + 8);
 
             ctx.fillText(
-                node.subtitle,
+                subtitle,
                 x,
                 y + radius + 8
             );
