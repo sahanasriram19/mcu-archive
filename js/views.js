@@ -19,7 +19,7 @@ export const VIEWS = [
         // to zoom in. fit < 1 leaves a margin round the
         // edge; raise it towards (or past) 1 to start closer.
         // zoom is the fallback if nothing has laid out yet.
-        camera: { x: 0, y: 0, zoom: 0.15, fit: 0.92, minZoom: 0.07, maxZoom: 0.4 }
+        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.96, minZoom: 0.07, maxZoom: 0.4 }
     },
 
     {
