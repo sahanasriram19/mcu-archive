@@ -49,6 +49,11 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
         ) return;
 
+        // Nothing to show for an unlabelled branch (the hub,
+        // and the phase junctions on the Complete MCU mind
+        // map) — skip it rather than leave a bare glow circle.
+        if(!node.label && !node.subtitle) return;
+
         const pulse = PULSE ? (0.9 + Math.sin(node.pulse) * 0.1) : 1;
 
         const radius = BASE_RADIUS * camera.zoom * pulse;

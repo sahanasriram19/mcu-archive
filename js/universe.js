@@ -54,7 +54,13 @@ export function renderUniverse(camera, entered){
 
     drawNebulas(camera);
 
-    drawDust(camera);
+    // Dust layer switched off: it drew faint flat discs
+    // (8-30px) that read as stray translucent circles once
+    // the mind map left open space in the middle. It's still
+    // generated (see generator.js), so the seeded random
+    // sequence — and therefore every other layer's layout —
+    // stays exactly the same. Put this call back to restore it.
+    // drawDust(camera);
 
     drawStars(camera);
 
