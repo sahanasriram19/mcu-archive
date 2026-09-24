@@ -8,46 +8,40 @@
 // to the plain star for a node until its poster (if
 // any) has actually finished loading.
 //--------------------------------------------------
-import { getWaveRadius } from "./hub.js";
 import { currentView } from "./viewManager.js";
 
 const posterCache = new Map();
 
-function getPoster(source, zoom){
+// Which size to use for a poster drawn `screenWidth` CSS
+// pixels wide. Picks the smallest TMDB size that still
+// looks sharp on this screen (w185 / w500 / original).
+//
+// This used to be called without a zoom, so every poster
+// always loaded TMDB's *original* file (~2000x3000, often
+// several MB) even when drawn ~35px wide. With the whole
+// mind map on screen at once, all 77 of those downloaded
+// and decoded the moment you clicked Enter — the hang.
+function sizeFor(screenWidth){
 
-    if(!source) return null;
+    const px = screenWidth * (window.devicePixelRatio || 1);
 
-    let url;
+    if(px <= 185) return "small";
 
-    if(typeof source === "string"){
+    if(px <= 500) return "medium";
 
-        url = source;
+    return "large";
 
-    }else{
+}
 
-        if(zoom < 0.6){
-
-            url = source.small;
-
-        }
-        else if(zoom < 1.1){
-
-            url = source.medium;
-
-        }
-        else{
-
-            url = source.large;
-
-        }
-
-    }
+function loadEntry(url){
 
     let entry = posterCache.get(url);
 
     if(!entry){
 
         const img = new Image();
+
+        img.decoding = "async";
 
         entry = {
 
@@ -65,6 +59,39 @@ function getPoster(source, zoom){
         posterCache.set(url, entry);
 
     }
+
+    return entry;
+
+}
+
+function getPoster(source, screenWidth){
+
+    if(!source) return null;
+
+    if(typeof source === "string") return loadEntry(source);
+
+    const order = ["small", "medium", "large"];
+
+    const want = order.indexOf(sizeFor(screenWidth));
+
+    const entry = loadEntry(source[order[want]]);
+
+    if(entry.loaded && !entry.failed) return entry;
+
+    // Sharper version still on its way (e.g. just zoomed
+    // in) — keep showing the best size already loaded
+    // instead of flashing back to the placeholder card.
+    for(let i = want - 1; i >= 0; i--){
+
+        const fallback = posterCache.get(source[order[i]]);
+
+        if(fallback && fallback.loaded && !fallback.failed) return fallback;
+
+    }
+
+    // Nothing loaded yet: make sure at least the small
+    // one is on its way, since it arrives fastest.
+    if(want > 0) loadEntry(source.small);
 
     return entry;
 
@@ -89,19 +116,6 @@ export function renderNodes(ctx, camera, nodes){
         const x = halfW + (node.x - camera.x) * camera.zoom;
 
         const y = halfH + (node.y - camera.y) * camera.zoom;
-
-        const distance = Math.hypot(node.x, node.y);
-
-        const waveRadius = getWaveRadius();
-
-        const waveWidth = 900;
-
-        const d = Math.abs(distance - waveRadius);
-
-        const wave = Math.max(
-            0,
-            1 - d / waveWidth
-        );
 
         //----------------------------------
         // Cull offscreen nodes
@@ -136,7 +150,7 @@ export function renderNodes(ctx, camera, nodes){
         // Outer Glow (tinted per-node colour)
         //----------------------------------
 
-        const glowRadius = (110 + wave * 50) * camera.zoom;
+        const glowRadius = 110 * camera.zoom;
 
         const glow = ctx.createRadialGradient(
 
@@ -152,7 +166,7 @@ export function renderNodes(ctx, camera, nodes){
 
         );
 
-        const glowStrength = 0.08 + wave * 0.35;
+        const glowStrength = 0.08;
 
         glow.addColorStop(
             0,
@@ -194,12 +208,17 @@ export function renderNodes(ctx, camera, nodes){
         // the plain star as a fallback.
         //----------------------------------
 
-        const poster = getPoster(node.poster);
+        const BASE_POSTER_SIZE = 320;
+
+        const onScreenWidth =
+            (currentView === "release" || currentView === "chronology" || currentView === "characters" ? 300 :
+             currentView === "complete" ? BASE_POSTER_SIZE + Math.min(node.ring || 0, 4) * 35 :
+             BASE_POSTER_SIZE) * camera.zoom;
+
+        const poster = getPoster(node.poster, onScreenWidth);
         const posterReady = !!(poster && poster.loaded && !poster.failed);
 
         if (posterReady) {
-            
-        const BASE_POSTER_SIZE = 320;
 
         let POSTER_SIZE = BASE_POSTER_SIZE;
 
@@ -298,11 +317,6 @@ export function renderNodes(ctx, camera, nodes){
     // Draw poster
     //------------------------------------
 
-    ctx.filter =
-    `brightness(${1 + wave * 0.8})
-    contrast(${1 + wave * 0.2})
-    saturate(${1 + wave * 0.3})`;
-
     ctx.drawImage(
 
         poster.img,
@@ -317,7 +331,6 @@ export function renderNodes(ctx, camera, nodes){
 
     );
 
-    ctx.filter = "none";
     ctx.restore();
 
 } else {

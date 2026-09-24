@@ -104,8 +104,12 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.textBaseline = "middle";
         ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter`;
 
-        ctx.strokeText(node.label, x, y);
-        ctx.fillText(node.label, x, y);
+        if(node.label){
+
+            ctx.strokeText(node.label, x, y);
+            ctx.fillText(node.label, x, y);
+
+        }
 
         //----------------------------------
         // Subtitle (era + year range + count)

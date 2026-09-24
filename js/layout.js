@@ -230,12 +230,18 @@ export function layoutComplete(nodes){
 
         cursor += wedge;
 
+        // No label on the homepage — the Phases view already
+        // names each phase. The branch node itself stays (just
+        // its small coloured glow): it's the junction the lines
+        // split from, and sharing the "phaseN" key with the
+        // Phases view is what makes switching views glide
+        // instead of rebuilding from the centre.
         branches.push({
 
             phase,
             key: "phase"+phase,
-            label: "PHASE "+phase,
-            subtitle: phaseSubtitle(groups[phase]),
+            label: "",
+            subtitle: "",
             x: Math.cos(centre) * MINDMAP_PHASE_RADIUS * sx,
             y: Math.sin(centre) * MINDMAP_PHASE_RADIUS * sy
 

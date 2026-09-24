@@ -25,11 +25,3 @@ export function renderHub(ctx, camera){
     }
 
 }
-
-const WAVE_SPEED = 1.4;
-
-export function getWaveRadius(){
-
-    return (performance.now()*0.18*WAVE_SPEED)%7000;
-
-}
