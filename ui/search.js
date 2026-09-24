@@ -1,5 +1,6 @@
 import { graph } from "../js/graph.js";
 import { camera } from "../js/camera.js";
+import { isCompact } from "../js/responsive.js";
 
 let selectedIndex = 0;
 let results = [];
@@ -181,7 +182,9 @@ export function initMovieSearch(){
 
         camera.targetX=node.x;
         camera.targetY=node.y;
-        camera.targetZoom=0.95;
+        // Close enough to see the poster clearly, but on a
+        // phone not so close that it overflows the screen.
+        camera.targetZoom=isCompact() ? 0.6 : 0.95;
 
         results=[];
 

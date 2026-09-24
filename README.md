@@ -64,7 +64,8 @@ mcu-archive/
     ├── graph.js                  # node + edge data, per-frame easing
     ├── layout.js                  # one layout function per view (Complete MCU mind map, Phases, Release, Chronology, Character Journeys)
     ├── viewManager.js              # ties layout + edges + camera together per view
-    ├── views.js                     # view registry (labels, default camera)
+    ├── views.js                     # view registry (labels, default camera, phone framing)
+    ├── responsive.js                 # decides phone vs desktop layouts (portrait / landscape)
     ├── universe.js                   # draws every layer each frame, background first
     ├── connections.js                 # renders the glowing connection lines (curved branches on the mind map)
     ├── nodes.js                        # renders poster nodes

@@ -289,6 +289,29 @@
 
 }
 
+@media (max-height: 500px) {
+
+    /* Phones held sideways: everything has to fit in
+       ~340-430px of height, or the Enter button ends up
+       below the bottom of the screen. Smaller logo, no
+       tagline (the title + stats say enough), tighter
+       spacing. */
+    #landing-card img { width: min(200px, 30vw); }
+
+    .landing-title { margin-top: 12px; }
+
+    .landing-tagline { display: none; }
+
+    #landing-stats { margin-top: 12px; gap: 6px; }
+
+    .landing-stat { padding: 3px 10px; font-size: .72rem; }
+
+    #enterButton { margin-top: 16px; padding: 10px 26px; }
+
+    .landing-hint { display: none; }
+
+}
+
 /* Respect the OS "reduce motion" setting: show everything
    in place, no drawing, drifting or pulsing. */
 @media (prefers-reduced-motion: reduce) {

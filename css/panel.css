@@ -14,12 +14,43 @@
     animation: float 3s ease-in-out infinite;
 }
 
+/* Title + (phones only) current-view toggle. */
+.view-panel-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+
+/* A button now — clicking it goes back to the start page. */
 .view-panel-title{
+    padding:0;
+    border:none;
+    background:none;
     font-size:13px;
     font-weight:600;
     letter-spacing:.16em;
     text-transform:uppercase;
     color:var(--text);
+    cursor:pointer;
+    transition:color var(--transition);
+}
+
+.view-panel-title:hover{
+    color:#fff;
+    text-shadow:0 0 12px rgba(230,36,41,.6);
+}
+
+.view-panel-title:focus-visible,
+.view-panel-toggle:focus-visible{
+    outline:2px solid rgba(255,255,255,.7);
+    outline-offset:3px;
+    border-radius:6px;
+}
+
+/* Phones only (see the compact media query below). */
+.view-panel-toggle{
+    display:none;
 }
 
 .view-panel-subtitle{
@@ -73,31 +104,124 @@
   }
 }
 
-@media (max-width: 768px){
+/*==================================================
+  PHONES (and other small screens)
+
+  Must match COMPACT_QUERY in js/responsive.js: narrow
+  screens, OR short ones — phones held sideways are wide
+  but only ~340-430px tall, and the old max-width-only
+  query left them with the desktop panel.
+
+  The panel becomes a slim bar along the bottom (title +
+  current view). Tapping the view name opens the rest
+  (search + view buttons) as a sheet; it closes again
+  when a view is picked or the map is tapped (ui/panel.js).
+==================================================*/
+
+@media (max-width: 768px), (max-height: 500px){
 
     #view-panel{
         top:auto;
-        left:12px;
-        right:12px;
-        bottom:12px;
+        left:max(10px, env(safe-area-inset-left));
+        right:max(10px, env(safe-area-inset-right));
+        /* --keyboard-offset lifts it above the on-screen
+           keyboard while typing in search (ui/panel.js) */
+        bottom:calc(max(10px, env(safe-area-inset-bottom)) + var(--keyboard-offset, 0px));
         width:auto;
-        max-height:42vh;
-        overflow-y:auto;
-        padding:12px;
+        max-width:560px;
+        margin:0 auto;
+        padding:10px 10px 10px 16px;
         border-radius:16px;
         animation:none;
+        transition:bottom .15s ease;
+    }
+
+    .view-panel-title{
+        font-size:11px;
+    }
+
+    .view-panel-subtitle{
+        display:none;
+    }
+
+    .view-panel-toggle{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        min-height:40px;
+        max-width:65%;
+        padding:8px 14px;
+        border:1px solid rgba(230,36,41,.4);
+        border-radius:999px;
+        background:rgba(230,36,41,.14);
+        color:var(--text);
+        font-size:13px;
+        font-weight:600;
+        cursor:pointer;
+    }
+
+    .view-panel-current{
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .view-panel-chevron{
+        font-size:11px;
+        transition:transform .2s ease;
+    }
+
+    #view-panel.expanded .view-panel-chevron{
+        transform:rotate(180deg);
+    }
+
+    /* Collapsed: just the bar. */
+    .view-panel-content{
+        display:none;
+    }
+
+    /* Expanded: search + views, scrolling inside if the
+       screen is short. */
+    #view-panel.expanded .view-panel-content{
+        display:block;
+        margin-top:10px;
+        padding-right:6px;
+        max-height:min(60vh, calc(100dvh - 120px - var(--keyboard-offset, 0px)));
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+        overscroll-behavior:contain;
     }
 
     .view-panel-list{
         display:grid;
         grid-template-columns:repeat(2, minmax(0,1fr));
         gap:6px;
+        margin-top:10px;
     }
 
+    /* Comfortable touch targets (44px is the usual
+       minimum for a fingertip). */
     .view-panel-btn{
-        min-height:42px;
-        padding:10px;
-        font-size:12px;
+        min-height:44px;
+        padding:10px 12px;
+        font-size:13px;
+    }
+
+    /* Search box sizing lives in mobile.css, which loads
+       after search.css and so can override it. */
+
+}
+
+/* Phones held sideways: short screen, so a 3-column grid
+   keeps the open panel from covering the whole map. */
+@media (max-height: 500px) and (orientation: landscape){
+
+    .view-panel-list{
+        grid-template-columns:repeat(3, minmax(0,1fr));
+    }
+
+    #view-panel.expanded .view-panel-content{
+        max-height:calc(100dvh - 90px - var(--keyboard-offset, 0px));
     }
 
 }

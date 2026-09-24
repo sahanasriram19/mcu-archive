@@ -29,7 +29,15 @@ export const VIEWS = [
         // Six separate mini mind maps rather than one
         // shared hub — see graph.js edgesPhaseSpokes.
         edges: { mode: "phaseSpokes" },
-        camera: { x: 0, y: 0, zoom: 0.16 }
+        camera: { x: 0, y: 0, zoom: 0.16 },
+        // Phones (see viewManager.js phoneCamera): upright,
+        // the phases stack in one column — fill the width and
+        // start at the top. Sideways, they sit in one row —
+        // fill the height and start at the left.
+        phone: {
+            portrait:  { fit: 0.94, axis: "width", anchor: "top" },
+            landscape: { fit: 0.9,  axis: "height", anchor: "left" }
+        }
     },
 
     {
@@ -43,7 +51,15 @@ export const VIEWS = [
         // so landing the camera there opens on the very
         // start of the timeline, not partway through it.
         edges: { mode: "timelineTrail" },
-        camera: { x: 0, y: 0, zoom: 0.40 }
+        camera: { x: 0, y: 0, zoom: 0.40 },
+        // Phones: the timeline runs top to bottom when upright
+        // (fill the width, start at the first title) and left
+        // to right when sideways (fill the height, start at
+        // the first title on the left).
+        phone: {
+            portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
+            landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }
+        }
     },
 
     {
@@ -51,7 +67,11 @@ export const VIEWS = [
         label: "Chronological Order",
         layout: "chronology",
         edges: { mode: "timelineTrail" },
-        camera: { x: 0, y: 0, zoom: 0.40 }
+        camera: { x: 0, y: 0, zoom: 0.40 },
+        phone: {
+            portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
+            landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }
+        }
     },
 
     {
@@ -59,7 +79,11 @@ export const VIEWS = [
         label: "Character Journeys",
         layout: "characters",
         edges: { mode: "characters" },
-        camera: { x: 0, y: 0, zoom: 0.40 }
+        camera: { x: 0, y: 0, zoom: 0.40 },
+        phone: {
+            portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
+            landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }
+        }
     }
 
 ];

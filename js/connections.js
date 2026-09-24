@@ -1,5 +1,6 @@
 import { getCurrentView } from "./viewManager.js";
 import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
+import { getTimelineOrientation } from "./layout.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -426,22 +427,45 @@ function renderTimeline(ctx, camera, graph){
     const halfW = window.innerWidth / 2;
     const halfH = window.innerHeight / 2;
 
+    // Left to right normally; top to bottom on an upright
+    // phone (see layoutTimeline in layout.js).
+    const vertical = getTimelineOrientation() === "vertical";
+
+    const along = vertical ? "targetY" : "targetX";
+
     //------------------------------------
-    // Horizontal timeline
+    // The spine
     //------------------------------------
 
     const movies = [...graph.nodes]
         .filter(n => !n.isBranch)
-        .sort((a,b)=>a.targetX-b.targetX);
+        .sort((a,b)=>a[along]-b[along]);
 
     if(!movies.length) return;
 
-    const firstX = halfW + (movies[0].targetX - camera.x) * camera.zoom;
-    const lastX  = halfW + (movies[movies.length-1].targetX - camera.x) * camera.zoom;
+    const first = movies[0], last = movies[movies.length-1];
 
-    const lineY = halfH + (0 - camera.y) * camera.zoom;
+    let x1, y1, x2, y2;
 
-    const glow = ctx.createLinearGradient(firstX, lineY, lastX, lineY);
+    if(vertical){
+
+        const lineX = halfW + (0 - camera.x) * camera.zoom;
+
+        x1 = x2 = lineX;
+        y1 = halfH + (first.targetY - camera.y) * camera.zoom;
+        y2 = halfH + (last.targetY - camera.y) * camera.zoom;
+
+    } else {
+
+        const lineY = halfH + (0 - camera.y) * camera.zoom;
+
+        y1 = y2 = lineY;
+        x1 = halfW + (first.targetX - camera.x) * camera.zoom;
+        x2 = halfW + (last.targetX - camera.x) * camera.zoom;
+
+    }
+
+    const glow = ctx.createLinearGradient(x1, y1, x2, y2);
 
     glow.addColorStop(0,"rgba(130,205,255,.25)");
     glow.addColorStop(.5,"rgba(190,240,255,.65)");
@@ -456,8 +480,8 @@ function renderTimeline(ctx, camera, graph){
     ctx.lineWidth = 10 * camera.zoom;
 
     ctx.beginPath();
-    ctx.moveTo(firstX,lineY);
-    ctx.lineTo(lastX,lineY);
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
     ctx.stroke();
     ctx.restore();
 
@@ -469,15 +493,16 @@ function renderTimeline(ctx, camera, graph){
     ctx.lineWidth = Math.max(2.5 * camera.zoom,1.2);
 
     ctx.beginPath();
-    ctx.moveTo(firstX,lineY);
-    ctx.lineTo(lastX,lineY);
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
     ctx.stroke();
     ctx.restore();
 
     //------------------------------------
-    // One vertical branch per poster —
-    // batched into a single path for the
-    // same reason as the main edges above.
+    // One branch per poster, from the
+    // spine straight out to it — batched
+    // into a single path for the same
+    // reason as the main edges above.
     //------------------------------------
 
     const branchPath = new Path2D();
@@ -487,7 +512,16 @@ function renderTimeline(ctx, camera, graph){
         const x = halfW + (node.x - camera.x) * camera.zoom;
         const y = halfH + (node.y - camera.y) * camera.zoom;
 
-        branchPath.moveTo(x, lineY);
+        if(vertical){
+
+            branchPath.moveTo(x1, y);
+
+        } else {
+
+            branchPath.moveTo(x, y1);
+
+        }
+
         branchPath.lineTo(x, y);
 
     });

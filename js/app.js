@@ -28,6 +28,12 @@ const button = document.getElementById("enterButton");
 
 let entered = false;
 
+// True while the landing page is showing after having
+// entered once (via the "MCU Archive" title). The mind map
+// isn't drawn then — the landing page is see-through, so
+// it would otherwise show behind it.
+let onLanding = false;
+
 // Hide archive until Enter
 viewport.style.display = "none";
 
@@ -121,6 +127,8 @@ async function enter(viewKey){
     // it, instead of cutting straight across.
     landing.classList.add("leaving");
 
+    onLanding = false;
+
     setTimeout(() => {
 
         if(landing.classList.contains("leaving")) landing.style.display = "none";
@@ -177,6 +185,8 @@ window.addEventListener("mcu:go-to-landing", () => {
 
     landing.classList.remove("leaving");
 
+    onLanding = true;
+
     landing.style.display = "flex";
 
     alignLandingBranches();
@@ -205,7 +215,7 @@ function loop(){
 
     updateArchive();
 
-    renderUniverse(camera, entered);
+    renderUniverse(camera, entered && !onLanding);
 
     requestAnimationFrame(loop);
 

@@ -17,40 +17,42 @@
       <link rel="stylesheet" href="css/search.css">
       <link rel="stylesheet" href="css/mobile.css">   <!-- add this line -->
 
-  Everything below is scoped to max-width: 768px (or
-  narrower) — desktop is completely untouched.
+  Everything below is scoped to phone-sized screens —
+  narrow ones, OR short ones (phones held sideways). The
+  query must match COMPACT_QUERY in js/responsive.js.
+  Desktop is completely untouched.
 ==================================================*/
 
-@media (max-width: 768px){
+@media (max-width: 768px), (max-height: 500px){
 
     /*----------------------------------------
-      1. Nav box ("MCU Archive" panel) — smaller
+      1. Nav box — see the phone section at the
+         bottom of panel.css (it's a collapsible
+         bar now). Only the search box is sized
+         here, since search.css loads after
+         panel.css and would override it there.
     ----------------------------------------*/
 
-    #view-panel{
-        max-height:30vh;
-        padding:10px;
-        border-radius:14px;
+    #movie-search{
+        min-height:44px;
+        /* 16px stops iPhones zooming the whole page
+           in when the search box is tapped. */
+        font-size:16px;
     }
 
-    .view-panel-title{
-        font-size:11px;
+    /* Results show inside the panel's scrolling
+       sheet instead of hanging below it off the
+       bottom of the screen. */
+    #movie-search-results{
+        position:static;
+        margin-top:8px;
+        max-height:40vh;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
     }
 
-    /* "Choose a view and zoom" — not essential
-       on a phone, drop it to save vertical space. */
-    .view-panel-subtitle{
-        display:none;
-    }
-
-    .view-panel-list{
-        gap:5px;
-    }
-
-    .view-panel-btn{
-        min-height:36px;
-        padding:8px;
-        font-size:11px;
+    .search-result{
+        min-height:44px;
     }
 
     /*----------------------------------------
@@ -203,6 +205,50 @@
 
     #movie-details-poster{
         max-height:50dvh;
+    }
+
+}
+
+/*----------------------------------------
+  Phones held sideways — details card
+
+  Stacking the poster above the text (as in
+  portrait) leaves a sideways phone with a
+  wide, cropped strip of poster and a sliver
+  of text. Side by side instead: the full
+  poster on the left at its real 2:3 shape,
+  details scrolling on the right.
+----------------------------------------*/
+
+@media (max-height: 500px) and (orientation: landscape){
+
+    #movie-details-overlay{
+        align-items:center;
+        padding:max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+
+    #movie-details-card{
+        flex-direction:row !important;
+        width:min(100%, 760px) !important;
+        height:calc(100dvh - 16px) !important;
+        max-height:calc(100dvh - 16px) !important;
+        border-radius:16px !important;
+    }
+
+    #movie-details-poster{
+        flex:0 0 auto !important;
+        height:100%;
+        width:auto;
+        max-height:none;
+        aspect-ratio:2 / 3;
+    }
+
+    #movie-details-body{
+        padding:14px 18px !important;
+    }
+
+    #movie-details-title{
+        font-size:18px !important;
     }
 
 }

@@ -164,14 +164,15 @@ const JUNCTION_HIT_MIN_PX = 22;   // ...but never smaller than this on screen
 const HUB_HALF_W = 450;           // Marvel logo size, world units (see hub.js)
 const HUB_HALF_H = 200;
 
-function mindmapTargetAt(clientX, clientY){
+// `coarse` = a finger rather than a mouse: bigger targets.
+function mindmapTargetAt(clientX, clientY, coarse = false){
 
     if(getCurrentView() !== "complete") return null;
 
     const halfW = window.innerWidth / 2;
     const halfH = window.innerHeight / 2;
 
-    const radius = Math.max(JUNCTION_HIT_MIN_PX, JUNCTION_HIT_WORLD * camera.zoom);
+    const radius = Math.max(coarse ? 30 : JUNCTION_HIT_MIN_PX, JUNCTION_HIT_WORLD * camera.zoom);
 
     for(const branch of graph.branchNodes){
 
@@ -192,7 +193,7 @@ function mindmapTargetAt(clientX, clientY){
     // belongs to. A line into a poster counts as that
     // poster's branch; a line into a phase junction counts
     // as the whole phase.
-    const edgeIndex = edgeAtScreenPoint(clientX, clientY, camera, graph);
+    const edgeIndex = edgeAtScreenPoint(clientX, clientY, camera, graph, coarse ? 14 : 7);
 
     if(edgeIndex !== -1){
 
@@ -246,7 +247,12 @@ function clearHover(){
 
 function updateHover(e, node, target){
 
-    if(e.pointerType !== "mouse" || pointers.size > 0 || getCurrentView() !== "complete"){
+    // Touch/pen: leave the highlight alone. There's no hover
+    // on a touchscreen; a tap sets the highlight instead
+    // (see endGesture), and dragging mustn't wipe it.
+    if(e.pointerType !== "mouse") return;
+
+    if(pointers.size > 0 || getCurrentView() !== "complete"){
 
         clearHover();
 
@@ -387,11 +393,39 @@ function endGesture(e){
 
         } else {
 
-            const target = mindmapTargetAt(tapX, tapY);
+            const isTouch = e.pointerType !== "mouse";
 
-            if(target && (target.type === "junction" || target.type === "line")) focusPhase(target.phase);
+            const target = mindmapTargetAt(tapX, tapY, isTouch);
 
-            else if(target && target.type === "hub") refitView();
+            if(target && (target.type === "junction" || target.type === "line")){
+
+                // On touchscreens a tap is the only way to light
+                // a branch up, so keep that phase lit while it's
+                // zoomed in (until the next tap on empty space).
+                if(isTouch){
+
+                    graph.hover.nodeIndex = target.type === "line" ? target.nodeIndex : null;
+                    graph.hover.phase = target.phase;
+
+                }
+
+                focusPhase(target.phase);
+
+            }
+
+            else if(target && target.type === "hub"){
+
+                if(isTouch) clearHover();
+
+                refitView();
+
+            }
+
+            else if(isTouch){
+
+                clearHover();
+
+            }
 
         }
 

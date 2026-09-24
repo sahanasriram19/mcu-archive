@@ -11,7 +11,10 @@ export const camera = {
     zoom: 0.28,
     targetZoom: 0.28,
 
-    minZoom: 0.07,
+    // Low enough for a phone held sideways to fit the whole
+    // Phases grid; the mind map keeps its own 0.07 floor
+    // (views.js), so its posters stay readable.
+    minZoom: 0.05,
     maxZoom: 4,
 
     positionSmoothing: 0.09,

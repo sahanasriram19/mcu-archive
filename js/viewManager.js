@@ -23,6 +23,7 @@ import { LAYOUTS } from "./layout.js";
 import { VIEWS } from "./views.js";
 import { camera } from "./camera.js";
 import { archive } from "./archiveCore.js";
+import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
 
 function buildEdges(recipe){
@@ -218,6 +219,93 @@ function fitCamera(cam){
 
 }
 
+//----------------------------------
+// PHONE CAMERA
+//
+// Views with a `phone` setting in views.js use this on
+// phone-sized screens instead of their fixed desktop
+// camera (which, on a phone, left the timelines showing
+// one giant poster and Phases showing scraps of rings).
+//
+//   axis:   "width" / "height" / "both" — which way the
+//           content must fit on screen
+//   anchor: "top" / "left" / "center" — where it starts:
+//           "top"/"left" put the FIRST title at the edge,
+//           so a timeline opens at its beginning and you
+//           scroll on from there
+//   fit:    scale on top of that (<1 leaves a margin)
+//
+// The screen area under a bottom panel doesn't count.
+//----------------------------------
+
+const EDGE_PAD = 16;   // px between content and the screen edge
+
+function phoneCamera(cfg){
+
+    const nodes = visibleNodes();
+
+    if(!nodes.length) return null;
+
+    const xs = nodes.map(n => n.targetX);
+    const ys = nodes.map(n => n.targetY);
+
+    const minX = Math.min(...xs) - POSTER_HALF_W, maxX = Math.max(...xs) + POSTER_HALF_W;
+    const minY = Math.min(...ys) - POSTER_HALF_H, maxY = Math.max(...ys) + POSTER_HALF_H;
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    let top = 0, bottom = H, left = 0, right = W;
+
+    const r = panelRect();
+
+    if(r && r.bottom > H * 0.75) bottom = r.top - PANEL_GAP;
+
+    const aw = Math.max(1, right - left);
+    const ah = Math.max(1, bottom - top);
+
+    const bw = maxX - minX;
+    const bh = maxY - minY;
+
+    let zoom =
+        cfg.axis === "width"  ? aw / bw :
+        cfg.axis === "height" ? ah / bh :
+        Math.min(aw / bw, ah / bh);
+
+    zoom *= cfg.fit || 1;
+
+    zoom = Math.max(camera.minZoom, Math.min(cfg.maxZoom || camera.maxZoom, zoom));
+
+    // Centre of the free area, as an offset from the
+    // centre of the screen.
+    const freeCx = (left + right) / 2 - W / 2;
+    const freeCy = (top + bottom) / 2 - H / 2;
+
+    let x = (minX + maxX) / 2 - freeCx / zoom;
+    let y = (minY + maxY) / 2 - freeCy / zoom;
+
+    if(cfg.anchor === "top"){
+
+        y = minY - (top + EDGE_PAD - H / 2) / zoom;
+
+    } else if(cfg.anchor === "left"){
+
+        x = minX - (left + EDGE_PAD - W / 2) / zoom;
+
+    }
+
+    return { x, y, zoom };
+
+}
+
+function phoneCameraConfig(view){
+
+    if(!view.phone || !isCompact()) return null;
+
+    return view.phone[isPortraitPhone() ? "portrait" : "landscape"] || null;
+
+}
+
 export function setView(key){
 
     const view = VIEWS.find(v=> v.key === key);
@@ -256,7 +344,19 @@ export function setView(key){
     // show the whole new arrangement.
     //----------------------------------
 
-    if(view.camera.fit){
+    lastLayoutMode = layoutModeKey();
+
+    const phoneCfg = phoneCameraConfig(view);
+
+    const phoneCam = phoneCfg ? phoneCamera(phoneCfg) : null;
+
+    if(phoneCam){
+
+        camera.targetX = phoneCam.x;
+        camera.targetY = phoneCam.y;
+        camera.targetZoom = phoneCam.zoom;
+
+    } else if(view.camera.fit){
 
         const fit = fitCamera(view.camera);
 
@@ -296,6 +396,12 @@ export function getCurrentView(){
 
 let lastFitAspect = null;
 
+// Phone portrait / phone landscape / desktop, as of the
+// last layout. Rotating a phone changes it, and then every
+// view (not just the mind map) lays itself out again, since
+// the timelines and Phases use different layouts each way up.
+let lastLayoutMode = null;
+
 const REFIT_ASPECT_CHANGE = 0.12;   // 12% change in width/height ratio
 
 let resizeTimer = null;
@@ -308,7 +414,17 @@ window.addEventListener("resize", () => {
 
         const view = VIEWS.find(v => v.key === currentView);
 
-        if(!view || !view.camera.fit || lastFitAspect === null) return;
+        if(!view) return;
+
+        if(lastLayoutMode !== null && layoutModeKey() !== lastLayoutMode){
+
+            setView(currentView);
+
+            return;
+
+        }
+
+        if(!view.camera.fit || lastFitAspect === null) return;
 
         const aspect = window.innerWidth / Math.max(1, window.innerHeight);
 

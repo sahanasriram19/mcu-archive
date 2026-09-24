@@ -236,9 +236,12 @@ export function edgesByCharacter(){
 
     const edges = [];
 
+    // Chain in journey order (set by layoutCharacters), not
+    // by x position — on an upright phone the journey runs
+    // top to bottom, so left-to-right order would be wrong.
     const movies = graph.nodes
         .filter(node => node.targetX < 50000)
-        .sort((a,b)=>a.targetX-b.targetX);
+        .sort((a,b)=>(a.journeyIndex ?? 0)-(b.journeyIndex ?? 0));
 
     for(let i = 0; i < movies.length - 1; i++){
 

@@ -13,6 +13,7 @@
 
 import { setBranchNodes } from "./graph.js";
 import { getSelectedCharacter } from "./characters/characterJourney.js";
+import { isCompact, isPortraitPhone } from "./responsive.js";
 
 //--------------------------------------------------
 // Short era name per phase, used as the branch node's
@@ -337,6 +338,38 @@ export function layoutPhases(nodes){
         .filter(phase => groups[phase].length > 0)
         .sort((a,b)=>a-b);
 
+    // Upright phone: one phase per row, top to bottom, so
+    // each ring is big enough to read and you scroll down
+    // through the phases like a feed. (The 4 + 3 grid below
+    // is far too wide for a phone held upright.)
+    // Phone held sideways: the same idea turned on its side —
+    // one row, left to right, that you swipe through. (Two
+    // rows are too tall for a ~340px-high screen.)
+    if(isCompact()){
+
+        const portrait = isPortraitPhone();
+
+        const column = phaseKeys.map((phase, pi)=>({
+
+            phase,
+            key: "phase"+phase,
+            label: "PHASE "+phase,
+            subtitle: phaseSubtitle(groups[phase]),
+            x: portrait ? 0 : pi * PHASE_GRID_X,
+            y: portrait ? pi * PHASE_GRID_Y : 0
+
+        }));
+
+        setBranchNodes(column);
+
+        placePhaseRings(column, groups);
+
+        resolveOverlaps(nodes);
+
+        return;
+
+    }
+
     const branchTargets = phaseKeys.map((phase,pi)=>{
 
         const row = pi < PHASE_TOP_ROW_COUNT ? 0 : 1;
@@ -362,7 +395,18 @@ export function layoutPhases(nodes){
 
     setBranchNodes(branchTargets);
 
-    branchTargets.forEach(branch=>{
+    placePhaseRings(branchTargets, groups);
+
+    // Guarantees zero overlap island-to-island as well as
+    // within a single crowded ring.
+    resolveOverlaps(nodes);
+
+}
+
+// Rings each phase's titles around its branch position.
+function placePhaseRings(branches, groups){
+
+    branches.forEach(branch=>{
 
         const members = [...groups[branch.phase]].sort((a,b)=>a.timeline-b.timeline);
 
@@ -380,10 +424,6 @@ export function layoutPhases(nodes){
         });
 
     });
-
-    // Guarantees zero overlap island-to-island as well as
-    // within a single crowded ring.
-    resolveOverlaps(nodes);
 
 }
 
@@ -417,6 +457,13 @@ const TIMELINE_STEM = 260;
 const TIMELINE_LABEL_EVERY = 5;
 
 const TIMELINE_BRANCH_OFFSET = 120;
+
+// Upright phones: the timeline runs top to bottom instead,
+// titles alternating left and right of a vertical spine.
+// Same-side neighbours are 2 x spacing apart, which must
+// clear a poster's height (480) — hence 290.
+const TIMELINE_SPACING_Y = 290;
+const TIMELINE_SIDE_X = 330;
 
 export function layoutRelease(nodes){
 
@@ -482,6 +529,16 @@ function phaseLabel(members){
 
 }
 
+// Which way the current timeline runs ("horizontal" or
+// "vertical"); read by connections.js.
+let timelineOrientation = "horizontal";
+
+export function getTimelineOrientation(){
+
+    return timelineOrientation;
+
+}
+
 function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
 
     const sorted = [...nodes].sort(compareFn);
@@ -491,6 +548,12 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
     node.ring = 0;
 });
 
+    const vertical = isPortraitPhone();
+
+    // connections.js draws the spine along whichever axis
+    // this says.
+    timelineOrientation = vertical ? "vertical" : "horizontal";
+
     // Starts at x:0 and runs rightward — deliberately not
     // centred, so the camera (see views.js) lands right on
     // the beginning of the timeline instead of somewhere in
@@ -499,9 +562,19 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
 
             const side = i % 2 === 0 ? -1 : 1;
 
-            node.targetX = i * TIMELINE_SPACING_X;
+            if(vertical){
 
-            node.targetY = side * (TIMELINE_STEM + 80);
+                node.targetX = side * TIMELINE_SIDE_X;
+
+                node.targetY = i * TIMELINE_SPACING_Y;
+
+            } else {
+
+                node.targetX = i * TIMELINE_SPACING_X;
+
+                node.targetY = side * (TIMELINE_STEM + 80);
+
+            }
 
         });
 
@@ -526,9 +599,9 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
 
             subtitle: subtitleFn ? subtitleFn(chunk) : "",
 
-            x:midIndex * TIMELINE_SPACING_X,
+            x: vertical ? 0 : midIndex * TIMELINE_SPACING_X,
 
-            y:0,
+            y: vertical ? midIndex * TIMELINE_SPACING_Y : 0,
 
             memberIds:chunk.map(movie=>movie.id)
 
@@ -576,13 +649,32 @@ export function layoutCharacters(nodes){
 
     const SPACING = 650;
 
+    const vertical = isPortraitPhone();
+
     movies.forEach((node,i)=>{
 
         const side = i % 2 === 0 ? -1 : 1;
 
-        node.targetX = i * SPACING;
+        // Order along the journey — graph.js chains the
+        // titles by this, whichever way the layout runs.
+        node.journeyIndex = i;
 
-        node.targetY = side * 280;
+        if(vertical){
+
+            // Top to bottom, alternating left/right. Same-side
+            // neighbours sit 2 x 270 apart, clearing a 450-tall
+            // poster.
+            node.targetX = side * 230;
+
+            node.targetY = i * 270;
+
+        } else {
+
+            node.targetX = i * SPACING;
+
+            node.targetY = side * 280;
+
+        }
 
     });
 
