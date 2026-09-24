@@ -57,6 +57,16 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
         const colour = PHASE_COLOURS[phaseNum] || "230,150,60";
 
+        // Each branch gets its own save/restore so the text
+        // shadow below can't leak out. It used to: a stray
+        // restore() here only balanced when there was a
+        // single branch node, so with several (Phases, the
+        // mind map) shadowBlur stayed switched on for every
+        // poster, glow and line drawn afterwards — by far the
+        // most expensive thing canvas does, and the cause of
+        // the choppy animation.
+        ctx.save();
+
         //----------------------------------
         // Glow
         //----------------------------------
@@ -78,16 +88,24 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         // Label
         //----------------------------------
 
+        // A thin dark outline instead of shadowBlur: same
+        // "lifts off the background" effect, but shadowBlur
+        // on text is expensive to redraw every frame and at
+        // the default zoom the blur was under a pixel anyway.
+        // Drawn normally (not "lighter") so the dark outline
+        // actually shows.
+        ctx.globalCompositeOperation = "source-over";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "rgba(0,0,0,.55)";
+        ctx.lineWidth = 4;
+
         ctx.fillStyle = "#FFFFFF";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter`;
-        ctx.shadowColor = "rgba(0,0,0,.6)";
-        ctx.shadowBlur = 6 * camera.zoom;
 
+        ctx.strokeText(node.label, x, y);
         ctx.fillText(node.label, x, y);
-
-        ctx.restore();
 
         //----------------------------------
         // Subtitle (era + year range + count)
@@ -99,12 +117,19 @@ export function renderBranchNodes(ctx, camera, branchNodes){
             ctx.textAlign = "center";
             ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter`;
 
+            ctx.lineWidth = 3;
+
+            ctx.strokeText(node.subtitle, x, y + radius + 8);
+
             ctx.fillText(
                 node.subtitle,
                 x,
                 y + radius + 8
-            )
-        };
+            );
+
+        }
+
+        ctx.restore();
 
     });
 
