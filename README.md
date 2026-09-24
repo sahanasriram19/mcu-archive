@@ -18,7 +18,7 @@ Enter the archive and the whole MCU flies outward from a central hub, forming a 
 
 Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB.
 
-The whole thing sits on top of a custom-built starfield/nebula background engine (stars, dust, energy particles, shooting stars, all on a seeded deterministic generator so it looks the same on every visit rather than randomly recoloring itself).
+The whole thing sits on top of a custom-built starfield/nebula background engine (stars, energy particles, shooting stars, all on a seeded deterministic generator so it looks the same on every visit rather than randomly recoloring itself).
 
 ---
 
@@ -38,6 +38,9 @@ No build step, no bundler — open `index.html` through a local server and it ru
 ```
 mcu-archive/
 ├── index.html
+├── assets/
+│   ├── favicon.png
+│   └── marvel-logo.jpg           # the logo on the landing card and the mind map's centre
 ├── data/
 │   └── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
 ├── css/
@@ -45,37 +48,45 @@ mcu-archive/
 │   ├── background.css
 │   ├── landing.css
 │   ├── world.css
+│   ├── cards.css
 │   ├── panel.css
+│   ├── search.css
 │   ├── characters.css
-│   └── movieDetails.css
+│   ├── movieDetails.css
+│   └── mobile.css             # phone-only overrides; desktop untouched
 ├── ui/
 │   ├── panel.js               # the top-left view-switcher panel
-│   ├── landing.js
-│   └── search.js
+│   └── search.js              # the movie/character search box
 └── js/
     ├── app.js                 # entry point / render loop
     ├── camera.js               # pan/zoom state + easing
-    ├── graph.js                 # node + edge data, per-frame easing
-    ├── layout.js                 # one layout function per view (Complete MCU, Phases, Release, Chronology, Character Journeys)
-    ├── viewManager.js             # ties layout + edges + camera together per view
-    ├── views.js                    # view registry (labels, default camera)
-    ├── connections.js               # renders the glowing connection lines
-    ├── nodes.js                      # renders poster nodes
-    ├── branchNodes.js                 # renders the labelled "Phase" hub circles
-    ├── archive.js / archiveCore.js     # the central hub orb + view state
-    ├── posters.js                       # TMDB lookups (poster, overview, rating, cast, trailer)
-    ├── tmdbConfig.js                     # your TMDB API key goes here
-    ├── movieDetails.js                    # the click-to-view details card
-    ├── characters/                         # the Character Journeys sub-feature
-    │   ├── data.js                          # auto-derives the character roster from mcu.json
-    │   ├── journeys.js                       # filters the graph to one character
-    │   ├── panel.js                           # the Marvel-style character selector UI
-    │   └── timeline.js
-    └── universe/                             # background starfield/nebula engine
-        ├── generator.js                       # seeded, deterministic particle generation
+    ├── input.js                 # drag to pan, wheel/pinch to zoom, click a poster
+    ├── graph.js                  # node + edge data, per-frame easing
+    ├── layout.js                  # one layout function per view (Complete MCU mind map, Phases, Release, Chronology, Character Journeys)
+    ├── viewManager.js              # ties layout + edges + camera together per view
+    ├── views.js                     # view registry (labels, default camera)
+    ├── universe.js                   # draws every layer each frame, background first
+    ├── connections.js                 # renders the glowing connection lines (curved branches on the mind map)
+    ├── nodes.js                        # renders poster nodes
+    ├── nodeHitTest.js                   # works out which poster a click landed on
+    ├── branchNodes.js                    # renders the labelled "Phase" hub circles
+    ├── hub.js                             # the Marvel logo at the mind map's centre
+    ├── archive.js / archiveCore.js         # the central hub orb + view state
+    ├── posters.js                           # TMDB lookups (poster, overview, rating, cast, trailer)
+    ├── tmdbConfig.js                         # your TMDB API key goes here
+    ├── movieDetails.js                        # the click-to-view details card
+    ├── characters/                             # the Character Journeys sub-feature
+    │   ├── data.js                              # auto-derives the character roster from mcu.json
+    │   ├── characterJourney.js                   # which character is currently selected
+    │   └── panel.js                               # the Marvel-style character selector UI
+    └── universe/                                   # background starfield/nebula engine
+        ├── config.js                                # particle counts
+        ├── generator.js                              # seeded, deterministic particle generation
         ├── stars.js / heroStars.js / dust.js / energy.js / nebulas.js / shootingStars.js
         ├── background.js
+        ├── renderer.js                                 # the canvas + resize handling
         ├── state.js
+        ├── helpers.js
         └── utils.js
 ```
 
