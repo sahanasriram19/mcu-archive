@@ -8,425 +8,446 @@
   Countdown card (top right)
 --------------------------------------------------*/
 
-#countdown{
-    position:fixed;
-    top:max(24px, env(safe-area-inset-top));
-    right:max(24px, env(safe-area-inset-right));
-    z-index:30;
+#countdown {
+    position: fixed;
+    top: max(24px, env(safe-area-inset-top));
+    right: max(24px, env(safe-area-inset-right));
+    z-index: 30;
 
-    display:grid;
-    gap:2px;
-    min-width:220px;
-    padding:14px 16px 12px;
+    display: grid;
+    gap: 2px;
+    min-width: 220px;
+    padding: 14px 16px 12px;
 
-    text-align:left;
-    color:var(--text);
-    font:inherit;
+    text-align: left;
+    color: var(--text);
+    font: inherit;
 
-    background:rgba(17,22,30,.72);
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:var(--radius);
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-    box-shadow:0 20px 50px rgba(0,0,0,.45);
+    background: rgba(17, 22, 30, .72);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: var(--radius);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
 
-    cursor:pointer;
+    cursor: pointer;
 
     /* Hidden until the first tick has filled it in. */
-    opacity:0;
-    transform:translateY(-6px);
-    pointer-events:none;
-    transition:opacity .5s ease, transform .5s ease, border-color .2s ease, box-shadow .2s ease;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity .5s ease, transform .5s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
-#countdown.ready{
-    opacity:1;
-    transform:none;
-    pointer-events:auto;
+#countdown.ready {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
 }
 
-#countdown:hover{
-    border-color:rgba(230,36,41,.5);
-    box-shadow:0 20px 50px rgba(0,0,0,.45), 0 0 24px rgba(230,36,41,.25);
+#countdown:hover {
+    border-color: rgba(230, 36, 41, .5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .45), 0 0 24px rgba(230, 36, 41, .25);
 }
 
-#countdown:focus-visible{
-    outline:2px solid rgba(255,255,255,.7);
-    outline-offset:3px;
+#countdown:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, .7);
+    outline-offset: 3px;
 }
 
-.countdown-kicker{
-    font-size:10.5px;
-    font-weight:700;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--accent);
+.countdown-kicker {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
 }
 
-.countdown-title{
-    font-size:15px;
-    font-weight:700;
-    line-height:1.3;
-    max-width:240px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+.countdown-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.countdown-meta{
-    font-size:11.5px;
-    color:var(--muted);
+.countdown-meta {
+    font-size: 11.5px;
+    color: var(--muted);
 }
 
-.countdown-clock{
-    display:flex;
-    gap:12px;
-    margin-top:10px;
+.countdown-clock {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
 }
 
-.countdown-clock > span{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-width:34px;
+.countdown-clock>span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 34px;
 }
 
-.countdown-clock b{
-    font-size:22px;
-    font-weight:700;
-    line-height:1.1;
+.countdown-clock b {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
     /* Fixed-width digits, so the clock doesn't jiggle
        as the seconds tick. */
-    font-variant-numeric:tabular-nums;
+    font-variant-numeric: tabular-nums;
 }
 
-.countdown-clock i{
-    font-style:normal;
-    font-size:9.5px;
-    letter-spacing:.1em;
-    text-transform:uppercase;
-    color:var(--muted);
+.countdown-clock i {
+    font-style: normal;
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
 }
 
 /*--------------------------------------------------
   Watch-list banner (top centre, while focused)
 --------------------------------------------------*/
 
-#watch-banner{
-    position:fixed;
-    top:max(24px, env(safe-area-inset-top));
+#watch-banner {
+    position: fixed;
+    top: max(24px, env(safe-area-inset-top));
     /* Centred with auto margins rather than left:50% +
        translate, which caps a shrink-to-fit box at half
        the screen width (it wrapped to 4 lines on phones). */
-    left:0;
-    right:0;
-    margin:0 auto;
-    width:fit-content;
-    z-index:31;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: fit-content;
+    z-index: 31;
 
-    display:flex;
-    align-items:center;
-    gap:14px;
-    max-width:min(560px, calc(100vw - 32px));
-    padding:8px 8px 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: min(560px, calc(100vw - 32px));
+    padding: 8px 8px 8px 18px;
 
-    font-size:13px;
-    color:var(--text);
+    font-size: 13px;
+    color: var(--text);
 
-    background:rgba(17,22,30,.85);
-    border:1px solid rgba(230,36,41,.45);
-    border-radius:999px;
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-    box-shadow:0 12px 40px rgba(0,0,0,.5), 0 0 24px rgba(230,36,41,.2);
+    background: rgba(17, 22, 30, .85);
+    border: 1px solid rgba(230, 36, 41, .45);
+    border-radius: 999px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .5), 0 0 24px rgba(230, 36, 41, .2);
 
-    opacity:0;
-    transform:translateY(-8px);
-    pointer-events:none;
-    transition:opacity .3s ease, transform .3s ease;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease;
 }
 
-#watch-banner.show{
-    opacity:1;
-    transform:none;
-    pointer-events:auto;
+#watch-banner.show {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
 }
 
-.watch-banner-text b{
-    font-weight:700;
+.watch-banner-text b {
+    font-weight: 700;
 }
 
-.watch-banner-clear{
-    flex:0 0 auto;
-    padding:7px 14px;
-    border:1px solid rgba(255,255,255,.18);
-    border-radius:999px;
-    background:rgba(255,255,255,.06);
-    color:var(--text);
-    font:inherit;
-    font-size:12px;
-    font-weight:600;
-    cursor:pointer;
+.watch-banner-clear {
+    flex: 0 0 auto;
+    padding: 7px 14px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .06);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.watch-banner-clear:hover{
-    background:rgba(255,255,255,.14);
+.watch-banner-clear:hover {
+    background: rgba(255, 255, 255, .14);
 }
 
 /*--------------------------------------------------
   Details card: "Watch before this"
 --------------------------------------------------*/
 
-#movie-details-watch:empty{
-    display:none;
+#movie-details-watch:empty {
+    display: none;
 }
 
-#movie-details-watch{
-    margin:18px 0 20px;
-    padding-top:16px;
-    border-top:1px solid rgba(255,255,255,.08);
+#movie-details-watch {
+    margin: 18px 0 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
 }
 
-.watch-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
-    margin-bottom:12px;
+.watch-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
-.watch-label{
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:.1em;
-    text-transform:uppercase;
-    color:var(--muted);
+.watch-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
 }
 
-.watch-note{
-    margin-top:3px;
-    font-size:12px;
-    color:rgba(255,255,255,.45);
+.watch-note {
+    margin-top: 3px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, .45);
 }
 
-.watch-show{
-    flex:0 0 auto;
-    padding:7px 14px;
-    border:1px solid rgba(230,36,41,.5);
-    border-radius:999px;
-    background:rgba(230,36,41,.14);
-    color:var(--text);
-    font:inherit;
-    font-size:12px;
-    font-weight:600;
-    cursor:pointer;
-    transition:background .2s ease;
+.watch-show {
+    flex: 0 0 auto;
+    padding: 7px 14px;
+    border: 1px solid rgba(230, 36, 41, .5);
+    border-radius: 999px;
+    background: rgba(230, 36, 41, .14);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s ease;
 }
 
-.watch-show:hover{
-    background:rgba(230,36,41,.3);
+.watch-show:hover {
+    background: rgba(230, 36, 41, .3);
 }
 
 /* Row of small posters, scrolling sideways like the
    cast row. */
-.watch-row{
-    display:flex;
-    flex-wrap:nowrap;
-    gap:12px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    padding:4px 2px 8px;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:thin;
-    scrollbar-color:rgba(255,255,255,.25) transparent;
+.watch-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .25) transparent;
 }
 
-.watch-row::-webkit-scrollbar{ height:6px; }
-
-.watch-row::-webkit-scrollbar-thumb{
-    background:rgba(255,255,255,.2);
-    border-radius:99px;
+.watch-row::-webkit-scrollbar {
+    height: 6px;
 }
 
-.watch-item{
-    flex:0 0 84px;
-    max-width:84px;
-    padding:0;
-    border:none;
-    background:none;
-    color:var(--text);
-    font:inherit;
-    text-align:center;
-    cursor:pointer;
+.watch-row::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .2);
+    border-radius: 99px;
 }
 
-.watch-poster{
-    width:80px;
-    height:120px;
-    margin:0 auto 8px;
-    border-radius:10px;
-    overflow:hidden;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.1);
-    box-shadow:0 6px 16px rgba(0,0,0,.35);
-    transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+.watch-item {
+    flex: 0 0 84px;
+    max-width: 84px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
 }
 
-.watch-poster img{
-    display:block;
-    width:100%;
-    height:100%;
-    object-fit:cover;
+.watch-poster {
+    width: 80px;
+    height: 120px;
+    margin: 0 auto 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.watch-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* No poster yet: the title on a card in its own colour. */
-.watch-poster-fallback{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    height:100%;
-    padding:8px;
-    font-size:10.5px;
-    font-weight:600;
-    line-height:1.3;
-    color:rgba(255,255,255,.9);
-    background:linear-gradient(180deg, rgba(var(--c),.4), rgba(var(--c),.15));
+.watch-poster-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, .9);
+    background: linear-gradient(180deg, rgba(var(--c), .4), rgba(var(--c), .15));
 }
 
 .watch-item:hover .watch-poster,
-.watch-item:focus-visible .watch-poster{
-    transform:translateY(-3px);
-    border-color:rgba(230,36,41,.6);
-    box-shadow:0 10px 22px rgba(0,0,0,.45), 0 0 14px rgba(230,36,41,.3);
+.watch-item:focus-visible .watch-poster {
+    transform: translateY(-3px);
+    border-color: rgba(230, 36, 41, .6);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .45), 0 0 14px rgba(230, 36, 41, .3);
 }
 
-.watch-item:focus-visible{
-    outline:none;
+.watch-item:focus-visible {
+    outline: none;
 }
 
-.watch-title{
-    font-size:11.5px;
-    font-weight:600;
-    line-height:1.3;
+.watch-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
     /* Up to two lines, then … */
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.watch-year{
-    margin-top:2px;
-    font-size:11px;
-    color:var(--muted);
+.watch-year {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
 }
 
 /*--------------------------------------------------
   Phones (same query as js/responsive.js)
 --------------------------------------------------*/
 
-@media (max-width: 768px), (max-height: 500px){
+@media (max-width: 768px),
+(max-height: 500px) {
 
     /* A slim pill across the top instead of a card:
        "NEXT UP  VisionQuest  19d 14:03:22" */
-    #countdown{
-        top:max(10px, env(safe-area-inset-top));
-        left:max(10px, env(safe-area-inset-left));
-        right:max(10px, env(safe-area-inset-right));
-        min-width:0;
-        width:auto;
-        max-width:420px;
-        margin:0 auto;
-        padding:8px 14px;
-        border-radius:999px;
+    #countdown {
+        top: max(10px, env(safe-area-inset-top));
+        left: max(10px, env(safe-area-inset-left));
+        right: max(10px, env(safe-area-inset-right));
+        min-width: 0;
+        width: auto;
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 8px 14px;
+        border-radius: 999px;
 
-        display:flex;
-        align-items:center;
-        gap:10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .countdown-kicker{
-        flex:0 0 auto;
-        font-size:9.5px;
+    .countdown-kicker {
+        flex: 0 0 auto;
+        font-size: 9.5px;
     }
 
-    .countdown-title{
-        flex:1 1 auto;
-        min-width:0;
-        max-width:none;
-        font-size:13px;
+    .countdown-title {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+        font-size: 13px;
     }
 
-    .countdown-meta{
-        display:none;
+    .countdown-meta {
+        display: none;
     }
 
-    .countdown-clock{
-        flex:0 0 auto;
-        gap:6px;
-        margin-top:0;
+    .countdown-clock {
+        flex: 0 0 auto;
+        gap: 6px;
+        margin-top: 0;
     }
 
-    .countdown-clock > span{
-        flex-direction:row;
-        align-items:baseline;
-        min-width:0;
+    .countdown-clock>span {
+        flex-direction: row;
+        align-items: baseline;
+        min-width: 0;
     }
 
-    .countdown-clock b{
-        font-size:13px;
+    .countdown-clock b {
+        font-size: 13px;
     }
 
     /* d / h / m / s after each number instead of words. */
-    .countdown-clock i{
-        font-size:0;
-        letter-spacing:0;
-        text-transform:none;
+    .countdown-clock i {
+        font-size: 0;
+        letter-spacing: 0;
+        text-transform: none;
     }
 
-    .countdown-clock > span:nth-child(1) i::after{ content:"d"; font-size:10px; }
-    .countdown-clock > span:nth-child(2) i::after{ content:"h"; font-size:10px; }
-    .countdown-clock > span:nth-child(3) i::after{ content:"m"; font-size:10px; }
-    .countdown-clock > span:nth-child(4) i::after{ content:"s"; font-size:10px; }
+    .countdown-clock>span:nth-child(1) i::after {
+        content: "d";
+        font-size: 10px;
+    }
+
+    .countdown-clock>span:nth-child(2) i::after {
+        content: "h";
+        font-size: 10px;
+    }
+
+    .countdown-clock>span:nth-child(3) i::after {
+        content: "m";
+        font-size: 10px;
+    }
+
+    .countdown-clock>span:nth-child(4) i::after {
+        content: "s";
+        font-size: 10px;
+    }
 
     /* Banner sits just under the countdown pill. */
-    #watch-banner{
-        top:calc(max(10px, env(safe-area-inset-top)) + 46px);
-        gap:10px;
-        padding:6px 6px 6px 14px;
-        font-size:12px;
+    #watch-banner {
+        top: calc(max(10px, env(safe-area-inset-top)) + 46px);
+        gap: 10px;
+        padding: 6px 6px 6px 14px;
+        font-size: 12px;
     }
 
-    .watch-head{
-        flex-wrap:wrap;
+    .watch-head {
+        flex-wrap: wrap;
     }
 
-    .watch-show{
-        min-height:36px;
+    .watch-show {
+        min-height: 36px;
     }
 
-    .watch-item{
-        flex:0 0 68px;
-        max-width:68px;
+    .watch-item {
+        flex: 0 0 68px;
+        max-width: 68px;
     }
 
-    .watch-poster{
-        width:64px;
-        height:96px;
+    .watch-poster {
+        width: 64px;
+        height: 96px;
     }
 
-    .watch-poster-fallback{
-        padding:5px;
-        font-size:9px;
+    .watch-poster-fallback {
+        padding: 5px;
+        font-size: 9px;
     }
 
 }
 
 /* Very narrow phones: drop the seconds to keep it on
    one line. */
-@media (max-width: 360px){
+@media (max-width: 360px) {
 
-    .countdown-clock > span:nth-child(4){ display:none; }
+    .countdown-clock>span:nth-child(4) {
+        display: none;
+    }
 
 }
