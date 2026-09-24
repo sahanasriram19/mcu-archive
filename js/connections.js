@@ -383,34 +383,33 @@ export function renderConnections(ctx, camera, graph){
 
     if(highlight){
 
-        // Wide, soft glow in the phase colour...
+        // Soft glow in the phase colour...
+        //
+        // Widths are kept close to the normal lines (whose
+        // core is 1.2px at the default zoom) so a highlighted
+        // branch changes colour rather than bulking up. To make
+        // it bolder or slimmer, change the minimums (the second
+        // number in each Math.max) — they're what apply at the
+        // default zoom.
         ctx.save();
 
         ctx.globalCompositeOperation = "lighter";
 
         ctx.shadowColor = `rgba(${highlight.colour},1)`;
-        ctx.shadowBlur = Math.max(36 * camera.zoom, 10);
+        ctx.shadowBlur = Math.max(16 * camera.zoom, 6);
 
-        ctx.strokeStyle = `rgba(${highlight.colour},.55)`;
-        ctx.lineWidth = Math.max(18 * camera.zoom, 7);
+        ctx.strokeStyle = `rgba(${highlight.colour},.5)`;
+        ctx.lineWidth = Math.max(6 * camera.zoom, 3);
 
         ctx.stroke(hiPath);
 
         ctx.restore();
 
-        // ...then the line itself, solid in the phase colour
-        // (it used to be white, which is why the colour barely
-        // showed when zoomed out), with a thin pale centre so
-        // it still reads as a glowing strand, not a flat line.
+        // ...then the line itself, solid in the phase colour.
         ctx.save();
 
         ctx.strokeStyle = `rgb(${highlight.colour})`;
-        ctx.lineWidth = Math.max(6 * camera.zoom, 3);
-
-        ctx.stroke(hiPath);
-
-        ctx.strokeStyle = "rgba(255,255,255,.7)";
-        ctx.lineWidth = Math.max(1.5 * camera.zoom, 1);
+        ctx.lineWidth = Math.max(2.5 * camera.zoom, 1.6);
 
         ctx.stroke(hiPath);
 
