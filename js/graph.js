@@ -139,6 +139,7 @@ export function setBranchNodes(targets){
             prev.targetX = t.x;
             prev.targetY = t.y;
             prev.label = t.label;
+            prev.phase = t.phase;
             prev.subtitle = t.subtitle || "";
             prev.hidden = !!t.hidden;
             prev.memberIds = t.memberIds || [];
@@ -158,6 +159,7 @@ export function setBranchNodes(targets){
 
         node.memberIds = t.memberIds || [];
         node.hidden = !!t.hidden;
+        node.phase = t.phase;
 
         branchMemory.set(t.key, { x: t.x, y: t.y });
 
@@ -243,105 +245,82 @@ export function edgesByCharacter(){
 }
 
 //--------------------------------------------------
-// MIND MAP (Complete MCU) — hub -> each phase branch
-// -> the movies in that phase, chained by timeline.
+// MIND MAP (Complete MCU) — a real tree:
+//   hub -> each phase branch
+//   phase branch -> its first row of titles
+//   every later title -> the nearest title in the row
+//   before it (same phase), so each branch keeps
+//   splitting into smaller branches as it goes out.
+// Reads node.tier / node.mindmapAngle, which
+// layoutComplete sets — so layout must run first
+// (viewManager already guarantees that).
 //--------------------------------------------------
 
 export function edgesMindmap(){
 
     const edges = [];
 
-    const movies =
-        [...graph.nodes]
-        .sort((a,b)=>a.timeline-b.timeline);
+    const byPhase = {};
 
-    const rings = [];
+    movieNodes().forEach(node=>{
 
-    let index = 0;
+        if(typeof node.tier !== "number") return;
 
-    for(const size of [
-        8,
-        12,
-        16,
-        20,
-        24,
-        28,
-        32
-    ]){
-
-        if(index >= movies.length) break;
-
-        rings.push(
-            movies.slice(index,index+size)
-        );
-
-        index += size;
-
-    }
-
-    if(index < movies.length){
-
-        rings.push(
-            movies.slice(index)
-        );
-
-    }
-
-    //-----------------------------------
-    // Circle around each ring
-    //-----------------------------------
-
-    rings.forEach(ring=>{
-
-        for(let i=0;i<ring.length;i++){
-
-            edges.push({
-
-                from:graph.nodes.indexOf(ring[i]),
-
-                to:graph.nodes.indexOf(
-
-                    ring[(i+1)%ring.length]
-
-                )
-
-            });
-
-        }
+        (byPhase[node.phase] = byPhase[node.phase] || []).push(node);
 
     });
 
-    //-----------------------------------
-    // ONE bridge between rings
-    //-----------------------------------
+    graph.branchNodes.forEach(branch=>{
 
-    for(let i=0;i<rings.length-1;i++){
+        if(!branch.key.startsWith("phase")) return;
 
-        edges.push({
+        edges.push({ from:"hub", to:"branch:"+branch.key, style:"curve" });
 
-            from:graph.nodes.indexOf(
-                rings[i][0]
-            ),
+        const phase = Number(branch.key.replace("phase",""));
 
-            to:graph.nodes.indexOf(
-                rings[i+1][0]
-            )
+        const members = byPhase[phase] || [];
+
+        const tiers = [];
+
+        members.forEach(node=>{
+
+            (tiers[node.tier] = tiers[node.tier] || []).push(node);
 
         });
 
-    }
+        tiers.forEach((tier, ti)=>{
 
-    //-----------------------------------
-    // Hub only connects to first ring
-    //-----------------------------------
+            if(!tier) return;
 
-    rings[0].forEach(movie=>{
+            tier.forEach(node=>{
 
-        edges.push({
+                if(ti === 0){
 
-            from:"hub",
+                    edges.push({ from:"branch:"+branch.key, to:graph.nodes.indexOf(node), style:"curve" });
 
-            to:graph.nodes.indexOf(movie)
+                    return;
+
+                }
+
+                const parents = tiers[ti-1] || [];
+
+                let best = null, bestD = Infinity;
+
+                parents.forEach(parent=>{
+
+                    const d = Math.abs(parent.mindmapAngle - node.mindmapAngle);
+
+                    if(d < bestD){ bestD = d; best = parent; }
+
+                });
+
+                if(best){
+
+                    edges.push({ from:graph.nodes.indexOf(best), to:graph.nodes.indexOf(node), style:"curve" });
+
+                }
+
+            });
 
         });
 

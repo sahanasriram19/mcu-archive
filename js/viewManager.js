@@ -41,6 +41,44 @@ function buildEdges(recipe){
 
 }
 
+//----------------------------------
+// Zoom that makes the laid-out graph
+// fill the screen, then pushes in by
+// camera.fit (1 = whole map just fits,
+// >1 = a bit closer, edges run off
+// screen). Works from target positions
+// so it's correct before nodes arrive.
+//----------------------------------
+
+const POSTER_HALF_W = 160;
+const POSTER_HALF_H = 240;
+
+function fitZoom(cam){
+
+    let maxX = 0, maxY = 0;
+
+    graph.nodes.forEach(n=>{
+
+        if(Math.abs(n.targetX) > 50000) return;
+
+        maxX = Math.max(maxX, Math.abs(n.targetX - cam.x) + POSTER_HALF_W);
+        maxY = Math.max(maxY, Math.abs(n.targetY - cam.y) + POSTER_HALF_H);
+
+    });
+
+    if(!maxX || !maxY) return cam.zoom;
+
+    const zoom = Math.min(
+
+        window.innerWidth / (maxX * 2),
+        window.innerHeight / (maxY * 2)
+
+    ) * cam.fit;
+
+    return Math.min(cam.maxZoom || 0.5, Math.max(cam.minZoom || 0.08, zoom));
+
+}
+
 export function setView(key){
 
     const view = VIEWS.find(v=> v.key === key);
@@ -79,7 +117,9 @@ export function setView(key){
 
     camera.targetY = view.camera.y;
 
-    camera.targetZoom = view.camera.zoom;
+    camera.targetZoom = view.camera.fit
+        ? fitZoom(view.camera)
+        : view.camera.zoom;
 
 }
 

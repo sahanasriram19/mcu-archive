@@ -119,105 +119,166 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN){
 // apart that full-size posters never overlap.
 //--------------------------------------------------
 
-const HUB_RADIUS = 900;
-const RING_SPACING = 850;
-const ITEMS_PER_RING = 18;
-const ELLIPSE_X = 1;
-const ELLIPSE_Y = 1;
+// Order the phase branches go round the hub, clockwise
+// from the top. Phase 0 (the Defenders-saga shows) sits
+// last so it lands next to Phase 1, closing the loop.
+const MINDMAP_PHASE_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
-const RING_COUNTS = [
-    8,
-    12,
-    16,
-    20,
-    24,
-    26,
-    26,
-    26
-];
+const MINDMAP_PHASE_RADIUS = 1500;  // hub -> phase node
+const MINDMAP_FIRST_TIER = 2500;    // hub -> first row of titles
+const MINDMAP_TIER_STEP = 950;      // gap between rows of titles
+const MINDMAP_SLOT = 470;           // arc length each poster needs
+const MINDMAP_WEDGE_PAD = 4;        // extra "weight" per phase so small phases still get room
+
+// Stretch factors that turn the circle into an ellipse
+// matching the screen's shape — wide on a laptop, tall on
+// a phone — so the map fills the screen instead of sitting
+// in a circle with empty space either side. Area stays
+// roughly the same, it's just redistributed.
+function mindmapStretch(){
+
+    const aspect = Math.min(2.2, Math.max(0.5,
+        window.innerWidth / Math.max(1, window.innerHeight)
+    ));
+
+    const s = Math.sqrt(aspect);
+
+    return { sx: Math.max(0.8, s * 1.05), sy: Math.max(0.8, 1 / s * 1.05) };
+
+}
+
+// Splits a phase's titles (already in timeline order)
+// into rows radiating out from its branch: a few "lead"
+// titles first, then progressively wider rows — that's
+// what gives each branch its fanned-out, tree-like look.
+function mindmapTiers(members, wedge){
+
+    const tiers = [];
+
+    let index = 0;
+    let tier = 0;
+
+    let wanted = Math.max(2, Math.min(4, Math.round(members.length / 4)));
+
+    while(index < members.length){
+
+        const radius = MINDMAP_FIRST_TIER + tier * MINDMAP_TIER_STEP;
+
+        const capacity = Math.max(2, Math.floor((wedge * radius) / MINDMAP_SLOT));
+
+        let count = Math.min(capacity, wanted, members.length - index);
+
+        // Don't leave a lonely one- or two-title row at the
+        // end if it can fit on the row before it.
+        const left = members.length - index - count;
+
+        if(left > 0 && left <= 2 && count + left <= capacity) count += left;
+
+        tiers.push({ radius, members: members.slice(index, index + count) });
+
+        index += count;
+        tier++;
+
+        wanted = Math.ceil(wanted * 1.6);
+
+    }
+
+    return tiers;
+
+}
 
 export function layoutComplete(nodes){
 
-    setBranchNodes([{
+    const { sx, sy } = mindmapStretch();
+
+    const groups = {};
+
+    nodes.forEach(node=>{
+
+        groups[node.phase] = groups[node.phase] || [];
+        groups[node.phase].push(node);
+
+    });
+
+    const phaseKeys = [
+        ...MINDMAP_PHASE_ORDER.filter(p => groups[p] && groups[p].length),
+        ...Object.keys(groups).map(Number).filter(p => !MINDMAP_PHASE_ORDER.includes(p)).sort((a,b)=>a-b)
+    ];
+
+    // Wedge size grows with phase size, so Phase 4's 17
+    // titles get more of the circle than Phase 0's 6 —
+    // the padding keeps small phases from being squeezed.
+    const weights = phaseKeys.map(p => groups[p].length + MINDMAP_WEDGE_PAD);
+    const totalWeight = weights.reduce((a,b)=>a+b, 0);
+
+    const branches = [{
         phase:null,
         key:"hub",
         label:"",
         subtitle:"",
         x:0,
         y:0
-    }]);
+    }];
 
-    const ordered = [...nodes].sort(
-        (a,b)=>a.timeline-b.timeline
-    );
+    let cursor = -Math.PI/2 - (weights[0] / totalWeight) * Math.PI;
 
-    let index = 0;
+    phaseKeys.forEach((phase, pi)=>{
 
-    RING_COUNTS.forEach((count, ring)=>{
+        const wedge = (weights[pi] / totalWeight) * Math.PI * 2;
 
-        const members = ordered.slice(index,index+count);
+        const centre = cursor + wedge/2;
 
-        let radius =
-            HUB_RADIUS +
-            ring * RING_SPACING;
+        cursor += wedge;
 
-       // Give the outer rings much more breathing room.
-        if (ring === RING_COUNTS.length - 2) radius += 350;
-        if (ring === RING_COUNTS.length - 1) radius += 1400;
+        branches.push({
 
-        members.forEach((node,i)=>{
-
-            const angle =
-                (i/members.length) *
-                Math.PI*2 -
-                Math.PI/2;
-
-            node.layout = "complete";
-            node.ring = ring;
-
-            node.targetX =
-                Math.cos(angle) * radius;
-
-            node.targetY =
-                Math.sin(angle) * radius;
+            phase,
+            key: "phase"+phase,
+            label: "PHASE "+phase,
+            subtitle: phaseSubtitle(groups[phase]),
+            x: Math.cos(centre) * MINDMAP_PHASE_RADIUS * sx,
+            y: Math.sin(centre) * MINDMAP_PHASE_RADIUS * sy
 
         });
 
-        index += count;
+        const members = [...groups[phase]].sort((a,b)=>a.timeline-b.timeline);
+
+        // Leave a little clear air at each wedge edge so
+        // neighbouring phases read as separate branches.
+        const usable = wedge * 0.86;
+
+        mindmapTiers(members, usable).forEach((tier, ti)=>{
+
+            const n = tier.members.length;
+
+            const step = Math.min(usable / n, MINDMAP_SLOT * 1.4 / tier.radius);
+
+            // Every other row is nudged half a slot sideways
+            // so rows interleave like leaves rather than
+            // lining up in rigid columns.
+            const stagger = (ti % 2 === 1 && n > 1) ? step * 0.18 : 0;
+
+            tier.members.forEach((node, i)=>{
+
+                const angle = centre + (i - (n-1)/2) * step + stagger;
+
+                node.layout = "complete";
+                node.ring = 0;
+                node.tier = ti;
+                node.mindmapAngle = angle;
+
+                node.targetX = Math.cos(angle) * tier.radius * sx;
+                node.targetY = Math.sin(angle) * tier.radius * sy;
+
+            });
+
+        });
 
     });
 
-    if(index < ordered.length){
+    setBranchNodes(branches);
 
-        const members = ordered.slice(index);
-
-        const ring = RING_COUNTS.length;
-
-        const radius =
-            HUB_RADIUS +
-            ring * RING_SPACING;
-
-        members.forEach((node,i)=>{
-
-            const angle =
-                (i/members.length) *
-                Math.PI*2 -
-                Math.PI/2;
-
-            node.layout = "complete";
-            node.ring = ring;
-
-            node.targetX =
-                Math.cos(angle) * radius;
-
-            node.targetY =
-                Math.sin(angle) * radius;
-
-        });
-
-    }
-
-    resolveOverlaps(nodes,0);
+    resolveOverlaps(nodes, 40);
 
 }
 

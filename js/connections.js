@@ -20,6 +20,41 @@ function resolveAnchor(ref, graph){
 
 }
 
+// Control points for a mind-map branch, in world space.
+function curveControls(from, to){
+
+    const len = Math.hypot(to.x - from.x, to.y - from.y);
+
+    const outward = (p, fallback)=>{
+
+        const d = Math.hypot(p.x, p.y);
+
+        if(d < 1){
+
+            const f = Math.hypot(fallback.x, fallback.y) || 1;
+
+            return [fallback.x / f, fallback.y / f];
+
+        }
+
+        return [p.x / d, p.y / d];
+
+    };
+
+    const [fx, fy] = outward(from, to);
+    const [tx, ty] = outward(to, to);
+
+    const k = len * 0.42;
+
+    return [
+
+        from.x + fx * k, from.y + fy * k,
+        to.x - tx * k,   to.y - ty * k
+
+    ];
+
+}
+
 export function renderConnections(ctx, camera, graph){
 
     if(!graph.edges.length) return;
@@ -91,7 +126,30 @@ export function renderConnections(ctx, camera, graph){
         ) return;
 
         path.moveTo(x1, y1);
-        path.lineTo(x2, y2);
+
+        if(edge.style === "curve"){
+
+            // Mind-map branch: a soft S-curve that leaves the
+            // parent heading away from the hub and arrives at
+            // the child heading away from the hub too, so every
+            // branch visibly "grows" outward from the centre.
+            const [c1x, c1y, c2x, c2y] = curveControls(from, to);
+
+            path.bezierCurveTo(
+
+                halfW + (c1x - camera.x) * camera.zoom,
+                halfH + (c1y - camera.y) * camera.zoom,
+                halfW + (c2x - camera.x) * camera.zoom,
+                halfH + (c2y - camera.y) * camera.zoom,
+                x2, y2
+
+            );
+
+        } else {
+
+            path.lineTo(x2, y2);
+
+        }
 
         any = true;
 

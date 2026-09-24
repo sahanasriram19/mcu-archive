@@ -14,7 +14,11 @@ export const VIEWS = [
         label: "Complete MCU",
         layout: "complete",
         edges: { mode: "mindmap" },
-        camera: { x: 0, y: 0, zoom: 0.11 }
+        // Zoom is worked out from the layout so the mind
+        // map fills the screen; fit > 1 pushes in a little
+        // past "everything visible" so it feels immersive.
+        // zoom is the fallback if nothing has laid out yet.
+        camera: { x: 0, y: 0, zoom: 0.16, fit: 1.12, minZoom: 0.1, maxZoom: 0.4 }
     },
 
     {
