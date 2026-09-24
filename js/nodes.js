@@ -9,6 +9,7 @@
 // any) has actually finished loading.
 //--------------------------------------------------
 import { currentView } from "./viewManager.js";
+import { graph } from "./graph.js";
 
 const posterCache = new Map();
 
@@ -106,7 +107,9 @@ export function renderNodes(ctx, camera, nodes){
     const halfW = window.innerWidth/2;
     const halfH = window.innerHeight/2;
 
-    nodes.forEach(node=>{
+    const focus = graph.focus;
+
+    const drawNode = node=>{
 
         //----------------------------------
         // Screen Position (camera-zoom aware,
@@ -121,12 +124,35 @@ export function renderNodes(ctx, camera, nodes){
         // Cull offscreen nodes
         //----------------------------------
 
+        // Margin grows with the drawn poster, so big posters
+        // (zoomed in, or lifted on hover) don't vanish while
+        // part of them is still on screen.
+        const cullMargin = Math.max(120, 300 * camera.zoom);
+
         if(
 
-            x < -120 || x > window.innerWidth + 120 ||
-            y < -120 || y > window.innerHeight + 120
+            x < -cullMargin || x > window.innerWidth + cullMargin ||
+            y < -cullMargin || y > window.innerHeight + cullMargin
 
         ) return;
+
+        //----------------------------------
+        // Hover lift + watch-list focus
+        //----------------------------------
+
+        // 0 → 1 as the mouse settles on this poster (eased in
+        // graph.js updateGraph), used to scale it up a little.
+        const lift = node.lift || 0;
+
+        const scale = 1 + LIFT_SCALE * lift;
+
+        // "What should I watch before…" (js/upcoming.js):
+        // titles outside the list fade right back.
+        const inFocus = !focus || focus.ids.has(node.id);
+
+        ctx.save();
+
+        if(!inFocus) ctx.globalAlpha = FOCUS_DIM_ALPHA;
 
         //----------------------------------
         // Gentle Floating
@@ -241,7 +267,7 @@ export function renderNodes(ctx, camera, nodes){
 
         }
 
-        const posterWidth = POSTER_SIZE * camera.zoom ;
+        const posterWidth = POSTER_SIZE * camera.zoom * scale;
         const posterHeight = posterWidth * 1.5;
 
     const left = x + floatX - posterWidth / 2;
@@ -375,7 +401,7 @@ export function renderNodes(ctx, camera, nodes){
 
             }
 
-            const posterWidth = POSTER_SIZE * camera.zoom ;
+            const posterWidth = POSTER_SIZE * camera.zoom * scale;
             const posterHeight = posterWidth * 1.5;
 
             const left = x + floatX - posterWidth / 2;
@@ -468,6 +494,60 @@ export function renderNodes(ctx, camera, nodes){
         }
 
         //----------------------------------
+        // Outline: hover glow and/or watch-
+        // list marker, around the poster.
+        //----------------------------------
+
+        const isGoal = focus && focus.targetId === node.id;
+
+        const markFocus = focus && inFocus;
+
+        if(lift > 0.01 || markFocus){
+
+            const w = onScreenWidth * scale;
+            const h = w * 1.5;
+
+            ctx.save();
+
+            ctx.globalCompositeOperation = "source-over";
+
+            ctx.beginPath();
+
+            // Corner radius scales down with small posters, or a
+            // tiny poster's outline turns into an oval.
+            roundedRect(ctx, x + floatX - w/2, y + floatY - h/2, w, h, Math.min(12, w * 0.12));
+
+            if(markFocus){
+
+                // The watch list in white; the title it leads up
+                // to in Marvel red.
+                const c = isGoal ? "230,36,41" : "255,255,255";
+
+                ctx.shadowColor = `rgba(${c},.9)`;
+                ctx.shadowBlur = 14;
+                ctx.strokeStyle = `rgba(${c},.95)`;
+                ctx.lineWidth = isGoal ? 3 : 2;
+
+                ctx.stroke();
+
+            }
+
+            if(lift > 0.01){
+
+                ctx.shadowColor = `rgba(${node.colour},${lift})`;
+                ctx.shadowBlur = 26 * lift;
+                ctx.strokeStyle = `rgba(255,255,255,${0.85 * lift})`;
+                ctx.lineWidth = 1.5;
+
+                ctx.stroke();
+
+            }
+
+            ctx.restore();
+
+        }
+
+        //----------------------------------
         // Selection ring
         //----------------------------------
 
@@ -485,8 +565,41 @@ export function renderNodes(ctx, camera, nodes){
 
         }
 
-    });
+        ctx.restore();
+
+    };
+
+    // The hovered poster is drawn last so it lifts over its
+    // neighbours instead of tucking under them.
+    const hovered = graph.hoverPoster !== null ? nodes[graph.hoverPoster] : null;
+
+    nodes.forEach(node=>{ if(node !== hovered) drawNode(node); });
+
+    if(hovered) drawNode(hovered);
 
     ctx.restore();
+
+}
+
+//--------------------------------------------------
+// Hover lift / focus settings
+//--------------------------------------------------
+
+const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
+
+const FOCUS_DIM_ALPHA = 0.14;   // how faint titles outside a watch list get
+
+function roundedRect(ctx, x, y, w, h, r){
+
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
 
 }

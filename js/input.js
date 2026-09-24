@@ -22,7 +22,7 @@ function isUiTarget(target){
     return !!target.closest(
         "#view-panel, .character-dropdown, .search-container, " +
         "#movie-search-results, #movie-details-overlay, " +
-        ".character-panel"
+        ".character-panel, #countdown, #watch-banner"
     );
 
 }
@@ -245,6 +245,23 @@ function clearHover(){
 
 }
 
+// Which poster the mouse is on, in any view — nodes.js
+// lifts it. Mouse only; touch has no hover, and dragging
+// shouldn't lift whatever passes under the finger.
+function updateHoverPoster(e, node){
+
+    if(e.pointerType !== "mouse" || pointers.size > 0){
+
+        graph.hoverPoster = null;
+
+        return;
+
+    }
+
+    graph.hoverPoster = (node && !node.isBranch) ? graph.nodes.indexOf(node) : null;
+
+}
+
 function updateHover(e, node, target){
 
     // Touch/pen: leave the highlight alone. There's no hover
@@ -302,6 +319,8 @@ function updateCursor(e){
 
         clearHover();
 
+        graph.hoverPoster = null;
+
         return;
 
     }
@@ -318,6 +337,8 @@ function updateCursor(e){
     const target = (node && !node.isBranch) ? null : mindmapTargetAt(clientX, clientY);
 
     updateHover(e, node, target);
+
+    updateHoverPoster(e, node);
 
 
     if((node && !node.isBranch) || target){
@@ -473,6 +494,8 @@ viewport.addEventListener(
         viewport.style.cursor = "default";
 
         clearHover();
+
+        graph.hoverPoster = null;
 
     }
 );

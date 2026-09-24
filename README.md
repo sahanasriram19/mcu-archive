@@ -53,6 +53,7 @@ mcu-archive/
 │   ├── search.css
 │   ├── characters.css
 │   ├── movieDetails.css
+│   ├── upcoming.css           # countdown card, watch-list banner, "Watch before this"
 │   └── mobile.css             # phone-only overrides; desktop untouched
 ├── ui/
 │   ├── panel.js               # the top-left view-switcher panel
@@ -76,6 +77,7 @@ mcu-archive/
     ├── posters.js                           # TMDB lookups (poster, overview, rating, cast, trailer)
     ├── tmdbConfig.js                         # your TMDB API key goes here
     ├── movieDetails.js                        # the click-to-view details card
+    ├── upcoming.js                             # countdown to the next release + "What should I watch before…?"
     ├── characters/                             # the Character Journeys sub-feature
     │   ├── data.js                              # auto-derives the character roster from mcu.json
     │   ├── characterJourney.js                   # which character is currently selected

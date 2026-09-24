@@ -21,7 +21,18 @@ export const graph = {
     // branchNodes.js): nodeIndex = a hovered poster, phase =
     // the phase whose branch should light up. Both null when
     // nothing is hovered.
-    hover: { nodeIndex: null, phase: null }
+    hover: { nodeIndex: null, phase: null },
+
+    // The poster under the mouse in ANY view (index into
+    // nodes, or null) — nodes.js lifts it. Separate from
+    // hover above, which only drives the mind map's branch
+    // highlight.
+    hoverPoster: null,
+
+    // "What should I watch before…" (js/upcoming.js): when
+    // set, only these node ids are shown at full strength and
+    // everything else is dimmed. null = off.
+    focus: null   // { ids: Set, label: string } | null
 
 };
 
@@ -41,6 +52,9 @@ function createNode(movie){
         release:movie.release,
         timeline:movie.timeline,
         characters:movie.characters || [],
+        // Hand-picked "watch these first" ids (upcoming titles
+        // in mcu.json); see js/upcoming.js for how it's used.
+        watchBefore:movie.watchBefore || [],
         colour:movie.colour || "255,255,255",
         poster:movie.poster,
 
@@ -485,6 +499,19 @@ export function updateGraph(){
 
         node.pulse += 0.02;
         node.glow = 0.5 + Math.sin(node.pulse)*0.5;
+
+        // Hover lift (nodes.js): ease towards 1 on the hovered
+        // poster and back to 0 everywhere else — quick in,
+        // slightly slower out, so it feels springy not snappy.
+        const hovered = graph.hoverPoster !== null && graph.nodes[graph.hoverPoster] === node;
+
+        const liftTarget = hovered ? 1 : 0;
+
+        const lift = node.lift || 0;
+
+        node.lift = lift + (liftTarget - lift) * (hovered ? 0.25 : 0.18);
+
+        if(node.lift < 0.002) node.lift = 0;
 
     });
 

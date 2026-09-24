@@ -221,6 +221,10 @@ export function renderConnections(ctx, camera, graph){
 
     ctx.globalCompositeOperation = "source-over";
 
+    // Watch-list focus (js/upcoming.js): the lines step back
+    // with the titles outside the list.
+    if(graph.focus) ctx.globalAlpha = 0.25;
+
     const currentView = getCurrentView();
 
     if(currentView === "release" || currentView === "chronology"){

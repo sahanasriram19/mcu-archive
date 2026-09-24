@@ -9,6 +9,7 @@
 //==================================================
 
 import { fetchDetails } from "./posters.js";
+import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -25,6 +26,7 @@ overlay.innerHTML = `
             <p id="movie-details-overview"></p>
             <div id="movie-details-characters"></div>
             <div id="movie-details-cast"></div>
+            <div id="movie-details-watch"></div>
         </div>
     </div>
 `;
@@ -39,6 +41,81 @@ const overviewEl = overlay.querySelector("#movie-details-overview");
 const trailerEl = overlay.querySelector("#movie-details-trailer");
 const charactersEl = overlay.querySelector("#movie-details-characters");
 const castEl = overlay.querySelector("#movie-details-cast");
+const watchEl = overlay.querySelector("#movie-details-watch");
+
+//--------------------------------------------------
+// "Watch before this" — see js/upcoming.js for where the
+// list comes from. Each title is a chip that opens its
+// own card; "Show on map" closes this card and lights the
+// list up on the map.
+//--------------------------------------------------
+
+function renderWatchBefore(node){
+
+    const { nodes, source } = watchListFor(node);
+
+    if(!nodes.length){
+
+        watchEl.innerHTML = "";
+
+        return;
+
+    }
+
+    const note = source === "curated"
+        ? "Hand-picked essentials"
+        : "Earlier titles with the same characters";
+
+    // A row of small posters, like the cast row above it.
+    // Uses TMDB's smallest poster size (w185) — plenty for
+    // ~80px thumbnails. Titles whose poster hasn't loaded
+    // yet get a card in their own colour with the name.
+    const thumb = n => {
+
+        const url = n.poster
+            ? (typeof n.poster === "string" ? n.poster : (n.poster.small || n.poster.medium))
+            : "";
+
+        return url
+            ? `<img src="${url}" alt="" loading="lazy">`
+            : `<div class="watch-poster-fallback" style="--c:${n.colour}">${n.title}</div>`;
+
+    };
+
+    watchEl.innerHTML = `
+        <div class="watch-head">
+            <div>
+                <div class="watch-label">Watch before this</div>
+                <div class="watch-note">${note} · ${nodes.length} title${nodes.length === 1 ? "" : "s"}</div>
+            </div>
+            <button type="button" class="watch-show">Show on map</button>
+        </div>
+        <div class="watch-row">
+            ${nodes.map((n, i) => `
+                <button type="button" class="watch-item" data-i="${i}" title="${n.title}">
+                    <div class="watch-poster">${thumb(n)}</div>
+                    <div class="watch-title">${n.title}</div>
+                    <div class="watch-year">${(n.release || "").slice(0, 4)}</div>
+                </button>
+            `).join("")}
+        </div>
+    `;
+
+    watchEl.querySelectorAll(".watch-item").forEach(item => {
+
+        item.addEventListener("click", () => showMovieDetails(nodes[+item.dataset.i]));
+
+    });
+
+    watchEl.querySelector(".watch-show").addEventListener("click", () => {
+
+        hideMovieDetails();
+
+        startWatchFocus(node);
+
+    });
+
+}
 
 function hideMovieDetails() {
 
@@ -162,7 +239,15 @@ export async function showMovieDetails(node) {
 
     const metaParts = [];
 
-    if (node.release) metaParts.push(formatDate(node.release));
+    if (node.release) {
+
+        metaParts.push(
+            isUpcoming(node)
+                ? "Coming " + new Date(releaseTime(node)).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+                : formatDate(node.release)
+        );
+
+    }
 
     if (node.phase !== undefined && node.phase !== null && node.phase >= 1) {
 
@@ -194,6 +279,8 @@ export async function showMovieDetails(node) {
         charactersEl.innerHTML = "";
 
     }
+
+    renderWatchBefore(node);
 
     // fetchDetails() call as soon as the poster is hovered,
     // so by the time a click actually lands it has usually

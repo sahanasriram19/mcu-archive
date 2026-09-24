@@ -451,12 +451,29 @@ export function focusPhase(phase){
 
     const branch = graph.branchNodes.find(b => b.key === "phase" + phase);
 
+    frameNodes(members, branch ? [branch] : []);
+
+}
+
+// Frame any set of titles (e.g. a "watch before" list —
+// see js/upcoming.js) in the current view.
+export function focusNodes(nodes){
+
+    frameNodes(nodes.filter(n => Math.abs(n.targetX) < 50000), []);
+
+}
+
+// Zoom and centre so these nodes (plus any extra points,
+// like a phase junction) fill the screen, clear of the
+// view panel.
+function frameNodes(members, extras){
+
     if(!members.length) return;
 
     const xs = members.map(n => n.targetX);
     const ys = members.map(n => n.targetY);
 
-    if(branch){ xs.push(branch.targetX); ys.push(branch.targetY); }
+    extras.forEach(p => { xs.push(p.targetX); ys.push(p.targetY); });
 
     const minX = Math.min(...xs) - POSTER_HALF_W, maxX = Math.max(...xs) + POSTER_HALF_W;
     const minY = Math.min(...ys) - POSTER_HALF_H, maxY = Math.max(...ys) + POSTER_HALF_H;
@@ -474,6 +491,10 @@ export function focusPhase(phase){
 
     }
 
+    // Leave room for the countdown card / focus banner
+    // along the top.
+    top += TOP_UI_RESERVE;
+
     const zoom = Math.min(
 
         (right - left) / (maxX - minX),
@@ -481,9 +502,9 @@ export function focusPhase(phase){
 
     ) * 0.9;
 
-    const z = Math.max(camera.minZoom, Math.min(camera.maxZoom, zoom));
+    const z = Math.max(camera.minZoom, Math.min(0.6, zoom));
 
-    // Put the phase's centre at the centre of the free area.
+    // Put the group's centre at the centre of the free area.
     const freeCx = (left + right) / 2 - window.innerWidth / 2;
     const freeCy = (top + bottom) / 2 - window.innerHeight / 2;
 
@@ -492,6 +513,8 @@ export function focusPhase(phase){
     camera.targetZoom = z;
 
 }
+
+const TOP_UI_RESERVE = 60;   // px
 
 // Back to the default "whole map" framing, without
 // re-running the layout.

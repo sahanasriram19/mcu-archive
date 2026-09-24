@@ -1087,11 +1087,17 @@
         "type": "show",
         "phase": 6,
         "saga": "multiverse",
-        "release": "2026-11-01",
+        "release": "2026-10-14",
         "timeline": 74,
         "colour": "170,60,200",
         "characters": [
             "Vision"
+        ],
+        "watchBefore": [
+            "avengers2",
+            "infinitywar",
+            "wandavision",
+            "agathaallalong"
         ],
         "poster": ""
     },
@@ -1107,6 +1113,17 @@
         "characters": [
             "Doctor Doom"
         ],
+        "watchBefore": [
+            "endgame",
+            "loki1",
+            "shangchi",
+            "blackpanther2",
+            "antmanquantumania",
+            "deadpoolwolverine",
+            "cap4",
+            "thunderbolts",
+            "fantasticfour"
+        ],
         "poster": ""
     },
     {
@@ -1121,6 +1138,14 @@
         "characters": [
             "Doctor Doom"
         ],
+        "watchBefore": [
+            "endgame",
+            "loki1",
+            "spidermannwh",
+            "drstrange2",
+            "fantasticfour",
+            "avengersdoomsday"
+        ],
         "poster": ""
     },
     {
@@ -1134,6 +1159,10 @@
         "colour": "140,20,30",
         "characters": [
             "Blade"
+        ],
+        "watchBefore": [
+            "eternals",
+            "werewolfbynight"
         ],
         "poster": ""
     }

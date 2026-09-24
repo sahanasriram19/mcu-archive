@@ -17,6 +17,7 @@ import { setView } from "./viewManager.js";
 import "./input.js";
 import { initialisePanel } from "../ui/panel.js";
 import { initCharacterPanel } from "./characters/panel.js";
+import { initUpcoming } from "./upcoming.js";
 
 //==========================================
 // LANDING
@@ -48,6 +49,10 @@ const graphReady = initialiseGraph();
 //----------------------------------
 
 const statsEl = document.getElementById("landing-stats");
+
+// Countdown to the next release (top-right card inside
+// the archive) needs the titles loaded first.
+graphReady.then(initUpcoming);
 
 graphReady.then(() => {
 
