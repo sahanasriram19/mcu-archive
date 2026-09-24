@@ -149,14 +149,45 @@ function fitCamera(cam){
     const W = window.innerWidth;
     const H = window.innerHeight;
 
-    // Which way to slide: away from the side of the screen
-    // the panel hugs.
     const panelOnLeft = r.left < W * 0.25 && r.right < W * 0.6;
     const panelAtBottom = !panelOnLeft && r.bottom > H * 0.75;
 
     if(!panelOnLeft && !panelAtBottom) return fallback;
 
-    // Try the fitted zoom first, then ease out 3% at a time.
+    //----------------------------------
+    // Desktop (panel on the left): the map always stays
+    // centred on the logo. If a poster would land under
+    // the panel, zoom out a little at a time (up to ~25%)
+    // until it clears, rather than sliding the map
+    // sideways, which made the view lean to the right.
+    //----------------------------------
+
+    if(panelOnLeft){
+
+        for(let step = 0; step < 10; step++){
+
+            const zoom = zoom0 * Math.pow(0.97, step);
+
+            if(zoom < (cam.minZoom || 0.08)) break;
+
+            const boxes = screenBoxes(nodes, cam.x, cam.y, zoom);
+
+            if(!boxes.some(b => hitsPanel(b, r))) return { x: cam.x, y: cam.y, zoom };
+
+        }
+
+        // Very narrow window: stay centred at the normal fit.
+        return fallback;
+
+    }
+
+    //----------------------------------
+    // Phones (panel along the bottom): 77 posters can't
+    // fit a phone screen at a readable size, so the map
+    // is centred in the open space above the panel
+    // instead of behind it.
+    //----------------------------------
+
     for(let step = 0; step < 12; step++){
 
         const zoom = zoom0 * Math.pow(0.97, step);
@@ -169,56 +200,15 @@ function fitCamera(cam){
 
         if(!blocked.length) return { x: cam.x, y: cam.y, zoom };
 
-        if(panelOnLeft){
+        const shift = Math.max(...blocked.map(b => b.bottom - (r.top - PANEL_GAP)));
 
-            const shift = Math.max(...blocked.map(b => r.right + PANEL_GAP - b.left));
+        if(boxes.every(b => b.top - shift >= 0)){
 
-            const fits = boxes.every(b => b.right + shift <= W);
+            const moved = boxes.map(b => ({ ...b, top: b.top - shift, bottom: b.bottom - shift }));
 
-            if(fits){
-
-                const moved = boxes.map(b => ({ ...b, left: b.left + shift, right: b.right + shift }));
-
-                if(!moved.some(b => hitsPanel(b, r))){
-
-                    return { x: cam.x - shift / zoom, y: cam.y, zoom };
-
-                }
-
-            }
-
-        } else {
-
-            const shift = Math.max(...blocked.map(b => b.bottom - (r.top - PANEL_GAP)));
-
-            const fits = boxes.every(b => b.top - shift >= 0);
-
-            if(fits){
-
-                const moved = boxes.map(b => ({ ...b, top: b.top - shift, bottom: b.bottom - shift }));
-
-                if(!moved.some(b => hitsPanel(b, r))){
-
-                    return { x: cam.x, y: cam.y + shift / zoom, zoom };
-
-                }
-
-            }
+            if(!moved.some(b => hitsPanel(b, r))) return { x: cam.x, y: cam.y + shift / zoom, zoom };
 
         }
-
-    }
-
-    // Couldn't clear it without shrinking posters to
-    // nothing (phones: 77 posters won't fit a 390px screen
-    // at a readable size). Instead, centre the map in the
-    // open space beside/above the panel rather than behind
-    // it, so its middle is what you see first.
-    if(panelOnLeft){
-
-        const shift = (r.right + PANEL_GAP) / 2;
-
-        return { x: cam.x - shift / zoom0, y: cam.y, zoom: zoom0 };
 
     }
 

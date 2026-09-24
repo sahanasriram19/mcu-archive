@@ -716,7 +716,7 @@ export function loadPosters(graph) {
     ) {
 
         console.warn(
-            "TMDB API key not set — copy js/tmdbKey.example.js to js/tmdbKey.js and add your key to load real posters. " +
+            "TMDB API key not set — add yours in js/tmdbConfig.js to load real posters. " +
             "Titles will show as placeholder cards until then."
         );
 

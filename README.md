@@ -73,8 +73,7 @@ mcu-archive/
     ├── hub.js                             # the Marvel logo at the mind map's centre
     ├── archive.js / archiveCore.js         # the central hub orb + view state
     ├── posters.js                           # TMDB lookups (poster, overview, rating, cast, trailer)
-    ├── tmdbConfig.js                         # TMDB URLs; loads your key from tmdbKey.js
-    ├── tmdbKey.example.js                     # template — copy to tmdbKey.js (git-ignored) and add your key
+    ├── tmdbConfig.js                         # your TMDB API key goes here
     ├── movieDetails.js                        # the click-to-view details card
     ├── characters/                             # the Character Journeys sub-feature
     │   ├── data.js                              # auto-derives the character roster from mcu.json
@@ -98,7 +97,7 @@ mcu-archive/
 ## Setup
 
 1. **Get a free TMDB API key** at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) (approved instantly for personal/non-commercial use).
-2. Copy `js/tmdbKey.example.js` to `js/tmdbKey.js` and paste your key in place of `YOUR_TMDB_API_KEY_HERE`. `js/tmdbKey.js` is in `.gitignore`, so your key stays on your machine. Without it the app still runs, with placeholder cards instead of posters.
+2. Open `js/tmdbConfig.js` and paste your key in place of `YOUR_TMDB_API_KEY_HERE`.
 3. Serve the folder with any static file server — it uses `fetch()` to load `data/mcu.json`, which most browsers block from a plain `file://` URL.
    ```bash
    npx serve .
@@ -107,7 +106,7 @@ mcu-archive/
    ```
 4. Open the served URL, click **Enter**, and the archive builds itself.
 
-> **Note:** keeping the key in the git-ignored `js/tmdbKey.js` keeps it off GitHub. It isn't a true secret, though: any site that calls TMDB from the browser sends the key with each request, so anyone using a hosted copy can see it. TMDB keys are read-only, so that's normal for a project like this. GitHub Pages only serves files that are committed, so a git-ignored key won't be there and posters won't load on Pages. If you host it there, commit `js/tmdbKey.js` after all; that's acceptable for a read-only key. On a host where you upload files yourself (Netlify drag-and-drop, your own server), just include the file in the upload.
+> **Note:** if you plan to push this to a public GitHub repo, consider adding `js/tmdbConfig.js` to `.gitignore` so your key isn't publicly visible. TMDB keys aren't sensitive/dangerous if exposed, but it's good practice — someone else could otherwise use up your request quota.
 
 ---
 
