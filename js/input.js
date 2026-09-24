@@ -3,6 +3,7 @@ import { graph } from "./graph.js";
 import { getCurrentView, focusPhase, refitView } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
+import { edgeAtScreenPoint } from "./connections.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -187,6 +188,32 @@ function mindmapTargetAt(clientX, clientY){
 
     }
 
+    // A branch line: lights up (and zooms to) the phase it
+    // belongs to. A line into a poster counts as that
+    // poster's branch; a line into a phase junction counts
+    // as the whole phase.
+    const edgeIndex = edgeAtScreenPoint(clientX, clientY, camera, graph);
+
+    if(edgeIndex !== -1){
+
+        const edge = graph.edges[edgeIndex];
+
+        if(typeof edge.to === "number"){
+
+            const node = graph.nodes[edge.to];
+
+            return { type: "line", nodeIndex: edge.to, phase: node.phase };
+
+        }
+
+        if(typeof edge.to === "string" && edge.to.startsWith("branch:phase")){
+
+            return { type: "line", nodeIndex: null, phase: Number(edge.to.slice("branch:phase".length)) };
+
+        }
+
+    }
+
     const hx = halfW + (0 - camera.x) * camera.zoom;
     const hy = halfH + (0 - camera.y) * camera.zoom;
 
@@ -235,6 +262,11 @@ function updateHover(e, node, target){
     } else if(target && target.type === "junction"){
 
         graph.hover.nodeIndex = null;
+        graph.hover.phase = target.phase;
+
+    } else if(target && target.type === "line"){
+
+        graph.hover.nodeIndex = target.nodeIndex;
         graph.hover.phase = target.phase;
 
     } else {
@@ -357,7 +389,7 @@ function endGesture(e){
 
             const target = mindmapTargetAt(tapX, tapY);
 
-            if(target && target.type === "junction") focusPhase(target.phase);
+            if(target && (target.type === "junction" || target.type === "line")) focusPhase(target.phase);
 
             else if(target && target.type === "hub") refitView();
 

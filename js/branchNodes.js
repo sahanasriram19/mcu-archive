@@ -28,6 +28,29 @@ export const PHASE_COLOURS = {
 
 };
 
+//--------------------------------------------------
+// Hover highlight colours for the Complete MCU mind map.
+// Brighter, more saturated cousins of the colours above,
+// picked so every phase is clearly different from the
+// normal pale-blue lines AND from each other. (Using the
+// colours above directly, Phase 4's blue looked like no
+// change at all and Phase 0's grey barely registered.)
+// Phase 0 swaps grey for teal, since grey can't stand
+// out against white lines.
+//--------------------------------------------------
+
+export const HIGHLIGHT_COLOURS = {
+
+    0: "45,212,191",    // teal
+    1: "248,72,94",     // red
+    2: "251,140,40",    // orange
+    3: "250,210,30",    // gold
+    4: "64,120,255",    // royal blue
+    5: "196,110,255",   // purple
+    6: "60,225,120"     // green
+
+};
+
 export function renderBranchNodes(ctx, camera, branchNodes){
 
     if(!branchNodes.length) return;
@@ -73,6 +96,8 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
         const colour = PHASE_COLOURS[phaseNum] || "230,150,60";
 
+        const hintColour = HIGHLIGHT_COLOURS[phaseNum] || colour;
+
         // Each branch gets its own save/restore so the text
         // shadow below can't leak out. It used to: a stray
         // restore() here only balanced when there was a
@@ -87,10 +112,14 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         // Glow
         //----------------------------------
 
+        // Hovered mind-map junctions glow in the highlight
+        // colour so they match the lit-up branch.
+        const glowColour = (hovered && !node.label) ? hintColour : colour;
+
         const glow = ctx.createRadialGradient(x,y,0,x,y, radius*2.8);
 
-        glow.addColorStop(0, `rgba(${colour},.4)`);
-        glow.addColorStop(.4, `rgba(${colour},.16)`);
+        glow.addColorStop(0, `rgba(${glowColour},.4)`);
+        glow.addColorStop(.4, `rgba(${glowColour},.16)`);
         glow.addColorStop(1, "rgba(0,0,0,0)");
 
         ctx.fillStyle = glow;
@@ -115,7 +144,12 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.strokeStyle = "rgba(0,0,0,.55)";
         ctx.lineWidth = 4;
 
-        ctx.fillStyle = "#FFFFFF";
+        // Hint labels take a pale tint of the phase colour:
+        // the full-strength colour (e.g. Phase 4's blue) can be
+        // hard to read against the dark navy background.
+        const tint = hintColour.split(",").map(c => Math.round((+c + 255*1.2) / 2.2)).join(",");
+
+        ctx.fillStyle = (hovered && !node.label) ? `rgb(${tint})` : "#FFFFFF";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter`;

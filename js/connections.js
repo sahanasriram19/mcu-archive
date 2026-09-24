@@ -1,5 +1,5 @@
 import { getCurrentView } from "./viewManager.js";
-import { PHASE_COLOURS } from "./branchNodes.js";
+import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -53,6 +53,95 @@ function curveControls(from, to){
         to.x - tx * k,   to.y - ty * k
 
     ];
+
+}
+
+//--------------------------------------------------
+// LINE HIT TEST (Complete MCU mind map)
+//
+// Which connection line, if any, is under a screen point
+// — so hovering the branches themselves lights them up,
+// not just the posters. Samples each curve along the exact
+// same shape it's drawn with, and returns the edge index
+// of the nearest line within `tolerance` px, or -1.
+//--------------------------------------------------
+
+const LINE_SAMPLES = 16;
+
+function distToSegment(px, py, ax, ay, bx, by){
+
+    const dx = bx - ax, dy = by - ay;
+
+    const len2 = dx*dx + dy*dy;
+
+    let t = len2 ? ((px - ax) * dx + (py - ay) * dy) / len2 : 0;
+
+    t = Math.max(0, Math.min(1, t));
+
+    return Math.hypot(px - (ax + t*dx), py - (ay + t*dy));
+
+}
+
+export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
+
+    const halfW = window.innerWidth/2;
+    const halfH = window.innerHeight/2;
+
+    const sx = x => halfW + (x - camera.x) * camera.zoom;
+    const sy = y => halfH + (y - camera.y) * camera.zoom;
+
+    let best = -1, bestD = tolerance;
+
+    graph.edges.forEach((edge, i)=>{
+
+        const from = resolveAnchor(edge.from, graph);
+        const to = resolveAnchor(edge.to, graph);
+
+        if(!from || !to) return;
+
+        const x0 = sx(from.x), y0 = sy(from.y);
+        const x3 = sx(to.x), y3 = sy(to.y);
+
+        // Quick reject: point nowhere near this line's box.
+        if(
+            px < Math.min(x0, x3) - 60 || px > Math.max(x0, x3) + 60 ||
+            py < Math.min(y0, y3) - 60 || py > Math.max(y0, y3) + 60
+        ) return;
+
+        if(edge.style !== "curve"){
+
+            const d = distToSegment(px, py, x0, y0, x3, y3);
+
+            if(d < bestD){ bestD = d; best = i; }
+
+            return;
+
+        }
+
+        const [c1x, c1y, c2x, c2y] = curveControls(from, to);
+
+        const x1 = sx(c1x), y1 = sy(c1y), x2 = sx(c2x), y2 = sy(c2y);
+
+        let lx = x0, ly = y0;
+
+        for(let k = 1; k <= LINE_SAMPLES; k++){
+
+            const t = k / LINE_SAMPLES, u = 1 - t;
+
+            const bx = u*u*u*x0 + 3*u*u*t*x1 + 3*u*t*t*x2 + t*t*t*x3;
+            const by = u*u*u*y0 + 3*u*u*t*y1 + 3*u*t*t*y2 + t*t*t*y3;
+
+            const d = distToSegment(px, py, lx, ly, bx, by);
+
+            if(d < bestD){ bestD = d; best = i; }
+
+            lx = bx; ly = by;
+
+        }
+
+    });
+
+    return best;
 
 }
 
@@ -117,7 +206,7 @@ function hoverHighlight(graph){
 
     if(!set.size) return null;
 
-    const colour = PHASE_COLOURS[phase] || "170,225,255";
+    const colour = HIGHLIGHT_COLOURS[phase] || "170,225,255";
 
     return { set, colour };
 
@@ -294,24 +383,34 @@ export function renderConnections(ctx, camera, graph){
 
     if(highlight){
 
+        // Wide, soft glow in the phase colour...
         ctx.save();
 
         ctx.globalCompositeOperation = "lighter";
 
         ctx.shadowColor = `rgba(${highlight.colour},1)`;
-        ctx.shadowBlur = 36 * camera.zoom;
+        ctx.shadowBlur = Math.max(36 * camera.zoom, 10);
 
-        ctx.strokeStyle = `rgba(${highlight.colour},.95)`;
-        ctx.lineWidth = Math.max(14 * camera.zoom, 3);
+        ctx.strokeStyle = `rgba(${highlight.colour},.55)`;
+        ctx.lineWidth = Math.max(18 * camera.zoom, 7);
 
         ctx.stroke(hiPath);
 
         ctx.restore();
 
+        // ...then the line itself, solid in the phase colour
+        // (it used to be white, which is why the colour barely
+        // showed when zoomed out), with a thin pale centre so
+        // it still reads as a glowing strand, not a flat line.
         ctx.save();
 
-        ctx.strokeStyle = "rgba(255,255,255,.95)";
-        ctx.lineWidth = Math.max(3.5 * camera.zoom, 1.6);
+        ctx.strokeStyle = `rgb(${highlight.colour})`;
+        ctx.lineWidth = Math.max(6 * camera.zoom, 3);
+
+        ctx.stroke(hiPath);
+
+        ctx.strokeStyle = "rgba(255,255,255,.7)";
+        ctx.lineWidth = Math.max(1.5 * camera.zoom, 1);
 
         ctx.stroke(hiPath);
 
