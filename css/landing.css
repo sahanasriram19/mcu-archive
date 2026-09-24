@@ -1,104 +1,304 @@
+/*==================================================
+  LANDING PAGE
+  Logo, title, tagline, live stats and the Enter button,
+  over a faint preview of the mind map (#landing-branches)
+  whose branches draw outward from behind the logo.
+==================================================*/
+
 #landing {
     position: fixed;
     inset: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 20;
+    overflow: hidden;
+    transition: opacity .5s ease, transform .5s ease;
 }
 
+/* Fade + slight push-in when entering (see app.js), so the
+   mind map flying out behind it reads as one motion. */
+#landing.leaving {
+    opacity: 0;
+    transform: scale(1.06);
+    pointer-events: none;
+}
+
+/*--------------------------------------------------
+  Branch preview
+--------------------------------------------------*/
+
+#landing-branches {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(1120px, 140vw);
+    height: auto;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    /* Fade the tips out towards the edges. */
+    -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+
+    animation: branches-drift 60s ease-in-out infinite alternate;
+}
+
+#landing-branches .lb path {
+    fill: none;
+    stroke: rgb(var(--c));
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: .5;
+    filter: drop-shadow(0 0 4px rgba(var(--c), .9));
+
+    /* Draw-in: each path starts fully dashed-away. */
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: branch-draw 1.4s cubic-bezier(.3,.7,.3,1) forwards;
+    animation-delay: var(--d);
+}
+
+#landing-branches .lb path.tw  { stroke-width: 1.4; opacity: .4; animation-delay: calc(var(--d) + .45s); }
+#landing-branches .lb path.tw2 { stroke-width: 1;   opacity: .3; animation-delay: calc(var(--d) + .9s); }
+
+#landing-branches .lb circle {
+    fill: rgb(var(--c));
+    opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(var(--c), 1));
+    animation: node-in .6s ease forwards, node-glow 3.2s ease-in-out infinite alternate;
+    animation-delay: calc(var(--d) + .9s), calc(var(--d) + 1.6s);
+}
+
+#landing-branches .lb circle.c2 {
+    animation-delay: calc(var(--d) + 1.4s), calc(var(--d) + 2.1s);
+}
+
+@keyframes branch-draw { to { stroke-dashoffset: 0; } }
+
+@keyframes node-in { to { opacity: .75; } }
+
+@keyframes node-glow {
+    from { opacity: .75; }
+    to   { opacity: .35; }
+}
+
+@keyframes branches-drift {
+    from { transform: translate(-50%, -50%) rotate(-3deg); }
+    to   { transform: translate(-50%, -50%) rotate(3deg); }
+}
+
+/*--------------------------------------------------
+  Card
+--------------------------------------------------*/
+
 #landing-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: transparent !important; /* Forcefully removes any hidden card background */
-    padding: 0;
-    margin: 0;
-    
-    /* Moves both the image and button up and down together */
-    animation: float 2s ease-in-out infinite;
+    text-align: center;
+    padding: 0 20px;
+    max-width: 560px;
+    animation: card-in .9s ease both;
+}
+
+/* Soft dark backdrop behind the text, so the branch
+   lines passing behind it don't hurt readability. */
+#landing-card::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    width: 150%;
+    height: 90%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgba(9,11,16,.85) 40%, rgba(9,11,16,0) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes card-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
 }
 
 #landing-card img {
     display: block;
-    width: 100%;
-    max-width: 420px;
+    width: min(360px, 70vw);
     height: auto;
-    border-radius: 4px; /* Optional: adds a slight corner curve to match the logo image */
+    border-radius: 4px;
+    box-shadow: 0 0 60px rgba(230, 36, 41, .35), 0 10px 40px rgba(0,0,0,.5);
 }
 
-#landing-card p {
-    font-size: clamp(.8rem, 2vw, 1rem);
-    line-height: 1.6;
-    color: var(--muted);
-    margin-bottom: 24px;
+.landing-title {
+    margin-top: 22px;
+    font-size: clamp(.8rem, 1.6vw, .95rem);
+    font-weight: 700;
+    letter-spacing: .5em;
+    /* letter-spacing adds space after the last letter too;
+       this pulls it back so the title stays truly centred */
+    margin-right: -.5em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.85);
 }
+
+.landing-tagline {
+    margin-top: 14px;
+    max-width: 420px;
+    font-size: clamp(.95rem, 2vw, 1.08rem);
+    line-height: 1.55;
+    color: var(--muted);
+}
+
+#landing-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    min-height: 30px;
+    opacity: 0;
+    transition: opacity .6s ease;
+}
+
+#landing-stats.ready { opacity: 1; }
+
+.landing-stat {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255,255,255,.04);
+    font-size: .8rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.landing-stat b {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/*--------------------------------------------------
+  Enter button
+--------------------------------------------------*/
 
 #enterButton {
-    /* Sits cleanly underneath the glowing logo */
-    margin-top: 24px;
-    padding: clamp(12px, 2.5vw, 17px) clamp(34px, 7vw, 52px);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding: clamp(12px, 2.4vw, 15px) clamp(28px, 5vw, 40px);
     border: 1px solid rgba(255,255,255,.18);
     border-radius: 999px;
     background: linear-gradient(180deg, #ff3b41 0%, var(--accent) 55%, #b3161b 100%);
     color: white;
-    font-size: clamp(.95rem, 2vw, 1.1rem);
+    font-size: clamp(.85rem, 1.8vw, .95rem);
     font-weight: 700;
-    letter-spacing: .08em;
+    letter-spacing: .12em;
     text-transform: uppercase;
     cursor: pointer;
-    animation: pulse-glow 1.8s ease-in-out infinite alternate;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    animation: pulse-glow 2.4s ease-in-out infinite alternate;
+    transition: transform .2s ease, filter .2s ease;
 }
 
-/* Independent hover pop effect for the button */
+.enter-arrow {
+    display: inline-block;
+    transition: transform .2s ease;
+}
+
 #enterButton:hover {
-    transform: scale(1.06);
+    transform: scale(1.05);
     filter: brightness(1.12);
 }
 
+#enterButton:hover .enter-arrow { transform: translateX(4px); }
+
 #enterButton:active {
-    transform: scale(0.97);
-    filter: brightness(0.95);
+    transform: scale(.97);
+    filter: brightness(.95);
+}
+
+#enterButton:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
 }
 
 @keyframes pulse-glow {
-  0% {
-    box-shadow: 0 0 10px #ff2a34, 
-                0 0 20px rgba(255, 0, 0, 0.4);
-  }
-  100% {
-    box-shadow: 0 0 20px #ff254a, 
-                0 0 40px hsl(352, 100%, 55%), 
-                0 0 60px rgba(105, 5, 5, 0.6);
-  }
+    from { box-shadow: 0 0 10px rgba(255,42,52,.7), 0 0 20px rgba(255,0,0,.3); }
+    to   { box-shadow: 0 0 18px rgba(255,37,74,.9), 0 0 38px rgba(255,30,60,.5), 0 0 60px rgba(105,5,5,.5); }
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+.landing-hint {
+    margin-top: 12px;
+    font-size: .75rem;
+    color: rgba(255,255,255,.4);
 }
 
-@media (max-width: 600px){
+.landing-hint kbd {
+    padding: 1px 6px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: .7rem;
+}
 
-    #landing{
-        padding:20px;
-    }
+/* Touch screens have no Enter key. */
+@media (hover: none) {
+    .landing-hint { display: none; }
+}
 
-    #landing-card{
-        width:min(100%, 360px);
-    }
+/*--------------------------------------------------
+  Footer
+--------------------------------------------------*/
 
-    #landing-card img{
-        width:100%;
-        max-width:360px;
-    }
+.landing-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    padding: 0 20px;
+    text-align: center;
+    font-size: .7rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,.32);
+}
+
+/*--------------------------------------------------
+  Small screens
+--------------------------------------------------*/
+
+@media (max-width: 600px) {
+
+    .landing-title { margin-top: 18px; letter-spacing: .4em; margin-right: -.4em; }
+
+    .landing-tagline { max-width: 300px; }
+
+    #enterButton { margin-top: 24px; }
+
+    .landing-footer { bottom: 12px; font-size: .62rem; }
+
+}
+
+@media (max-height: 560px) {
+
+    /* Short screens (phones in landscape): drop the footer
+       so it can't collide with the button. */
+    .landing-footer { display: none; }
+
+}
+
+/* Respect the OS "reduce motion" setting: show everything
+   in place, no drawing, drifting or pulsing. */
+@media (prefers-reduced-motion: reduce) {
+
+    #landing-branches,
+    #landing-card,
+    #enterButton { animation: none; }
+
+    #landing-branches .lb path { animation: none; stroke-dashoffset: 0; }
+
+    #landing-branches .lb circle { animation: none; opacity: .6; }
 
 }

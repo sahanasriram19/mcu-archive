@@ -35,9 +35,97 @@ viewport.style.display = "none";
 
 const graphReady = initialiseGraph();
 
+//----------------------------------
+// Landing stats — worked out from
+// data/mcu.json, so they stay right
+// as titles are added.
+//----------------------------------
+
+const statsEl = document.getElementById("landing-stats");
+
+graphReady.then(() => {
+
+    if(!statsEl) return;
+
+    const movies = graph.nodes.filter(n => !n.isBranch);
+
+    const count = type => movies.filter(n => n.type === type).length;
+
+    const years = movies
+        .map(n => new Date(n.release).getFullYear())
+        .filter(y => !isNaN(y));
+
+    const phases = new Set(movies.map(n => n.phase)).size;
+
+    const plural = (n, word) => `<b>${n}</b> ${word}${n === 1 ? "" : "s"}`;
+
+    const stats = [
+        plural(count("movie"), "film"),
+        `<b>${count("show")}</b> series`,
+        plural(count("special"), "special"),
+        plural(phases, "phase"),
+        years.length ? `<b>${Math.min(...years)}–${Math.max(...years)}</b>` : ""
+    ].filter(Boolean);
+
+    statsEl.innerHTML = stats
+        .map(html => `<span class="landing-stat">${html}</span>`)
+        .join("");
+
+    statsEl.classList.add("ready");
+
+});
+
+//----------------------------------
+// Landing branch preview: centre it on
+// the logo (not the middle of the
+// screen), so the branches grow out
+// of the logo the way the mind map
+// grows out of the hub. Uses layout
+// offsets, not getBoundingClientRect,
+// so the card's fade-in slide doesn't
+// throw it off.
+//----------------------------------
+
+const landingCard = document.getElementById("landing-card");
+const landingLogo = landingCard ? landingCard.querySelector("img") : null;
+const landingBranches = document.getElementById("landing-branches");
+
+function alignLandingBranches(){
+
+    if(!landingCard || !landingLogo || !landingBranches) return;
+
+    if(!landingLogo.offsetHeight) return;   // image not loaded yet
+
+    const y = landingCard.offsetTop + landingLogo.offsetTop + landingLogo.offsetHeight / 2;
+
+    landingBranches.style.top = y + "px";
+
+}
+
+if(landingLogo){
+
+    if(landingLogo.complete) alignLandingBranches();
+
+    landingLogo.addEventListener("load", alignLandingBranches);
+
+}
+
+window.addEventListener("resize", alignLandingBranches);
+
+// Matches the fade length in css/landing.css (#landing.leaving).
+const LANDING_FADE_MS = 500;
+
 async function enter(viewKey){
 
-    landing.style.display = "none";
+    // Fade the landing out while the archive appears behind
+    // it, instead of cutting straight across.
+    landing.classList.add("leaving");
+
+    setTimeout(() => {
+
+        if(landing.classList.contains("leaving")) landing.style.display = "none";
+
+    }, LANDING_FADE_MS);
 
     viewport.style.display = "block";
 
@@ -58,6 +146,23 @@ async function enter(viewKey){
 
 button.addEventListener("click", () => enter("complete"));
 
+// Pressing Enter on the landing page does the same as the
+// button (the hint under it says so).
+window.addEventListener("keydown", e => {
+
+    if(e.key !== "Enter") return;
+
+    if(landing.style.display === "none" || landing.classList.contains("leaving")) return;
+
+    // A focused button already fires click on Enter.
+    if(document.activeElement === button) return;
+
+    e.preventDefault();
+
+    enter("complete");
+
+});
+
 //----------------------------------
 // Manual way back to landing (see
 // ui/panel.js — the "MCU Archive"
@@ -70,7 +175,11 @@ button.addEventListener("click", () => enter("complete"));
 
 window.addEventListener("mcu:go-to-landing", () => {
 
+    landing.classList.remove("leaving");
+
     landing.style.display = "flex";
+
+    alignLandingBranches();
 
     viewport.style.display = "none";
 
