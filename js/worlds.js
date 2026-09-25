@@ -8,12 +8,13 @@
 //   xmen  — data/xmen.json, the Fox X-Men films plus
 //           Marvel Studios' X-Men '97, grouped by era
 //   spider — data/spiderman.json, the Raimi and Amazing
-//           Spider-Man films plus Sony's animated
-//           Spider-Verse, grouped by era
+//           Spider-Man films, Sony's animated Spider-Verse
+//           and Tom Holland's MCU films, grouped by era
 //
 // Those were their own continuities; they're tied to the
 // MCU through the multiverse. Deadpool & Wolverine and
-// No Way Home each appear in two worlds as the bridge.
+// Tom Holland's Spider-Man films (No Way Home is the
+// crossover) appear in two worlds.
 //
 // X-Men eras use group numbers 11+ and Spider-Man eras
 // 21+ (in each file's "phase" field) so they can never be
@@ -60,7 +61,7 @@ export const SPIDER_ERAS = {
     21: "Raimi Trilogy",
     22: "The Amazing Spider-Man",
     23: "Spider-Verse",
-    24: "Multiverse"
+    24: "MCU Spider-Man"
 
 };
 

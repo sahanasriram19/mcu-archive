@@ -86,6 +86,22 @@
         "poster": ""
     },
     {
+        "id": "spiderman1",
+        "title": "Spider-Man: Homecoming",
+        "type": "movie",
+        "phase": 24,
+        "saga": "marvel-studios",
+        "release": "2017-07-07",
+        "timeline": 9,
+        "colour": "255,190,60",
+        "characters": [
+            "Peter Parker (Tom Holland)",
+            "Adrian Toomes",
+            "Tony Stark"
+        ],
+        "poster": ""
+    },
+    {
         "id": "intospiderverse",
         "title": "Spider-Man: Into the Spider-Verse",
         "type": "movie",
@@ -98,6 +114,52 @@
             "Miles Morales",
             "Gwen Stacy (Spider-Gwen)",
             "Peter B. Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanffh",
+        "title": "Spider-Man: Far From Home",
+        "type": "movie",
+        "phase": 24,
+        "saga": "marvel-studios",
+        "release": "2019-07-02",
+        "timeline": 10,
+        "colour": "255,190,60",
+        "characters": [
+            "Peter Parker (Tom Holland)",
+            "Quentin Beck",
+            "MJ"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermannwh",
+        "title": "Spider-Man: No Way Home",
+        "type": "movie",
+        "phase": 24,
+        "saga": "marvel-studios",
+        "release": "2021-12-17",
+        "timeline": 11,
+        "colour": "255,190,60",
+        "characters": [
+            "Peter Parker (Tom Holland)",
+            "Peter Parker (Tobey Maguire)",
+            "Peter Parker (Andrew Garfield)",
+            "Norman Osborn",
+            "Otto Octavius",
+            "Max Dillon",
+            "Curt Connors",
+            "Sandman"
+        ],
+        "watchBefore": [
+            "spiderman2002",
+            "spiderman2",
+            "spiderman3",
+            "amazingspiderman",
+            "amazingspiderman2",
+            "spiderman1",
+            "spidermanffh"
         ],
         "poster": ""
     },
@@ -119,6 +181,20 @@
         "poster": ""
     },
     {
+        "id": "spidermanbnd",
+        "title": "Spider-Man: Brand New Day",
+        "type": "movie",
+        "phase": 24,
+        "saga": "marvel-studios",
+        "release": "2026-07-31",
+        "timeline": 12,
+        "colour": "255,190,60",
+        "characters": [
+            "Peter Parker (Tom Holland)"
+        ],
+        "poster": ""
+    },
+    {
         "id": "beyondspiderverse",
         "title": "Spider-Man: Beyond the Spider-Verse",
         "type": "movie",
@@ -135,34 +211,6 @@
         "watchBefore": [
             "intospiderverse",
             "acrossspiderverse"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "spidermannwh",
-        "title": "Spider-Man: No Way Home",
-        "type": "movie",
-        "phase": 24,
-        "saga": "marvel-studios",
-        "release": "2021-12-17",
-        "timeline": 9,
-        "colour": "255,190,60",
-        "characters": [
-            "Peter Parker (Tom Holland)",
-            "Peter Parker (Tobey Maguire)",
-            "Peter Parker (Andrew Garfield)",
-            "Norman Osborn",
-            "Otto Octavius",
-            "Max Dillon",
-            "Curt Connors",
-            "Sandman"
-        ],
-        "watchBefore": [
-            "spiderman2002",
-            "spiderman2",
-            "spiderman3",
-            "amazingspiderman",
-            "amazingspiderman2"
         ],
         "poster": ""
     }

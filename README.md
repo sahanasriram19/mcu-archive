@@ -15,7 +15,7 @@ Enter the archive and the whole MCU flies outward from a central hub, forming a 
 - **Release Order** — a left-to-right timeline in real-world release order.
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
 - **X-Men World** — a second world in the same app: the Fox X-Men films plus *X-Men '97*, with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.
-- **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*), with *No Way Home* as the bridge to the MCU. Same five views, grouped into eras.
+- **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) and Tom Holland's MCU films, with *No Way Home* as the crossover. Same five views, grouped into eras.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
 Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB.
@@ -46,7 +46,7 @@ mcu-archive/
 ├── data/
 │   ├── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
 │   ├── xmen.json             # the X-Men world: Fox films + X-Men '97, grouped by era
-│   └── spiderman.json        # the Spider-Man world: Raimi, Amazing and Spider-Verse films
+│   └── spiderman.json        # the Spider-Man world: Raimi, Amazing, Spider-Verse and Tom Holland films
 ├── css/
 │   ├── main.css
 │   ├── background.css

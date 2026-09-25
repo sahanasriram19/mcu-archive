@@ -235,6 +235,7 @@ const SECTIONS = [
             // in the phone bar when that would read awkwardly.
             { label: "Tobey Maguire's Spider-Man", character: "Peter Parker (Tobey Maguire)", journey: "Tobey Maguire's Journey" },
             { label: "Andrew Garfield's Spider-Man", character: "Peter Parker (Andrew Garfield)", journey: "Andrew Garfield's Journey" },
+            { label: "Tom Holland's Spider-Man", character: "Peter Parker (Tom Holland)", journey: "Tom Holland's Journey" },
             { label: "Miles Morales", character: "Miles Morales" },
             { label: "Spider-Gwen", character: "Gwen Stacy (Spider-Gwen)" },
             { label: "Green Goblin", character: "Norman Osborn" },

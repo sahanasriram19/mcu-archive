@@ -37,7 +37,7 @@ export const PHASE_COLOURS = {
     21: "220,45,55",    // Raimi Trilogy — red
     22: "40,120,230",   // The Amazing Spider-Man — blue
     23: "240,70,170",   // Spider-Verse — magenta
-    24: "255,190,60"    // Multiverse (No Way Home) — gold
+    24: "255,190,60"    // MCU Spider-Man (Tom Holland) — gold
 
 };
 
@@ -71,7 +71,7 @@ export const HIGHLIGHT_COLOURS = {
     21: "255,70,80",    // Raimi Trilogy
     22: "70,150,255",   // The Amazing Spider-Man
     23: "255,90,190",   // Spider-Verse
-    24: "255,200,70"    // Multiverse
+    24: "255,200,70"    // MCU Spider-Man
 
 };
 
