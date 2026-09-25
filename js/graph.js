@@ -56,6 +56,9 @@ function createNode(movie){
         // Hand-picked "watch these first" ids (upcoming titles
         // in mcu.json); see js/upcoming.js for how it's used.
         watchBefore:movie.watchBefore || [],
+        // e.g. "cancelled" — kept on the map, but never
+        // counted down to (js/upcoming.js).
+        status:movie.status || "",
         colour:movie.colour || "255,255,255",
         poster:movie.poster,
 

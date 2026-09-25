@@ -240,7 +240,11 @@ export async function showMovieDetails(node) {
 
     const metaParts = [];
 
-    if (node.release) {
+    if (node.status === "cancelled") {
+
+        metaParts.push("Cancelled");
+
+    } else if (node.release) {
 
         metaParts.push(
             isUpcoming(node)
