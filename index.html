@@ -1,219 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
+//==================================================
+// 3D TILT
+//
+// Cards lean towards the mouse, with a soft light that
+// follows it, as if they were real objects on a desk:
+//
+//   • the countdown cards (top right)
+//   • the small posters in "Watch before this"
+//   • the big poster in the details card, which drifts
+//     a little inside its frame instead of tilting
+//
+// Mouse only — touch screens have nothing to follow — and
+// off when the OS asks for reduced motion. The look lives
+// in css/tilt.css; this file only sets four CSS variables
+// on whatever is under the pointer:
+//
+//   --rx, --ry   tilt in degrees
+//   --gx, --gy   where the light sits (percent)
+//==================================================
 
-<head>
+const TARGETS = ".countdown-card, .watch-poster, #movie-details-poster";
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+const MAX_TILT = 10;          // degrees at the card's edge
+const POSTER_DRIFT = 10;      // px the details poster drifts
 
-    <!-- Colours the phone browser's address bar to match. -->
-    <meta name="theme-color" content="#090B10">
+const canHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    <title>MCU Archive</title>
+let current = null;
 
-    <link rel="icon" type="image/png" href="assets/favicon.png">
+let frame = 0;
 
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/background.css">
-    <link rel="stylesheet" href="css/landing.css">
-    <link rel="stylesheet" href="css/world.css">
-    <link rel="stylesheet" href="css/cards.css">
-    <link rel="stylesheet" href="css/panel.css">
-    <link rel="stylesheet" href="css/characters.css">
-    <link rel="stylesheet" href="css/movieDetails.css">
-    <link rel="stylesheet" href="css/search.css">
-    <link rel="stylesheet" href="css/upcoming.css">
-    <link rel="stylesheet" href="css/tilt.css">
-    <link rel="stylesheet" href="css/mobile.css"> 
+let lastEvent = null;
 
-</head>
+function reset(el){
 
-<body>
+    el.classList.remove("tilting");
 
-    <!-- Background -->
+    el.style.removeProperty("--rx");
+    el.style.removeProperty("--ry");
+    el.style.removeProperty("--px");
+    el.style.removeProperty("--py");
 
-    <div id="background">
+}
 
-        <div id="stars"></div>
+function apply(){
 
-        <div id="grid"></div>
+    frame = 0;
 
-        <div id="particles"></div>
+    if(!current || !lastEvent) return;
 
-    </div>
+    const r = current.getBoundingClientRect();
 
-    <!-- Landing -->
+    // -0.5 .. 0.5 across the card
+    const nx = (lastEvent.clientX - r.left) / r.width - 0.5;
+    const ny = (lastEvent.clientY - r.top) / r.height - 0.5;
 
-    <section id="landing">
+    current.style.setProperty("--gx", ((nx + 0.5) * 100).toFixed(1) + "%");
+    current.style.setProperty("--gy", ((ny + 0.5) * 100).toFixed(1) + "%");
 
-        <!-- The landing page scrolls: the hero first, then a 3D
-             fly-through of the MCU (js/intro.js). Everything
-             visible lives in this sticky, full-screen layer; the
-             spacer after it just gives the page its scroll length. -->
-        <div class="intro-sticky">
+    if(current.id === "movie-details-poster"){
 
-            <!-- 3D fly-through: posters and phase chapter titles,
-                 built from data/mcu.json by js/intro.js. -->
-            <div id="intro-stage" aria-hidden="true"></div>
+        // The art moves against the pointer, like looking
+        // through a window.
+        current.style.setProperty("--px", (-nx * POSTER_DRIFT).toFixed(1) + "px");
+        current.style.setProperty("--py", (-ny * POSTER_DRIFT).toFixed(1) + "px");
 
-            <!-- A preview of the mind map inside: faint branches in
-                 the seven phase colours that draw themselves outward
-                 from behind the logo. Decorative only. -->
-            <svg id="landing-branches" viewBox="-560 -420 1120 840" aria-hidden="true" focusable="false">
-                <g class="lb" style="--c:248,72,94;--d:0.15s">
-                <path d="M0 0 C0.0 -64.3 0.0 -88.7 0.0 -153.0"/>
-                <path class="tw" d="M0.0 -153.0 C0.0 -218.6 -54.6 -228.9 -69.8 -292.7"/>
-                <circle cx="-69.8" cy="-292.7" r="5"/>
-                <path class="tw2" d="M-69.8 -292.7 C-79.6 -333.8 -58.8 -351.5 -65.8 -393.2"/>
-                <circle class="c2" cx="-65.8" cy="-393.2" r="3.5"/>
-                <path class="tw" d="M0.0 -153.0 C0.0 -213.5 0.0 -236.5 0.0 -297.0"/>
-                <circle cx="0.0" cy="-297.0" r="5"/>
-                <path class="tw" d="M0.0 -153.0 C0.0 -218.6 54.6 -228.9 69.8 -292.7"/>
-                <circle cx="69.8" cy="-292.7" r="5"/>
-                <path class="tw2" d="M69.8 -292.7 C80.2 -336.2 106.8 -343.8 120.0 -386.5"/>
-                <circle class="c2" cx="120.0" cy="-386.5" r="3.5"/>
-                </g>
-                <g class="lb" style="--c:251,140,40;--d:0.27s">
-                <path d="M0 0 C69.8 -40.1 96.3 -55.3 166.1 -95.4"/>
-                <path class="tw" d="M166.1 -95.4 C226.7 -130.2 220.0 -177.9 274.3 -221.8"/>
-                <circle cx="274.3" cy="-221.8" r="5"/>
-                <path class="tw2" d="M274.3 -221.8 C315.7 -255.3 342.9 -250.7 385.9 -282.2"/>
-                <circle class="c2" cx="385.9" cy="-282.2" r="3.5"/>
-                <path class="tw" d="M166.1 -95.4 C231.8 -133.1 256.8 -147.5 322.5 -185.2"/>
-                <circle cx="322.5" cy="-185.2" r="5"/>
-                <path class="tw" d="M166.1 -95.4 C239.3 -137.5 282.9 -112.1 361.4 -143.2"/>
-                <circle cx="361.4" cy="-143.2" r="5"/>
-                <path class="tw2" d="M361.4 -143.2 C414.7 -164.3 440.4 -154.4 494.5 -173.4"/>
-                <circle class="c2" cx="494.5" cy="-173.4" r="3.5"/>
-                </g>
-                <g class="lb" style="--c:250,210,30;--d:0.39s">
-                <path d="M0 0 C87.0 14.3 120.2 19.7 207.2 34.0"/>
-                <path class="tw" d="M207.2 34.0 C294.1 48.3 324.3 -7.2 412.3 -9.1"/>
-                <circle cx="412.3" cy="-9.1" r="5"/>
-                <path class="tw2" d="M412.3 -9.1 C470.5 -10.4 491.7 6.9 549.9 7.7"/>
-                <circle class="c2" cx="549.9" cy="7.7" r="3.5"/>
-                <path class="tw" d="M207.2 34.0 C290.7 47.7 324.3 32.8 408.5 41.3"/>
-                <circle cx="408.5" cy="41.3" r="5"/>
-                <path class="tw" d="M207.2 34.0 C287.6 47.2 313.5 72.1 392.9 90.4"/>
-                <circle cx="392.9" cy="90.4" r="5"/>
-                <path class="tw2" d="M392.9 90.4 C446.7 102.8 461.6 124.9 514.9 139.3"/>
-                <circle class="c2" cx="514.9" cy="139.3" r="3.5"/>
-                <path class="tw" d="M207.2 34.0 C285.6 46.9 291.5 109.1 366.0 137.0"/>
-                <circle cx="366.0" cy="137.0" r="5"/>
-                </g>
-                <g class="lb" style="--c:64,120,255;--d:0.51s">
-                <path d="M0 0 C38.7 57.9 53.5 79.9 92.2 137.8"/>
-                <path class="tw" d="M92.2 137.8 C138.0 206.2 204.2 173.2 266.9 226.4"/>
-                <circle cx="266.9" cy="226.4" r="5"/>
-                <path class="tw2" d="M266.9 226.4 C302.4 256.5 300.6 282.4 334.5 314.3"/>
-                <circle class="c2" cx="334.5" cy="314.3" r="3.5"/>
-                <path class="tw" d="M92.2 137.8 C131.1 196.0 165.5 201.6 209.9 255.7"/>
-                <circle cx="209.9" cy="255.7" r="5"/>
-                <path class="tw" d="M92.2 137.8 C127.3 190.2 117.3 221.9 146.8 277.6"/>
-                <circle cx="146.8" cy="277.6" r="5"/>
-                <path class="tw2" d="M146.8 277.6 C166.8 315.4 152.2 337.7 169.8 376.7"/>
-                <circle class="c2" cx="169.8" cy="376.7" r="3.5"/>
-                <path class="tw" d="M92.2 137.8 C128.2 191.6 62.4 228.9 79.4 291.4"/>
-                <circle cx="79.4" cy="291.4" r="5"/>
-                </g>
-                <g class="lb" style="--c:196,110,255;--d:0.63s">
-                <path d="M0 0 C-38.7 57.9 -53.5 79.9 -92.2 137.8"/>
-                <path class="tw" d="M-92.2 137.8 C-127.1 189.9 -90.3 227.3 -113.5 285.5"/>
-                <circle cx="-113.5" cy="285.5" r="5"/>
-                <path class="tw2" d="M-113.5 285.5 C-130.6 328.4 -157.8 333.1 -177.6 374.8"/>
-                <circle class="c2" cx="-177.6" cy="374.8" r="3.5"/>
-                <path class="tw" d="M-92.2 137.8 C-128.7 192.3 -142.5 213.1 -179.0 267.6"/>
-                <circle cx="-179.0" cy="267.6" r="5"/>
-                <path class="tw" d="M-92.2 137.8 C-134.3 200.7 -186.1 188.1 -239.3 241.9"/>
-                <circle cx="-239.3" cy="241.9" r="5"/>
-                <path class="tw2" d="M-239.3 241.9 C-275.6 278.6 -302.9 276.0 -341.0 310.7"/>
-                <circle class="c2" cx="-341.0" cy="310.7" r="3.5"/>
-                </g>
-                <g class="lb" style="--c:60,225,120;--d:0.75s">
-                <path d="M0 0 C-87.0 14.3 -120.2 19.7 -207.2 34.0"/>
-                <path class="tw" d="M-207.2 34.0 C-286.4 47.0 -303.9 91.1 -380.8 114.1"/>
-                <circle cx="-380.8" cy="114.1" r="5"/>
-                <path class="tw2" d="M-380.8 114.1 C-436.4 130.8 -461.5 119.2 -517.7 133.7"/>
-                <circle class="c2" cx="-517.7" cy="133.7" r="3.5"/>
-                <path class="tw" d="M-207.2 34.0 C-289.1 47.4 -320.3 52.6 -402.2 66.1"/>
-                <circle cx="-402.2" cy="66.1" r="5"/>
-                <path class="tw" d="M-207.2 34.0 C-292.4 48.0 -325.7 12.7 -411.9 16.1"/>
-                <circle cx="-411.9" cy="16.1" r="5"/>
-                <path class="tw2" d="M-411.9 16.1 C-470.2 18.4 -491.7 1.5 -550.0 1.7"/>
-                <circle class="c2" cx="-550.0" cy="1.7" r="3.5"/>
-                </g>
-                <g class="lb" style="--c:45,212,191;--d:0.87s">
-                <path d="M0 0 C-69.8 -40.1 -96.3 -55.3 -166.1 -95.4"/>
-                <path class="tw" d="M-166.1 -95.4 C-235.4 -135.2 -271.2 -130.2 -343.2 -164.8"/>
-                <circle cx="-343.2" cy="-164.8" r="5"/>
-                <path class="tw2" d="M-343.2 -164.8 C-389.2 -186.9 -396.7 -211.9 -441.7 -235.9"/>
-                <circle class="c2" cx="-441.7" cy="-235.9" r="3.5"/>
-                <path class="tw" d="M-166.1 -95.4 C-228.8 -131.4 -239.8 -163.5 -299.5 -204.2"/>
-                <circle cx="-299.5" cy="-204.2" r="5"/>
-                </g>
-            </svg>
+    } else {
 
-            <div id="landing-card">
+        current.style.setProperty("--rx", (-ny * MAX_TILT).toFixed(2) + "deg");
+        current.style.setProperty("--ry", (nx * MAX_TILT).toFixed(2) + "deg");
 
-                <img src="assets/marvel-logo.jpg" alt="Marvel">
+    }
 
-                <h1 class="landing-title">MCU Archive</h1>
+    current.classList.add("tilting");
 
-                <p class="landing-tagline">
-                    Every film and series in the Marvel Cinematic Universe,
-                    mapped as one branching universe.
-                </p>
+}
 
-                <!-- Filled in from data/mcu.json by app.js, so it stays
-                     right as titles are added. Hidden until then. -->
-                <div id="landing-stats" aria-live="polite"></div>
+function onMove(e){
 
-                <button id="enterButton">
-                    Enter the Archive <span class="enter-arrow" aria-hidden="true">&rarr;</span>
-                </button>
+    if(!canHover.matches || reduceMotion.matches || e.pointerType !== "mouse") return;
 
-                <div class="landing-hint">or press <kbd>Enter</kbd></div>
+    const el = e.target instanceof Element ? e.target.closest(TARGETS) : null;
 
-            </div>
+    if(el !== current){
 
-            <!-- Shown at the start: invites the scroll. -->
-            <div class="intro-scroll-hint" aria-hidden="true">
-                <span>Scroll to fly through the MCU</span>
-                <span class="intro-scroll-chevron">&#8964;</span>
-            </div>
+        if(current) reset(current);
 
-            <!-- Shown once the fly-through has started. -->
-            <button id="intro-skip" type="button">Skip to the archive &rarr;</button>
+        current = el;
 
-            <!-- Shown at the end of the fly-through. -->
-            <div id="intro-end">
-                <div class="intro-end-kicker">That's the MCU so far</div>
-                <div class="intro-end-title">Now explore how it all connects</div>
-                <button id="intro-end-enter" type="button">
-                    Enter the Archive <span class="enter-arrow" aria-hidden="true">&rarr;</span>
-                </button>
-            </div>
+    }
 
-        </div>
+    if(!current) return;
 
-        <div class="intro-spacer" aria-hidden="true"></div>
+    lastEvent = e;
 
-    </section>
+    if(!frame) frame = requestAnimationFrame(apply);
 
-        <!-- Universe -->
+}
 
-        <canvas id="universe"></canvas>
+export function initTilt(){
 
-        <!-- World -->
+    document.addEventListener("pointermove", onMove, { passive: true });
 
-        <main id="viewport">
+    // Leaving the window: settle whatever was tilted.
+    document.addEventListener("pointerleave", () => {
 
-            <div id="world"></div>
+        if(current) reset(current);
 
-        </main>
+        current = null;
 
-    <script type="module" src="js/app.js"></script>
+    });
 
-</body>
+    document.documentElement.addEventListener("mouseleave", () => {
 
-</html>
+        if(current) reset(current);
+
+        current = null;
+
+    });
+
+}

@@ -157,6 +157,12 @@ export function initIntro(nodes, onEnter){
 
     if(reduceMotion) return;
 
+    // "Scroll to fly through the MCU" also works as a
+    // button: it gets the flight going.
+    hint.addEventListener("click", () =>
+        landing.scrollBy({ top: Math.round(window.innerHeight * 0.9), behavior: "smooth" })
+    );
+
     const titles = nodes.filter(n => !n.isBranch && n.status !== "cancelled");
 
     const released = titles.filter(n => !isUpcoming(n));

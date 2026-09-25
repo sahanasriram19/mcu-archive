@@ -260,25 +260,6 @@
     to   { box-shadow: 0 0 18px rgba(255,37,74,.9), 0 0 38px rgba(255,30,60,.5), 0 0 60px rgba(105,5,5,.5); }
 }
 
-.landing-hint {
-    margin-top: 12px;
-    font-size: .75rem;
-    color: rgba(255,255,255,.4);
-}
-
-.landing-hint kbd {
-    padding: 1px 6px;
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: .7rem;
-}
-
-/* Touch screens have no Enter key. */
-@media (hover: none) {
-    .landing-hint { display: none; }
-}
-
 /*--------------------------------------------------
   Small screens
 --------------------------------------------------*/
@@ -289,7 +270,7 @@
 
     .landing-tagline { max-width: 300px; }
 
-    #enterButton { margin-top: 24px; }
+    #landing-card .intro-scroll-hint { margin-top: 24px; }
 
 
 }
@@ -314,9 +295,10 @@
 
     .landing-stat { padding: 3px 10px; font-size: .72rem; }
 
-    #enterButton { margin-top: 16px; padding: 10px 26px; }
+    #landing-card .intro-scroll-hint { margin-top: 16px; }
 
-    .landing-hint { display: none; }
+    #landing-card .intro-scroll-hint > span:first-child { padding: 9px 20px; }
+
 
 }
 
@@ -459,21 +441,56 @@
 
 /* "Scroll to fly through the MCU" at the bottom. */
 .intro-scroll-hint {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: max(24px, env(safe-area-inset-bottom));
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    font-size: 12px;
-    letter-spacing: .12em;
+    gap: 4px;
+    margin-top: 30px;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: clamp(.8rem, 1.6vw, .9rem);
+    font-weight: 700;
+    letter-spacing: .16em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.55);
-    pointer-events: none;
-    transition: opacity .3s ease;
+    color: rgba(255,255,255,.85);
+    cursor: pointer;
+    transition: opacity .3s ease, color .2s ease;
 }
+
+/* The words sit in a softly glowing pill. */
+.intro-scroll-hint > span:first-child {
+    padding: 12px 26px;
+    border: 1px solid rgba(230,36,41,.55);
+    border-radius: 999px;
+    background: rgba(230,36,41,.12);
+    box-shadow: 0 0 22px rgba(230,36,41,.25);
+    animation: hint-glow 2.4s ease-in-out infinite alternate;
+    transition: background .2s ease;
+}
+
+.intro-scroll-hint:hover { color: #fff; }
+
+.intro-scroll-hint:hover > span:first-child { background: rgba(230,36,41,.25); }
+
+.intro-scroll-hint:focus-visible {
+    outline: none;
+}
+
+.intro-scroll-hint:focus-visible > span:first-child {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
+@keyframes hint-glow {
+    from { box-shadow: 0 0 12px rgba(230,36,41,.2); }
+    to   { box-shadow: 0 0 28px rgba(230,36,41,.45); }
+}
+
+/* The Enter button only shows when the fly-through is off
+   (reduced motion, below); otherwise it waits at the end. */
+#enterButton { display: none; }
 
 .intro-scroll-chevron {
     font-size: 22px;
@@ -574,6 +591,7 @@
     #intro-skip,
     #intro-end { display: none; }
 
-    .intro-scroll-chevron { animation: none; }
+    /* No fly-through, so the Enter button goes straight in. */
+    #enterButton { display: inline-flex; }
 
 }
