@@ -5,6 +5,8 @@ import {
 
     graph,
 
+    worldNodes,
+
     initialiseGraph,
 
     updateGraph
@@ -12,12 +14,14 @@ import {
 } from "./graph.js";
 
 import { updateArchive } from "./archive.js";
-import { setView } from "./viewManager.js";
+import { setView, getCurrentView } from "./viewManager.js";
 
 import "./input.js";
 import { initialisePanel } from "../ui/panel.js";
 import { initCharacterPanel } from "./characters/panel.js";
 import { initUpcoming } from "./upcoming.js";
+import { initIntro, setIntroActive } from "./intro.js";
+import { initTilt } from "./tilt.js";
 
 //==========================================
 // LANDING
@@ -53,6 +57,13 @@ const statsEl = document.getElementById("landing-stats");
 // Countdown to the next release (top-right card inside
 // the archive) needs the titles loaded first.
 graphReady.then(initUpcoming);
+
+// Cards lean towards the mouse (js/tilt.js).
+initTilt();
+
+// The landing page's 3D scroll fly-through (js/intro.js),
+// built from the MCU titles once they've loaded.
+graphReady.then(() => initIntro(worldNodes.mcu, () => enter("complete")));
 
 graphReady.then(() => {
 
@@ -134,6 +145,9 @@ async function enter(viewKey){
 
     onLanding = false;
 
+    // The fly-through stops steering the camera.
+    setIntroActive(false);
+
     setTimeout(() => {
 
         if(landing.classList.contains("leaving")) landing.style.display = "none";
@@ -152,6 +166,12 @@ async function enter(viewKey){
         setView(viewKey);
 
         initialisePanel();
+
+    } else {
+
+        // Back from the landing page: the fly-through moved
+        // the camera, so frame the current view again.
+        setView(getCurrentView());
 
     }
 
@@ -192,7 +212,10 @@ window.addEventListener("mcu:go-to-landing", () => {
 
     onLanding = true;
 
-    landing.style.display = "flex";
+    landing.style.display = "block";
+
+    // Start the fly-through again from the top.
+    setIntroActive(true);
 
     alignLandingBranches();
 

@@ -1,0 +1,104 @@
+/*==================================================
+  3D TILT & DETAILS CARD SWING-IN
+  (Behaviour: js/tilt.js sets --rx/--ry, --gx/--gy and
+  --px/--py on the card under the mouse.)
+==================================================*/
+
+/*--------------------------------------------------
+  Tilting cards: countdown cards + watch-before posters
+--------------------------------------------------*/
+
+.countdown-card,
+.watch-poster{
+    position:relative;
+    transform:perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+    transition:transform .45s cubic-bezier(.2,.8,.2,1),
+               border-color .2s ease, box-shadow .2s ease;
+}
+
+/* While following the mouse: quick, so it feels attached. */
+.countdown-card.tilting,
+.watch-poster.tilting{
+    transition:transform .1s linear,
+               border-color .2s ease, box-shadow .2s ease;
+}
+
+/* The hover lift on watch-before posters, kept alongside
+   the tilt. */
+.watch-item:hover .watch-poster,
+.watch-item:focus-visible .watch-poster{
+    transform:perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+}
+
+/* The light that follows the mouse. */
+.countdown-card::after,
+.watch-poster::after,
+#movie-details-poster::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    pointer-events:none;
+    background:radial-gradient(circle at var(--gx, 50%) var(--gy, 50%),
+        rgba(255,255,255,.16), rgba(255,255,255,0) 60%);
+    opacity:0;
+    transition:opacity .35s ease;
+}
+
+.countdown-card.tilting::after,
+.watch-poster.tilting::after,
+#movie-details-poster.tilting::after{
+    opacity:1;
+}
+
+/*--------------------------------------------------
+  Details poster: drifts inside its frame
+--------------------------------------------------*/
+
+#movie-details-poster{
+    position:relative;
+}
+
+#movie-details-poster img{
+    transform:scale(1.05) translate(var(--px, 0px), var(--py, 0px));
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
+}
+
+#movie-details-poster.tilting img{
+    transition:transform .15s linear;
+}
+
+/*--------------------------------------------------
+  Details card: swings up into place
+--------------------------------------------------*/
+
+@media (min-width: 769px){
+
+    #movie-details-card{
+        transform-origin:50% 100%;
+        transform:perspective(1400px) rotateX(14deg) translateY(40px) scale(.94);
+        transition:transform .55s cubic-bezier(.2,.8,.2,1);
+    }
+
+    #movie-details-overlay.open #movie-details-card{
+        transform:perspective(1400px) rotateX(0deg) translateY(0) scale(1);
+    }
+
+}
+
+/*--------------------------------------------------
+  Reduced motion: no tilt, no drift, no swing
+--------------------------------------------------*/
+
+@media (prefers-reduced-motion: reduce){
+
+    .countdown-card,
+    .watch-poster,
+    .watch-item:hover .watch-poster,
+    #movie-details-poster img,
+    #movie-details-card,
+    #movie-details-overlay.open #movie-details-card{
+        transform:none;
+    }
+
+}

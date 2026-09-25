@@ -8,7 +8,7 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 ## What it does
 
-Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
+Before you enter, scroll the landing page to fly through the MCU in 3D: each Phase opens with a title card, its films and series float past on either side, and a "Coming Soon" chapter closes it out (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
 - **Complete MCU** — every title, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
 - **Phases** — six (well, seven — Phase 0 covers the Defenders-saga shows) separate mini mind maps, one per phase, so you can compare each era's shape at a glance.
@@ -18,7 +18,7 @@ Enter the archive and the whole MCU flies outward from a central hub, forming a 
 - **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) and Tom Holland's MCU films, with *No Way Home* as the crossover. Same five views, grouped into eras.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
-Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB.
+Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. On a mouse, the countdown cards and small posters lean towards the cursor with a soft light, and the details card swings up into place.
 
 The whole thing sits on top of a custom-built starfield/nebula background engine (stars, energy particles, shooting stars, all on a seeded deterministic generator so it looks the same on every visit rather than randomly recoloring itself).
 
@@ -58,6 +58,7 @@ mcu-archive/
 │   ├── characters.css
 │   ├── movieDetails.css
 │   ├── upcoming.css           # countdown card, watch-list banner, "Watch before this"
+│   ├── tilt.css               # 3D tilt + light on cards, details card swing-in
 │   └── mobile.css             # phone-only overrides; desktop untouched
 ├── ui/
 │   ├── panel.js               # the top-left view-switcher panel
@@ -83,6 +84,8 @@ mcu-archive/
     ├── tmdbConfig.js                         # your TMDB API key goes here
     ├── movieDetails.js                        # the click-to-view details card
     ├── upcoming.js                             # countdown to the next release + "What should I watch before…?"
+    ├── intro.js                                # the landing page's 3D scroll fly-through
+    ├── tilt.js                                 # cards lean towards the mouse
     ├── characters/                             # the Character Journeys sub-feature
     │   ├── data.js                              # auto-derives the character roster from mcu.json
     │   ├── characterJourney.js                   # which character is currently selected

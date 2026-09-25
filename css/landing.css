@@ -5,20 +5,38 @@
   whose branches draw outward from behind the logo.
 ==================================================*/
 
+/* The landing page scrolls (the 3D fly-through, see
+   js/intro.js): #landing is the scroll container, and
+   everything visible sits in .intro-sticky, pinned to the
+   screen while .intro-spacer supplies the scroll length. */
 #landing {
     position: fixed;
     inset: 0;
+    display: block;
+    z-index: 20;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    transition: opacity .5s ease, transform .5s ease;
+}
+
+#landing::-webkit-scrollbar { display: none; }
+
+.intro-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 20;
     overflow: hidden;
-    transition: opacity .5s ease, transform .5s ease;
 
-    /* Sits the content a little below true centre (it
-       read as top-heavy once the footer was gone). The
-       branch preview follows the logo, see app.js. */
+    /* Sits the hero a little below true centre (it read
+       as top-heavy once the footer was gone). The branch
+       preview follows the logo, see app.js. */
     padding-top: min(12vh, 110px);
 }
 
@@ -106,7 +124,9 @@
     text-align: center;
     padding: 0 20px;
     max-width: 560px;
-    animation: card-in .9s ease both;
+    /* backwards, not both: once it has played, the scroll
+       fade-out (js/intro.js) is free to move the hero. */
+    animation: card-in .9s ease backwards;
 }
 
 /* Soft dark backdrop behind the text, so the branch
@@ -189,7 +209,8 @@
   Enter button
 --------------------------------------------------*/
 
-#enterButton {
+#enterButton,
+#intro-end-enter {
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -213,19 +234,23 @@
     transition: transform .2s ease;
 }
 
-#enterButton:hover {
+#enterButton:hover,
+#intro-end-enter:hover {
     transform: scale(1.05);
     filter: brightness(1.12);
 }
 
-#enterButton:hover .enter-arrow { transform: translateX(4px); }
+#enterButton:hover .enter-arrow,
+#intro-end-enter:hover .enter-arrow { transform: translateX(4px); }
 
-#enterButton:active {
+#enterButton:active,
+#intro-end-enter:active {
     transform: scale(.97);
     filter: brightness(.95);
 }
 
-#enterButton:focus-visible {
+#enterButton:focus-visible,
+#intro-end-enter:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 4px;
 }
@@ -272,7 +297,7 @@
 @media (max-height: 500px) {
 
     /* No room to spare on a sideways phone: true centre. */
-    #landing { padding-top: 0; }
+    .intro-sticky { padding-top: 0; }
 
     /* Phones held sideways: everything has to fit in
        ~340-430px of height, or the Enter button ends up
@@ -306,5 +331,249 @@
     #landing-branches .lb path { animation: none; stroke-dashoffset: 0; }
 
     #landing-branches .lb circle { animation: none; opacity: .6; }
+
+}
+
+/*==================================================
+  3D FLY-THROUGH (js/intro.js)
+
+  Scrolling the landing page moves a camera forward
+  through space: posters float past on alternating sides,
+  each phase opens with a chapter title, and the end
+  offers the way in. Built with the browser's own 3D
+  (CSS perspective + translate3d), no library.
+==================================================*/
+
+#intro-stage {
+    position: absolute;
+    inset: 0;
+    perspective: 1000px;
+    perspective-origin: 50% 50%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.intro-item {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    /* Hidden until the camera gets near (js/intro.js). */
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* A poster floating in space. --pw is its width. */
+.intro-poster {
+    width: var(--pw, 220px);
+    aspect-ratio: 2 / 3;
+    margin-left: calc(var(--pw, 220px) / -2);
+    margin-top: calc(var(--pw, 220px) * -0.75);
+    border-radius: 12px;
+    overflow: hidden;
+    pointer-events: auto;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(var(--c), .45), rgba(var(--c), .15));
+    border: 1px solid rgba(var(--c), .6);
+    box-shadow: 0 0 40px rgba(var(--c), .35), 0 20px 40px rgba(0,0,0,.5);
+}
+
+.intro-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* No poster art (yet): the title on the card. */
+.intro-poster-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 14px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: rgba(255,255,255,.92);
+}
+
+/* Name + year under each poster. */
+.intro-caption {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--pw, 220px) * 0.75 + 12px);
+    transform: translateX(-50%);
+    width: calc(var(--pw, 220px) + 60px);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+    text-shadow: 0 2px 10px rgba(0,0,0,.8);
+    pointer-events: none;
+}
+
+.intro-caption small {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,.55);
+}
+
+/* A phase's chapter title. */
+.intro-chapter {
+    width: 900px;
+    margin-left: -450px;
+    margin-top: -90px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.intro-chapter-kicker {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .4em;
+    margin-right: -.4em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+}
+
+.intro-chapter-title {
+    margin-top: 6px;
+    font-size: 110px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: .02em;
+    color: rgb(var(--c));
+    text-shadow: 0 0 40px rgba(var(--c), .6), 0 0 90px rgba(var(--c), .35);
+}
+
+.intro-chapter-sub {
+    margin-top: 14px;
+    font-size: 20px;
+    color: rgba(255,255,255,.75);
+}
+
+/* "Scroll to fly through the MCU" at the bottom. */
+.intro-scroll-hint {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.55);
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+.intro-scroll-chevron {
+    font-size: 22px;
+    line-height: 1;
+    animation: hint-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes hint-bob {
+    0%, 100% { transform: translateY(0); opacity: .6; }
+    50%      { transform: translateY(6px); opacity: 1; }
+}
+
+/* Skip button, top right, once the fly-through starts. */
+#intro-skip {
+    position: absolute;
+    top: max(20px, env(safe-area-inset-top));
+    right: max(20px, env(safe-area-inset-right));
+    padding: 9px 16px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 999px;
+    background: rgba(17,22,30,.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease, background .2s ease;
+}
+
+#intro-skip.show {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+#intro-skip:hover { background: rgba(230,36,41,.25); }
+
+/* The end of the fly-through. */
+#intro-end {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(560px, 90vw);
+    transform: translate(-50%, -40%) scale(.96);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s ease, transform .5s ease;
+}
+
+#intro-end.show {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+}
+
+.intro-end-kicker {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.intro-end-title {
+    margin-top: 10px;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 800;
+    line-height: 1.15;
+    text-shadow: 0 4px 24px rgba(0,0,0,.6);
+}
+
+#intro-end-enter { margin-top: 26px; }
+
+@media (max-width: 600px) {
+
+    .intro-chapter { width: 92vw; margin-left: -46vw; }
+
+    .intro-chapter-title { font-size: 64px; }
+
+    .intro-chapter-sub { font-size: 16px; }
+
+    .intro-caption { font-size: 12px; }
+
+}
+
+/* Reduce motion: no fly-through — just the hero. */
+@media (prefers-reduced-motion: reduce) {
+
+    #intro-stage,
+    .intro-scroll-hint,
+    .intro-spacer,
+    #intro-skip,
+    #intro-end { display: none; }
+
+    .intro-scroll-chevron { animation: none; }
 
 }
