@@ -161,10 +161,10 @@ if(window.visualViewport){
 // VIEW SECTIONS — one per world (js/worlds.js)
 //
 // Each world gets its own section: a heading and that
-// world's views. They work as an accordion — one open at
-// a time — so the panel stays as short as before and
-// doesn't cover more of the map. Picking a view in the
-// other world's section switches worlds on the same page.
+// world's views. Each heading opens/closes its own
+// section, and several can be open together. Picking a
+// view in another world's section switches worlds on the
+// same page.
 //--------------------------------------------------
 
 const SECTIONS = [
@@ -253,19 +253,26 @@ const WORLD_SHORT = { xmen: "X-Men", spider: "Spider-Man" };
 
 const sectionEls = [];
 
+// Sections open and close independently — any number can
+// be open at once. (They used to work as an accordion,
+// where opening one closed the others.)
+function setSectionOpen(entry, open){
+
+    entry.el.classList.toggle("open", open);
+
+    entry.body.classList.toggle("open", open);
+
+    entry.head.setAttribute("aria-expanded", open ? "true" : "false");
+
+}
+
+// Make sure a world's section is open, leaving the others
+// exactly as they are.
 function openSection(world){
 
-    sectionEls.forEach(({ world: w, el, head, body }) => {
+    const entry = sectionEls.find(s => s.world === world);
 
-        const open = w === world;
-
-        el.classList.toggle("open", open);
-
-        body.classList.toggle("open", open);
-
-        head.setAttribute("aria-expanded", open ? "true" : "false");
-
-    });
+    if(entry && !entry.el.classList.contains("open")) setSectionOpen(entry, true);
 
 }
 
@@ -286,7 +293,9 @@ SECTIONS.forEach(section => {
     head.addEventListener("click", () => {
 
         // Toggle this section; opening it closes the other.
-        openSection(el.classList.contains("open") ? null : section.world);
+        const entry = sectionEls.find(s => s.el === el);
+
+        setSectionOpen(entry, !el.classList.contains("open"));
 
     });
 
@@ -423,10 +432,9 @@ function refreshActive(){
 
     });
 
-    // Keep the current world's section open.
-    const openEl = sectionEls.find(s => s.el.classList.contains("open"));
-
-    if(!openEl || openEl.world !== world) openSection(world);
+    // The current world's section is always open (others
+    // stay however you left them).
+    openSection(world);
 
 }
 

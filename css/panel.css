@@ -79,8 +79,8 @@
 }
 
 /* One section per world (ui/panel.js): a heading that
-   opens/closes it, and that world's view buttons. Only
-   one is open at a time. */
+   opens/closes it, and that world's view buttons. Any
+   number can be open at once. */
 .view-panel-section{
     display:flex;
     flex-direction:column;
