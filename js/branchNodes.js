@@ -31,7 +31,13 @@ export const PHASE_COLOURS = {
     12: "240,160,40",   // Wolverine — amber
     13: "40,190,170",   // First Class Saga — teal
     14: "225,45,60",    // Deadpool — red
-    15: "150,110,240"   // New Mutants & '97 — violet
+    15: "150,110,240",  // New Mutants & '97 — violet
+
+    // Spider-Man eras (js/worlds.js)
+    21: "220,45,55",    // Raimi Trilogy — red
+    22: "40,120,230",   // The Amazing Spider-Man — blue
+    23: "240,70,170",   // Spider-Verse — magenta
+    24: "255,190,60"    // Multiverse (No Way Home) — gold
 
 };
 
@@ -60,7 +66,12 @@ export const HIGHLIGHT_COLOURS = {
     12: "255,176,40",   // Wolverine
     13: "40,220,195",   // First Class Saga
     14: "255,60,80",    // Deadpool
-    15: "180,120,255"   // New Mutants & '97
+    15: "180,120,255",  // New Mutants & '97
+
+    21: "255,70,80",    // Raimi Trilogy
+    22: "70,150,255",   // The Amazing Spider-Man
+    23: "255,90,190",   // Spider-Verse
+    24: "255,200,70"    // Multiverse
 
 };
 

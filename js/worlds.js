@@ -1,21 +1,24 @@
 //==================================================
 // WORLDS
 //
-// The archive holds two worlds, each with its own data
+// The archive holds three worlds, each with its own data
 // file and its own set of views:
 //
 //   mcu   — data/mcu.json, grouped by Phase (0-6)
 //   xmen  — data/xmen.json, the Fox X-Men films plus
 //           Marvel Studios' X-Men '97, grouped by era
+//   spider — data/spiderman.json, the Raimi and Amazing
+//           Spider-Man films plus Sony's animated
+//           Spider-Verse, grouped by era
 //
-// The Fox films were their own continuity; they're tied
-// to the MCU through the multiverse, and Deadpool &
-// Wolverine appears in both worlds as the bridge.
+// Those were their own continuities; they're tied to the
+// MCU through the multiverse. Deadpool & Wolverine and
+// No Way Home each appear in two worlds as the bridge.
 //
-// X-Men eras use group numbers 11+ (in xmen.json's
-// "phase" field) so they can never be mistaken for an
-// MCU phase — the colour tables in branchNodes.js key
-// off the same numbers.
+// X-Men eras use group numbers 11+ and Spider-Man eras
+// 21+ (in each file's "phase" field) so they can never be
+// mistaken for an MCU phase — the colour tables in
+// branchNodes.js key off the same numbers.
 //==================================================
 
 export const WORLDS = {
@@ -30,6 +33,12 @@ export const WORLDS = {
         key: "xmen",
         label: "X-Men",
         file: "./data/xmen.json"
+    },
+
+    spider: {
+        key: "spider",
+        label: "Spider-Man",
+        file: "./data/spiderman.json"
     }
 
 };
@@ -44,6 +53,18 @@ export const XMEN_ERAS = {
     15: "New Mutants & '97"
 
 };
+
+// Spider-Man eras, keyed by the number in spiderman.json.
+export const SPIDER_ERAS = {
+
+    21: "Raimi Trilogy",
+    22: "The Amazing Spider-Man",
+    23: "Spider-Verse",
+    24: "Multiverse"
+
+};
+
+const ERA_NAMES = { ...XMEN_ERAS, ...SPIDER_ERAS };
 
 let currentWorld = "mcu";
 
@@ -64,8 +85,8 @@ export function setCurrentWorld(key){
 // details card.
 export function groupName(phase, { upper = true } = {}){
 
-    const name = XMEN_ERAS[phase] !== undefined
-        ? XMEN_ERAS[phase]
+    const name = ERA_NAMES[phase] !== undefined
+        ? ERA_NAMES[phase]
         : "Phase " + phase;
 
     return upper ? name.toUpperCase() : name;

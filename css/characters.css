@@ -89,30 +89,30 @@
 Character Journey Dropdown
 ------------------------------------------*/
 
+/* Opens/closes with the .collapse animation in panel.css
+   (animates to the list's real height; the old max-height
+   of 700px made closing lag). Only the spacing is here. */
 .character-dropdown{
 
-    overflow:hidden;
-
-    max-height:0;
-
-    opacity:0;
+    margin-top:0;
 
     transition:
-        max-height .35s ease,
-        opacity .25s ease,
-        margin-top .25s ease;
-
-    margin-top:0;
+        grid-template-rows .4s cubic-bezier(.22,.8,.24,1),
+        opacity .3s ease,
+        margin-top .4s cubic-bezier(.22,.8,.24,1),
+        visibility 0s linear .4s;
 
 }
 
 .character-dropdown.open{
 
-    max-height:700px;
-
-    opacity:1;
-
     margin-top:8px;
+
+    transition:
+        grid-template-rows .4s cubic-bezier(.22,.8,.24,1),
+        opacity .3s ease .05s,
+        margin-top .4s cubic-bezier(.22,.8,.24,1),
+        visibility 0s;
 
 }
 

@@ -74,7 +74,8 @@
         grid-column:1 / -1;
     }
 
-    .character-dropdown.open{
+    /* Long hero lists scroll inside once open. */
+    .character-dropdown.open > .collapse-inner{
         max-height:220px;
         overflow-y:auto;
         -webkit-overflow-scrolling:touch;

@@ -15,6 +15,11 @@
     z-index: 20;
     overflow: hidden;
     transition: opacity .5s ease, transform .5s ease;
+
+    /* Sits the content a little below true centre (it
+       read as top-heavy once the footer was gone). The
+       branch preview follows the logo, see app.js. */
+    padding-top: min(12vh, 110px);
 }
 
 /* Fade + slight push-in when entering (see app.js), so the
@@ -250,22 +255,6 @@
 }
 
 /*--------------------------------------------------
-  Footer
---------------------------------------------------*/
-
-.landing-footer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 18px;
-    padding: 0 20px;
-    text-align: center;
-    font-size: .7rem;
-    line-height: 1.6;
-    color: rgba(255,255,255,.32);
-}
-
-/*--------------------------------------------------
   Small screens
 --------------------------------------------------*/
 
@@ -277,19 +266,13 @@
 
     #enterButton { margin-top: 24px; }
 
-    .landing-footer { bottom: 12px; font-size: .62rem; }
-
-}
-
-@media (max-height: 560px) {
-
-    /* Short screens (phones in landscape): drop the footer
-       so it can't collide with the button. */
-    .landing-footer { display: none; }
 
 }
 
 @media (max-height: 500px) {
+
+    /* No room to spare on a sideways phone: true centre. */
+    #landing { padding-top: 0; }
 
     /* Phones held sideways: everything has to fit in
        ~340-430px of height, or the Enter button ends up

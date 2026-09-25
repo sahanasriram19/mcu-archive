@@ -15,6 +15,7 @@ Enter the archive and the whole MCU flies outward from a central hub, forming a 
 - **Release Order** — a left-to-right timeline in real-world release order.
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
 - **X-Men World** — a second world in the same app: the Fox X-Men films plus *X-Men '97*, with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.
+- **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*), with *No Way Home* as the bridge to the MCU. Same five views, grouped into eras.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
 Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB.
@@ -44,7 +45,8 @@ mcu-archive/
 │   └── marvel-logo.jpg           # the logo on the landing card and the mind map's centre
 ├── data/
 │   ├── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
-│   └── xmen.json             # the X-Men world: Fox films + X-Men '97, grouped by era
+│   ├── xmen.json             # the X-Men world: Fox films + X-Men '97, grouped by era
+│   └── spiderman.json        # the Spider-Man world: Raimi, Amazing and Spider-Verse films
 ├── css/
 │   ├── main.css
 │   ├── background.css
@@ -69,7 +71,7 @@ mcu-archive/
     ├── viewManager.js              # ties layout + edges + camera together per view
     ├── views.js                     # view registry (labels, default camera, phone framing)
     ├── responsive.js                 # decides phone vs desktop layouts (portrait / landscape)
-    ├── worlds.js                      # the two worlds (MCU / X-Men), era names, current world
+    ├── worlds.js                      # the three worlds (MCU / X-Men / Spider-Man), era names, current world
     ├── universe.js                   # draws every layer each frame, background first
     ├── connections.js                 # renders the glowing connection lines (curved branches on the mind map)
     ├── nodes.js                        # renders poster nodes

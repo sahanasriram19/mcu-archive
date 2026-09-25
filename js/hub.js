@@ -16,9 +16,11 @@ export function renderHub(ctx, camera){
 
     // X-Men world: a plain title plate in place of the Marvel
     // logo, the same size so the branches meet it the same way.
-    if(getWorld() === "xmen"){
+    const plate = WORLD_PLATES[getWorld()];
 
-        drawWorldPlate(ctx, x, y, width, height, "X-MEN");
+    if(plate){
+
+        drawWorldPlate(ctx, x, y, width, height, plate);
 
         return;
 
@@ -38,9 +40,18 @@ export function renderHub(ctx, camera){
 
 }
 
-// A dark plate with a gold rim and the world's name in
-// bold type — just typography, no emblem.
-function drawWorldPlate(ctx, x, y, w, h, text){
+// Title plates for the non-MCU worlds: just the name in
+// bold type on a coloured plate — no emblems.
+const WORLD_PLATES = {
+
+    xmen:   { text: "X-MEN",      top: "#1c2a5e", bottom: "#0d1433", rim: "250,204,21", ink: "rgb(250,204,21)" },
+    spider: { text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" }
+
+};
+
+function drawWorldPlate(ctx, x, y, w, h, plate){
+
+    const text = plate.text;
 
     const r = Math.min(18, h * 0.12);
 
@@ -55,23 +66,38 @@ function drawWorldPlate(ctx, x, y, w, h, text){
     ctx.closePath();
 
     const fill = ctx.createLinearGradient(x, y - h/2, x, y + h/2);
-    fill.addColorStop(0, "#1c2a5e");
-    fill.addColorStop(1, "#0d1433");
+    fill.addColorStop(0, plate.top);
+    fill.addColorStop(1, plate.bottom);
 
     ctx.fillStyle = fill;
-    ctx.shadowColor = "rgba(250,204,21,.45)";
+    ctx.shadowColor = `rgba(${plate.rim},.45)`;
     ctx.shadowBlur = 30 * (h / 400);
     ctx.fill();
 
     ctx.shadowBlur = 0;
     ctx.lineWidth = Math.max(1.5, h * 0.03);
-    ctx.strokeStyle = "rgb(250,204,21)";
+    ctx.strokeStyle = `rgb(${plate.rim})`;
     ctx.stroke();
 
-    ctx.fillStyle = "rgb(250,204,21)";
+    ctx.fillStyle = plate.ink;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `900 ${h * 0.5}px Impact, "Arial Black", Inter, sans-serif`;
+
+    // Shrink longer names ("SPIDER-MAN") to fit the plate.
+    let size = h * 0.5;
+
+    ctx.font = `900 ${size}px Impact, "Arial Black", Inter, sans-serif`;
+
+    const fit = (w * 0.86) / Math.max(1, ctx.measureText(text).width);
+
+    if(fit < 1){
+
+        size *= fit;
+
+        ctx.font = `900 ${size}px Impact, "Arial Black", Inter, sans-serif`;
+
+    }
+
     ctx.fillText(text, x, y + h * 0.03);
 
     ctx.restore();

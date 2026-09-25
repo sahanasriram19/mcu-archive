@@ -34,6 +34,8 @@ panel.innerHTML = `
 
     <div class="view-panel-content" id="view-panel-content">
 
+      <div class="view-panel-content-inner">
+
         <div class="search-container">
 
             <input
@@ -46,6 +48,8 @@ panel.innerHTML = `
         </div>
 
         <div class="view-panel-list"></div>
+
+      </div>
 
     </div>
 `;
@@ -214,21 +218,49 @@ const SECTIONS = [
             { label: "Beast", character: "Beast" },
             { label: "Deadpool", character: "Deadpool" }
         ]
+    },
+
+    {
+        world: "spider",
+        title: "Spider-Man World",
+        labels: {
+            complete: "Complete Spider-Man",
+            phases: "Eras",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            // `journey` overrides the "<label>'s Journey" wording
+            // in the phone bar when that would read awkwardly.
+            { label: "Tobey Maguire's Spider-Man", character: "Peter Parker (Tobey Maguire)", journey: "Tobey Maguire's Journey" },
+            { label: "Andrew Garfield's Spider-Man", character: "Peter Parker (Andrew Garfield)", journey: "Andrew Garfield's Journey" },
+            { label: "Miles Morales", character: "Miles Morales" },
+            { label: "Spider-Gwen", character: "Gwen Stacy (Spider-Gwen)" },
+            { label: "Green Goblin", character: "Norman Osborn" },
+            { label: "Doctor Octopus", character: "Otto Octavius" },
+            { label: "Harry Osborn", character: "Harry Osborn" }
+        ]
     }
 
 ];
 
 let selectedHeroLabel = "";
 
+// Prefix for the phone bar label outside the MCU.
+const WORLD_SHORT = { xmen: "X-Men", spider: "Spider-Man" };
+
 const sectionEls = [];
 
 function openSection(world){
 
-    sectionEls.forEach(({ world: w, el, head }) => {
+    sectionEls.forEach(({ world: w, el, head, body }) => {
 
         const open = w === world;
 
         el.classList.toggle("open", open);
+
+        body.classList.toggle("open", open);
 
         head.setAttribute("aria-expanded", open ? "true" : "false");
 
@@ -257,13 +289,31 @@ SECTIONS.forEach(section => {
 
     });
 
+    // The section's body opens/closes smoothly: a .collapse
+    // wrapper animates its real height (css/panel.css).
+    const body = document.createElement("div");
+
+    body.className = "view-panel-section-body collapse";
+
+    const bodyInner = document.createElement("div");
+
+    bodyInner.className = "collapse-inner";
+
+    body.appendChild(bodyInner);
+
     const views = document.createElement("div");
 
     views.className = "view-panel-views";
 
     const dropdown = document.createElement("div");
 
-    dropdown.className = "character-dropdown";
+    dropdown.className = "character-dropdown collapse";
+
+    const dropdownInner = document.createElement("div");
+
+    dropdownInner.className = "collapse-inner";
+
+    dropdown.appendChild(dropdownInner);
 
     VIEWS.forEach(view => {
 
@@ -318,7 +368,7 @@ SECTIONS.forEach(section => {
 
             dropdown.classList.remove("open");
 
-            selectedHeroLabel = hero.label;
+            selectedHeroLabel = hero.journey || hero.label + "'s Journey";
 
             collapseIfCompact();
 
@@ -326,16 +376,18 @@ SECTIONS.forEach(section => {
 
         });
 
-        dropdown.appendChild(btn);
+        dropdownInner.appendChild(btn);
 
     });
 
+    bodyInner.appendChild(views);
+
     el.appendChild(head);
-    el.appendChild(views);
+    el.appendChild(body);
 
     list.appendChild(el);
 
-    sectionEls.push({ world: section.world, el, head });
+    sectionEls.push({ world: section.world, el, head, body });
 
 });
 
@@ -353,12 +405,12 @@ function refreshActive(){
     // when it's not the MCU.
     const name =
         current === "characters" && selectedHeroLabel
-            ? selectedHeroLabel + "'s Journey"
+            ? selectedHeroLabel
             : (section.labels[current] || "");
 
     currentLabel.textContent =
-        world !== "mcu" && !name.includes("X-Men") && current !== "characters"
-            ? `X-Men · ${name}`
+        world !== "mcu" && !name.startsWith("Complete") && current !== "characters"
+            ? `${WORLD_SHORT[world] || ""} · ${name}`
             : name;
 
     list.querySelectorAll(".view-panel-btn").forEach(btn => {

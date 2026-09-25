@@ -11,7 +11,11 @@
     backdrop-filter:blur(18px);
     -webkit-backdrop-filter:blur(18px);
     box-shadow:0 20px 50px rgba(0,0,0,.5);
-    animation: float 3s ease-in-out infinite;
+    /* No bobbing animation, and its own compositing layer:
+       a moving panel re-blurring the animated star canvas
+       behind it every frame is what made it flicker. */
+    transform:translateZ(0);
+    will-change:transform;
     /* With a character list open it can get long — scroll
        inside rather than run off the bottom. */
     max-height:calc(100vh - 56px);
@@ -109,7 +113,8 @@
     color:var(--text);
 }
 
-/* A small colour mark per world: Marvel red / X-Men gold. */
+/* A small colour mark per world: Marvel red / X-Men gold /
+   Spider-Man blue. */
 .view-panel-section-head span:first-child::before{
     content:"";
     display:inline-block;
@@ -125,6 +130,10 @@
     background:rgb(250,204,21);
 }
 
+.view-panel-section[data-world="spider"] .view-panel-section-head span:first-child::before{
+    background:rgb(70,150,255);
+}
+
 .view-panel-section-chevron{
     font-size:10px;
     transition:transform .2s ease;
@@ -134,15 +143,55 @@
     transform:rotate(180deg);
 }
 
-.view-panel-views{
-    display:none;
-    flex-direction:column;
-    gap:6px;
-    margin-top:6px;
+/*--------------------------------------------------
+  Smooth open/close (sections, character list, phone
+  sheet). Animating grid-template-rows from 0fr to 1fr
+  animates to the content's REAL height — max-height
+  tricks guess a height, which made closing lag and the
+  speed uneven. Hidden content is also taken out of the
+  tab order (visibility) once it has finished closing.
+--------------------------------------------------*/
+
+.collapse{
+    display:grid;
+    grid-template-rows:0fr;
+    opacity:0;
+    visibility:hidden;
+    transition:
+        grid-template-rows .4s cubic-bezier(.22,.8,.24,1),
+        opacity .3s ease,
+        visibility 0s linear .4s;
 }
 
-.view-panel-section.open .view-panel-views{
+.collapse.open{
+    grid-template-rows:1fr;
+    opacity:1;
+    visibility:visible;
+    transition:
+        grid-template-rows .4s cubic-bezier(.22,.8,.24,1),
+        opacity .3s ease .05s,
+        visibility 0s;
+}
+
+.collapse > .collapse-inner{
+    min-height:0;
+    overflow:hidden;
+}
+
+.view-panel-views{
     display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding-top:6px;
+}
+
+@media (prefers-reduced-motion: reduce){
+
+    .collapse,
+    .collapse.open{
+        transition:none;
+    }
+
 }
 
 .view-panel-btn{
@@ -252,16 +301,41 @@
         transform:rotate(180deg);
     }
 
-    /* Collapsed: just the bar. */
+    /* Collapsed: just the bar. The sheet slides open to
+       its real height (same technique as .collapse). */
     .view-panel-content{
-        display:none;
+        display:grid;
+        grid-template-rows:0fr;
+        opacity:0;
+        visibility:hidden;
+        margin-top:0;
+        transition:
+            grid-template-rows .4s cubic-bezier(.22,.8,.24,1),
+            opacity .3s ease,
+            margin-top .4s cubic-bezier(.22,.8,.24,1),
+            visibility 0s linear .4s;
+    }
+
+    .view-panel-content-inner{
+        min-height:0;
+        overflow:hidden;
     }
 
     /* Expanded: search + views, scrolling inside if the
        screen is short. */
     #view-panel.expanded .view-panel-content{
-        display:block;
+        grid-template-rows:1fr;
+        opacity:1;
+        visibility:visible;
         margin-top:10px;
+        transition:
+            grid-template-rows .4s cubic-bezier(.22,.8,.24,1),
+            opacity .3s ease .05s,
+            margin-top .4s cubic-bezier(.22,.8,.24,1),
+            visibility 0s;
+    }
+
+    #view-panel.expanded .view-panel-content-inner{
         padding-right:6px;
         max-height:min(60vh, calc(100dvh - 120px - var(--keyboard-offset, 0px)));
         overflow-y:auto;
@@ -273,7 +347,7 @@
         margin-top:10px;
     }
 
-    .view-panel-section.open .view-panel-views{
+    .view-panel-views{
         display:grid;
         grid-template-columns:repeat(2, minmax(0,1fr));
         gap:6px;
@@ -301,11 +375,11 @@
    keeps the open panel from covering the whole map. */
 @media (max-height: 500px) and (orientation: landscape){
 
-    .view-panel-section.open .view-panel-views{
+    .view-panel-views{
         grid-template-columns:repeat(3, minmax(0,1fr));
     }
 
-    #view-panel.expanded .view-panel-content{
+    #view-panel.expanded .view-panel-content-inner{
         max-height:calc(100dvh - 90px - var(--keyboard-offset, 0px));
     }
 

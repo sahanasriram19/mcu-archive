@@ -1,0 +1,169 @@
+[
+    {
+        "id": "spiderman2002",
+        "title": "Spider-Man",
+        "type": "movie",
+        "phase": 21,
+        "saga": "sony",
+        "release": "2002-05-03",
+        "timeline": 1,
+        "colour": "220,45,55",
+        "characters": [
+            "Peter Parker (Tobey Maguire)",
+            "Mary Jane Watson",
+            "Norman Osborn",
+            "Harry Osborn"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman2",
+        "title": "Spider-Man 2",
+        "type": "movie",
+        "phase": 21,
+        "saga": "sony",
+        "release": "2004-06-30",
+        "timeline": 2,
+        "colour": "220,45,55",
+        "characters": [
+            "Peter Parker (Tobey Maguire)",
+            "Mary Jane Watson",
+            "Otto Octavius",
+            "Harry Osborn",
+            "Norman Osborn"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman3",
+        "title": "Spider-Man 3",
+        "type": "movie",
+        "phase": 21,
+        "saga": "sony",
+        "release": "2007-05-04",
+        "timeline": 3,
+        "colour": "220,45,55",
+        "characters": [
+            "Peter Parker (Tobey Maguire)",
+            "Mary Jane Watson",
+            "Harry Osborn",
+            "Sandman",
+            "Venom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "amazingspiderman",
+        "title": "The Amazing Spider-Man",
+        "type": "movie",
+        "phase": 22,
+        "saga": "sony",
+        "release": "2012-07-03",
+        "timeline": 4,
+        "colour": "40,120,230",
+        "characters": [
+            "Peter Parker (Andrew Garfield)",
+            "Gwen Stacy",
+            "Curt Connors"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "amazingspiderman2",
+        "title": "The Amazing Spider-Man 2",
+        "type": "movie",
+        "phase": 22,
+        "saga": "sony",
+        "release": "2014-05-02",
+        "timeline": 5,
+        "colour": "40,120,230",
+        "characters": [
+            "Peter Parker (Andrew Garfield)",
+            "Gwen Stacy",
+            "Max Dillon",
+            "Harry Osborn"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "intospiderverse",
+        "title": "Spider-Man: Into the Spider-Verse",
+        "type": "movie",
+        "phase": 23,
+        "saga": "sony",
+        "release": "2018-12-14",
+        "timeline": 6,
+        "colour": "240,70,170",
+        "characters": [
+            "Miles Morales",
+            "Gwen Stacy (Spider-Gwen)",
+            "Peter B. Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "acrossspiderverse",
+        "title": "Spider-Man: Across the Spider-Verse",
+        "type": "movie",
+        "phase": 23,
+        "saga": "sony",
+        "release": "2023-06-02",
+        "timeline": 7,
+        "colour": "240,70,170",
+        "characters": [
+            "Miles Morales",
+            "Gwen Stacy (Spider-Gwen)",
+            "Miguel O'Hara",
+            "Peter B. Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "beyondspiderverse",
+        "title": "Spider-Man: Beyond the Spider-Verse",
+        "type": "movie",
+        "phase": 23,
+        "saga": "sony",
+        "release": "2027-06-18",
+        "timeline": 8,
+        "colour": "240,70,170",
+        "characters": [
+            "Miles Morales",
+            "Gwen Stacy (Spider-Gwen)",
+            "Miguel O'Hara"
+        ],
+        "watchBefore": [
+            "intospiderverse",
+            "acrossspiderverse"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermannwh",
+        "title": "Spider-Man: No Way Home",
+        "type": "movie",
+        "phase": 24,
+        "saga": "marvel-studios",
+        "release": "2021-12-17",
+        "timeline": 9,
+        "colour": "255,190,60",
+        "characters": [
+            "Peter Parker (Tom Holland)",
+            "Peter Parker (Tobey Maguire)",
+            "Peter Parker (Andrew Garfield)",
+            "Norman Osborn",
+            "Otto Octavius",
+            "Max Dillon",
+            "Curt Connors",
+            "Sandman"
+        ],
+        "watchBefore": [
+            "spiderman2002",
+            "spiderman2",
+            "spiderman3",
+            "amazingspiderman",
+            "amazingspiderman2"
+        ],
+        "poster": ""
+    }
+]
