@@ -1,94 +1,312 @@
 //==================================================
-// WORLDS
+// MOVIE DETAILS MODAL
 //
-// The archive holds three worlds, each with its own data
-// file and its own set of views:
-//
-//   mcu   — data/mcu.json, grouped by Phase (0-6)
-//   xmen  — data/xmen.json, the Fox X-Men films plus
-//           Marvel Studios' X-Men '97, grouped by era
-//   spider — data/spiderman.json, the Raimi and Amazing
-//           Spider-Man films plus Sony's animated
-//           Spider-Verse, grouped by era
-//
-// Those were their own continuities; they're tied to the
-// MCU through the multiverse. Deadpool & Wolverine and
-// No Way Home each appear in two worlds as the bridge.
-//
-// X-Men eras use group numbers 11+ and Spider-Man eras
-// 21+ (in each file's "phase" field) so they can never be
-// mistaken for an MCU phase — the colour tables in
-// branchNodes.js key off the same numbers.
+// A click on a poster (see nodeHitTest.js + input.js)
+// calls showMovieDetails(node) to populate and reveal
+// this card. Overview/rating come from posters.js,
+// which now stashes them on the node alongside the
+// poster image whenever TMDB has them.
 //==================================================
 
-export const WORLDS = {
+import { fetchDetails } from "./posters.js";
+import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
+import { groupName } from "./worlds.js";
 
-    mcu: {
-        key: "mcu",
-        label: "MCU",
-        file: "./data/mcu.json"
-    },
+const overlay = document.createElement("div");
+overlay.id = "movie-details-overlay";
 
-    xmen: {
-        key: "xmen",
-        label: "X-Men",
-        file: "./data/xmen.json"
-    },
+overlay.innerHTML = `
+    <div id="movie-details-card">
+        <button id="movie-details-close" aria-label="Close">&times;</button>
+        <div id="movie-details-poster"></div>
+        <div id="movie-details-body">
+            <div id="movie-details-kicker"></div>
+            <h2 id="movie-details-title"></h2>
+            <div id="movie-details-meta"></div>
+            <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
+            <p id="movie-details-overview"></p>
+            <div id="movie-details-characters"></div>
+            <div id="movie-details-cast"></div>
+            <div id="movie-details-watch"></div>
+        </div>
+    </div>
+`;
 
-    spider: {
-        key: "spider",
-        label: "Spider-Man",
-        file: "./data/spiderman.json"
+document.body.appendChild(overlay);
+
+const posterEl = overlay.querySelector("#movie-details-poster");
+const kickerEl = overlay.querySelector("#movie-details-kicker");
+const titleEl = overlay.querySelector("#movie-details-title");
+const metaEl = overlay.querySelector("#movie-details-meta");
+const overviewEl = overlay.querySelector("#movie-details-overview");
+const trailerEl = overlay.querySelector("#movie-details-trailer");
+const charactersEl = overlay.querySelector("#movie-details-characters");
+const castEl = overlay.querySelector("#movie-details-cast");
+const watchEl = overlay.querySelector("#movie-details-watch");
+
+//--------------------------------------------------
+// "Watch before this" — see js/upcoming.js for where the
+// list comes from. Each title is a chip that opens its
+// own card; "Show on map" closes this card and lights the
+// list up on the map.
+//--------------------------------------------------
+
+function renderWatchBefore(node){
+
+    const { nodes, source } = watchListFor(node);
+
+    if(!nodes.length){
+
+        watchEl.innerHTML = "";
+
+        return;
+
     }
 
-};
+    const note = source === "curated"
+        ? "Hand-picked essentials"
+        : "Earlier titles with the same characters";
 
-// X-Men eras, keyed by the number in xmen.json's "phase".
-export const XMEN_ERAS = {
+    // A row of small posters, like the cast row above it.
+    // Uses TMDB's smallest poster size (w185) — plenty for
+    // ~80px thumbnails. Titles whose poster hasn't loaded
+    // yet get a card in their own colour with the name.
+    const thumb = n => {
 
-    11: "Original Trilogy",
-    12: "Wolverine",
-    13: "First Class Saga",
-    14: "Deadpool",
-    15: "New Mutants & '97"
+        const url = n.poster
+            ? (typeof n.poster === "string" ? n.poster : (n.poster.small || n.poster.medium))
+            : "";
 
-};
+        return url
+            ? `<img src="${url}" alt="" loading="lazy">`
+            : `<div class="watch-poster-fallback" style="--c:${n.colour}">${n.title}</div>`;
 
-// Spider-Man eras, keyed by the number in spiderman.json.
-export const SPIDER_ERAS = {
+    };
 
-    21: "Raimi Trilogy",
-    22: "The Amazing Spider-Man",
-    23: "Spider-Verse",
-    24: "Multiverse"
+    watchEl.innerHTML = `
+        <div class="watch-head">
+            <div>
+                <div class="watch-label">Watch before this</div>
+                <div class="watch-note">${note} · ${nodes.length} title${nodes.length === 1 ? "" : "s"}</div>
+            </div>
+            <button type="button" class="watch-show">Show on map</button>
+        </div>
+        <div class="watch-row">
+            ${nodes.map((n, i) => `
+                <button type="button" class="watch-item" data-i="${i}" title="${n.title}">
+                    <div class="watch-poster">${thumb(n)}</div>
+                    <div class="watch-title">${n.title}</div>
+                    <div class="watch-year">${(n.release || "").slice(0, 4)}</div>
+                </button>
+            `).join("")}
+        </div>
+    `;
 
-};
+    watchEl.querySelectorAll(".watch-item").forEach(item => {
 
-const ERA_NAMES = { ...XMEN_ERAS, ...SPIDER_ERAS };
+        item.addEventListener("click", () => showMovieDetails(nodes[+item.dataset.i]));
 
-let currentWorld = "mcu";
+    });
 
-export function getWorld(){
+    watchEl.querySelector(".watch-show").addEventListener("click", () => {
 
-    return currentWorld;
+        hideMovieDetails();
+
+        startWatchFocus(node);
+
+    });
 
 }
 
-export function setCurrentWorld(key){
+function hideMovieDetails() {
 
-    if(WORLDS[key]) currentWorld = key;
+    overlay.classList.remove("open");
 
 }
 
-// "PHASE 3" for the MCU, "WOLVERINE" etc. for X-Men eras —
-// used for branch labels, timeline markers and the
-// details card.
-export function groupName(phase, { upper = true } = {}){
+overlay.addEventListener("click", e => {
 
-    const name = ERA_NAMES[phase] !== undefined
-        ? ERA_NAMES[phase]
-        : "Phase " + phase;
+    // Only closes on a click outside the card itself.
+    if (e.target === overlay) hideMovieDetails();
 
-    return upper ? name.toUpperCase() : name;
+});
+
+overlay.querySelector("#movie-details-close")
+    .addEventListener("click", hideMovieDetails);
+
+window.addEventListener("keydown", e => {
+
+    if (e.key === "Escape") hideMovieDetails();
+
+});
+
+function posterUrlFor(node) {
+
+    if (!node.poster) return "";
+
+    return typeof node.poster === "string"
+        ? node.poster
+        : (node.poster.large || node.poster.medium || node.poster.small || "");
+
+}
+
+function formatDate(release) {
+
+    if (!release) return "";
+
+    const d = new Date(release);
+
+    if (isNaN(d)) return release;
+
+    return d.toLocaleDateString(undefined, {
+
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+
+    });
+
+}
+
+let openNode = null;
+
+function renderExtras(node) {
+
+    if (node.trailerUrl) {
+
+        trailerEl.href = node.trailerUrl;
+        trailerEl.style.display = "inline-flex";
+
+    } else {
+
+        trailerEl.removeAttribute("href");
+        trailerEl.style.display = "none";
+
+    }
+
+    if (node.cast && node.cast.length) {
+
+        castEl.innerHTML =
+            `<div id="movie-details-cast-label">Cast</div>` +
+            `<div id="movie-details-cast-list">` +
+            node.cast.map(member => {
+
+                const initials = member.name
+                    .split(" ")
+                    .map(w => w[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase();
+
+                const avatar = member.photo
+                    ? `<img src="${member.photo}" alt="${member.name}">`
+                    : `<div class="cast-avatar-fallback">${initials}</div>`;
+
+                return `
+                    <div class="cast-member">
+                        <div class="cast-avatar">${avatar}</div>
+                        <div class="cast-name">${member.name}</div>
+                        <div class="cast-character">${member.character}</div>
+                    </div>
+                `;
+
+            }).join("") +
+            `</div>`;
+
+    } else {
+
+        castEl.innerHTML = "";
+
+    }
+
+}
+
+export async function showMovieDetails(node) {
+
+    openNode = node;
+
+    const url = posterUrlFor(node);
+
+    posterEl.innerHTML = url
+        ? `<img src="${url}" alt="${node.title}">`
+        : `<div id="movie-details-noposter">${node.title}</div>`;
+
+    kickerEl.textContent =
+        node.type === "show" ? "Disney+ Series" :
+            node.type === "special" ? "Marvel Special" :
+                "Feature Film";
+
+    titleEl.textContent = node.title;
+
+    const metaParts = [];
+
+    if (node.release) {
+
+        metaParts.push(
+            isUpcoming(node)
+                ? "Coming " + new Date(releaseTime(node)).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+                : formatDate(node.release)
+        );
+
+    }
+
+    if (node.phase !== undefined && node.phase !== null && node.phase >= 1) {
+
+        // "Phase 3" for MCU titles, the era name for X-Men.
+        metaParts.push(groupName(node.phase, { upper: false }) + (node.world && node.world !== "mcu" ? " era" : ""));
+
+    }
+
+    if (typeof node.rating === "number" && node.rating > 0) {
+
+        metaParts.push("★ " + node.rating.toFixed(1));
+
+    }
+
+    metaEl.textContent = metaParts.join("  ·  ");
+
+    overviewEl.textContent = node.overview ||
+        "No synopsis available yet for this entry.";
+
+    if (node.characters && node.characters.length) {
+
+        charactersEl.innerHTML =
+            `<div id="movie-details-characters-label">Featuring</div>` +
+            node.characters
+                .map(c => `<span class="character-chip">${c}</span>`)
+                .join("");
+
+    } else {
+
+        charactersEl.innerHTML = "";
+
+    }
+
+    renderWatchBefore(node);
+
+    // fetchDetails() call as soon as the poster is hovered,
+    // so by the time a click actually lands it has usually
+    // already resolved (fetchDetails is a no-op the second
+    // time it's called for a node that's already loaded/
+    // loading, so this doesn't double the network cost).
+        await fetchDetails(node);
+
+        console.log("DETAILS DEBUG:", {
+            title: node.title,
+            tmdbId: node.tmdbId,
+            tmdbEndpoint: node.tmdbEndpoint,
+            cast: node.cast,
+            castCount: node.cast?.length,
+            trailer: node.trailerUrl
+        });
+
+        if (openNode !== node) return;
+
+        // Give the browser one frame to apply any updates
+        await new Promise(requestAnimationFrame);
+
+        renderExtras(node);
+
+        overlay.classList.add("open");
 
 }
