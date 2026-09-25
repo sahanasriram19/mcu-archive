@@ -146,73 +146,6 @@ export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
 
 }
 
-//--------------------------------------------------
-// HOVER HIGHLIGHT (Complete MCU mind map)
-//
-// Returns the set of edge indexes to light up, plus the
-// phase colour to light them in — or null if nothing is
-// hovered.
-//   Hovering a poster: its own branch, from the poster
-//   back through its parent titles and phase to the hub.
-//   Hovering a phase junction: that phase's whole branch.
-//--------------------------------------------------
-
-function hoverHighlight(graph){
-
-    const { nodeIndex, phase } = graph.hover;
-
-    if(nodeIndex === null && phase === null) return null;
-
-    const edges = graph.edges;
-
-    const set = new Set();
-
-    if(nodeIndex !== null){
-
-        // Each child has exactly one incoming edge in the
-        // mind-map tree, so "edge that ends here" = parent.
-        const parentEdge = new Map();
-
-        edges.forEach((edge, i) => parentEdge.set(String(edge.to), i));
-
-        let current = nodeIndex;
-
-        for(let guard = 0; guard < 20; guard++){
-
-            const i = parentEdge.get(String(current));
-
-            if(i === undefined) break;
-
-            set.add(i);
-
-            current = edges[i].from;
-
-            if(current === "hub") break;
-
-        }
-
-    } else {
-
-        const anchor = "branch:phase" + phase;
-
-        edges.forEach((edge, i) => {
-
-            const child = typeof edge.to === "number" ? graph.nodes[edge.to] : null;
-
-            if(edge.to === anchor || (child && child.phase === phase)) set.add(i);
-
-        });
-
-    }
-
-    if(!set.size) return null;
-
-    const colour = HIGHLIGHT_COLOURS[phase] || "170,225,255";
-
-    return { set, colour };
-
-}
-
 export function renderConnections(ctx, camera, graph){
 
     if(!graph.edges.length) return;
@@ -263,19 +196,37 @@ export function renderConnections(ctx, camera, graph){
     // glow without reintroducing the lag.
     //----------------------------------
 
-    const path = new Path2D();
+    // Complete MCU / X-Men and Phases / Eras: each phase's
+    // branches are drawn in that phase's own colour, all the
+    // time (see HIGHLIGHT_COLOURS in branchNodes.js). Other
+    // views (Character Journeys) keep the white lines.
+    const coloured = currentView === "complete" || currentView === "phases";
 
-    // Hovered branch goes into its own path so it can be
-    // drawn brighter and in its phase colour on top.
-    const highlight = currentView === "complete" ? hoverHighlight(graph) : null;
+    // One path per colour, so the whole map still costs only
+    // a couple of strokes per colour rather than per edge.
+    const paths = new Map();
 
-    const hiPath = highlight ? new Path2D() : null;
+    const pathFor = colour => {
 
-    let any = false;
+        let p = paths.get(colour);
 
-    graph.edges.forEach((edge, edgeIndex)=>{
+        if(!p){ p = new Path2D(); paths.set(colour, p); }
 
-        const target = highlight && highlight.set.has(edgeIndex) ? hiPath : path;
+        return p;
+
+    };
+
+    const phaseOf = ref => {
+
+        if(typeof ref === "number") return graph.nodes[ref] ? graph.nodes[ref].phase : null;
+
+        if(typeof ref === "string" && ref.startsWith("branch:phase")) return Number(ref.slice("branch:phase".length));
+
+        return null;
+
+    };
+
+    graph.edges.forEach(edge=>{
 
         const from = resolveAnchor(edge.from, graph);
         const to = resolveAnchor(edge.to, graph);
@@ -294,6 +245,18 @@ export function renderConnections(ctx, camera, graph){
             (y1<0 && y2<0) || (y1>h && y2>h)
 
         ) return;
+
+        let colour = null;
+
+        if(coloured){
+
+            const phase = phaseOf(edge.to) ?? phaseOf(edge.from);
+
+            colour = HIGHLIGHT_COLOURS[phase] || null;
+
+        }
+
+        const target = pathFor(colour);
 
         target.moveTo(x1, y1);
 
@@ -321,11 +284,9 @@ export function renderConnections(ctx, camera, graph){
 
         }
 
-        any = true;
-
     });
 
-    if(!any){
+    if(!paths.size){
 
         ctx.restore();
 
@@ -333,16 +294,23 @@ export function renderConnections(ctx, camera, graph){
 
     }
 
-    //----------------------------------
-    // Glow — one bigger, bolder pass
-    // instead of many small ones.
-    //----------------------------------
+    paths.forEach((path, colour)=>{
+
+        if(colour === null) drawWhite(ctx, camera, path);
+
+        else drawColoured(ctx, camera, path, colour);
+
+    });
+
+    ctx.restore();
+
+}
+
+// The original pale-blue/white glowing lines: one wide
+// glow, a tighter bloom, and a bright core.
+function drawWhite(ctx, camera, path){
 
     ctx.save();
-
-    // While a branch is highlighted, the rest of the map
-    // steps back so the highlighted one stands out.
-    if(highlight) ctx.globalAlpha = 0.4;
 
     ctx.globalCompositeOperation = "lighter";
 
@@ -354,22 +322,13 @@ export function renderConnections(ctx, camera, graph){
 
     ctx.stroke(path);
 
-    // A second, tighter glow pass adds a brighter inner
-    // bloom without needing an even bigger (more expensive)
-    // single blur radius.
     ctx.shadowBlur = 14 * camera.zoom;
     ctx.lineWidth = 6 * camera.zoom;
     ctx.stroke(path);
 
     ctx.restore();
 
-    //----------------------------------
-    // Bright Core
-    //----------------------------------
-
     ctx.save();
-
-    if(highlight) ctx.globalAlpha = 0.4;
 
     ctx.shadowColor = "rgba(255,255,255,1)";
     ctx.shadowBlur = 10 * camera.zoom;
@@ -381,46 +340,36 @@ export function renderConnections(ctx, camera, graph){
 
     ctx.restore();
 
-    //----------------------------------
-    // Highlighted branch — phase-coloured
-    // glow with a bright core, on top.
-    //----------------------------------
+}
 
-    if(highlight){
+// Phase-coloured lines: the same glow-and-core look in the
+// phase's colour. The core is the colour lifted towards
+// white, so it still reads as a lit strand. One blurred
+// pass per colour keeps it cheap with 7 colours on screen.
+function drawColoured(ctx, camera, path, colour){
 
-        // Soft glow in the phase colour...
-        //
-        // Widths are kept close to the normal lines (whose
-        // core is 1.2px at the default zoom) so a highlighted
-        // branch changes colour rather than bulking up. To make
-        // it bolder or slimmer, change the minimums (the second
-        // number in each Math.max) — they're what apply at the
-        // default zoom.
-        ctx.save();
+    const core = colour.split(",").map(c => Math.round(+c + (255 - +c) * 0.35)).join(",");
 
-        ctx.globalCompositeOperation = "lighter";
+    ctx.save();
 
-        ctx.shadowColor = `rgba(${highlight.colour},1)`;
-        ctx.shadowBlur = Math.max(16 * camera.zoom, 6);
+    ctx.globalCompositeOperation = "lighter";
 
-        ctx.strokeStyle = `rgba(${highlight.colour},.5)`;
-        ctx.lineWidth = Math.max(6 * camera.zoom, 3);
+    ctx.shadowColor = `rgba(${colour},1)`;
+    ctx.shadowBlur = 28 * camera.zoom;
 
-        ctx.stroke(hiPath);
+    ctx.strokeStyle = `rgba(${colour},.55)`;
+    ctx.lineWidth = 9 * camera.zoom;
 
-        ctx.restore();
+    ctx.stroke(path);
 
-        // ...then the line itself, solid in the phase colour.
-        ctx.save();
+    ctx.restore();
 
-        ctx.strokeStyle = `rgb(${highlight.colour})`;
-        ctx.lineWidth = Math.max(2.5 * camera.zoom, 1.6);
+    ctx.save();
 
-        ctx.stroke(hiPath);
+    ctx.strokeStyle = `rgba(${core},.95)`;
+    ctx.lineWidth = Math.max(2.5 * camera.zoom, 1.3);
 
-        ctx.restore();
-
-    }
+    ctx.stroke(path);
 
     ctx.restore();
 

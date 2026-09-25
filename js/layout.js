@@ -489,6 +489,19 @@ function verticalTimelineY(i){
 
 }
 
+// "2008–2011": the span of real-world release years in a
+// group of titles — shown under each timeline marker in
+// both Release Order and Chronological Order.
+function releaseYears(members){
+
+    const years = members.map(m=>new Date(m.release).getFullYear());
+
+    const min = Math.min(...years), max = Math.max(...years);
+
+    return min===max ? `${min}` : `${min}–${max}`;
+
+}
+
 export function layoutRelease(nodes){
 
     layoutTimeline(
@@ -496,15 +509,7 @@ export function layoutRelease(nodes){
         nodes,
         (a,b)=> new Date(a.release)-new Date(b.release),
         members => phaseLabel(members),
-        members => {
-
-            const years = members.map(m=>new Date(m.release).getFullYear());
-
-            const min = Math.min(...years), max = Math.max(...years);
-
-            return min===max ? `${min}` : `${min}–${max}`;
-
-        }
+        releaseYears
 
     );
 
@@ -517,7 +522,7 @@ export function layoutChronology(nodes){
         nodes,
         (a,b)=> a.timeline-b.timeline,
         members => phaseLabel(members),
-        () => ""
+        releaseYears
 
     );
 

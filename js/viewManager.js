@@ -97,6 +97,19 @@ function baseFitZoom(cam, nodes){
 
 }
 
+// The countdown card (js/upcoming.js), once it's showing.
+function countdownRect(){
+
+    const el = document.getElementById("countdown");
+
+    if(!el || !el.classList.contains("ready")) return null;
+
+    const r = el.getBoundingClientRect();
+
+    return r.width && r.height ? r : null;
+
+}
+
 function panelRect(){
 
     const panel = document.getElementById("view-panel");
@@ -168,7 +181,16 @@ function fitCamera(cam){
 
     if(panelOnLeft){
 
-        for(let step = 0; step < 10; step++){
+        const cd = countdownRect();
+
+        const obstacles = cd ? [r, cd] : [r];
+
+        // Zoom out 3% at a time (up to ~35%) until nothing is
+        // covered. If that's impossible (small laptop screens),
+        // use whichever zoom covered the fewest posters.
+        let best = fallback, bestHits = Infinity;
+
+        for(let step = 0; step < 15; step++){
 
             const zoom = zoom0 * Math.pow(0.97, step);
 
@@ -176,12 +198,17 @@ function fitCamera(cam){
 
             const boxes = screenBoxes(nodes, cam.x, cam.y, zoom);
 
-            if(!boxes.some(b => hitsPanel(b, r))) return { x: cam.x, y: cam.y, zoom };
+            // Clear of the panel AND the countdown card in the
+            // top-right corner.
+            const hits = boxes.filter(b => obstacles.some(o => hitsPanel(b, o))).length;
+
+            if(hits === 0) return { x: cam.x, y: cam.y, zoom };
+
+            if(hits < bestHits){ bestHits = hits; best = { x: cam.x, y: cam.y, zoom }; }
 
         }
 
-        // Very narrow window: stay centred at the normal fit.
-        return fallback;
+        return best;
 
     }
 

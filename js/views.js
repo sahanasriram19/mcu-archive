@@ -29,12 +29,10 @@ export const VIEWS = [
         // Six separate mini mind maps rather than one
         // shared hub — see graph.js edgesPhaseSpokes.
         edges: { mode: "phaseSpokes" },
-        camera: { x: 0, y: 0, zoom: 0.16 },
-        // X-Men's Eras view (5 groups in a 3 + 2 grid) fits
-        // itself to the screen instead, clear of the panel.
-        worlds: {
-            xmen: { camera: { x: 0, y: 0, zoom: 0.16, fit: 0.9, minZoom: 0.07, maxZoom: 0.3 } }
-        },
+        // Fits itself to the screen, clear of the panel and
+        // the countdown card (works for MCU Phases and X-Men
+        // Eras alike). zoom is the fallback.
+        camera: { x: 0, y: 0, zoom: 0.16, fit: 0.92, minZoom: 0.07, maxZoom: 0.3 },
         // Phones (see viewManager.js phoneCamera): upright,
         // the phases stack in one column — fill the width and
         // start at the top. Sideways, they sit in one row —

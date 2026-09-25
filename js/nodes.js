@@ -494,15 +494,16 @@ export function renderNodes(ctx, camera, nodes){
         }
 
         //----------------------------------
-        // Outline: hover glow and/or watch-
-        // list marker, around the poster.
+        // Watch-list outline around the poster
+        // (hovering only enlarges it — no
+        // outline).
         //----------------------------------
 
         const isGoal = focus && focus.targetId === node.id;
 
         const markFocus = focus && inFocus;
 
-        if(lift > 0.01 || markFocus){
+        if(markFocus){
 
             const w = onScreenWidth * scale;
             const h = w * 1.5;
@@ -517,31 +518,16 @@ export function renderNodes(ctx, camera, nodes){
             // tiny poster's outline turns into an oval.
             roundedRect(ctx, x + floatX - w/2, y + floatY - h/2, w, h, Math.min(12, w * 0.12));
 
-            if(markFocus){
+            // The watch list in white; the title it leads up to
+            // in Marvel red.
+            const c = isGoal ? "230,36,41" : "255,255,255";
 
-                // The watch list in white; the title it leads up
-                // to in Marvel red.
-                const c = isGoal ? "230,36,41" : "255,255,255";
+            ctx.shadowColor = `rgba(${c},.9)`;
+            ctx.shadowBlur = 14;
+            ctx.strokeStyle = `rgba(${c},.95)`;
+            ctx.lineWidth = isGoal ? 3 : 2;
 
-                ctx.shadowColor = `rgba(${c},.9)`;
-                ctx.shadowBlur = 14;
-                ctx.strokeStyle = `rgba(${c},.95)`;
-                ctx.lineWidth = isGoal ? 3 : 2;
-
-                ctx.stroke();
-
-            }
-
-            if(lift > 0.01){
-
-                ctx.shadowColor = `rgba(${node.colour},${lift})`;
-                ctx.shadowBlur = 26 * lift;
-                ctx.strokeStyle = `rgba(255,255,255,${0.85 * lift})`;
-                ctx.lineWidth = 1.5;
-
-                ctx.stroke();
-
-            }
+            ctx.stroke();
 
             ctx.restore();
 
