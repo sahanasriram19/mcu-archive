@@ -1,5 +1,5 @@
 import { VIEWS } from "../js/views.js";
-import { setView, getCurrentView } from "../js/viewManager.js";
+import { setWorldView, getCurrentView, getWorld } from "../js/viewManager.js";
 
 import {
 
@@ -153,126 +153,233 @@ if(window.visualViewport){
     window.visualViewport.addEventListener("scroll", liftAboveKeyboard);
 
 }
-const dropdown = document.createElement("div");
-dropdown.className = "character-dropdown";
+//--------------------------------------------------
+// VIEW SECTIONS — one per world (js/worlds.js)
+//
+// Each world gets its own section: a heading and that
+// world's views. They work as an accordion — one open at
+// a time — so the panel stays as short as before and
+// doesn't cover more of the map. Picking a view in the
+// other world's section switches worlds on the same page.
+//--------------------------------------------------
 
-VIEWS.forEach(view=>{
+const SECTIONS = [
 
-    const btn = document.createElement("button");
+    {
+        world: "mcu",
+        title: "MCU",
+        labels: {
+            complete: "Complete MCU",
+            phases: "Phases",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            { label: "Iron Man", character: "Tony Stark" },
+            { label: "Captain America", character: "Steve Rogers" },
+            { label: "Thor", character: "Thor" },
+            { label: "Hulk", character: "Bruce Banner" },
+            { label: "Black Widow", character: "Natasha Romanoff" },
+            { label: "Hawkeye", character: "Clint Barton" },
+            { label: "Spider-Man", character: "Peter Parker" },
+            { label: "Doctor Strange", character: "Stephen Strange" },
+            { label: "Scarlet Witch", character: "Wanda Maximoff" },
+            { label: "Loki", character: "Loki" },
+            { label: "Black Panther", character: "T'Challa" },
+            { label: "Captain Marvel", character: "Carol Danvers" },
+            { label: "Vision", character: "Vision" },
+            { label: "Ant-Man", character: "Scott Lang" }
+        ]
+    },
 
-    btn.className = "view-panel-btn";
-    btn.dataset.view = view.key;
-    btn.textContent = view.label;
-
-btn.addEventListener("click", () => {
-
-    if(view.key === "characters"){
-
-        dropdown.classList.toggle("open");
-        btn.classList.toggle("expanded");
-        return;
-
+    {
+        world: "xmen",
+        title: "X-Men World",
+        labels: {
+            complete: "Complete X-Men",
+            phases: "Eras",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            { label: "Wolverine", character: "Wolverine" },
+            { label: "Professor X", character: "Charles Xavier" },
+            { label: "Magneto", character: "Magneto" },
+            { label: "Jean Grey", character: "Jean Grey" },
+            { label: "Mystique", character: "Mystique" },
+            { label: "Cyclops", character: "Cyclops" },
+            { label: "Storm", character: "Storm" },
+            { label: "Beast", character: "Beast" },
+            { label: "Deadpool", character: "Deadpool" }
+        ]
     }
-
-    // Close the phone panel first, so the new view frames
-    // itself around the slim bar, not the open panel.
-    collapseIfCompact();
-
-    setView(view.key);
-    refreshActive();
-
-});
-
-list.appendChild(btn);
-
-if(view.key === "characters"){
-
-    btn.classList.add("has-dropdown");
-
-    list.appendChild(dropdown);
-
-}
-
-
-});
-
-const heroes = [
-
-    { label: "Iron Man", character: "Tony Stark" },
-    { label: "Captain America", character: "Steve Rogers" },
-    { label: "Thor", character: "Thor" },
-    { label: "Hulk", character: "Bruce Banner" },
-    { label: "Black Widow", character: "Natasha Romanoff" },
-    { label: "Hawkeye", character: "Clint Barton" },
-
-    { label: "Spider-Man", character: "Peter Parker" },
-    { label: "Doctor Strange", character: "Stephen Strange" },
-    { label: "Scarlet Witch", character: "Wanda Maximoff" },
-    { label: "Loki", character: "Loki" },
-    { label: "Black Panther", character: "T'Challa" },
-    { label: "Captain Marvel", character: "Carol Danvers" },
-    {label: "Vision", character: "Vision"},
-    {label: "Ant man", character: "Scott Lang"}
 
 ];
 
-heroes.forEach(hero=>{
+let selectedHeroLabel = "";
 
-    const btn = document.createElement("button");
+const sectionEls = [];
 
-    btn.className = "character-btn";
+function openSection(world){
 
-    btn.textContent = hero.label;
+    sectionEls.forEach(({ world: w, el, head }) => {
 
-    btn.addEventListener("click",()=>{
+        const open = w === world;
 
-        setSelectedCharacter(hero.character);
+        el.classList.toggle("open", open);
 
-        dropdown.classList.remove("open");
-
-        selectedHeroLabel = hero.label;
-
-        collapseIfCompact();
-
-        setView("characters");
-
-        refreshActive();
+        head.setAttribute("aria-expanded", open ? "true" : "false");
 
     });
 
-    dropdown.appendChild(btn);
+}
+
+SECTIONS.forEach(section => {
+
+    const el = document.createElement("div");
+
+    el.className = "view-panel-section";
+
+    el.dataset.world = section.world;
+
+    const head = document.createElement("button");
+
+    head.type = "button";
+    head.className = "view-panel-section-head";
+    head.innerHTML = `<span>${section.title}</span><span class="view-panel-section-chevron" aria-hidden="true">&#9662;</span>`;
+
+    head.addEventListener("click", () => {
+
+        // Toggle this section; opening it closes the other.
+        openSection(el.classList.contains("open") ? null : section.world);
+
+    });
+
+    const views = document.createElement("div");
+
+    views.className = "view-panel-views";
+
+    const dropdown = document.createElement("div");
+
+    dropdown.className = "character-dropdown";
+
+    VIEWS.forEach(view => {
+
+        const btn = document.createElement("button");
+
+        btn.className = "view-panel-btn";
+        btn.dataset.view = view.key;
+        btn.dataset.world = section.world;
+        btn.textContent = section.labels[view.key] || view.label;
+
+        btn.addEventListener("click", () => {
+
+            if(view.key === "characters"){
+
+                dropdown.classList.toggle("open");
+                btn.classList.toggle("expanded");
+                return;
+
+            }
+
+            // Close the phone panel first, so the new view frames
+            // itself around the slim bar, not the open panel.
+            collapseIfCompact();
+
+            setWorldView(section.world, view.key);
+
+        });
+
+        views.appendChild(btn);
+
+        if(view.key === "characters"){
+
+            btn.classList.add("has-dropdown");
+
+            views.appendChild(dropdown);
+
+        }
+
+    });
+
+    section.heroes.forEach(hero => {
+
+        const btn = document.createElement("button");
+
+        btn.className = "character-btn";
+
+        btn.textContent = hero.label;
+
+        btn.addEventListener("click", () => {
+
+            setSelectedCharacter(hero.character);
+
+            dropdown.classList.remove("open");
+
+            selectedHeroLabel = hero.label;
+
+            collapseIfCompact();
+
+            setWorldView(section.world, "characters");
+
+        });
+
+        dropdown.appendChild(btn);
+
+    });
+
+    el.appendChild(head);
+    el.appendChild(views);
+
+    list.appendChild(el);
+
+    sectionEls.push({ world: section.world, el, head });
 
 });
 
-let selectedHeroLabel = "";
+openSection("mcu");
 
 function refreshActive(){
 
-    const current=getCurrentView();
+    const current = getCurrentView();
+    const world = getWorld();
+
+    const section = SECTIONS.find(s => s.world === world) || SECTIONS[0];
 
     // The phone bar's label: the current view's name (plus
-    // the hero, for a character journey).
-    const view = VIEWS.find(v => v.key === current);
+    // the hero, for a character journey), and the world
+    // when it's not the MCU.
+    const name =
+        current === "characters" && selectedHeroLabel
+            ? selectedHeroLabel + "'s Journey"
+            : (section.labels[current] || "");
 
-    if(view){
+    currentLabel.textContent =
+        world !== "mcu" && !name.includes("X-Men") && current !== "characters"
+            ? `X-Men · ${name}`
+            : name;
 
-        currentLabel.textContent =
-            current === "characters" && selectedHeroLabel
-                ? selectedHeroLabel + "'s Journey"
-                : view.label;
-
-    }
-
-    list.querySelectorAll(".view-panel-btn").forEach(btn=>{
+    list.querySelectorAll(".view-panel-btn").forEach(btn => {
 
         btn.classList.toggle(
             "active",
-            btn.dataset.view===current
+            btn.dataset.view === current && btn.dataset.world === world
         );
 
     });
 
+    // Keep the current world's section open.
+    const openEl = sectionEls.find(s => s.el.classList.contains("open"));
+
+    if(!openEl || openEl.world !== world) openSection(world);
+
 }
+
+// Views can change from elsewhere too (rotating a phone,
+// "Show on map" switching worlds) — stay in step.
+window.addEventListener("mcu:view-changed", refreshActive);
 
 export function initialisePanel(){
 

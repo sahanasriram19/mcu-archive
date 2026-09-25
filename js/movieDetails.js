@@ -10,6 +10,7 @@
 
 import { fetchDetails } from "./posters.js";
 import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
+import { groupName } from "./worlds.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -251,7 +252,8 @@ export async function showMovieDetails(node) {
 
     if (node.phase !== undefined && node.phase !== null && node.phase >= 1) {
 
-        metaParts.push("Phase " + node.phase);
+        // "Phase 3" for MCU titles, the era name for X-Men.
+        metaParts.push(groupName(node.phase, { upper: false }) + (node.world === "xmen" ? " era" : ""));
 
     }
 

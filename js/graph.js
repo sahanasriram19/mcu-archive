@@ -3,6 +3,7 @@
 //==================================================
 
 import { loadPosters } from "./posters.js";
+import { WORLDS, setCurrentWorld } from "./worlds.js";
 
 export const graph = {
 
@@ -102,22 +103,81 @@ function createBranchNode(key, label, subtitle, x, y, targetX, targetY){
 // populated, like the first setView() call.
 //==================================================
 
+// Every world's nodes, loaded once: { mcu: [...], xmen: [...] }.
+// graph.nodes always points at the CURRENT world's list —
+// everything that draws or lays out the map works on that,
+// so it never needs to know which world it's in. Each world
+// keeps its own node objects, so switching back finds its
+// titles right where they were.
+export const worldNodes = {};
+
 export async function initialiseGraph(){
 
-    const movies = await fetch("./data/mcu.json")
-        .then(r => r.json());
+    const keys = Object.keys(WORLDS);
 
-    graph.nodes = [];
-    graph.edges = [];
-    graph.branchNodes = [];
+    const lists = await Promise.all(keys.map(key =>
 
-    movies.forEach(movie => {
+        fetch(WORLDS[key].file)
+            .then(r => r.json())
+            .catch(err => {
 
-        graph.nodes.push(createNode(movie));
+                console.warn("Couldn't load", WORLDS[key].file, err);
+
+                return [];
+
+            })
+
+    ));
+
+    keys.forEach((key, i) => {
+
+        worldNodes[key] = lists[i].map(movie => {
+
+            const node = createNode(movie);
+
+            node.world = key;
+
+            return node;
+
+        });
 
     });
 
-    loadPosters(graph);
+    graph.nodes = worldNodes.mcu;
+    graph.edges = [];
+    graph.branchNodes = [];
+
+    // Posters for every world load up front (the MCU first),
+    // so switching worlds doesn't start from blank cards.
+    keys.forEach(key => loadPosters({ nodes: worldNodes[key] }));
+
+}
+
+// Every title in every world — for things that span both,
+// like the countdown to the next release.
+export function allNodes(){
+
+    return Object.values(worldNodes).flat();
+
+}
+
+// Switch the map to another world's titles. The caller
+// (viewManager.setWorldView) then lays out a view for it.
+export function useWorld(key){
+
+    if(!worldNodes[key] || graph.nodes === worldNodes[key]) return false;
+
+    setCurrentWorld(key);
+
+    graph.nodes = worldNodes[key];
+    graph.edges = [];
+
+    graph.hover.nodeIndex = null;
+    graph.hover.phase = null;
+    graph.hoverPoster = null;
+    graph.focus = null;
+
+    return true;
 
 }
 

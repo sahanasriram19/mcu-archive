@@ -19,7 +19,7 @@ export const VIEWS = [
         // to zoom in. fit < 1 leaves a margin round the
         // edge; raise it towards (or past) 1 to start closer.
         // zoom is the fallback if nothing has laid out yet.
-        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.96, minZoom: 0.07, maxZoom: 0.4 }
+        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.92, minZoom: 0.07, maxZoom: 0.4 }
     },
 
     {
@@ -30,6 +30,11 @@ export const VIEWS = [
         // shared hub — see graph.js edgesPhaseSpokes.
         edges: { mode: "phaseSpokes" },
         camera: { x: 0, y: 0, zoom: 0.16 },
+        // X-Men's Eras view (5 groups in a 3 + 2 grid) fits
+        // itself to the screen instead, clear of the panel.
+        worlds: {
+            xmen: { camera: { x: 0, y: 0, zoom: 0.16, fit: 0.9, minZoom: 0.07, maxZoom: 0.3 } }
+        },
         // Phones (see viewManager.js phoneCamera): upright,
         // the phases stack in one column — fill the width and
         // start at the top. Sideways, they sit in one row —

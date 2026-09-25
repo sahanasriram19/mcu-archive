@@ -14,6 +14,7 @@ Enter the archive and the whole MCU flies outward from a central hub, forming a 
 - **Phases** — six (well, seven — Phase 0 covers the Defenders-saga shows) separate mini mind maps, one per phase, so you can compare each era's shape at a glance.
 - **Release Order** — a left-to-right timeline in real-world release order.
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
+- **X-Men World** — a second world in the same app: the Fox X-Men films plus *X-Men '97*, with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
 Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB.
@@ -42,7 +43,8 @@ mcu-archive/
 │   ├── favicon.png
 │   └── marvel-logo.jpg           # the logo on the landing card and the mind map's centre
 ├── data/
-│   └── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
+│   ├── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
+│   └── xmen.json             # the X-Men world: Fox films + X-Men '97, grouped by era
 ├── css/
 │   ├── main.css
 │   ├── background.css
@@ -67,6 +69,7 @@ mcu-archive/
     ├── viewManager.js              # ties layout + edges + camera together per view
     ├── views.js                     # view registry (labels, default camera, phone framing)
     ├── responsive.js                 # decides phone vs desktop layouts (portrait / landscape)
+    ├── worlds.js                      # the two worlds (MCU / X-Men), era names, current world
     ├── universe.js                   # draws every layer each frame, background first
     ├── connections.js                 # renders the glowing connection lines (curved branches on the mind map)
     ├── nodes.js                        # renders poster nodes

@@ -22,9 +22,10 @@
 // Release dates count to local midnight on the day.
 //==================================================
 
-import { graph } from "./graph.js";
+import { graph, worldNodes, allNodes } from "./graph.js";
 import { showMovieDetails } from "./movieDetails.js";
-import { focusNodes } from "./viewManager.js";
+import { focusNodes, setWorldView, getCurrentView } from "./viewManager.js";
+import { getWorld } from "./worlds.js";
 
 //--------------------------------------------------
 // Dates
@@ -51,15 +52,18 @@ export function isUpcoming(node, now = Date.now()){
 
 }
 
-function movies(){
+// A title's own world (MCU or X-Men) — watch lists stay
+// within it.
+function worldOf(node){
 
-    return graph.nodes.filter(n => !n.isBranch);
+    return (worldNodes[node.world] || graph.nodes).filter(n => !n.isBranch);
 
 }
 
+// The countdown looks across every world.
 export function nextRelease(now = Date.now()){
 
-    return movies()
+    return allNodes()
         .filter(n => isUpcoming(n, now))
         .sort((a, b) => releaseTime(a) - releaseTime(b))[0] || null;
 
@@ -73,7 +77,7 @@ export function nextRelease(now = Date.now()){
 // mcu.json's watchBefore) or "characters" (the fallback).
 export function watchListFor(node){
 
-    const all = movies();
+    const all = worldOf(node);
 
     const byId = new Map(all.map(n => [n.id, n]));
 
@@ -142,6 +146,14 @@ export function startWatchFocus(node){
     const { nodes } = watchListFor(node);
 
     if(!nodes.length) return;
+
+    // Opened from the other world (e.g. the MCU countdown
+    // while exploring X-Men): switch over first, same view.
+    if(node.world && node.world !== getWorld()){
+
+        setWorldView(node.world, getCurrentView() === "characters" ? "complete" : getCurrentView());
+
+    }
 
     graph.focus = {
 

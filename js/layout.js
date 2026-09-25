@@ -14,6 +14,7 @@
 import { setBranchNodes } from "./graph.js";
 import { getSelectedCharacter } from "./characters/characterJourney.js";
 import { isCompact, isPortraitPhone } from "./responsive.js";
+import { groupName } from "./worlds.js";
 
 //--------------------------------------------------
 // Short era name per phase, used as the branch node's
@@ -244,7 +245,7 @@ export function layoutComplete(nodes){
             label: "",
             subtitle: "",
             // Shown only while that branch is hovered.
-            hint: "PHASE "+phase,
+            hint: groupName(phase),
             hintSubtitle: phaseSubtitle(groups[phase]),
             x: Math.cos(centre) * MINDMAP_PHASE_RADIUS * sx,
             y: Math.sin(centre) * MINDMAP_PHASE_RADIUS * sy
@@ -306,7 +307,9 @@ export function layoutComplete(nodes){
 const PHASE_GRID_X = 2800;
 const PHASE_GRID_Y = 2800;
 
-const PHASE_TOP_ROW_COUNT = 4;
+// Top row takes the larger half: 7 MCU phases -> 4 + 3,
+// 5 X-Men eras -> 3 + 2.
+const topRowCount = n => Math.ceil(n / 2);
 
 // Radius large enough that arc-spacing comfortably clears
 // a poster width even at n=17 (Phase 4) — this is the same
@@ -314,9 +317,17 @@ const PHASE_TOP_ROW_COUNT = 4;
 // resolveOverlaps very little correcting to do in the first
 // place, rather than relying on many iterations to untangle
 // a tightly-packed starting position.
-function phaseRingRadius(n){
+// Also wide enough to clear the group's own label in the
+// middle: X-Men era names ("FIRST CLASS SAGA") are much
+// longer than "PHASE 1", and with only 3-4 titles the ring
+// was small enough for posters to sit on the label. Short
+// MCU labels come out under 620, so MCU rings are unchanged.
+function phaseRingRadius(n, label = ""){
 
-    return 620 + Math.max(0, n-6)*55;
+    return Math.max(
+        620 + Math.max(0, n-6)*55,
+        300 + label.length * 38
+    );
 
 }
 
@@ -353,7 +364,7 @@ export function layoutPhases(nodes){
 
             phase,
             key: "phase"+phase,
-            label: "PHASE "+phase,
+            label: groupName(phase),
             subtitle: phaseSubtitle(groups[phase]),
             x: portrait ? 0 : pi * PHASE_GRID_X,
             y: portrait ? pi * PHASE_GRID_Y : 0
@@ -372,19 +383,19 @@ export function layoutPhases(nodes){
 
     const branchTargets = phaseKeys.map((phase,pi)=>{
 
-        const row = pi < PHASE_TOP_ROW_COUNT ? 0 : 1;
+        const row = pi < topRowCount(phaseKeys.length) ? 0 : 1;
 
-        const col = row === 0 ? pi : pi - PHASE_TOP_ROW_COUNT;
+        const col = row === 0 ? pi : pi - topRowCount(phaseKeys.length);
 
         const rowCount = row === 0 ?
-            Math.min(PHASE_TOP_ROW_COUNT, phaseKeys.length) :
-            phaseKeys.length - PHASE_TOP_ROW_COUNT;
+            Math.min(topRowCount(phaseKeys.length), phaseKeys.length) :
+            phaseKeys.length - topRowCount(phaseKeys.length);
 
         return {
 
             phase,
             key: "phase"+phase,
-            label: "PHASE "+phase,
+            label: groupName(phase),
             subtitle: phaseSubtitle(groups[phase]),
             x: (col - (rowCount-1)/2) * PHASE_GRID_X,
             y: (row - 0.5) * PHASE_GRID_Y
@@ -412,7 +423,7 @@ function placePhaseRings(branches, groups){
 
         const n = members.length;
 
-        const radius = phaseRingRadius(n);
+        const radius = phaseRingRadius(n, groupName(branch.phase));
 
         members.forEach((node,i)=>{
 
@@ -464,6 +475,19 @@ const TIMELINE_BRANCH_OFFSET = 120;
 // clear a poster's height (480) — hence 290.
 const TIMELINE_SPACING_Y = 290;
 const TIMELINE_SIDE_X = 330;
+
+// Upright phones: each labelled group of titles starts
+// after a gap, and its label sits in that gap like a
+// section header. A phone is too narrow to fit a long
+// label ("ORIGINAL TRILOGY") BETWEEN the left and right
+// posters, which is where it goes on wider screens.
+const TIMELINE_GROUP_GAP_Y = 520;
+
+function verticalTimelineY(i){
+
+    return i * TIMELINE_SPACING_Y + (Math.floor(i / TIMELINE_LABEL_EVERY) + 1) * TIMELINE_GROUP_GAP_Y;
+
+}
 
 export function layoutRelease(nodes){
 
@@ -525,7 +549,7 @@ function phaseLabel(members){
 
     phases.sort((a,b)=> counts[b]-counts[a] || a-b);
 
-    return `PHASE ${phases[0]}`;
+    return groupName(phases[0]);
 
 }
 
@@ -566,7 +590,7 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
 
                 node.targetX = side * TIMELINE_SIDE_X;
 
-                node.targetY = i * TIMELINE_SPACING_Y;
+                node.targetY = verticalTimelineY(i);
 
             } else {
 
@@ -601,7 +625,8 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
 
             x: vertical ? 0 : midIndex * TIMELINE_SPACING_X,
 
-            y: vertical ? midIndex * TIMELINE_SPACING_Y : 0,
+            // Vertical: centred in the gap above the group.
+            y: vertical ? verticalTimelineY(i) - (TIMELINE_SPACING_Y + TIMELINE_GROUP_GAP_Y) / 2 : 0,
 
             memberIds:chunk.map(movie=>movie.id)
 

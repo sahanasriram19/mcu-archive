@@ -15,9 +15,12 @@ import {
     edgesMindmap,
     edgesPhaseSpokes,
     edgesTimelineTrail,
-    setEdges
+    setEdges,
+    useWorld
 
 } from "./graph.js";
+
+import { getWorld } from "./worlds.js";
 
 import { LAYOUTS } from "./layout.js";
 import { VIEWS } from "./views.js";
@@ -240,6 +243,8 @@ function fitCamera(cam){
 
 const EDGE_PAD = 16;   // px between content and the screen edge
 
+const LABEL_HALF_H = 140; // world units above a label's centre to keep on screen
+
 function phoneCamera(cfg){
 
     const nodes = visibleNodes();
@@ -250,7 +255,13 @@ function phoneCamera(cfg){
     const ys = nodes.map(n => n.targetY);
 
     const minX = Math.min(...xs) - POSTER_HALF_W, maxX = Math.max(...xs) + POSTER_HALF_W;
-    const minY = Math.min(...ys) - POSTER_HALF_H, maxY = Math.max(...ys) + POSTER_HALF_H;
+
+    // Labels count too (e.g. the section label above the
+    // first title of an upright phone timeline).
+    const labelYs = graph.branchNodes.filter(b => b.label).map(b => b.targetY - LABEL_HALF_H);
+
+    const minY = Math.min(...ys.map(y => y - POSTER_HALF_H), ...labelYs);
+    const maxY = Math.max(...ys) + POSTER_HALF_H;
 
     const W = window.innerWidth;
     const H = window.innerHeight;
@@ -260,6 +271,17 @@ function phoneCamera(cfg){
     const r = panelRect();
 
     if(r && r.bottom > H * 0.75) bottom = r.top - PANEL_GAP;
+
+    // Start below the countdown pill across the top.
+    const countdown = document.getElementById("countdown");
+
+    if(countdown && countdown.classList.contains("ready")){
+
+        const c = countdown.getBoundingClientRect();
+
+        if(c.height && c.bottom < H * 0.3) top = c.bottom;
+
+    }
 
     const aw = Math.max(1, right - left);
     const ah = Math.max(1, bottom - top);
@@ -295,6 +317,17 @@ function phoneCamera(cfg){
     }
 
     return { x, y, zoom };
+
+}
+
+// A view's camera settings for the current world: views.js
+// can give a world its own (e.g. X-Men's Eras view fits the
+// screen, while MCU Phases keeps its fixed zoom).
+function cameraFor(view){
+
+    const own = view.worlds && view.worlds[getWorld()];
+
+    return (own && own.camera) || view.camera;
 
 }
 
@@ -356,9 +389,9 @@ export function setView(key){
         camera.targetY = phoneCam.y;
         camera.targetZoom = phoneCam.zoom;
 
-    } else if(view.camera.fit){
+    } else if(cameraFor(view).fit){
 
-        const fit = fitCamera(view.camera);
+        const fit = fitCamera(cameraFor(view));
 
         camera.targetX = fit.x;
         camera.targetY = fit.y;
@@ -368,13 +401,30 @@ export function setView(key){
 
     } else {
 
-        camera.targetX = view.camera.x;
-        camera.targetY = view.camera.y;
-        camera.targetZoom = view.camera.zoom;
+        camera.targetX = cameraFor(view).x;
+        camera.targetY = cameraFor(view).y;
+        camera.targetZoom = cameraFor(view).zoom;
 
     }
 
+    // Lets the panel keep its active button / phone label in
+    // step, however the view was changed.
+    window.dispatchEvent(new CustomEvent("mcu:view-changed"));
+
 }
+
+// Switch to another world (see js/worlds.js) and show one
+// of its views. Titles of a world you haven't visited yet
+// fly out from the centre, like the first time you enter.
+export function setWorldView(world, key){
+
+    useWorld(world);
+
+    setView(key);
+
+}
+
+export { getWorld };
 
 export function getCurrentView(){
 
@@ -424,7 +474,7 @@ window.addEventListener("resize", () => {
 
         }
 
-        if(!view.camera.fit || lastFitAspect === null) return;
+        if(!cameraFor(view).fit || lastFitAspect === null) return;
 
         const aspect = window.innerWidth / Math.max(1, window.innerHeight);
 
@@ -522,9 +572,9 @@ export function refitView(){
 
     const view = VIEWS.find(v => v.key === currentView);
 
-    if(!view || !view.camera.fit) return;
+    if(!view || !cameraFor(view).fit) return;
 
-    const fit = fitCamera(view.camera);
+    const fit = fitCamera(cameraFor(view));
 
     camera.targetX = fit.x;
     camera.targetY = fit.y;

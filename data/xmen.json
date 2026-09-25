@@ -1,0 +1,280 @@
+[
+    {
+        "id": "xmen1",
+        "title": "X-Men",
+        "type": "movie",
+        "phase": 11,
+        "saga": "fox",
+        "release": "2000-07-14",
+        "timeline": 6,
+        "colour": "70,110,230",
+        "characters": [
+            "Wolverine",
+            "Charles Xavier",
+            "Magneto",
+            "Jean Grey",
+            "Cyclops",
+            "Storm",
+            "Rogue",
+            "Mystique"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "x2",
+        "title": "X2",
+        "type": "movie",
+        "phase": 11,
+        "saga": "fox",
+        "release": "2003-05-02",
+        "timeline": 7,
+        "colour": "70,110,230",
+        "characters": [
+            "Wolverine",
+            "Charles Xavier",
+            "Magneto",
+            "Jean Grey",
+            "Cyclops",
+            "Storm",
+            "Nightcrawler",
+            "Mystique",
+            "Rogue"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "xmen3",
+        "title": "X-Men: The Last Stand",
+        "type": "movie",
+        "phase": 11,
+        "saga": "fox",
+        "release": "2006-05-26",
+        "timeline": 8,
+        "colour": "70,110,230",
+        "characters": [
+            "Wolverine",
+            "Jean Grey",
+            "Charles Xavier",
+            "Magneto",
+            "Storm",
+            "Rogue",
+            "Mystique",
+            "Beast"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "wolverineorigins",
+        "title": "X-Men Origins: Wolverine",
+        "type": "movie",
+        "phase": 12,
+        "saga": "fox",
+        "release": "2009-05-01",
+        "timeline": 2,
+        "colour": "240,160,40",
+        "characters": [
+            "Wolverine",
+            "Sabretooth",
+            "Gambit",
+            "Deadpool"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "thewolverine",
+        "title": "The Wolverine",
+        "type": "movie",
+        "phase": 12,
+        "saga": "fox",
+        "release": "2013-07-26",
+        "timeline": 9,
+        "colour": "240,160,40",
+        "characters": [
+            "Wolverine"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "logan",
+        "title": "Logan",
+        "type": "movie",
+        "phase": 12,
+        "saga": "fox",
+        "release": "2017-03-03",
+        "timeline": 13,
+        "colour": "240,160,40",
+        "characters": [
+            "Wolverine",
+            "Charles Xavier",
+            "X-23"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "firstclass",
+        "title": "X-Men: First Class",
+        "type": "movie",
+        "phase": 13,
+        "saga": "fox",
+        "release": "2011-06-03",
+        "timeline": 1,
+        "colour": "40,190,170",
+        "characters": [
+            "Charles Xavier",
+            "Magneto",
+            "Mystique",
+            "Beast"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "dofp",
+        "title": "X-Men: Days of Future Past",
+        "type": "movie",
+        "phase": 13,
+        "saga": "fox",
+        "release": "2014-05-23",
+        "timeline": 3,
+        "colour": "40,190,170",
+        "characters": [
+            "Wolverine",
+            "Charles Xavier",
+            "Magneto",
+            "Mystique",
+            "Beast",
+            "Storm",
+            "Quicksilver"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "apocalypse",
+        "title": "X-Men: Apocalypse",
+        "type": "movie",
+        "phase": 13,
+        "saga": "fox",
+        "release": "2016-05-27",
+        "timeline": 4,
+        "colour": "40,190,170",
+        "characters": [
+            "Charles Xavier",
+            "Magneto",
+            "Mystique",
+            "Jean Grey",
+            "Cyclops",
+            "Storm",
+            "Beast",
+            "Quicksilver",
+            "Nightcrawler"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "darkphoenix",
+        "title": "Dark Phoenix",
+        "type": "movie",
+        "phase": 13,
+        "saga": "fox",
+        "release": "2019-06-07",
+        "timeline": 5,
+        "colour": "40,190,170",
+        "characters": [
+            "Jean Grey",
+            "Charles Xavier",
+            "Magneto",
+            "Mystique",
+            "Cyclops",
+            "Storm",
+            "Beast",
+            "Quicksilver",
+            "Nightcrawler"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "deadpool1",
+        "title": "Deadpool",
+        "type": "movie",
+        "phase": 14,
+        "saga": "fox",
+        "release": "2016-02-12",
+        "timeline": 10,
+        "colour": "225,45,60",
+        "characters": [
+            "Deadpool",
+            "Colossus"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "deadpool2",
+        "title": "Deadpool 2",
+        "type": "movie",
+        "phase": 14,
+        "saga": "fox",
+        "release": "2018-05-18",
+        "timeline": 11,
+        "colour": "225,45,60",
+        "characters": [
+            "Deadpool",
+            "Cable",
+            "Domino",
+            "Colossus"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "deadpoolwolverine",
+        "title": "Deadpool & Wolverine",
+        "type": "movie",
+        "phase": 14,
+        "saga": "marvel-studios",
+        "release": "2024-07-26",
+        "timeline": 14,
+        "colour": "225,45,60",
+        "characters": [
+            "Deadpool",
+            "Wolverine"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "newmutants",
+        "title": "The New Mutants",
+        "type": "movie",
+        "phase": 15,
+        "saga": "fox",
+        "release": "2020-08-28",
+        "timeline": 12,
+        "colour": "150,110,240",
+        "characters": [
+            "Wolfsbane",
+            "Magik",
+            "Sunspot",
+            "Cannonball",
+            "Mirage"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "xmen97",
+        "title": "X-Men '97",
+        "type": "show",
+        "phase": 15,
+        "saga": "marvel-studios",
+        "release": "2024-03-20",
+        "timeline": 15,
+        "colour": "150,110,240",
+        "characters": [
+            "Cyclops",
+            "Jean Grey",
+            "Storm",
+            "Wolverine",
+            "Rogue",
+            "Gambit",
+            "Magneto",
+            "Beast"
+        ],
+        "poster": ""
+    }
+]

@@ -12,6 +12,12 @@
     -webkit-backdrop-filter:blur(18px);
     box-shadow:0 20px 50px rgba(0,0,0,.5);
     animation: float 3s ease-in-out infinite;
+    /* With a character list open it can get long — scroll
+       inside rather than run off the bottom. */
+    max-height:calc(100vh - 56px);
+    overflow-y:auto;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(255,255,255,.2) transparent;
 }
 
 /* Title + (phones only) current-view toggle. */
@@ -65,7 +71,78 @@
 .view-panel-list{
     display:flex;
     flex-direction:column;
+    gap:10px;
+}
+
+/* One section per world (ui/panel.js): a heading that
+   opens/closes it, and that world's view buttons. Only
+   one is open at a time. */
+.view-panel-section{
+    display:flex;
+    flex-direction:column;
+}
+
+.view-panel-section + .view-panel-section{
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.08);
+}
+
+.view-panel-section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:4px 2px;
+    border:none;
+    background:none;
+    color:var(--muted);
+    font:inherit;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:color var(--transition);
+}
+
+.view-panel-section-head:hover,
+.view-panel-section.open .view-panel-section-head{
+    color:var(--text);
+}
+
+/* A small colour mark per world: Marvel red / X-Men gold. */
+.view-panel-section-head span:first-child::before{
+    content:"";
+    display:inline-block;
+    width:7px;
+    height:7px;
+    margin-right:8px;
+    border-radius:50%;
+    vertical-align:1px;
+    background:var(--accent);
+}
+
+.view-panel-section[data-world="xmen"] .view-panel-section-head span:first-child::before{
+    background:rgb(250,204,21);
+}
+
+.view-panel-section-chevron{
+    font-size:10px;
+    transition:transform .2s ease;
+}
+
+.view-panel-section.open .view-panel-section-chevron{
+    transform:rotate(180deg);
+}
+
+.view-panel-views{
+    display:none;
+    flex-direction:column;
     gap:6px;
+    margin-top:6px;
+}
+
+.view-panel-section.open .view-panel-views{
+    display:flex;
 }
 
 .view-panel-btn{
@@ -193,10 +270,18 @@
     }
 
     .view-panel-list{
+        margin-top:10px;
+    }
+
+    .view-panel-section.open .view-panel-views{
         display:grid;
         grid-template-columns:repeat(2, minmax(0,1fr));
         gap:6px;
-        margin-top:10px;
+    }
+
+    .view-panel-section-head{
+        min-height:36px;
+        font-size:11px;
     }
 
     /* Comfortable touch targets (44px is the usual
@@ -216,7 +301,7 @@
    keeps the open panel from covering the whole map. */
 @media (max-height: 500px) and (orientation: landscape){
 
-    .view-panel-list{
+    .view-panel-section.open .view-panel-views{
         grid-template-columns:repeat(3, minmax(0,1fr));
     }
 

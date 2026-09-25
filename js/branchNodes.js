@@ -24,7 +24,14 @@ export const PHASE_COLOURS = {
     3: "232,183,75",    // gold
     4: "91,141,239",    // blue
     5: "155,140,246",   // violet
-    6: "98,201,141"     // green
+    6: "98,201,141",    // green
+
+    // X-Men eras (js/worlds.js)
+    11: "70,110,230",   // Original Trilogy — blue
+    12: "240,160,40",   // Wolverine — amber
+    13: "40,190,170",   // First Class Saga — teal
+    14: "225,45,60",    // Deadpool — red
+    15: "150,110,240"   // New Mutants & '97 — violet
 
 };
 
@@ -47,7 +54,13 @@ export const HIGHLIGHT_COLOURS = {
     3: "250,210,30",    // gold
     4: "64,120,255",    // royal blue
     5: "196,110,255",   // purple
-    6: "60,225,120"     // green
+    6: "60,225,120",    // green
+
+    11: "80,130,255",   // Original Trilogy
+    12: "255,176,40",   // Wolverine
+    13: "40,220,195",   // First Class Saga
+    14: "255,60,80",    // Deadpool
+    15: "180,120,255"   // New Mutants & '97
 
 };
 
