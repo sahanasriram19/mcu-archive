@@ -199,73 +199,26 @@ export function clearWatchFocus(){
 }
 
 //--------------------------------------------------
-// "Coming up" panel (top right)
+// Countdown cards (top right)
 //
-// The next release with a big ticking clock, then the
-// releases after it as compact rows, each with its own
-// countdown — so the right side balances the view panel
-// on the left. Click the big one or any row to open that
-// title's details. On phones only the next release shows,
-// as a slim pill (css/upcoming.css).
+// A column of identical cards, one per upcoming title
+// across every world, soonest at the top: title, type,
+// date and a ticking clock. Click one to open that title's
+// details. As each release day arrives, its card drops
+// off and the rest move up. How many show depends on the
+// screen's height (css/upcoming.css); phones show only the
+// next one, as a slim pill.
 //--------------------------------------------------
 
-const MORE_COUNT = 4;   // rows under the big countdown
+const MAX_CARDS = 4;
 
-const card = document.createElement("div");
+const column = document.createElement("div");
 
-card.id = "countdown";
+column.id = "countdown";
 
-card.innerHTML = `
-    <button type="button" class="countdown-main">
-        <span class="countdown-kicker">Next up</span>
-        <span class="countdown-title"></span>
-        <span class="countdown-meta"></span>
-        <span class="countdown-clock" aria-live="off">
-            <span><b data-unit="d">0</b><i>days</i></span>
-            <span><b data-unit="h">00</b><i>hrs</i></span>
-            <span><b data-unit="m">00</b><i>min</i></span>
-            <span><b data-unit="s">00</b><i>sec</i></span>
-        </span>
-    </button>
-    <div class="countdown-more">
-        <div class="countdown-more-label">Coming later</div>
-        <div class="countdown-list"></div>
-    </div>
-`;
-
-document.getElementById("viewport").appendChild(card);
-
-const mainBtn = card.querySelector(".countdown-main");
-const titleEl = card.querySelector(".countdown-title");
-const metaEl = card.querySelector(".countdown-meta");
-const moreEl = card.querySelector(".countdown-more");
-const listEl = card.querySelector(".countdown-list");
-const unitEls = Object.fromEntries(
-    [...card.querySelectorAll("[data-unit]")].map(el => [el.dataset.unit, el])
-);
-
-let current = null;
-
-let laterNodes = [];
-
-mainBtn.addEventListener("click", () => {
-
-    if(current) showMovieDetails(current);
-
-});
-
-listEl.addEventListener("click", e => {
-
-    const row = e.target.closest(".countdown-row");
-
-    if(row) showMovieDetails(laterNodes[+row.dataset.i]);
-
-});
+document.getElementById("viewport").appendChild(column);
 
 const TYPE_LABEL = { movie: "Film", show: "Disney+ series", special: "Special" };
-
-// Dot colour per world, matching the view panel's marks.
-const WORLD_DOT = { mcu: "230,36,41", xmen: "250,204,21", spider: "70,150,255" };
 
 function formatDay(node){
 
@@ -274,6 +227,8 @@ function formatDay(node){
     });
 
 }
+
+const pad = n => String(n).padStart(2, "0");
 
 function split(ms){
 
@@ -288,92 +243,95 @@ function split(ms){
 
 }
 
-const pad = n => String(n).padStart(2, "0");
+// { node, units: {d,h,m,s} } for each card on screen.
+let cards = [];
 
-// Compact countdown for a row: "84d 06h 12m", or hours and
-// minutes once it's under a day away.
-function shortClock(ms){
+let cardsKey = "";
 
-    const { d, h, m } = split(ms);
+function buildCards(nodes){
 
-    return d > 0 ? `${d}d ${pad(h)}h ${pad(m)}m` : `${pad(h)}h ${pad(m)}m`;
+    column.innerHTML = "";
+
+    cards = nodes.map((node, i) => {
+
+        const btn = document.createElement("button");
+
+        btn.type = "button";
+        btn.className = "countdown-card";
+
+        btn.innerHTML = `
+            <span class="countdown-kicker">${i === 0 ? "Next up" : "Coming up"}</span>
+            <span class="countdown-title"></span>
+            <span class="countdown-meta"></span>
+            <span class="countdown-clock" aria-live="off">
+                <span><b data-unit="d">0</b><i>days</i></span>
+                <span><b data-unit="h">00</b><i>hrs</i></span>
+                <span><b data-unit="m">00</b><i>min</i></span>
+                <span><b data-unit="s">00</b><i>sec</i></span>
+            </span>
+        `;
+
+        btn.querySelector(".countdown-title").textContent = node.title;
+
+        // Long names are cut to one line so every card is the
+        // same height; hovering shows the full title.
+        btn.title = node.title;
+        btn.querySelector(".countdown-meta").textContent = `${TYPE_LABEL[node.type] || "Title"} · ${formatDay(node)}`;
+
+        btn.setAttribute("aria-label", `${i === 0 ? "Next up" : "Coming up"}: ${node.title}, ${formatDay(node)}. Open details.`);
+
+        btn.addEventListener("click", () => showMovieDetails(node));
+
+        column.appendChild(btn);
+
+        const units = Object.fromEntries(
+            [...btn.querySelectorAll("[data-unit]")].map(el => [el.dataset.unit, el])
+        );
+
+        return { node, units };
+
+    });
 
 }
-
-// Rebuilt only when the set of upcoming titles changes;
-// each tick just updates the numbers.
-function renderList(nodes){
-
-    laterNodes = nodes;
-
-    listEl.innerHTML = nodes.map((n, i) => `
-        <button type="button" class="countdown-row" data-i="${i}" style="--dot:${WORLD_DOT[n.world] || "255,255,255"}" aria-label="${n.title}, ${formatDay(n)}. Open details.">
-            <span class="countdown-row-title">${n.title}</span>
-            <span class="countdown-row-date">${formatDay(n)}</span>
-            <span class="countdown-row-clock"></span>
-        </button>
-    `).join("");
-
-    moreEl.classList.toggle("empty", nodes.length === 0);
-
-}
-
-let listKey = "";
 
 function tick(){
 
     const now = Date.now();
 
-    const upcoming = upcomingReleases(now);
+    const upcoming = upcomingReleases(now).slice(0, MAX_CARDS);
 
-    const next = upcoming[0];
+    if(!upcoming.length){
 
-    if(!next){
-
-        card.classList.remove("ready");
+        column.classList.remove("ready");
 
         return;
 
     }
 
-    if(next !== current){
+    // Rebuild only when the line-up changes (a release day
+    // passed); otherwise just update the numbers.
+    const key = upcoming.map(n => n.id).join("|");
 
-        current = next;
+    if(key !== cardsKey){
 
-        titleEl.textContent = next.title;
+        cardsKey = key;
 
-        metaEl.textContent = `${TYPE_LABEL[next.type] || "Title"} · ${formatDay(next)}`;
-
-        mainBtn.setAttribute("aria-label", `Next up: ${next.title}, ${formatDay(next)}. Open details.`);
-
-    }
-
-    const { d, h, m, s } = split(releaseTime(next) - now);
-
-    unitEls.d.textContent = d;
-    unitEls.h.textContent = pad(h);
-    unitEls.m.textContent = pad(m);
-    unitEls.s.textContent = pad(s);
-
-    const later = upcoming.slice(1, 1 + MORE_COUNT);
-
-    const key = later.map(n => n.id).join("|");
-
-    if(key !== listKey){
-
-        listKey = key;
-
-        renderList(later);
+        buildCards(upcoming);
 
     }
 
-    listEl.querySelectorAll(".countdown-row-clock").forEach((el, i) => {
+    cards.forEach(({ node, units }) => {
 
-        el.textContent = shortClock(releaseTime(later[i]) - now);
+        const { d, h, m, s } = split(releaseTime(node) - now);
+
+        units.d.textContent = d;
+        units.h.textContent = pad(h);
+        units.m.textContent = pad(m);
+        units.s.textContent = pad(s);
 
     });
 
-    card.classList.add("ready");
+    column.classList.add("ready");
 
 }
 
