@@ -65,7 +65,11 @@
     -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
     mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
 
-    animation: branches-drift 60s ease-in-out infinite alternate;
+    /* (It used to rock slowly back and forth forever. With
+       the glow and the edge fade, the browser had to redraw
+       the whole drawing for every frame of that, which
+       roughly halved the landing page's frame rate, so it
+       now stays still once drawn.) */
 }
 
 #landing-branches .lb path {
@@ -90,27 +94,22 @@
     fill: rgb(var(--c));
     opacity: 0;
     filter: drop-shadow(0 0 6px rgba(var(--c), 1));
-    animation: node-in .6s ease forwards, node-glow 3.2s ease-in-out infinite alternate;
-    animation-delay: calc(var(--d) + .9s), calc(var(--d) + 1.6s);
+    /* (There used to be a slow, endless glow pulse here too.
+       Pulsing 40-odd glowing dots made the browser repaint
+       the whole branch drawing every frame, which slowed
+       the landing page right down, so the dots now just
+       settle at a steady glow.) */
+    animation: node-in .6s ease forwards;
+    animation-delay: calc(var(--d) + .9s);
 }
 
 #landing-branches .lb circle.c2 {
-    animation-delay: calc(var(--d) + 1.4s), calc(var(--d) + 2.1s);
+    animation-delay: calc(var(--d) + 1.4s);
 }
 
 @keyframes branch-draw { to { stroke-dashoffset: 0; } }
 
 @keyframes node-in { to { opacity: .75; } }
-
-@keyframes node-glow {
-    from { opacity: .75; }
-    to   { opacity: .35; }
-}
-
-@keyframes branches-drift {
-    from { transform: translate(-50%, -50%) rotate(-3deg); }
-    to   { transform: translate(-50%, -50%) rotate(3deg); }
-}
 
 /*--------------------------------------------------
   Card

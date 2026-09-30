@@ -239,6 +239,10 @@ initCharacterPanel();
 
 function loop(){
 
+    // Asked for first, so one bad frame (an error while
+    // drawing) can't stop the animation for good.
+    requestAnimationFrame(loop);
+
     updateCamera();
 
     updateGraph();
@@ -246,8 +250,6 @@ function loop(){
     updateArchive();
 
     renderUniverse(camera, entered && !onLanding);
-
-    requestAnimationFrame(loop);
 
 }
 

@@ -25,6 +25,11 @@ body{
     height:100%;
     overflow:hidden;
     background:var(--bg);
+    /* The same gradient the starfield canvas paints behind
+       its stars (js/universe/background.js), so the page is
+       already the right colour before the scripts arrive —
+       the stars then fade in on top. */
+    background:linear-gradient(180deg, #04060A 0%, #07111F 25%, #10192D 50%, #08111E 75%, #020306 100%) fixed;
     color:var(--text);
     font-family:Inter,Arial,sans-serif;
 }

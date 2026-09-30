@@ -27,6 +27,8 @@ import { archive } from "./archiveCore.js";
 
 let generated = false;
 
+let shown = false;
+
 //==================================================
 
 export function initialiseUniverse(){
@@ -94,7 +96,14 @@ export function renderUniverse(camera, entered){
         renderBranchNodes(ctx, camera, graph.branchNodes);
         renderNodes(ctx, camera, graph.nodes);
 
+    }
 
+    // First frame drawn: fade the canvas in (css/world.css).
+    if(!shown){
+
+        shown = true;
+
+        ctx.canvas.classList.add("ready");
 
     }
 

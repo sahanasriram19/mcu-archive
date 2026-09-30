@@ -24,7 +24,55 @@
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/upcoming.css">
     <link rel="stylesheet" href="css/tilt.css">
-    <link rel="stylesheet" href="css/mobile.css"> 
+    <link rel="stylesheet" href="css/mobile.css">
+
+    <!-- Fetch every script and the MCU data up front, all at
+         once. Without this the browser only finds each file
+         after the one importing it has arrived, one layer at
+         a time, and the starry background waits for the
+         last of them. -->
+    <link rel="modulepreload" href="js/app.js">
+    <link rel="modulepreload" href="js/camera.js">
+    <link rel="modulepreload" href="js/universe.js">
+    <link rel="modulepreload" href="js/archive.js">
+    <link rel="modulepreload" href="js/graph.js">
+    <link rel="modulepreload" href="js/viewManager.js">
+    <link rel="modulepreload" href="js/input.js">
+    <link rel="modulepreload" href="ui/panel.js">
+    <link rel="modulepreload" href="js/characters/panel.js">
+    <link rel="modulepreload" href="js/upcoming.js">
+    <link rel="modulepreload" href="js/intro.js">
+    <link rel="modulepreload" href="js/tilt.js">
+    <link rel="modulepreload" href="js/universe/renderer.js">
+    <link rel="modulepreload" href="js/universe/state.js">
+    <link rel="modulepreload" href="js/universe/dust.js">
+    <link rel="modulepreload" href="js/universe/background.js">
+    <link rel="modulepreload" href="js/universe/nebulas.js">
+    <link rel="modulepreload" href="js/universe/stars.js">
+    <link rel="modulepreload" href="js/universe/heroStars.js">
+    <link rel="modulepreload" href="js/universe/shootingStars.js">
+    <link rel="modulepreload" href="js/universe/energy.js">
+    <link rel="modulepreload" href="js/universe/generator.js">
+    <link rel="modulepreload" href="js/connections.js">
+    <link rel="modulepreload" href="js/branchNodes.js">
+    <link rel="modulepreload" href="js/nodes.js">
+    <link rel="modulepreload" href="js/hub.js">
+    <link rel="modulepreload" href="js/archiveCore.js">
+    <link rel="modulepreload" href="js/posters.js">
+    <link rel="modulepreload" href="js/worlds.js">
+    <link rel="modulepreload" href="js/layout.js">
+    <link rel="modulepreload" href="js/views.js">
+    <link rel="modulepreload" href="js/responsive.js">
+    <link rel="modulepreload" href="js/nodeHitTest.js">
+    <link rel="modulepreload" href="js/movieDetails.js">
+    <link rel="modulepreload" href="js/characters/characterJourney.js">
+    <link rel="modulepreload" href="ui/search.js">
+    <link rel="modulepreload" href="js/characters/data.js">
+    <link rel="modulepreload" href="js/universe/utils.js">
+    <link rel="modulepreload" href="js/universe/config.js">
+    <link rel="modulepreload" href="js/universe/helpers.js">
+    <link rel="modulepreload" href="js/tmdbConfig.js">
+    <link rel="preload" href="data/mcu.json" as="fetch" crossorigin="anonymous">
 
 </head>
 

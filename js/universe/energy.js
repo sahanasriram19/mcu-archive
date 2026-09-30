@@ -15,6 +15,39 @@ import {
 
 //==================================================
 
+// Halo images, one per colour, drawn once.
+const halos = new Map();
+
+function haloFor(colour){
+
+    let h = halos.get(colour);
+
+    if (h) return h;
+
+    const size = 64;
+
+    h = document.createElement("canvas");
+
+    h.width = h.height = size;
+
+    const c = h.getContext("2d");
+
+    const g = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+
+    g.addColorStop(0, `rgba(${colour},1)`);
+    g.addColorStop(0.45, `rgba(${colour},0.35)`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+
+    c.fillStyle = g;
+
+    c.fillRect(0, 0, size, size);
+
+    halos.set(colour, h);
+
+    return h;
+
+}
+
 export function drawEnergy(camera) {
 
     ctx.save();
@@ -83,56 +116,15 @@ export function drawEnergy(camera) {
         // Glow
         //----------------------------------
 
-        const glow = ctx.createRadialGradient(
+        // From one pre-drawn halo per colour, instead of a
+        // new gradient per speck per frame.
+        const size = e.radius * 28;
 
-            screen.x,
+        ctx.globalAlpha = e.alpha * pulse;
 
-            screen.y,
+        ctx.drawImage(haloFor(e.colour), screen.x - size / 2, screen.y - size / 2, size, size);
 
-            0,
-
-            screen.x,
-
-            screen.y,
-
-            e.radius * 14
-
-        );
-
-        glow.addColorStop(
-            0,
-            `rgba(${e.colour},${e.alpha * pulse})`
-        );
-
-        glow.addColorStop(
-            0.45,
-            `rgba(${e.colour},${e.alpha * 0.25})`
-        );
-
-        glow.addColorStop(
-            1,
-            "rgba(0,0,0,0)"
-        );
-
-        ctx.fillStyle = glow;
-
-        ctx.beginPath();
-
-        ctx.arc(
-
-            screen.x,
-
-            screen.y,
-
-            e.radius * 14,
-
-            0,
-
-            Math.PI * 2
-
-        );
-
-        ctx.fill();
+        ctx.globalAlpha = 1;
 
         //----------------------------------
         // Core

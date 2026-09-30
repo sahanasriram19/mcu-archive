@@ -314,6 +314,18 @@ function frame(){
 
     branches.style.opacity = String(1 - heroT);
 
+    // Once fully faded, take the hero and its animated,
+    // glowing branches out of rendering altogether, so they
+    // don't cost anything during the flight.
+    const heroGone = heroT >= 1 ? "hidden" : "";
+
+    if(branches.style.visibility !== heroGone){
+
+        branches.style.visibility = heroGone;
+        hero.style.visibility = heroGone;
+
+    }
+
     hint.style.opacity = String(1 - clamp01(heroT * 3));
 
     skipBtn.classList.toggle("show", heroT > 0.6 && smooth < 0.97);

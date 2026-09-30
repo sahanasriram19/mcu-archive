@@ -3,7 +3,6 @@
 // STAR RENDERER
 //
 //==================================================
-
 import { ctx } from "./renderer.js";
 import { universe } from "./state.js";
 
@@ -13,6 +12,40 @@ import {
     clamp
 
 } from "./utils.js";
+
+//==================================================
+// Star halo image — the same gradient every bright star
+// used to build for itself each frame (white centre, a
+// faint blue edge), drawn once and reused.
+//==================================================
+
+let glow = null;
+
+function glowSprite(){
+
+    if (glow) return glow;
+
+    const size = 64;
+
+    glow = document.createElement("canvas");
+
+    glow.width = glow.height = size;
+
+    const c = glow.getContext("2d");
+
+    const g = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+
+    g.addColorStop(0, "rgba(255,255,255,0.18)");
+    g.addColorStop(0.4, "rgba(170,210,255,0.06)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+
+    c.fillStyle = g;
+
+    c.fillRect(0, 0, size, size);
+
+    return glow;
+
+}
 
 //==================================================
 
@@ -120,52 +153,15 @@ export function drawStars(camera) {
 
         if (radius > 1) {
 
-            const glow = ctx.createRadialGradient(
+            // A soft halo, from one pre-drawn image rather than
+            // a new gradient per star per frame.
+            const size = radius * 20;
 
-                screen.x,
-                screen.y,
-                0,
+            ctx.globalAlpha = pulse;
 
-                screen.x,
-                screen.y,
+            ctx.drawImage(glowSprite(), screen.x - size / 2, screen.y - size / 2, size, size);
 
-                radius * 10
-
-            );
-
-            glow.addColorStop(
-                0,
-                `rgba(255,255,255,${0.18 * pulse})`
-            );
-
-            glow.addColorStop(
-                0.4,
-                `rgba(170,210,255,${0.06 * pulse})`
-            );
-
-            glow.addColorStop(
-                1,
-                "rgba(0,0,0,0)"
-            );
-
-            ctx.fillStyle = glow;
-
-            ctx.beginPath();
-
-            ctx.arc(
-
-                screen.x,
-                screen.y,
-
-                radius * 10,
-
-                0,
-
-                Math.PI * 2
-
-            );
-
-            ctx.fill();
+            ctx.globalAlpha = 1;
 
         }
 
