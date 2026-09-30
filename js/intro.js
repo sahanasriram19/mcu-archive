@@ -27,6 +27,7 @@ import { showMovieDetails } from "./movieDetails.js";
 import { groupName } from "./worlds.js";
 import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 import { isUpcoming } from "./upcoming.js";
+import { warmPosters } from "./nodes.js";
 
 const landing = document.getElementById("landing");
 const stage = document.getElementById("intro-stage");
@@ -53,6 +54,11 @@ const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
 
 const FADE_IN_FAR = -4400;    // items appear from here...
 const FADE_IN_NEAR = -3000;   // ...fully visible from here
+
+// Phase titles show from much further away, so the next
+// chapter is already glowing in the distance.
+const CHAPTER_FADE_IN_FAR = -11000;
+const CHAPTER_FADE_IN_NEAR = -6000;
 const FADE_OUT_START = 350;   // start fading as they pass...
 const FADE_OUT_END = 850;     // ...gone by here
 
@@ -81,6 +87,11 @@ let totalDepth = 1;
 let active = false;
 let smooth = 0;
 let onEnterCb = null;
+
+// The MCU titles, and how far along the flight the map's
+// posters were last warmed up (see warmPosters below).
+let mcuNodes = [];
+let warmedAt = -1;
 
 // Deterministic "random" per index, so the scene is the
 // same on every visit.
@@ -154,6 +165,8 @@ function posterWidth(){
 export function initIntro(nodes, onEnter){
 
     onEnterCb = onEnter;
+
+    mcuNodes = nodes;
 
     skipBtn.addEventListener("click", () => onEnterCb && onEnterCb());
     endBtn.addEventListener("click", () => onEnterCb && onEnterCb());
@@ -300,6 +313,22 @@ function frame(){
 
     const camZ = smooth * totalDepth;
 
+    // Get the map's small posters downloaded and decoded
+    // while you fly, so entering the archive doesn't have
+    // to do it all at once. Twice, in case some posters'
+    // details only arrived from TMDB in the meantime.
+    for(const at of [0.15, 0.7]){
+
+        if(smooth >= at && warmedAt < at){
+
+            warmedAt = at;
+
+            warmPosters(mcuNodes, 40);
+
+        }
+
+    }
+
     //--------------------------------------------------
     // Hero fades and drifts up as the flight begins
     //--------------------------------------------------
@@ -366,7 +395,10 @@ function frame(){
 
         const rel = camZ - it.depth;   // < 0: still ahead of us
 
-        const visible = rel > FADE_IN_FAR && rel < FADE_OUT_END;
+        const far = it.kind === "chapter" ? CHAPTER_FADE_IN_FAR : FADE_IN_FAR;
+        const near = it.kind === "chapter" ? CHAPTER_FADE_IN_NEAR : FADE_IN_NEAR;
+
+        const visible = rel > far && rel < FADE_OUT_END;
 
         if(!visible){
 
@@ -378,7 +410,7 @@ function frame(){
 
         if(!it.shown){ it.el.style.visibility = "visible"; it.shown = true; }
 
-        const fadeIn = clamp01((rel - FADE_IN_FAR) / (FADE_IN_NEAR - FADE_IN_FAR));
+        const fadeIn = clamp01((rel - far) / (near - far));
         const fadeOut = 1 - clamp01((rel - FADE_OUT_START) / (FADE_OUT_END - FADE_OUT_START));
 
         // Items stay out of sight until the hero has gone,

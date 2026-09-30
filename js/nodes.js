@@ -52,7 +52,28 @@ function loadEntry(url){
 
         };
 
-        img.onload = ()=> entry.loaded = true;
+        // Only counted as loaded once the browser has fully
+        // decoded it, off the main thread (img.decode()).
+        // Drawing a not-yet-decoded image onto the canvas makes
+        // the browser decode it right there, in the middle of a
+        // frame — with dozens of posters appearing at once when
+        // you enter the archive, that was the stutter.
+        img.onload = ()=>{
+
+            if(img.decode){
+
+                img.decode()
+                    .then(()=> entry.loaded = true)
+                    .catch(()=> entry.loaded = true);
+
+            } else {
+
+                entry.loaded = true;
+
+            }
+
+        };
+
         img.onerror = ()=> entry.failed = true;
 
         img.src = url;
@@ -62,6 +83,24 @@ function loadEntry(url){
     }
 
     return entry;
+
+}
+
+// Start fetching (and decoding) the posters the map will
+// need for a view, ahead of time — js/intro.js calls this
+// during the fly-through, so they're ready the moment you
+// enter instead of all arriving at once.
+export function warmPosters(nodes, screenWidth){
+
+    nodes.forEach(n => {
+
+        if(!n.poster || n.isBranch) return;
+
+        if(typeof n.poster === "string") loadEntry(n.poster);
+
+        else loadEntry(n.poster[sizeFor(screenWidth)] || n.poster.small);
+
+    });
 
 }
 
@@ -98,7 +137,20 @@ function getPoster(source, screenWidth){
 
 }
 
+// A poster's first appearance on the canvas is its most
+// expensive draw (the browser has to hand the whole image
+// to the graphics side). When the archive opens, dozens of
+// posters appear in the same frame, which stalled it for a
+// moment. So only a few posters make their first appearance
+// per frame; the rest show their plain card for a frame or
+// two longer — too quick to notice.
+const NEW_POSTERS_PER_FRAME = 6;
+
+let newPosterBudget = NEW_POSTERS_PER_FRAME;
+
 export function renderNodes(ctx, camera, nodes){
+
+    newPosterBudget = NEW_POSTERS_PER_FRAME;
 
     ctx.save();
 
@@ -242,7 +294,23 @@ export function renderNodes(ctx, camera, nodes){
              BASE_POSTER_SIZE) * camera.zoom;
 
         const poster = getPoster(node.poster, onScreenWidth);
-        const posterReady = !!(poster && poster.loaded && !poster.failed);
+        let posterReady = !!(poster && poster.loaded && !poster.failed);
+
+        if(posterReady && !poster.shown){
+
+            if(newPosterBudget > 0){
+
+                newPosterBudget--;
+
+                poster.shown = true;
+
+            } else {
+
+                posterReady = false;
+
+            }
+
+        }
 
         if (posterReady) {
 

@@ -22,6 +22,7 @@ import { initCharacterPanel } from "./characters/panel.js";
 import { initUpcoming } from "./upcoming.js";
 import { initIntro, setIntroActive } from "./intro.js";
 import { initTilt } from "./tilt.js";
+import { warmPosters } from "./nodes.js";
 
 //==========================================
 // LANDING
@@ -64,6 +65,10 @@ initTilt();
 // The landing page's 3D scroll fly-through (js/intro.js),
 // built from the MCU titles once they've loaded.
 graphReady.then(() => initIntro(worldNodes.mcu, () => enter("complete")));
+
+// Also warm the map's posters a few seconds after load, for
+// anyone who skips the flight (see warmPosters in nodes.js).
+graphReady.then(() => setTimeout(() => warmPosters(worldNodes.mcu, 40), 3000));
 
 graphReady.then(() => {
 
