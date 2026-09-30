@@ -14,13 +14,19 @@ export function renderHub(ctx, camera){
     const width = 900 * camera.zoom;
     const height = 400 * camera.zoom;
 
-    // X-Men world: a plain title plate in place of the Marvel
-    // logo, the same size so the branches meet it the same way.
+    // X-Men / Spider-Man worlds: their own logo picture if
+    // one is set (see WORLD_PLATES below), otherwise a plain
+    // title plate — either way in place of the Marvel logo,
+    // the same size so the branches meet it the same way.
     const plate = WORLD_PLATES[getWorld()];
 
     if(plate){
 
-        drawWorldPlate(ctx, x, y, width, height, plate);
+        const pic = plateImage(plate);
+
+        if(pic) drawFitted(ctx, pic, x, y, width, height);
+
+        else drawWorldPlate(ctx, x, y, width, height, plate);
 
         return;
 
@@ -40,14 +46,58 @@ export function renderHub(ctx, camera){
 
 }
 
-// Title plates for the non-MCU worlds: just the name in
-// bold type on a coloured plate — no emblems.
+// The centre of the map for the non-MCU worlds.
+//
+// To use a picture as a world's logo, put the image file in
+// the assets folder and set `image` to its path, e.g.
+//
+//     image: "assets/xmen-logo.png"
+//
+// PNG with a transparent background looks best. It's scaled
+// to fit a 900 x 400 box (keeping its shape) in the middle
+// of the map. With `image` left out — or while the picture
+// is still loading, or if the file can't be found — the
+// plain title plate below is drawn instead.
 const WORLD_PLATES = {
 
-    xmen:   { text: "X-MEN",      top: "#1c2a5e", bottom: "#0d1433", rim: "250,204,21", ink: "rgb(250,204,21)" },
-    spider: { text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" }
+    xmen:   { image: "assets/xmen-logo.png", text: "X-MEN",      top: "#1c2a5e", bottom: "#0d1433", rim: "250,204,21", ink: "rgb(250,204,21)" },
+    spider: { image: "assets/spiderman-logo.png", text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" }
 
 };
+
+// Loads a world's logo picture once; returns it when ready.
+function plateImage(plate){
+
+    if(!plate.image) return null;
+
+    if(!plate.img){
+
+        plate.img = new Image();
+
+        plate.img.onerror = () => { plate.imgFailed = true; };
+
+        plate.img.src = plate.image;
+
+    }
+
+    if(plate.imgFailed || !plate.img.complete || !plate.img.naturalWidth) return null;
+
+    return plate.img;
+
+}
+
+// Draws a picture as large as fits in the w x h box centred
+// on (x, y), without stretching it.
+function drawFitted(ctx, pic, x, y, w, h){
+
+    const scale = Math.min(w / pic.naturalWidth, h / pic.naturalHeight);
+
+    const dw = pic.naturalWidth * scale;
+    const dh = pic.naturalHeight * scale;
+
+    ctx.drawImage(pic, x - dw / 2, y - dh / 2, dw, dh);
+
+}
 
 function drawWorldPlate(ctx, x, y, w, h, plate){
 
