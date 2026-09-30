@@ -366,7 +366,12 @@
        from here, so they line up exactly. */
     width: 0;
     height: 0;
-    will-change: transform, opacity;
+    /* No will-change here on purpose: with it, the browser
+       draws each title/poster once at the size it first
+       appears (tiny, far away) and just stretches that
+       image as it comes closer — blurry, then snapping
+       sharp. Without it, the text and posters are redrawn
+       crisp at their current size as they approach. */
     backface-visibility: hidden;
     /* Hidden until the camera gets near (js/intro.js). */
     visibility: hidden;
@@ -584,7 +589,8 @@
     align-items: center;
     transform-origin: 50% calc(var(--lw) * 0.197);
     transform: scale(.1);
-    will-change: transform;
+    /* (No will-change, so the logo stays sharp as it grows
+       — see .intro-item.) */
 }
 
 /* The branches only draw out from the logo once you're
