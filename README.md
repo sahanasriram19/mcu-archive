@@ -11,7 +11,7 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 Before you enter, scroll the landing page to fly through the MCU in 3D: each Phase opens with a title card, its films and series float past on either side, and a "Coming Soon" chapter closes it out (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
 - **Complete MCU** — every title, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
-- **Phases** — six (well, seven — Phase 0 covers the Defenders-saga shows) separate mini mind maps, one per phase, so you can compare each era's shape at a glance.
+- **Phases** — six separate mini mind maps, one per phase (plus one for the Netflix *Defenders* shows), so you can compare each era's shape at a glance.
 - **Release Order** — a left-to-right timeline in real-world release order.
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
 - **X-Men World** — a second world in the same app: the Fox X-Men films plus *X-Men '97*, with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.

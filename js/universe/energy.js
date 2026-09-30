@@ -24,7 +24,14 @@ export function drawEnergy(camera) {
     const width = universe.width;
     const height = universe.height;
 
-    for (const e of universe.energy) {
+    // Zoomed out (e.g. the Complete MCU map) these glowing
+    // specks crowd the screen, so only every other one is
+    // drawn there.
+    const step = camera.zoom < 0.5 ? 2 : 1;
+
+    for (let i = 0; i < universe.energy.length; i += step) {
+
+        const e = universe.energy[i];
 
         e.angle += e.speed;
 

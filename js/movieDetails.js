@@ -254,9 +254,10 @@ export async function showMovieDetails(node) {
 
     }
 
-    if (node.phase !== undefined && node.phase !== null && node.phase >= 1) {
+    if (node.phase !== undefined && node.phase !== null && node.phase >= 0) {
 
-        // "Phase 3" for MCU titles, the era name for X-Men.
+        // "Phase 3" for MCU titles, "Defenders" for the Netflix
+        // shows, the era name for X-Men and Spider-Man.
         metaParts.push(groupName(node.phase, { upper: false }) + (node.world && node.world !== "mcu" ? " era" : ""));
 
     }

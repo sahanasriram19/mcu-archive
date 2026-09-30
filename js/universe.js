@@ -64,7 +64,11 @@ export function renderUniverse(camera, entered){
 
     drawStars(camera);
 
-    drawHeroStars(camera);
+    // Hero stars switched off: big glowing balls with four
+    // spike lines. Like the dust, they're still generated so
+    // every other layer's seeded layout stays the same. Put
+    // this call back to restore them.
+    // drawHeroStars(camera);
 
     drawEnergy(camera);
 

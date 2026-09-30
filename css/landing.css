@@ -339,6 +339,11 @@
     position: absolute;
     left: 50%;
     top: 50%;
+    /* A zero-size anchor at the item's centre point: the
+       poster, its caption and the 3D turn are all measured
+       from here, so they line up exactly. */
+    width: 0;
+    height: 0;
     will-change: transform, opacity;
     backface-visibility: hidden;
     /* Hidden until the camera gets near (js/intro.js). */
@@ -357,8 +362,7 @@
     pointer-events: auto;
     cursor: pointer;
     background: linear-gradient(180deg, rgba(var(--c), .45), rgba(var(--c), .15));
-    border: 1px solid rgba(var(--c), .6);
-    box-shadow: 0 0 40px rgba(var(--c), .35), 0 20px 40px rgba(0,0,0,.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,.5);
 }
 
 .intro-poster img {
@@ -384,11 +388,11 @@
 
 /* Name + year under each poster. */
 .intro-caption {
+    /* Exactly the poster's width, directly under it. */
     position: absolute;
-    left: 50%;
+    left: calc(var(--pw, 220px) / -2);
     top: calc(var(--pw, 220px) * 0.75 + 12px);
-    transform: translateX(-50%);
-    width: calc(var(--pw, 220px) + 60px);
+    width: var(--pw, 220px);
     text-align: center;
     font-size: 14px;
     font-weight: 600;

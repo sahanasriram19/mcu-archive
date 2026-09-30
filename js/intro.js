@@ -5,7 +5,7 @@
 // through space. Each MCU phase opens with a chapter
 // title in its colour; its titles then float past on
 // alternating sides, angled towards you. Phases come in
-// the order they began (so the Netflix "Phase 0" shows
+// the order they began (so the Netflix "Defenders" shows
 // sit between Phase 2 and Phase 3), and a final "Coming
 // soon" chapter holds the titles not out yet. At the end,
 // the way into the archive appears.
@@ -222,10 +222,11 @@ export function initIntro(nodes, onEnter){
 
             stage.appendChild(el);
 
-            // Alternate left/right; a little variety in how
-            // far out, how high, and how much it's angled.
+            // Alternate left/right, all at the same height,
+            // with a little variety in how far out and how
+            // much each is angled.
             const xFrac = side * (0.2 + jitter(index, 1) * 0.1);
-            const yFrac = (jitter(index, 2) - 0.5) * 0.22;
+            const yFrac = 0;
             const rot = -side * (14 + jitter(index, 3) * 10);
 
             items.push({ el, poster, node, depth, xFrac, yFrac, rot, kind: "poster", imgSet: false });

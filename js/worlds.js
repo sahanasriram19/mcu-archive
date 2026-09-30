@@ -65,7 +65,16 @@ export const SPIDER_ERAS = {
 
 };
 
-const ERA_NAMES = { ...XMEN_ERAS, ...SPIDER_ERAS };
+// The MCU's "Phase 0" — the Netflix Defenders-saga shows
+// (Daredevil, Jessica Jones, Luke Cage…) — is shown by
+// name everywhere rather than as a phase number.
+export const MCU_GROUP_NAMES = {
+
+    0: "Defenders"
+
+};
+
+const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS };
 
 let currentWorld = "mcu";
 
@@ -81,7 +90,8 @@ export function setCurrentWorld(key){
 
 }
 
-// "PHASE 3" for the MCU, "WOLVERINE" etc. for X-Men eras —
+// "PHASE 3" for the MCU ("DEFENDERS" for the Netflix
+// shows), "WOLVERINE" etc. for X-Men eras —
 // used for branch labels, timeline markers and the
 // details card.
 export function groupName(phase, { upper = true } = {}){

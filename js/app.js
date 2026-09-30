@@ -77,7 +77,9 @@ graphReady.then(() => {
         .map(n => new Date(n.release).getFullYear())
         .filter(y => !isNaN(y));
 
-    const phases = new Set(movies.map(n => n.phase)).size;
+    // The Defenders shows (data's "phase 0") aren't a
+    // numbered phase, so they don't count here.
+    const phases = new Set(movies.map(n => n.phase).filter(p => p !== 0)).size;
 
     const plural = (n, word) => `<b>${n}</b> ${word}${n === 1 ? "" : "s"}`;
 
@@ -188,7 +190,7 @@ window.addEventListener("keydown", e => {
     if(landing.style.display === "none" || landing.classList.contains("leaving")) return;
 
     // A focused button already fires click on Enter.
-    if(document.activeElement === button) return;
+    if(document.activeElement && document.activeElement.tagName === "BUTTON") return;
 
     e.preventDefault();
 

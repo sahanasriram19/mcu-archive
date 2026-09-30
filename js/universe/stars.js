@@ -37,9 +37,11 @@ export function drawStars(camera) {
     // so it doesn't shimmer frame to frame).
     //------------------------------------------
 
+    // (The divisor was 1.6; 0.6 draws about a third as
+    // many when zoomed out, e.g. on the Complete MCU map.)
     const skip = camera.zoom >= 0.9
         ? 1
-        : Math.max(1, Math.round(1 / (camera.zoom * 1.6)));
+        : Math.max(1, Math.round(1 / (camera.zoom * 0.6)));
 
     const stars = universe.stars;
 
@@ -201,27 +203,13 @@ export function drawStars(camera) {
                 break;
 
             //----------------------------------
-            // Cross Star
+            // Plain star (was a cross)
             //----------------------------------
 
             case 1:
 
-                ctx.strokeStyle = star.colour;
-
-                ctx.lineWidth = 0.7;
-
-                ctx.beginPath();
-
-                ctx.moveTo(screen.x - 5, screen.y);
-
-                ctx.lineTo(screen.x + 5, screen.y);
-
-                ctx.moveTo(screen.x, screen.y - 5);
-
-                ctx.lineTo(screen.x, screen.y + 5);
-
-                ctx.stroke();
-
+                // Was a dot with four thin lines through it;
+                // now just the dot.
                 ctx.beginPath();
 
                 ctx.arc(
@@ -298,21 +286,7 @@ export function drawStars(camera) {
 
                 ctx.fill();
 
-                ctx.strokeStyle = "#FFFFFF";
-
-                ctx.lineWidth = 0.5;
-
-                ctx.beginPath();
-
-                ctx.moveTo(screen.x - 7, screen.y);
-
-                ctx.lineTo(screen.x + 7, screen.y);
-
-                ctx.moveTo(screen.x, screen.y - 7);
-
-                ctx.lineTo(screen.x, screen.y + 7);
-
-                ctx.stroke();
+                // (Its four spike lines were removed.)
 
                 break;
 
