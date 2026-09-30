@@ -65,6 +65,11 @@ const SMOOTHING = 0.12;       // camera easing per frame
 const PORTAL_PERSPECTIVE = 7000;
 const PORTAL_MIN_SCALE = 0.09;
 
+// It only starts to appear this far along the trail (0-1),
+// fading fully in over the next stretch.
+const END_REVEAL_FROM = 0.45;
+const END_REVEAL_OVER = 0.25;
+
 const STAR_ZOOM = 0.28;       // starfield zoom at the start...
 const STAR_ZOOM_BOOST = 1.6;  // ...rises by this factor to the end
 
@@ -91,17 +96,9 @@ const jitter = (i, salt) => {
 // Build
 //--------------------------------------------------
 
-function yearRange(members){
-
-    const ys = members.map(n => +n.release.slice(0, 4));
-
-    const a = Math.min(...ys), b = Math.max(...ys);
-
-    return a === b ? `${a}` : `${a}–${b}`;
-
-}
-
-function makeChapter(kicker, title, sub, colour){
+// A chapter card: a small kicker line and the big title
+// in the phase's colour.
+function makeChapter(kicker, title, colour){
 
     const el = document.createElement("div");
 
@@ -111,12 +108,10 @@ function makeChapter(kicker, title, sub, colour){
     el.innerHTML = `
         <div class="intro-chapter-kicker"></div>
         <div class="intro-chapter-title"></div>
-        <div class="intro-chapter-sub"></div>
     `;
 
     el.querySelector(".intro-chapter-kicker").textContent = kicker;
     el.querySelector(".intro-chapter-title").textContent = title;
-    el.querySelector(".intro-chapter-sub").textContent = sub;
 
     return el;
 
@@ -210,13 +205,8 @@ export function initIntro(nodes, onEnter){
             : (HIGHLIGHT_COLOURS[group.phase] || "255,255,255");
 
         const chapter = group.phase === null
-            ? makeChapter("Still to come", "Coming Soon", `${group.members.length} title${group.members.length === 1 ? "" : "s"} on the way`, colour)
-            : makeChapter(
-                "The Marvel Cinematic Universe",
-                groupName(group.phase),
-                `${yearRange(group.members)} · ${group.members.length} titles`,
-                colour
-            );
+            ? makeChapter("Still to come", "Coming Soon", colour)
+            : makeChapter("The Marvel Cinematic Universe", groupName(group.phase), colour);
 
         stage.appendChild(chapter);
 
@@ -339,7 +329,7 @@ function frame(){
 
     //--------------------------------------------------
     // The logo at the end: a small light in the distance
-    // from the moment the flight starts, growing as the
+    // from about halfway along, growing as the
     // trail runs out.
     //--------------------------------------------------
 
@@ -356,7 +346,11 @@ function frame(){
     // fades away as the logo itself takes over.
     beacon.style.opacity = (1 - clamp01((portalScale - 0.12) / 0.35)).toFixed(3);
 
-    endEl.style.opacity = heroT.toFixed(3);
+    // Hidden for the first part of the flight, then slowly
+    // revealed from about halfway along the trail.
+    const reveal = clamp01((smooth - END_REVEAL_FROM) / END_REVEAL_OVER);
+
+    endEl.style.opacity = (heroT * reveal).toFixed(3);
 
     //--------------------------------------------------
     // Starfield rushes past a little faster as you go

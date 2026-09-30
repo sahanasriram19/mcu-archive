@@ -83,6 +83,13 @@ function renderWatchBefore(node){
 
     };
 
+    // Opened from the landing page's 3D fly-through, there's
+    // no map on screen to show the list on, so "Show on map"
+    // only appears once you're inside the archive.
+    const landingEl = document.getElementById("landing");
+
+    const onLanding = !!landingEl && landingEl.style.display !== "none";
+
     // Titles from another world get its name after the
     // year, e.g. "2000 · X-Men".
     const otherWorld = n => {
@@ -101,7 +108,7 @@ function renderWatchBefore(node){
                 <div class="watch-label">Watch before this</div>
                 <div class="watch-note">${note} · ${nodes.length} title${nodes.length === 1 ? "" : "s"}</div>
             </div>
-            <button type="button" class="watch-show">Show on map</button>
+            ${onLanding ? "" : `<button type="button" class="watch-show">Show on map</button>`}
         </div>
         <div class="watch-row">
             ${nodes.map((n, i) => `
@@ -120,7 +127,9 @@ function renderWatchBefore(node){
 
     });
 
-    watchEl.querySelector(".watch-show").addEventListener("click", () => {
+    const showBtn = watchEl.querySelector(".watch-show");
+
+    if(showBtn) showBtn.addEventListener("click", () => {
 
         hideMovieDetails();
 

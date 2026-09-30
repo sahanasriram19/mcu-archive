@@ -151,11 +151,13 @@
 }
 
 /* The hero's glowing ring (the .portal styles further
-   down, in the fly-through section), a little smaller than
-   it was at the end of the trail. */
+   down, in the fly-through section). */
 #landing-card {
-    --ps: min(250px, 54vw, 36vh);
+    --ps: min(340px, 74vw, 46vh);
 }
+
+/* A bigger logo inside the landing ring. */
+.hero-portal .portal-core img { width: 76%; }
 
 .hero-portal .portal-halo { inset: -50%; }
 
@@ -457,11 +459,6 @@
     text-shadow: 0 0 40px rgba(var(--c), .6), 0 0 90px rgba(var(--c), .35);
 }
 
-.intro-chapter-sub {
-    margin-top: 14px;
-    font-size: 20px;
-    color: rgba(255,255,255,.75);
-}
 
 /* "Scroll to fly through the MCU" at the bottom. */
 .intro-scroll-hint {
@@ -743,7 +740,6 @@
 
     .intro-chapter-title { font-size: 64px; }
 
-    .intro-chapter-sub { font-size: 16px; }
 
     .intro-caption { font-size: 12px; }
 
