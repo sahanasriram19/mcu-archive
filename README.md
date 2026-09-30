@@ -8,7 +8,7 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 ## What it does
 
-Before you enter, scroll the landing page to fly through the MCU in 3D: each Phase opens with a title card, its films and series float past on either side, and a "Coming Soon" chapter closes it out (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
+The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each Phase opens with a title card, its films and series float past on either side, and a "Coming Soon" chapter closes it out. All the way, the Marvel logo shines at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
 - **Complete MCU** — every title, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
 - **Phases** — six separate mini mind maps, one per phase (plus one for the Netflix *Defenders* shows), so you can compare each era's shape at a glance.

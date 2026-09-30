@@ -1,8 +1,10 @@
 /*==================================================
   LANDING PAGE
-  Logo, title, tagline, live stats and the Enter button,
-  over a faint preview of the mind map (#landing-branches)
-  whose branches draw outward from behind the logo.
+  The hero (a glowing ring with the Marvel logo, title,
+  tagline and the invitation to scroll), then the 3D
+  fly-through, ending at the Marvel logo with a faint
+  preview of the mind map (#landing-branches) drawing out
+  from behind it, the live stats and the Enter button.
 ==================================================*/
 
 /* The landing page scrolls (the 3D fly-through, see
@@ -148,12 +150,31 @@
     to   { opacity: 1; transform: none; }
 }
 
-#landing-card img {
+/* The hero's glowing ring (the .portal styles further
+   down, in the fly-through section), a little smaller than
+   it was at the end of the trail. */
+#landing-card {
+    --ps: min(250px, 54vw, 36vh);
+}
+
+.hero-portal .portal-halo { inset: -50%; }
+
+/* The Marvel logo at the end of the trail, with the
+   mind-map branches growing out from behind it. */
+.end-logo {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.end-logo-img {
+    position: relative;
+    z-index: 1;
     display: block;
-    width: min(360px, 70vw);
+    width: var(--lw);
     height: auto;
     border-radius: 4px;
-    box-shadow: 0 0 60px rgba(230, 36, 41, .35), 0 10px 40px rgba(0,0,0,.5);
+    box-shadow: 0 0 60px rgba(230, 36, 41, .45), 0 10px 40px rgba(0,0,0,.5);
 }
 
 .landing-title {
@@ -284,7 +305,7 @@
        below the bottom of the screen. Smaller logo, no
        tagline (the title + stats say enough), tighter
        spacing. */
-    #landing-card img { width: min(200px, 30vw); }
+    #landing-card { --ps: min(130px, 34vh); }
 
     .landing-title { margin-top: 12px; }
 
@@ -536,22 +557,172 @@
 
 #intro-skip:hover { background: rgba(230,36,41,.25); }
 
-/* The end of the fly-through. */
+/* The end of the trail: the Marvel logo and the mind-map
+   branches. js/intro.js scales .end-scene from a small light
+   far away to full size as you arrive; .arrived starts the
+   branches drawing, and .show (at the very end) brings in
+   the caption, stats and Enter button under the logo. */
 #intro-end {
+    --lw: min(360px, 70vw);        /* logo width up close */
+
     position: absolute;
     left: 50%;
     top: 50%;
-    width: min(560px, 90vw);
-    transform: translate(-50%, -40%) scale(.96);
+    width: min(560px, 92vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Logo centred on the screen (it's 156/396 as tall as
+       it is wide); everything else hangs below. */
+    transform: translate(-50%, calc(var(--lw) * -0.197));
     text-align: center;
-    opacity: 0;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity .6s ease;
+}
+
+.end-scene {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: 50% calc(var(--lw) * 0.197);
+    transform: scale(.1);
+    will-change: transform;
+}
+
+/* The branches only draw out from the logo once you're
+   nearly there (js/intro.js adds .arrived). */
+#intro-end:not(.arrived) #landing-branches .lb path,
+#intro-end:not(.arrived) #landing-branches .lb circle {
+    animation-play-state: paused;
+}
+
+/* The glowing ring (now on the landing page, #landing-card;
+   --ps is its size). */
+.portal {
+    position: relative;
+    flex: 0 0 auto;
+    width: var(--ps);
+    height: var(--ps);
+}
+
+/* A bright, soft light at the ring's centre that doesn't
+   shrink with distance: while the ring is still a speck,
+   this is the glow you see at the end of the trail. Faded
+   out by js/intro.js as you arrive. */
+.portal-beacon {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--lw) * 0.197);
+    width: 260px;
+    height: 260px;
+    margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(255,235,210,.9) 0%,
+        rgba(255,120,90,.55) 10%,
+        rgba(230,36,41,.25) 30%,
+        rgba(230,36,41,.06) 55%,
+        transparent 70%);
+    will-change: opacity, transform;
+    /* Scale only: its opacity is set from JS. */
+    animation: beacon-pulse 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes beacon-pulse {
+    from { transform: scale(.85); }
+    to   { transform: scale(1.1); }
+}
+
+/* Soft light around the ring, gently breathing — this is
+   what catches the eye from far away. */
+.portal-halo {
+    position: absolute;
+    inset: -70%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(255,120,90,.55) 0%,
+        rgba(230,36,41,.35) 22%,
+        rgba(230,36,41,.12) 42%,
+        rgba(255,190,120,.04) 58%,
+        transparent 70%);
+    will-change: opacity, transform;
+    animation: portal-breathe 3.2s ease-in-out infinite alternate;
+}
+
+/* The shiny rim: a red-gold-white sweep going round. */
+.portal-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+        #ff3b41, #ffd27a, #ffffff, #ff8a5c, #b3161b, #ffd27a, #ffffff, #ff3b41);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+    will-change: transform;
+    animation: portal-spin 7s linear infinite;
+}
+
+/* Inside the ring: a dark lens with a red inner glow and
+   the logo. */
+.portal-core {
+    position: absolute;
+    inset: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, rgba(60,18,26,.95), rgba(8,10,18,.97) 70%);
+    box-shadow:
+        inset 0 0 40px rgba(230,36,41,.55),
+        0 0 30px rgba(230,36,41,.7),
+        0 0 90px rgba(255,110,80,.35);
+}
+
+.portal-core img {
+    width: 66%;
+    height: auto;
+    border-radius: 3px;
+    box-shadow: 0 0 30px rgba(230,36,41,.6);
+}
+
+@keyframes portal-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes portal-breathe {
+    from { opacity: .7; transform: scale(.94); }
+    to   { opacity: 1;  transform: scale(1.04); }
+}
+
+/* Caption + Enter button: only at the very end. */
+/* Soft dark backdrop behind the caption, stats and button,
+   so the branch lines passing behind stay out of the way. */
+.portal-cta::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 150%;
+    height: 170%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgba(9,11,16,.85) 45%, rgba(9,11,16,0) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.portal-cta {
+    position: relative;
+    z-index: 1;
+    margin-top: 34px;
+    opacity: 0;
+    transform: translateY(12px);
     transition: opacity .5s ease, transform .5s ease;
 }
 
-#intro-end.show {
+#intro-end.show .portal-cta {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: none;
     pointer-events: auto;
 }
 
@@ -559,19 +730,12 @@
     font-size: 13px;
     font-weight: 700;
     letter-spacing: .3em;
+    margin-right: -.3em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: rgba(255,255,255,.75);
 }
 
-.intro-end-title {
-    margin-top: 10px;
-    font-size: clamp(26px, 4vw, 40px);
-    font-weight: 800;
-    line-height: 1.15;
-    text-shadow: 0 4px 24px rgba(0,0,0,.6);
-}
-
-#intro-end-enter { margin-top: 26px; }
+#intro-end-enter { margin-top: 18px; white-space: nowrap; }
 
 @media (max-width: 600px) {
 
@@ -585,7 +749,23 @@
 
 }
 
-/* Reduce motion: no fly-through — just the hero. */
+/* Sideways phones: a smaller logo, no caption, and the
+   logo + button centred together so the button fits. */
+@media (max-height: 500px) {
+
+    #intro-end {
+        --lw: min(200px, 30vw);
+        transform: translate(-50%, -50%);
+    }
+
+    .portal-cta { margin-top: 16px; }
+
+    .intro-end-kicker { display: none; }
+
+    #intro-end-enter { margin-top: 0; }
+
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     #intro-stage,

@@ -13,7 +13,8 @@
 //    short list of titles to watch first:
 //      • a hand-picked `watchBefore` list in mcu.json, if the
 //        title has one (the upcoming titles do — edit them
-//        freely, they're just ids), otherwise
+//        freely, they're just ids, and may be titles from
+//        another world, like the X-Men films), otherwise
 //      • every earlier title that shares one of its
 //        characters.
 //    "Show on map" dims everything else, lights up that
@@ -98,10 +99,18 @@ export function watchListFor(node){
 
     const byId = new Map(all.map(n => [n.id, n]));
 
+    // A hand-picked list can reach into another world too
+    // (Avengers: Doomsday lists the Fox X-Men films): ids
+    // are looked up in the title's own world first, then in
+    // the others.
+    const anyWorld = new Map();
+
+    allNodes().forEach(n => { if(!n.isBranch && !anyWorld.has(n.id)) anyWorld.set(n.id, n); });
+
     if(node.watchBefore && node.watchBefore.length){
 
         const picked = node.watchBefore
-            .map(id => byId.get(id))
+            .map(id => byId.get(id) || anyWorld.get(id))
             .filter(Boolean)
             .sort((a, b) => releaseTime(a) - releaseTime(b));
 
@@ -160,7 +169,16 @@ window.addEventListener("keydown", e => {
 
 export function startWatchFocus(node){
 
-    const { nodes } = watchListFor(node);
+    const { nodes: list } = watchListFor(node);
+
+    // Only titles in this title's own world can light up on
+    // its map; the rest (e.g. the X-Men films for Doomsday)
+    // are counted in the banner instead.
+    const home = node.world || getWorld();
+
+    const nodes = list.filter(n => (n.world || home) === home);
+
+    const elsewhere = list.length - nodes.length;
 
     if(!nodes.length) return;
 
@@ -182,7 +200,8 @@ export function startWatchFocus(node){
     };
 
     bannerText.innerHTML =
-        `<b>${nodes.length}</b> title${nodes.length === 1 ? "" : "s"} to watch before <b>${node.title}</b>`;
+        `<b>${nodes.length}</b> title${nodes.length === 1 ? "" : "s"} to watch before <b>${node.title}</b>` +
+        (elsewhere ? ` <span class="watch-banner-more">+ ${elsewhere} from other worlds</span>` : "");
 
     banner.classList.add("show");
 

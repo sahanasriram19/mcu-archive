@@ -10,7 +10,7 @@
 
 import { fetchDetails } from "./posters.js";
 import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
-import { groupName } from "./worlds.js";
+import { groupName, WORLDS } from "./worlds.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -83,6 +83,18 @@ function renderWatchBefore(node){
 
     };
 
+    // Titles from another world get its name after the
+    // year, e.g. "2000 · X-Men".
+    const otherWorld = n => {
+
+        const home = node.world || "mcu";
+
+        return n.world && n.world !== home && WORLDS[n.world]
+            ? ` · <span class="watch-world">${WORLDS[n.world].label}</span>`
+            : "";
+
+    };
+
     watchEl.innerHTML = `
         <div class="watch-head">
             <div>
@@ -96,7 +108,7 @@ function renderWatchBefore(node){
                 <button type="button" class="watch-item" data-i="${i}" title="${n.title}">
                     <div class="watch-poster">${thumb(n)}</div>
                     <div class="watch-title">${n.title}</div>
-                    <div class="watch-year">${(n.release || "").slice(0, 4)}</div>
+                    <div class="watch-year">${(n.release || "").slice(0, 4)}${otherWorld(n)}</div>
                 </button>
             `).join("")}
         </div>

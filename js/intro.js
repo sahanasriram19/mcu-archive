@@ -32,11 +32,12 @@ const landing = document.getElementById("landing");
 const stage = document.getElementById("intro-stage");
 const spacer = document.querySelector(".intro-spacer");
 const hero = document.getElementById("landing-card");
-const branches = document.getElementById("landing-branches");
 const hint = document.querySelector(".intro-scroll-hint");
 const skipBtn = document.getElementById("intro-skip");
 const endEl = document.getElementById("intro-end");
 const endBtn = document.getElementById("intro-end-enter");
+const endScene = endEl.querySelector(".end-scene");
+const beacon = endEl.querySelector(".portal-beacon");
 
 //--------------------------------------------------
 // Tuning
@@ -56,6 +57,13 @@ const FADE_OUT_START = 350;   // start fading as they pass...
 const FADE_OUT_END = 850;     // ...gone by here
 
 const SMOOTHING = 0.12;       // camera easing per frame
+
+// The logo at the end of the trail: how quickly it
+// grows as you approach (bigger = larger from far away),
+// and the smallest it ever gets, so it always shows as a
+// light in the distance.
+const PORTAL_PERSPECTIVE = 7000;
+const PORTAL_MIN_SCALE = 0.09;
 
 const STAR_ZOOM = 0.28;       // starfield zoom at the start...
 const STAR_ZOOM_BOOST = 1.6;  // ...rises by this factor to the end
@@ -312,25 +320,43 @@ function frame(){
     hero.style.transform = `translateY(${-heroT * 60}px) scale(${1 - heroT * 0.08})`;
     hero.style.pointerEvents = heroT > 0.5 ? "none" : "";
 
-    branches.style.opacity = String(1 - heroT);
-
-    // Once fully faded, take the hero and its animated,
-    // glowing branches out of rendering altogether, so they
-    // don't cost anything during the flight.
+    // Once fully faded, take the hero (and its animated
+    // ring) out of rendering altogether, so it doesn't cost
+    // anything during the flight.
     const heroGone = heroT >= 1 ? "hidden" : "";
 
-    if(branches.style.visibility !== heroGone){
-
-        branches.style.visibility = heroGone;
-        hero.style.visibility = heroGone;
-
-    }
+    if(hero.style.visibility !== heroGone) hero.style.visibility = heroGone;
 
     hint.style.opacity = String(1 - clamp01(heroT * 3));
 
     skipBtn.classList.toggle("show", heroT > 0.6 && smooth < 0.97);
 
     endEl.classList.toggle("show", smooth > 0.965);
+
+    // Nearly there: the branches start drawing out from the
+    // logo (and stay drawn).
+    if(smooth > 0.93) endEl.classList.add("arrived");
+
+    //--------------------------------------------------
+    // The logo at the end: a small light in the distance
+    // from the moment the flight starts, growing as the
+    // trail runs out.
+    //--------------------------------------------------
+
+    const remaining = (1 - smooth) * totalDepth;
+
+    const portalScale = Math.max(
+        PORTAL_MIN_SCALE,
+        PORTAL_PERSPECTIVE / (PORTAL_PERSPECTIVE + remaining)
+    );
+
+    endScene.style.transform = `scale(${portalScale.toFixed(4)})`;
+
+    // The beacon is brightest while the logo is small and
+    // fades away as the logo itself takes over.
+    beacon.style.opacity = (1 - clamp01((portalScale - 0.12) / 0.35)).toFixed(3);
+
+    endEl.style.opacity = heroT.toFixed(3);
 
     //--------------------------------------------------
     // Starfield rushes past a little faster as you go

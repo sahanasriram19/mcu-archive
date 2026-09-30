@@ -100,41 +100,10 @@ graphReady.then(() => {
 });
 
 //----------------------------------
-// Landing branch preview: centre it on
-// the logo (not the middle of the
-// screen), so the branches grow out
-// of the logo the way the mind map
-// grows out of the hub. Uses layout
-// offsets, not getBoundingClientRect,
-// so the card's fade-in slide doesn't
-// throw it off.
+// The branch preview now sits at the
+// end of the fly-through, centred on
+// the logo there by CSS (.end-logo).
 //----------------------------------
-
-const landingCard = document.getElementById("landing-card");
-const landingLogo = landingCard ? landingCard.querySelector("img") : null;
-const landingBranches = document.getElementById("landing-branches");
-
-function alignLandingBranches(){
-
-    if(!landingCard || !landingLogo || !landingBranches) return;
-
-    if(!landingLogo.offsetHeight) return;   // image not loaded yet
-
-    const y = landingCard.offsetTop + landingLogo.offsetTop + landingLogo.offsetHeight / 2;
-
-    landingBranches.style.top = y + "px";
-
-}
-
-if(landingLogo){
-
-    if(landingLogo.complete) alignLandingBranches();
-
-    landingLogo.addEventListener("load", alignLandingBranches);
-
-}
-
-window.addEventListener("resize", alignLandingBranches);
 
 // Matches the fade length in css/landing.css (#landing.leaving).
 const LANDING_FADE_MS = 500;
@@ -218,8 +187,6 @@ window.addEventListener("mcu:go-to-landing", () => {
 
     // Start the fly-through again from the top.
     setIntroActive(true);
-
-    alignLandingBranches();
 
     viewport.style.display = "none";
 
