@@ -54,7 +54,7 @@ export function renderUniverse(camera, entered){
 
     drawBackground();
 
-    drawNebulas(camera);
+    // drawNebulas(camera);
 
     // Dust layer switched off: it drew faint flat discs
     // (8-30px) that read as stray translucent circles once
