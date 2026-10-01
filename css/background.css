@@ -7,11 +7,7 @@
 }
 
 #stars{
-    position:absolute;
-    inset:0;
-    opacity:.18;
-    background-image:radial-gradient( white 1px, transparent 1px);
-    background-size: 170px 170px;
+    display:none;
 }
 
 #particles{
