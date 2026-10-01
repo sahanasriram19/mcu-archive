@@ -54,15 +54,44 @@ export function renderUniverse(camera, entered){
 
     drawBackground();
 
-    // drawNebulas(camera);
+    //==================================================
+    // ARCHIVE-ONLY NEBULAS
+    //
+    // Nebulas are intentionally disabled on the landing
+    // page because their enlarged low-resolution sprites
+    // create the blurry/block-like texture seen there.
+    //
+    // They fade in/out around the threshold so they don't
+    // suddenly pop into existence while zooming.
+    //==================================================
 
-    // Dust layer switched off: it drew faint flat discs
-    // (8-30px) that read as stray translucent circles once
-    // the mind map left open space in the middle. It's still
-    // generated (see generator.js), so the seeded random
-    // sequence — and therefore every other layer's layout —
-    // stays exactly the same. Put this call back to restore it.
-    // drawDust(camera);
+    if (entered) {
+
+        const NEBULA_FULL_ZOOM = 0.11;
+        const NEBULA_START_ZOOM = 0.19;
+
+        let nebulaAlpha =
+            (NEBULA_START_ZOOM - camera.zoom) /
+            (NEBULA_START_ZOOM - NEBULA_FULL_ZOOM);
+
+        nebulaAlpha = Math.max(
+            0,
+            Math.min(1, nebulaAlpha)
+        );
+
+        if (nebulaAlpha > 0) {
+
+            ctx.save();
+
+            ctx.globalAlpha = nebulaAlpha * 0.55;
+
+            drawNebulas(camera);
+
+            ctx.restore();
+
+        }
+
+    }
 
     drawStars(camera);
 
