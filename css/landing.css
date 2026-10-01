@@ -698,10 +698,10 @@
     to   { opacity: 1;  transform: scale(1.04); }
 }
 
-/* Caption + Enter button: only at the very end.
+/* Caption + Enter button: only at the very end. */
 /* Soft dark backdrop behind the caption, stats and button,
    so the branch lines passing behind stay out of the way. */
-/* .portal-cta::before {
+.portal-cta::before {
     content: "";
     position: absolute;
     left: 50%;
@@ -712,7 +712,7 @@
     background: radial-gradient(closest-side, rgba(9,11,16,.85) 45%, rgba(9,11,16,0) 100%);
     z-index: -1;
     pointer-events: none;
-} */ */
+}
 
 .portal-cta {
     position: relative;
