@@ -17,9 +17,9 @@
 
 const STREAK_COUNT = 320;
 
-const RUSH_MS = 820;        // streaks speeding up
-const FLASH_IN_MS = 240;    // light builds over the end of the rush
-const FLASH_OUT_MS = 650;   // light fades, revealing the map
+const RUSH_MS = 1350;       // streaks speeding up (was 820)
+const FLASH_IN_MS = 380;    // light builds over the end of the rush
+const FLASH_OUT_MS = 950;   // light fades, revealing the map
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
