@@ -789,3 +789,16 @@
     opacity: 0;
     transition: transform 1.3s cubic-bezier(.55,0,.9,.4), opacity 1.15s ease-in;
 }
+
+/* ...but jumping from the end of the trail, the Marvel logo
+   stays where it is (js/warp.js draws it over the streaks),
+   so the landing just fades underneath it instead of
+   rushing at you. */
+#landing.warping.from-logo .intro-sticky {
+    transform: none;
+    transition: opacity .6s ease;
+}
+
+#landing.leaving.from-logo {
+    transform: none;
+}

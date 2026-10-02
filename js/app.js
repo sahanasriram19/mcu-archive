@@ -118,6 +118,27 @@ graphReady.then(() => {
 // Matches the fade length in css/landing.css (#landing.leaving).
 const LANDING_FADE_MS = 500;
 
+// The map's logo is drawn 900 x 400 world units at world
+// (0, 0) — see js/hub.js.
+const HUB_WIDTH = 900;
+const HUB_HEIGHT = 400;
+
+// Where the map's logo is on screen right now (for the
+// jump's logo to ride along with as it fades), or null when
+// this view doesn't have one.
+function hubOnScreen(){
+
+    if(getCurrentView() !== "complete") return null;
+
+    return {
+        x: window.innerWidth / 2 - camera.x * camera.zoom,
+        y: window.innerHeight / 2 - camera.y * camera.zoom,
+        width: HUB_WIDTH * camera.zoom,
+        height: HUB_HEIGHT * camera.zoom
+    };
+
+}
+
 async function enter(viewKey){
 
     if(landing.classList.contains("leaving")) return;   // already on the way in
@@ -138,9 +159,35 @@ async function enter(viewKey){
         // at the moment of the flash, hidden by the light.
         landing.classList.add("warping");
 
-        await playWarp().peak;
+        // Jumping from the end of the trail: the Marvel logo
+        // it ended on stays on screen through the jump, and
+        // the map opens out of it on the other side.
+        const endEl = document.getElementById("intro-end");
+
+        const endLogo = endEl && endEl.classList.contains("arrived")
+            ? endEl.querySelector(".end-logo-img")
+            : null;
+
+        if(endLogo) landing.classList.add("from-logo");
+
+        const nextView = entered ? getCurrentView() : viewKey;
+
+        const at = await playWarp({ logo: endLogo, followTo: hubOnScreen }).peak;
 
         if(landing.classList.contains("leaving")) landing.style.display = "none";
+
+        // Put the map's own logo exactly where the jump's
+        // logo is, same size, so as the light fades it's
+        // already there — then setView() below eases the
+        // camera out from it while the posters branch out.
+        // (Only Complete MCU has the logo in the middle.)
+        if(at && nextView === "complete"){
+
+            camera.zoom = at.width / HUB_WIDTH;
+            camera.x = (window.innerWidth / 2 - at.x) / camera.zoom;
+            camera.y = (window.innerHeight / 2 - at.y) / camera.zoom;
+
+        }
 
     } else {
 
@@ -206,7 +253,7 @@ window.addEventListener("keydown", e => {
 
 window.addEventListener("mcu:go-to-landing", () => {
 
-    landing.classList.remove("leaving", "warping");
+    landing.classList.remove("leaving", "warping", "from-logo");
 
     onLanding = true;
 
