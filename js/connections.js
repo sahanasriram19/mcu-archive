@@ -9,8 +9,10 @@ import { getTimelineOrientation } from "./layout.js";
 //--------------------------------------------------
 // Branches growing out
 //
-// Each time a layout forms (setView in viewManager.js
-// calls startGrow), the lines draw themselves outward
+// When a layout forms fresh — entering the archive,
+// switching worlds, or opening a timeline (setView in
+// viewManager.js calls startGrow) — the lines draw
+// themselves outward
 // instead of appearing all at once: first the ones leaving
 // the centre (or a phase's hub), then the next level out,
 // and so on. On the timelines the spine sweeps across in
@@ -19,12 +21,12 @@ import { getTimelineOrientation } from "./layout.js";
 // setting.
 //--------------------------------------------------
 
-const GROW_DELAY = 220;       // ms after the switch before lines start
-const GROW_STEP = 240;        // extra wait per level outward
-const GROW_STEPS_MAX = 1500;  // levels never take longer than this in total
-const GROW_DURATION = 560;    // how long each line takes to grow
-const SPINE_DURATION = 1100;  // timeline spine, end to end
-const STUB_DURATION = 380;    // a timeline poster's branch
+const GROW_DELAY = 400;       // ms after the switch before lines start
+const GROW_STEP = 420;        // extra wait per level outward
+const GROW_STEPS_MAX = 2600;  // levels never take longer than this in total
+const GROW_DURATION = 950;    // how long each line takes to grow
+const SPINE_DURATION = 2000;  // timeline spine, end to end
+const STUB_DURATION = 650;    // a timeline poster's branch
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -34,6 +36,18 @@ let edgeDelay = new Map();     // edge -> ms after the start
 const easeOut = t => 1 - Math.pow(1 - t, 3);
 
 const clamp01 = v => Math.max(0, Math.min(1, v));
+
+// Lines simply follow the posters, fully drawn (used when
+// moving between Complete, Phases and Character Journeys
+// within a world: the posters glide from where they are
+// to their new spots, lines attached).
+export function skipGrow(){
+
+    growStart = -Infinity;
+
+    edgeDelay = new Map();
+
+}
 
 // How far out each line is: lines leaving something that
 // no line leads into (the centre, a phase hub) are level 0,

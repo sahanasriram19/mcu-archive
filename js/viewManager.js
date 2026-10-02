@@ -7,7 +7,7 @@
 // applies layout + edges + camera together.
 //==================================================
 
-import { startGrow } from "./connections.js";
+import { startGrow, skipGrow } from "./connections.js";
 import {
 
     graph,
@@ -367,6 +367,9 @@ function phoneCameraConfig(view){
 
 }
 
+// The world the lines last grew out in (see setView).
+let grewWorld = null;
+
 export function setView(key){
 
     const view = VIEWS.find(v=> v.key === key);
@@ -400,8 +403,20 @@ export function setView(key){
 
     setEdges(buildEdges(view.edges));
 
-    // The lines draw themselves outward (connections.js).
-    startGrow(graph.edges);
+    // The lines draw themselves outward (connections.js)
+    // when this layout is forming fresh: the first view
+    // after entering, a new world, or a timeline (whose
+    // spine sweeps across). Moving between the other views
+    // of the same world, the posters glide from where they
+    // are to their new spots with the lines attached, as
+    // before.
+    const fresh = getWorld() !== grewWorld || key === "release" || key === "chronology";
+
+    grewWorld = getWorld();
+
+    if(fresh) startGrow(graph.edges);
+
+    else skipGrow();
 
     //----------------------------------
     // Camera — smoothly reframes to
