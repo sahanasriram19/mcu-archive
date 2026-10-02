@@ -4,10 +4,11 @@
 // Plays when you enter the archive from the landing page:
 // stars gather and pull back for a moment, then stretch
 // into streaks rushing past from the centre — faster and
-// faster, the field twisting into a tunnel of blue light
-// with a little shake — until the light bursts open from
-// the middle. It clears with a shockwave ring racing out
-// across the mind map waiting on the other side.
+// faster, the whole field turning one full revolution as
+// it becomes a tunnel of blue light, with colour fringes
+// on the nearest streaks and a little shake — until the
+// light bursts open from the middle with a wide lens
+// flare, and clears to reveal the mind map.
 //
 // The map is set up at the moment of the flash (app.js
 // waits for `peak`), so any brief hitch while it appears
@@ -18,13 +19,13 @@
 // "reduce motion" setting.
 //==================================================
 
-const STAR_COUNT = 420;
+const STAR_COUNT = 480;
 
-const CHARGE_MS = 380;      // stars appear and pull back, building up
-const RUSH_MS = 1500;       // the jump: from the start to the flash
-const FLASH_IN_MS = 420;    // light opens from the centre at the end of the rush
-const FLASH_OUT_MS = 950;   // light fades, revealing the map
-const RING_MS = 900;        // the shockwave ring after the flash
+const CHARGE_MS = 650;      // stars appear and pull back, building up
+const RUSH_MS = 2400;       // the jump: from the start to the flash
+const FLASH_IN_MS = 520;    // light opens from the centre at the end of the rush
+const FLASH_OUT_MS = 1150;  // light fades, revealing the map
+const FLARE_MS = 900;       // the lens flare across the middle at the flash
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -88,7 +89,6 @@ export function playWarp(){
     // however long that took.
     let fadeStart = null;
 
-    let spin = 0;
 
     const project = (st, z) => ({
         x: cx + (st.x / z) * focal,
@@ -133,10 +133,13 @@ export function playWarp(){
                 cy + (Math.random() - 0.5) * shake
             );
 
-            // The whole field slowly twists, like a vortex.
-            spin += dt * (0.05 + 0.6 * r * r);
+            // The whole field turns one full revolution over
+            // the jump, starting gently and picking up speed,
+            // so it lands exactly where it began as the light
+            // opens.
+            const turn = r < 1 ? r * r * (3 - 2 * r) : 1;
 
-            ctx.rotate(spin);
+            ctx.rotate(turn * Math.PI * 2);
 
             ctx.translate(-cx, -cy);
 
@@ -208,8 +211,36 @@ export function playWarp(){
 
                 const tail = project(st, Math.min(1.2, st.z + trail));
 
+                const width = 0.5 + near * near * (1.5 + r * 2.5);
+
+                // Colour fringes on the nearest, fastest streaks:
+                // a red and a blue copy pulled slightly apart,
+                // like light splitting through a lens.
+                if(r > 0.45 && near > 0.55){
+
+                    const split = (r - 0.45) * near * 5;
+
+                    const dx = (head.x - cx) / reach * split;
+                    const dy = (head.y - cy) / reach * split;
+
+                    ctx.lineWidth = width;
+
+                    ctx.strokeStyle = `rgba(255,60,80,${alpha * 0.45})`;
+                    ctx.beginPath();
+                    ctx.moveTo(tail.x + dx, tail.y + dy);
+                    ctx.lineTo(head.x + dx, head.y + dy);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = `rgba(60,160,255,${alpha * 0.45})`;
+                    ctx.beginPath();
+                    ctx.moveTo(tail.x - dx, tail.y - dy);
+                    ctx.lineTo(head.x - dx, head.y - dy);
+                    ctx.stroke();
+
+                }
+
                 ctx.strokeStyle = `rgba(${st.hue},${alpha})`;
-                ctx.lineWidth = 0.5 + near * near * (1.5 + r * 2.5);
+                ctx.lineWidth = width;
 
                 ctx.beginPath();
                 ctx.moveTo(tail.x, tail.y);
@@ -255,9 +286,11 @@ export function playWarp(){
 
             const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
 
+            // A soft edge, so it reads as light spreading, not
+            // a disc.
             g.addColorStop(0, `rgba(255,255,255,${flash})`);
-            g.addColorStop(0.55, `rgba(230,240,255,${flash})`);
-            g.addColorStop(0.85, `rgba(170,200,255,${flash * 0.85})`);
+            g.addColorStop(0.35, `rgba(235,243,255,${flash})`);
+            g.addColorStop(0.7, `rgba(180,205,255,${flash * (open >= 1 ? 0.9 : 0.6)})`);
             g.addColorStop(1, `rgba(170,200,255,${open >= 1 ? flash * 0.85 : 0})`);
 
             ctx.fillStyle = g;
@@ -266,34 +299,42 @@ export function playWarp(){
         }
 
         //----------------------------------
-        // Shockwave: a bright ring racing out
-        // across the map as the light clears
+        // Lens flare: a wide streak of blue
+        // light across the middle of the
+        // screen as the light bursts open,
+        // stretching out and fading
         //----------------------------------
 
-        if(fadeStart !== null){
+        const flareT = t - (RUSH_MS - FLASH_IN_MS * 0.5);
 
-            const k = (now - fadeStart) / RING_MS;
+        if(flareT > 0 && flareT < FLARE_MS){
 
-            if(k < 1){
+            const k = flareT / FLARE_MS;
 
-                const ease = 1 - Math.pow(1 - k, 3);
+            const strength = Math.sin(Math.PI * Math.min(1, k * 1.4)) * (1 - k * 0.5);
 
-                ctx.globalCompositeOperation = "lighter";
+            const len = w * (0.3 + k * 0.9);
 
-                ctx.strokeStyle = `rgba(190,215,255,${(1 - k) * 0.7})`;
-                ctx.lineWidth = 2 + 26 * (1 - k);
+            const band = ctx.createLinearGradient(cx - len, 0, cx + len, 0);
 
-                ctx.beginPath();
-                ctx.arc(cx, cy, reach * (0.15 + ease * 1.1), 0, Math.PI * 2);
-                ctx.stroke();
+            band.addColorStop(0, "rgba(120,170,255,0)");
+            band.addColorStop(0.5, `rgba(200,225,255,${strength * 0.9})`);
+            band.addColorStop(1, "rgba(120,170,255,0)");
 
-                ctx.strokeStyle = `rgba(255,255,255,${(1 - k) * 0.9})`;
-                ctx.lineWidth = 1.5 + 4 * (1 - k);
-                ctx.stroke();
+            ctx.globalCompositeOperation = "lighter";
 
-                ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = band;
 
-            }
+            const thick = 3 + 10 * (1 - k);
+
+            ctx.fillRect(cx - len, cy - thick / 2, len * 2, thick);
+
+            // A fainter, wider haze around it.
+            ctx.globalAlpha = 0.35;
+            ctx.fillRect(cx - len, cy - thick * 3, len * 2, thick * 6);
+            ctx.globalAlpha = 1;
+
+            ctx.globalCompositeOperation = "source-over";
 
         }
 
@@ -306,7 +347,8 @@ export function playWarp(){
         }
 
         const finished = fadeStart !== null &&
-            now - fadeStart >= Math.max(FLASH_OUT_MS, RING_MS);
+            now - fadeStart >= FLASH_OUT_MS &&
+            t > RUSH_MS - FLASH_IN_MS * 0.5 + FLARE_MS;
 
         if(!finished){
 

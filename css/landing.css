@@ -787,5 +787,5 @@
 #landing.warping .intro-sticky {
     transform: scale(1.8);
     opacity: 0;
-    transition: transform 1.3s cubic-bezier(.55,0,.9,.4), opacity 1.15s ease-in;
+    transition: transform 2s cubic-bezier(.55,0,.9,.4), opacity 1.3s ease-in;
 }
