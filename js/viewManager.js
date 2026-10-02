@@ -7,6 +7,7 @@
 // applies layout + edges + camera together.
 //==================================================
 
+import { startGrow } from "./connections.js";
 import {
 
     graph,
@@ -398,6 +399,9 @@ export function setView(key){
     //----------------------------------
 
     setEdges(buildEdges(view.edges));
+
+    // The lines draw themselves outward (connections.js).
+    startGrow(graph.edges);
 
     //----------------------------------
     // Camera — smoothly reframes to
