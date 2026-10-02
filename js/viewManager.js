@@ -16,9 +16,7 @@ import {
     edgesPhaseSpokes,
     edgesTimelineTrail,
     setEdges,
-    useWorld,
-    revealByPhase,
-    endReveal
+    useWorld
 
 } from "./graph.js";
 
@@ -368,9 +366,6 @@ function phoneCameraConfig(view){
 
 }
 
-// The world whose map last formed (see setView).
-let revealedWorld = null;
-
 export function setView(key){
 
     const view = VIEWS.find(v=> v.key === key);
@@ -403,18 +398,6 @@ export function setView(key){
     //----------------------------------
 
     setEdges(buildEdges(view.edges));
-
-    // A mind map forming fresh — the first view after
-    // entering, or another world — branches out one phase at
-    // a time (graph.js). Moving between views of the same
-    // world, the posters glide from where they are as before.
-    const fresh = getWorld() !== revealedWorld;
-
-    revealedWorld = getWorld();
-
-    if(fresh && (key === "complete" || key === "phases")) revealByPhase();
-
-    else endReveal();
 
     //----------------------------------
     // Camera — smoothly reframes to

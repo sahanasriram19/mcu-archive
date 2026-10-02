@@ -1,7 +1,6 @@
 import { getCurrentView } from "./viewManager.js";
 import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 import { getTimelineOrientation } from "./layout.js";
-import { revealAlpha } from "./graph.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -233,10 +232,6 @@ export function renderConnections(ctx, camera, graph){
         const to = resolveAnchor(edge.to, graph);
 
         if(!from || !to) return;
-
-        // A phase still waiting its turn as the mind map
-        // forms has no lines yet (revealByPhase, graph.js).
-        if(revealAlpha(from) <= 0 || revealAlpha(to) <= 0) return;
 
         const x1 = halfW + (from.x - camera.x) * camera.zoom;
         const y1 = halfH + (from.y - camera.y) * camera.zoom;
