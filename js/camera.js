@@ -23,7 +23,52 @@ export const camera = {
 
 };
 
+// A long, slow pull-back (see slowZoomOut): the zoom eases
+// in log space, so it moves out at an even pace instead of
+// lurching at the start. Set by viewManager.js as a mind
+// map forms after the hyperspace jump; cancelled as soon as
+// anything else changes the target (you scroll, a view
+// changes).
+export function slowZoomOut(fromZoom, rate){
+
+    camera.zoom = Math.min(camera.maxZoom, fromZoom);
+
+    camera.slow = { rate, target: camera.targetZoom, tx: camera.targetX, ty: camera.targetY };
+
+}
+
 export function updateCamera(){
+
+    const slow = camera.slow;
+
+    if(slow){
+
+        const retargeted =
+            slow.target !== camera.targetZoom ||
+            slow.tx !== camera.targetX ||
+            slow.ty !== camera.targetY;
+
+        const near = Math.abs(Math.log(camera.targetZoom / camera.zoom)) < 0.004;
+
+        if(retargeted || near){
+
+            camera.slow = null;
+
+        } else {
+
+            camera.zoom = Math.exp(
+                Math.log(camera.zoom) +
+                (Math.log(camera.targetZoom) - Math.log(camera.zoom)) * slow.rate
+            );
+
+            camera.x += (camera.targetX - camera.x) * slow.rate;
+            camera.y += (camera.targetY - camera.y) * slow.rate;
+
+            return;
+
+        }
+
+    }
 
     camera.x +=
         (camera.targetX - camera.x) *
