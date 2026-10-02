@@ -1,23 +1,5 @@
 import { VIEWS } from "../js/views.js";
 import { setWorldView, getCurrentView, getWorld } from "../js/viewManager.js";
-import { canPortal, worldPortal } from "../js/portal.js";
-
-// Show a view; when it's in another world, fly there
-// through a portal (js/portal.js) instead of just
-// rearranging the map.
-function goTo(world, viewKey){
-
-    if(world !== getWorld() && canPortal()){
-
-        worldPortal(world, () => setWorldView(world, viewKey));
-
-    } else {
-
-        setWorldView(world, viewKey);
-
-    }
-
-}
 
 import {
 
@@ -366,7 +348,7 @@ SECTIONS.forEach(section => {
             // itself around the slim bar, not the open panel.
             collapseIfCompact();
 
-            goTo(section.world, view.key);
+            setWorldView(section.world, view.key);
 
         });
 
@@ -400,7 +382,7 @@ SECTIONS.forEach(section => {
 
             collapseIfCompact();
 
-            goTo(section.world, "characters");
+            setWorldView(section.world, "characters");
 
         });
 
