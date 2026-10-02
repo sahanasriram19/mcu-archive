@@ -16,9 +16,7 @@ import {
     edgesPhaseSpokes,
     edgesTimelineTrail,
     setEdges,
-    useWorld,
-    revealByPhase,
-    endReveal
+    useWorld
 
 } from "./graph.js";
 
@@ -26,7 +24,7 @@ import { getWorld } from "./worlds.js";
 
 import { LAYOUTS } from "./layout.js";
 import { VIEWS } from "./views.js";
-import { camera, slowZoomOut } from "./camera.js";
+import { camera } from "./camera.js";
 import { archive } from "./archiveCore.js";
 import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
@@ -368,9 +366,6 @@ function phoneCameraConfig(view){
 
 }
 
-// The world whose map last formed (see setView).
-let revealedWorld = null;
-
 export function setView(key){
 
     const view = VIEWS.find(v=> v.key === key);
@@ -404,20 +399,6 @@ export function setView(key){
 
     setEdges(buildEdges(view.edges));
 
-    // A mind map forming fresh — the first view after
-    // entering, or another world — branches out one phase at
-    // a time (graph.js). Moving between views of the same
-    // world, the posters glide from where they are as before.
-    const fresh = getWorld() !== revealedWorld;
-
-    revealedWorld = getWorld();
-
-    const revealing = fresh && (key === "complete" || key === "phases");
-
-    if(revealing) revealByPhase();
-
-    else endReveal();
-
     //----------------------------------
     // Camera — smoothly reframes to
     // show the whole new arrangement.
@@ -450,18 +431,6 @@ export function setView(key){
         camera.targetX = cameraFor(view).x;
         camera.targetY = cameraFor(view).y;
         camera.targetZoom = cameraFor(view).zoom;
-
-    }
-
-    // Forming fresh: start right up close on the logo in the
-    // centre, and slowly pull back as the branches grow out
-    // of it, until the whole map is in view.
-    if(revealing){
-
-        camera.x = 0;
-        camera.y = 0;
-
-        slowZoomOut(camera.targetZoom * 5, 0.016);
 
     }
 

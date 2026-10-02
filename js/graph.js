@@ -544,124 +544,21 @@ export function setEdges(edges){
 // UPDATE
 //==================================================
 
-//==================================================
-// PHASE-BY-PHASE REVEAL
-//
-// When a mind map forms fresh (entering the archive, or
-// opening another world), everything starts gathered behind
-// the logo in the centre and branches out of it, phase
-// after phase in quick succession, drifting slowly to their
-// places and fading in — while the camera, starting close
-// up on the logo, slowly pulls back (viewManager.js).
-// viewManager.js calls revealByPhase(); nodes.js,
-// branchNodes.js and connections.js use revealAlpha() to
-// keep a phase hidden until its turn.
-//==================================================
-
-const REVEAL_START = 350;     // ms before the first phase sets off
-const REVEAL_STEP = 300;      // ms between one phase and the next
-const REVEAL_FADE = 500;      // fade-in as a phase sets off
-const REVEAL_EASE = 0.04;     // slower drift than a normal move (0.16)
-
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-export function revealByPhase(){
-
-    if(reduceMotion.matches) return;
-
-    const now = performance.now();
-
-    // The phases in the order their branches are laid out.
-    const order = [];
-
-    graph.branchNodes.forEach(b => {
-
-        if(typeof b.phase === "number" && !order.includes(b.phase)) order.push(b.phase);
-
-    });
-
-    const startOf = phase => {
-
-        const i = order.indexOf(phase);
-
-        return now + REVEAL_START + Math.max(0, i) * REVEAL_STEP;
-
-    };
-
-    // Everything starts gathered at the hub.
-    [...graph.nodes, ...graph.branchNodes].forEach(n => {
-
-        n.x = 0;
-        n.y = 0;
-
-        n.revealAt = typeof n.phase === "number" ? startOf(n.phase) : now + REVEAL_START;
-
-        n.revealing = true;
-
-    });
-
-}
-
-// 0 (not out yet) → 1 (fully shown).
-export function revealAlpha(node){
-
-    if(!node || !node.revealAt) return 1;
-
-    const t = (performance.now() - node.revealAt) / REVEAL_FADE;
-
-    return t <= 0 ? 0 : (t >= 1 ? 1 : t);
-
-}
-
-// Moves a node towards its target; held at the hub until
-// its phase's turn, then a slower drift while revealing.
-function easeNode(node, ease){
-
-    if(node.revealing){
-
-        if(performance.now() < node.revealAt) return;
-
-        ease = REVEAL_EASE;
-
-        if(Math.abs(node.targetX - node.x) < 2 && Math.abs(node.targetY - node.y) < 2){
-
-            node.revealing = false;
-
-        }
-
-    }
-
-    if (Math.abs(node.targetX - node.x) < 0.5)
-        node.x = node.targetX;
-    else
-        node.x += (node.targetX - node.x) * ease;
-
-    if (Math.abs(node.targetY - node.y) < 0.5)
-        node.y = node.targetY;
-    else
-        node.y += (node.targetY - node.y) * ease;
-
-}
-
-// Stops any reveal in progress (a normal view switch).
-export function endReveal(){
-
-    [...graph.nodes, ...graph.branchNodes].forEach(n => {
-
-        n.revealing = false;
-        n.revealAt = 0;
-
-    });
-
-}
-
 export function updateGraph(){
 
     const NODE_EASE = 0.16;
 
     graph.nodes.forEach(node=>{
 
-        easeNode(node, NODE_EASE);
+       if (Math.abs(node.targetX - node.x) < 0.5)
+            node.x = node.targetX;
+        else
+            node.x += (node.targetX - node.x) * NODE_EASE;
+
+        if (Math.abs(node.targetY - node.y) < 0.5)
+            node.y = node.targetY;
+        else
+            node.y += (node.targetY - node.y) * NODE_EASE;
 
         node.pulse += 0.02;
         node.glow = 0.5 + Math.sin(node.pulse)*0.5;
@@ -689,7 +586,11 @@ export function updateGraph(){
         // felt noticeably slower than switching into the
         // Order views (which have little to no branch nodes
         // to wait on).
-        easeNode(node, NODE_EASE);
+        if(Math.abs(node.targetX-node.x) < 0.5) node.x = node.targetX;
+        else node.x += (node.targetX-node.x) * NODE_EASE;
+
+        if(Math.abs(node.targetY-node.y) < 0.5) node.y = node.targetY;
+        else node.y += (node.targetY-node.y) * NODE_EASE;
 
         node.pulse += 0.02;
 
