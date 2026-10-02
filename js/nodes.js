@@ -657,3 +657,32 @@ function roundedRect(ctx, x, y, w, h, r){
     ctx.closePath();
 
 }
+//--------------------------------------------------
+// Where a node's poster is on screen right now (CSS px),
+// the same footprint drawNode uses — so the details card
+// can flip out of it (js/flip.js).
+//--------------------------------------------------
+
+export function nodeScreenRect(node, camera){
+
+    let size = 320;
+
+    if(currentView === "release" || currentView === "chronology" || currentView === "characters"){
+
+        size = 300;
+
+    } else if(currentView === "complete"){
+
+        size += Math.min(node.ring || 0, 4) * 35;
+
+    }
+
+    const w = size * camera.zoom * (1 + LIFT_SCALE * (node.lift || 0));
+    const h = w * 1.5;
+
+    const x = window.innerWidth / 2 + (node.x - camera.x) * camera.zoom;
+    const y = window.innerHeight / 2 + (node.y - camera.y) * camera.zoom;
+
+    return { left: x - w / 2, top: y - h / 2, width: w, height: h };
+
+}

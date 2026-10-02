@@ -11,6 +11,7 @@
 import { fetchDetails } from "./posters.js";
 import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
 import { groupName, WORLDS } from "./worlds.js";
+import { canFlip, flipOpen, flipClose, hideFlipper, goodRect } from "./flip.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -139,9 +140,66 @@ function renderWatchBefore(node){
 
 }
 
+// Where the card flipped out from (an element, or a
+// function giving a rectangle), so it can flip back there.
+let flipFrom = null;
+
+function rectOf(from){
+
+    if(!from) return null;
+
+    if(typeof from === "function") return from();
+
+    if(from instanceof Element && from.isConnected){
+
+        const r = from.getBoundingClientRect();
+
+        return { left: r.left, top: r.top, width: r.width, height: r.height };
+
+    }
+
+    return null;
+
+}
+
+function flipPosterUrl(node){
+
+    if(!node.poster) return "";
+
+    return typeof node.poster === "string"
+        ? node.poster
+        : (node.poster.medium || node.poster.small || node.poster.large || "");
+
+}
+
+const card = overlay.querySelector("#movie-details-card");
+
 function hideMovieDetails() {
 
-    overlay.classList.remove("open");
+    if(!overlay.classList.contains("open") && !overlay.classList.contains("dim")) return;
+
+    openNode = null;
+
+    const back = flipFrom && canFlip() ? rectOf(flipFrom) : null;
+
+    flipFrom = null;
+
+    if(goodRect(back) && overlay.classList.contains("open")){
+
+        // Flip back down onto the poster: the real card
+        // vanishes at once and the flipping copy takes over.
+        overlay.classList.add("flipping");
+        overlay.classList.remove("open", "dim");
+
+        flipClose(back, card).then(() => overlay.classList.remove("flipping"));
+
+        return;
+
+    }
+
+    hideFlipper();
+
+    overlay.classList.remove("open", "dim", "flipping");
 
 }
 
@@ -242,9 +300,40 @@ function renderExtras(node) {
 
 }
 
-export async function showMovieDetails(node) {
+// opts.from: where the poster that was clicked is — an
+// element, or a function returning a screen rectangle. The
+// card then flips out of it (js/flip.js). Without it, the
+// card just swings in as before.
+export async function showMovieDetails(node, opts = {}) {
 
     openNode = node;
+
+    const startRect = opts.from && canFlip() ? rectOf(opts.from) : null;
+
+    const flipping = goodRect(startRect);
+
+    let landed = null;
+
+    if(flipping){
+
+        flipFrom = opts.from;
+
+        // Dim the page now; the card itself stays hidden
+        // until the flipping copy has landed on its spot.
+        overlay.classList.remove("open");
+        overlay.classList.add("flipping", "dim");
+
+        landed = flipOpen(startRect, card, flipPosterUrl(node), node.colour, node.title);
+
+    } else {
+
+        flipFrom = null;
+
+        hideFlipper();
+
+        overlay.classList.remove("flipping", "dim");
+
+    }
 
     const url = posterUrlFor(node);
 
@@ -333,6 +422,18 @@ export async function showMovieDetails(node) {
 
         renderExtras(node);
 
+        if(landed){
+
+            await landed;
+
+            if (openNode !== node) return;
+
+        }
+
         overlay.classList.add("open");
+
+        // The real card is now exactly where the copy is;
+        // swap them on the next frame.
+        if(landed) requestAnimationFrame(hideFlipper);
 
 }

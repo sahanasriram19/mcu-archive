@@ -3,6 +3,7 @@ import { graph } from "./graph.js";
 import { getCurrentView, focusPhase, refitView } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
+import { nodeScreenRect } from "./nodes.js";
 import { edgeAtScreenPoint } from "./connections.js";
 
 const viewport = document.getElementById("viewport");
@@ -410,7 +411,9 @@ function endGesture(e){
 
         if(node && !node.isBranch){
 
-            showMovieDetails(node);
+            // The card flips out of this poster (js/flip.js),
+            // and back onto wherever it is when it closes.
+            showMovieDetails(node, { from: () => nodeScreenRect(node, camera) });
 
         } else {
 

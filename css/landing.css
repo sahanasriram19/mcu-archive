@@ -780,3 +780,12 @@
     #enterButton { display: inline-flex; }
 
 }
+
+/* Entering the archive by hyperspace jump (js/warp.js):
+   the landing rushes towards you and fades as the streaks
+   take over. */
+#landing.warping .intro-sticky {
+    transform: scale(1.8);
+    opacity: 0;
+    transition: transform .8s cubic-bezier(.55,0,.9,.4), opacity .7s ease-in;
+}

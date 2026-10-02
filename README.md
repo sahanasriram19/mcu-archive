@@ -18,7 +18,7 @@ The landing page opens on a glowing ring around the Marvel logo. Scroll to fly t
 - **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) and Tom Holland's MCU films, with *No Way Home* as the crossover. Same five views, grouped into eras.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
-Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. On a mouse, the countdown cards and small posters lean towards the cursor with a soft light, and the details card swings up into place.
+Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. Clicking a poster flips it over into its details card (and back again when you close it). On a mouse, the countdown cards and small posters lean towards the cursor with a soft light. Entering the archive is a hyperspace jump, and switching worlds flies you through a portal in that world's colour.
 
 The whole thing sits on top of a custom-built starfield/nebula background engine (stars, energy particles, shooting stars, all on a seeded deterministic generator so it looks the same on every visit rather than randomly recoloring itself).
 
@@ -86,6 +86,9 @@ mcu-archive/
     ├── upcoming.js                             # countdown to the next release + "What should I watch before…?"
     ├── intro.js                                # the landing page's 3D scroll fly-through
     ├── tilt.js                                 # cards lean towards the mouse
+    ├── warp.js                                 # hyperspace jump into the archive
+    ├── flip.js                                 # posters flip over into the details card
+    ├── portal.js                               # flying through a portal between worlds
     ├── characters/                             # the Character Journeys sub-feature
     │   ├── data.js                              # auto-derives the character roster from mcu.json
     │   ├── characterJourney.js                   # which character is currently selected

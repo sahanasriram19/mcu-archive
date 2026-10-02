@@ -23,6 +23,7 @@ import { initUpcoming } from "./upcoming.js";
 import { initIntro, setIntroActive } from "./intro.js";
 import { initTilt } from "./tilt.js";
 import { warmPosters } from "./nodes.js";
+import { canWarp, playWarp } from "./warp.js";
 
 //==========================================
 // LANDING
@@ -115,6 +116,8 @@ const LANDING_FADE_MS = 500;
 
 async function enter(viewKey){
 
+    if(landing.classList.contains("leaving")) return;   // already on the way in
+
     // Fade the landing out while the archive appears behind
     // it, instead of cutting straight across.
     landing.classList.add("leaving");
@@ -124,11 +127,26 @@ async function enter(viewKey){
     // The fly-through stops steering the camera.
     setIntroActive(false);
 
-    setTimeout(() => {
+    if(canWarp()){
+
+        // Hyperspace jump (js/warp.js): the landing rushes
+        // away under the streaks, and the archive is set up
+        // at the moment of the flash, hidden by the light.
+        landing.classList.add("warping");
+
+        await playWarp().peak;
 
         if(landing.classList.contains("leaving")) landing.style.display = "none";
 
-    }, LANDING_FADE_MS);
+    } else {
+
+        setTimeout(() => {
+
+            if(landing.classList.contains("leaving")) landing.style.display = "none";
+
+        }, LANDING_FADE_MS);
+
+    }
 
     viewport.style.display = "block";
 
@@ -184,7 +202,7 @@ window.addEventListener("keydown", e => {
 
 window.addEventListener("mcu:go-to-landing", () => {
 
-    landing.classList.remove("leaving");
+    landing.classList.remove("leaving", "warping");
 
     onLanding = true;
 

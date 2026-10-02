@@ -299,7 +299,7 @@ function buildCards(nodes){
 
         btn.setAttribute("aria-label", `${i === 0 ? "Next up" : "Coming up"}: ${node.title}, ${formatDay(node)}. Open details.`);
 
-        btn.addEventListener("click", () => showMovieDetails(node));
+        btn.addEventListener("click", () => showMovieDetails(node, { from: btn }));
 
         column.appendChild(btn);
 

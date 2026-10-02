@@ -150,7 +150,7 @@ function makePoster(node){
     el.querySelector(".intro-caption small").textContent =
         isUpcoming(node) ? "Coming " + node.release.slice(0, 4) : node.release.slice(0, 4);
 
-    poster.addEventListener("click", () => showMovieDetails(node));
+    poster.addEventListener("click", () => showMovieDetails(node, { from: poster }));
 
     return { el, poster };
 
