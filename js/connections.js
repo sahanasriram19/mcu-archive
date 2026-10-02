@@ -6,125 +6,6 @@ import { getTimelineOrientation } from "./layout.js";
 // CONNECTION RENDERER
 //==================================================
 
-//--------------------------------------------------
-// Branches growing out
-//
-// When a layout forms fresh — entering the archive,
-// switching worlds, or opening a timeline (setView in
-// viewManager.js calls startGrow) — the lines draw
-// themselves outward
-// instead of appearing all at once: first the ones leaving
-// the centre (or a phase's hub), then the next level out,
-// and so on. On the timelines the spine sweeps across in
-// date order and each poster's branch grows out of it as
-// the sweep passes. Off with the OS "reduce motion"
-// setting.
-//--------------------------------------------------
-
-const GROW_DELAY = 400;       // ms after the switch before lines start
-const GROW_STEP = 420;        // extra wait per level outward
-const GROW_STEPS_MAX = 2600;  // levels never take longer than this in total
-const GROW_DURATION = 950;    // how long each line takes to grow
-const SPINE_DURATION = 2000;  // timeline spine, end to end
-const STUB_DURATION = 650;    // a timeline poster's branch
-
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-let growStart = -Infinity;
-let edgeDelay = new Map();     // edge -> ms after the start
-
-const easeOut = t => 1 - Math.pow(1 - t, 3);
-
-const clamp01 = v => Math.max(0, Math.min(1, v));
-
-// Lines simply follow the posters, fully drawn (used when
-// moving between Complete, Phases and Character Journeys
-// within a world: the posters glide from where they are
-// to their new spots, lines attached).
-export function skipGrow(){
-
-    growStart = -Infinity;
-
-    edgeDelay = new Map();
-
-}
-
-// How far out each line is: lines leaving something that
-// no line leads into (the centre, a phase hub) are level 0,
-// the lines leaving their ends level 1, and so on.
-export function startGrow(edges){
-
-    growStart = performance.now();
-
-    edgeDelay = new Map();
-
-    const key = ref => String(ref);
-
-    const into = new Set(edges.map(e => key(e.to)));
-
-    const level = new Map();
-
-    edges.forEach(e => { if(!into.has(key(e.from))) level.set(key(e.from), 0); });
-
-    // Walk outwards (a few passes covers any depth).
-    for(let pass = 0; pass < edges.length && level.size < edges.length * 2; pass++){
-
-        let changed = false;
-
-        edges.forEach(e => {
-
-            const d = level.get(key(e.from));
-
-            if(d !== undefined && !level.has(key(e.to))){
-
-                level.set(key(e.to), d + 1);
-
-                changed = true;
-
-            }
-
-        });
-
-        if(!changed) break;
-
-    }
-
-    const deepest = Math.max(1, ...level.values());
-
-    const step = Math.min(GROW_STEP, GROW_STEPS_MAX / deepest);
-
-    edges.forEach(e => edgeDelay.set(e, GROW_DELAY + (level.get(key(e.from)) || 0) * step));
-
-}
-
-// 0 → 1: how much of this line is drawn right now.
-function growOf(edge, now){
-
-    if(reduceMotion.matches) return 1;
-
-    const delay = edgeDelay.has(edge) ? edgeDelay.get(edge) : 0;
-
-    return easeOut(clamp01((now - growStart - delay) / GROW_DURATION));
-
-}
-
-// The first `t` (0-1) of a cubic Bézier, as its own curve
-// (de Casteljau): returns [c1x, c1y, c2x, c2y, ex, ey].
-function partialCubic(x0, y0, x1, y1, x2, y2, x3, y3, t){
-
-    const lerp = (a, b) => a + (b - a) * t;
-
-    const ax = lerp(x0, x1), ay = lerp(y0, y1);
-    const bx = lerp(x1, x2), by = lerp(y1, y2);
-    const cx = lerp(x2, x3), cy = lerp(y2, y3);
-
-    const dx = lerp(ax, bx), dy = lerp(ay, by);
-    const ex = lerp(bx, cx), ey = lerp(by, cy);
-
-    return [ax, ay, dx, dy, lerp(dx, ex), lerp(dy, ey)];
-
-}
-
 function resolveAnchor(ref, graph){
 
     if(ref === "hub") return { x:0, y:0 };
@@ -345,13 +226,7 @@ export function renderConnections(ctx, camera, graph){
 
     };
 
-    const now = performance.now();
-
     graph.edges.forEach(edge=>{
-
-        const grow = growOf(edge, now);
-
-        if(grow <= 0) return;
 
         const from = resolveAnchor(edge.from, graph);
         const to = resolveAnchor(edge.to, graph);
@@ -393,25 +268,19 @@ export function renderConnections(ctx, camera, graph){
             // branch visibly "grows" outward from the centre.
             const [c1x, c1y, c2x, c2y] = curveControls(from, to);
 
-            const sc1x = halfW + (c1x - camera.x) * camera.zoom;
-            const sc1y = halfH + (c1y - camera.y) * camera.zoom;
-            const sc2x = halfW + (c2x - camera.x) * camera.zoom;
-            const sc2y = halfH + (c2y - camera.y) * camera.zoom;
+            target.bezierCurveTo(
 
-            if(grow < 1){
+                halfW + (c1x - camera.x) * camera.zoom,
+                halfH + (c1y - camera.y) * camera.zoom,
+                halfW + (c2x - camera.x) * camera.zoom,
+                halfH + (c2y - camera.y) * camera.zoom,
+                x2, y2
 
-                // Still growing: only the first part of the curve.
-                target.bezierCurveTo(...partialCubic(x1, y1, sc1x, sc1y, sc2x, sc2y, x2, y2, grow));
-
-            } else {
-
-                target.bezierCurveTo(sc1x, sc1y, sc2x, sc2y, x2, y2);
-
-            }
+            );
 
         } else {
 
-            target.lineTo(x1 + (x2 - x1) * grow, y1 + (y2 - y1) * grow);
+            target.lineTo(x2, y2);
 
         }
 
@@ -575,20 +444,10 @@ function renderTimeline(ctx, camera, graph){
     glow.addColorStop(.5,"rgba(190,240,255,.65)");
     glow.addColorStop(1,"rgba(255,255,255,.25)");
 
-    // The spine sweeps across in date order as the layout
-    // forms (see startGrow above).
-    const now = performance.now();
-
-    const sweep = reduceMotion.matches
-        ? 1
-        : easeOut(clamp01((now - growStart - GROW_DELAY) / SPINE_DURATION));
-
-    if(sweep <= 0) return;
-
     const spine = new Path2D();
 
     spine.moveTo(x1, y1);
-    spine.lineTo(x1 + (x2 - x1) * sweep, y1 + (y2 - y1) * sweep);
+    spine.lineTo(x2, y2);
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -620,41 +479,22 @@ function renderTimeline(ctx, camera, graph){
 
     const branchPath = new Path2D();
 
-    const spineLen = (vertical ? y2 - y1 : x2 - x1) || 1;
-
     movies.forEach(node=>{
 
         const x = halfW + (node.x - camera.x) * camera.zoom;
         const y = halfH + (node.y - camera.y) * camera.zoom;
 
-        // Each poster's branch grows out once the sweep has
-        // reached it.
-        let grow = 1;
-
-        if(!reduceMotion.matches){
-
-            const along = clamp01(((vertical ? y : x) - (vertical ? y1 : x1)) / spineLen);
-
-            // When the (eased) sweep reaches this point.
-            const reach = 1 - Math.cbrt(1 - along);
-
-            grow = easeOut(clamp01((now - growStart - GROW_DELAY - reach * SPINE_DURATION) / STUB_DURATION));
-
-        }
-
-        if(grow <= 0) return;
-
         if(vertical){
 
             branchPath.moveTo(x1, y);
-            branchPath.lineTo(x1 + (x - x1) * grow, y);
 
         } else {
 
             branchPath.moveTo(x, y1);
-            branchPath.lineTo(x, y1 + (y - y1) * grow);
 
         }
+
+        branchPath.lineTo(x, y);
 
     });
 
