@@ -14,7 +14,7 @@ const BASE_RADIUS = 72;     // circle size in world units, before zoom
 
 const PULSE = false;        // set true to bring back the gentle breathing effect
 
-import { graph } from "./graph.js";
+import { graph, revealAlpha } from "./graph.js";
 
 export const PHASE_COLOURS = {
 
@@ -88,6 +88,11 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
     branchNodes.forEach(node=>{
 
+        // Waiting its turn as the mind map forms (graph.js).
+        const reveal = revealAlpha(node);
+
+        if(reveal <= 0) return;
+
         const x = halfW + (node.x - camera.x) * camera.zoom;
         const y = halfH + (node.y - camera.y) * camera.zoom;
 
@@ -131,6 +136,8 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         // most expensive thing canvas does, and the cause of
         // the choppy animation.
         ctx.save();
+
+        ctx.globalAlpha = reveal;
 
         //----------------------------------
         // Glow

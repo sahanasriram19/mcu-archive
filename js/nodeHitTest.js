@@ -58,6 +58,9 @@ export function getNodeAtScreenPoint(screenX, screenY, camera, nodes, currentVie
 
         if(node.isBranch) continue;
 
+        // Not out yet as the mind map forms.
+        if(node.revealAt && performance.now() < node.revealAt) continue;
+
         const x = halfW + (node.x - camera.x) * camera.zoom;
         const y = halfH + (node.y - camera.y) * camera.zoom;
 

@@ -9,7 +9,7 @@
 // any) has actually finished loading.
 //--------------------------------------------------
 import { currentView } from "./viewManager.js";
-import { graph } from "./graph.js";
+import { graph, revealAlpha } from "./graph.js";
 
 const posterCache = new Map();
 
@@ -168,6 +168,12 @@ export function renderNodes(ctx, camera, nodes){
         // consistent with the universe engine)
         //----------------------------------
 
+        // Not out yet (a phase still waiting its turn as the
+        // mind map forms — see revealByPhase in graph.js).
+        const reveal = revealAlpha(node);
+
+        if(reveal <= 0) return;
+
         const x = halfW + (node.x - camera.x) * camera.zoom;
 
         const y = halfH + (node.y - camera.y) * camera.zoom;
@@ -204,7 +210,7 @@ export function renderNodes(ctx, camera, nodes){
 
         ctx.save();
 
-        if(!inFocus) ctx.globalAlpha = FOCUS_DIM_ALPHA;
+        ctx.globalAlpha = (inFocus ? 1 : FOCUS_DIM_ALPHA) * reveal;
 
         //----------------------------------
         // Gentle Floating
