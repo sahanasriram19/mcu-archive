@@ -313,45 +313,76 @@ function buildCards(nodes){
 
 }
 
-// Flip-clock digits: when a number changes, the old one
-// folds away from you (top edge tipping back) and the new
-// one folds down into place, like the flaps on an airport
+// Flip-clock digits: each digit is its own flap. When a
+// number changes, only the digits that actually changed
+// flip — the old one folds away from you and the new one
+// folds down into place, like the flaps on an airport
 // departure board. Plain swap with "reduce motion" on.
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-function flipTo(el, text){
+function flipDigit(el, ch){
 
-    if(el.textContent === text) return;
+    if(el.textContent === ch) return;
 
-    if(reduceMotion.matches || !el.animate || el.dataset.flipping){
+    if(reduceMotion.matches || !el.animate){
 
-        el.textContent = text;
+        el.textContent = ch;
 
         return;
 
     }
 
-    el.dataset.flipping = "1";
+    // A flip still running: jump straight to the new digit.
+    if(el._flip){
+
+        el._flip.cancel();
+
+        el._flip = null;
+
+    }
 
     const away = el.animate(
         [ { transform: "rotateX(0deg)" }, { transform: "rotateX(-90deg)" } ],
-        { duration: 160, easing: "ease-in" }
+        { duration: 170, easing: "ease-in" }
     );
+
+    el._flip = away;
 
     away.onfinish = () => {
 
-        el.textContent = text;
+        el.textContent = ch;
 
         const back = el.animate(
             [ { transform: "rotateX(90deg)" }, { transform: "rotateX(0deg)" } ],
-            { duration: 220, easing: "cubic-bezier(.2,.9,.3,1.25)" }
+            { duration: 230, easing: "cubic-bezier(.2,.9,.3,1.2)" }
         );
 
-        back.onfinish = () => { delete el.dataset.flipping; };
+        el._flip = back;
+
+        back.onfinish = () => { el._flip = null; };
 
     };
 
-    away.oncancel = () => { el.textContent = text; delete el.dataset.flipping; };
+    away.oncancel = () => { el.textContent = ch; };
+
+}
+
+// Shows `text` in a number's digit flaps, flipping only the
+// ones that changed. (If the number of digits changes — 100
+// days down to 99 — the flaps are simply rebuilt.)
+function flipTo(el, text){
+
+    const digits = el.children;
+
+    if(digits.length !== text.length){
+
+        el.innerHTML = [...text].map(c => `<span class="digit">${c}</span>`).join("");
+
+        return;
+
+    }
+
+    [...text].forEach((c, i) => flipDigit(digits[i], c));
 
 }
 

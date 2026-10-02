@@ -14,8 +14,9 @@
 // and off with the OS "reduce motion" setting.
 //==================================================
 
-const DURATION = 620;                 // ms, each way
-const EASE = "cubic-bezier(.2,.75,.25,1)";
+const DURATION = 950;                 // ms, each way (was 620)
+// Gentle start and a long, soft landing.
+const EASE = "cubic-bezier(.45,.05,.2,1)";
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const phone = window.matchMedia("(max-width: 768px)");

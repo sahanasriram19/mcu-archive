@@ -343,10 +343,16 @@ function drawWhite(ctx, camera, path){
 
     ctx.globalCompositeOperation = "lighter";
 
-    glowStroke(ctx, path, "140,210,255", 1, 10 * z, 32 * z);
+    // Capped in screen pixels: Character Journeys sits much
+    // closer in than the other views, and without a cap these
+    // lines came out several times thicker there than the
+    // lines everywhere else.
+    const band = Math.min(10 * z, 3);
+
+    glowStroke(ctx, path, "140,210,255", 1, band, Math.min(32 * z, 9));
 
     ctx.strokeStyle = "rgba(170,225,255,.75)";
-    ctx.lineWidth = 10 * z;
+    ctx.lineWidth = band;
     ctx.stroke(path);
 
     ctx.restore();
@@ -354,7 +360,7 @@ function drawWhite(ctx, camera, path){
     ctx.save();
 
     ctx.strokeStyle = "rgba(255,255,255,.92)";
-    ctx.lineWidth = Math.max(2.5 * z, 1.2);
+    ctx.lineWidth = Math.min(Math.max(2.5 * z, 1.2), 2);
 
     ctx.stroke(path);
 
