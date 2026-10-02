@@ -24,11 +24,11 @@
 
 const STREAK_COUNT = 320;
 
-const RUSH_MS = 1350;       // streaks speeding up (was 820)
-const FLASH_IN_MS = 380;    // light builds over the end of the rush
-const FLASH_OUT_MS = 750;   // light fades, revealing the map (was 950)
-const LOGO_OUT_MS = 900;    // the jump's logo hands over to the map's
-const LOGO_MATCH_MS = 300; // ...easing onto its shape over this long
+const RUSH_MS = 1700;       // streaks speeding up (was 1350)
+const FLASH_IN_MS = 480;    // light builds over the end of the rush (was 380)
+const FLASH_OUT_MS = 950;   // light fades, revealing the map (was 750)
+const LOGO_OUT_MS = 1150;   // the jump's logo hands over to the map's (was 900)
+const LOGO_MATCH_MS = 380; // ...easing onto its shape over this long
 const LOGO_GROW = 0.07;     // the logo swells this much as you near the jump
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");

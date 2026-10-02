@@ -787,7 +787,7 @@
 #landing.warping .intro-sticky {
     transform: scale(1.8);
     opacity: 0;
-    transition: transform 1.3s cubic-bezier(.55,0,.9,.4), opacity 1.15s ease-in;
+    transition: transform 1.65s cubic-bezier(.55,0,.9,.4), opacity 1.45s ease-in;
 }
 
 /* ...but jumping from the end of the trail, the Marvel logo
@@ -796,7 +796,7 @@
    rushing at you. */
 #landing.warping.from-logo .intro-sticky {
     transform: none;
-    transition: opacity .6s ease;
+    transition: opacity .75s ease;
 }
 
 #landing.leaving.from-logo {
