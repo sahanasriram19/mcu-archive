@@ -313,6 +313,48 @@ function buildCards(nodes){
 
 }
 
+// Flip-clock digits: when a number changes, the old one
+// folds away from you (top edge tipping back) and the new
+// one folds down into place, like the flaps on an airport
+// departure board. Plain swap with "reduce motion" on.
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function flipTo(el, text){
+
+    if(el.textContent === text) return;
+
+    if(reduceMotion.matches || !el.animate || el.dataset.flipping){
+
+        el.textContent = text;
+
+        return;
+
+    }
+
+    el.dataset.flipping = "1";
+
+    const away = el.animate(
+        [ { transform: "rotateX(0deg)" }, { transform: "rotateX(-90deg)" } ],
+        { duration: 160, easing: "ease-in" }
+    );
+
+    away.onfinish = () => {
+
+        el.textContent = text;
+
+        const back = el.animate(
+            [ { transform: "rotateX(90deg)" }, { transform: "rotateX(0deg)" } ],
+            { duration: 220, easing: "cubic-bezier(.2,.9,.3,1.25)" }
+        );
+
+        back.onfinish = () => { delete el.dataset.flipping; };
+
+    };
+
+    away.oncancel = () => { el.textContent = text; delete el.dataset.flipping; };
+
+}
+
 function tick(){
 
     const now = Date.now();
@@ -343,10 +385,10 @@ function tick(){
 
         const { d, h, m, s } = split(releaseTime(node) - now);
 
-        units.d.textContent = d;
-        units.h.textContent = pad(h);
-        units.m.textContent = pad(m);
-        units.s.textContent = pad(s);
+        flipTo(units.d, String(d));
+        flipTo(units.h, pad(h));
+        flipTo(units.m, pad(m));
+        flipTo(units.s, pad(s));
 
     });
 

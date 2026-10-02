@@ -22,6 +22,7 @@ import { initCharacterPanel } from "./characters/panel.js";
 import { initUpcoming } from "./upcoming.js";
 import { initIntro, setIntroActive } from "./intro.js";
 import { initTilt } from "./tilt.js";
+import { initParallax } from "./parallax.js";
 import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
 
@@ -62,6 +63,9 @@ graphReady.then(initUpcoming);
 
 // Cards lean towards the mouse (js/tilt.js).
 initTilt();
+
+// The landing page shifts in layers with the mouse.
+initParallax();
 
 // The landing page's 3D scroll fly-through (js/intro.js),
 // built from the MCU titles once they've loaded.

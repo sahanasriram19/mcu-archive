@@ -120,7 +120,31 @@ function renderWatchBefore(node){
                 </button>
             `).join("")}
         </div>
+        <div class="watch-caption" aria-hidden="true"></div>
     `;
+
+    // With a mouse the posters are fanned out like a hand of
+    // cards (css/tilt.css) and their own labels are hidden;
+    // the one you point at is named here instead.
+    const caption = watchEl.querySelector(".watch-caption");
+
+    const captionFor = n => `${n.title} · ${(n.release || "").slice(0, 4)}${otherWorld(n)}`;
+
+    const idleCaption = "Point at a poster to see its title";
+
+    caption.innerHTML = idleCaption;
+
+    watchEl.querySelectorAll(".watch-item").forEach(item => {
+
+        const show = () => { caption.innerHTML = captionFor(nodes[+item.dataset.i]); caption.classList.add("on"); };
+        const hide = () => { caption.innerHTML = idleCaption; caption.classList.remove("on"); };
+
+        item.addEventListener("mouseenter", show);
+        item.addEventListener("focus", show);
+        item.addEventListener("mouseleave", hide);
+        item.addEventListener("blur", hide);
+
+    });
 
     watchEl.querySelectorAll(".watch-item").forEach(item => {
 
@@ -292,11 +316,100 @@ function renderExtras(node) {
             }).join("") +
             `</div>`;
 
+        initCoverflow(castEl.querySelector("#movie-details-cast-list"));
+
     } else {
 
         castEl.innerHTML = "";
 
     }
+
+}
+
+//--------------------------------------------------
+// Cast coverflow: the cast row is a 3D carousel. The
+// photo in the middle faces you; the ones either side turn
+// away and sink back, like flipping through album covers.
+// Scroll (or swipe) the row to bring others to the middle.
+//--------------------------------------------------
+
+const reduceMotionCast = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+// The open card's coverflow, re-laid out on resize.
+let coverflowResize = null;
+
+window.addEventListener("resize", () => coverflowResize && coverflowResize());
+
+function initCoverflow(list){
+
+    if(!list || reduceMotionCast.matches) return;
+
+    list.classList.add("coverflow");
+
+    const members = [...list.querySelectorAll(".cast-member")];
+
+    let queued = false;
+
+    const update = () => {
+
+        queued = false;
+
+        const box = list.getBoundingClientRect();
+
+        const mid = box.left + box.width / 2;
+
+        members.forEach(m => {
+
+            const r = m.getBoundingClientRect();
+
+            const step = r.width + 14;
+
+            // How many places from the middle (negative: left).
+            const d = Math.max(-3, Math.min(3, (r.left + r.width / 2 - mid) / step));
+
+            const a = Math.max(-1.6, Math.min(1.6, d));
+
+            m.style.transform =
+                `translateZ(${(-Math.abs(a) * 60).toFixed(1)}px) rotateY(${(-a * 38).toFixed(1)}deg) scale(${(1 - Math.min(Math.abs(d), 3) * 0.06).toFixed(3)})`;
+
+            m.style.opacity = (1 - Math.min(Math.abs(d), 3) * 0.16).toFixed(3);
+
+            m.style.zIndex = String(10 - Math.round(Math.abs(d) * 2));
+
+        });
+
+    };
+
+    const queue = () => {
+
+        if(queued) return;
+
+        queued = true;
+
+        requestAnimationFrame(update);
+
+    };
+
+    list.addEventListener("scroll", queue, { passive: true });
+
+    coverflowResize = queue;
+
+    // Start with the third photo in the middle, so there are
+    // faces on both sides from the start.
+    const centreOn = Math.min(2, members.length - 1);
+
+    const start = () => {
+
+        if(members[centreOn]) list.scrollLeft = centreOn * (members[centreOn].offsetWidth + 14);
+
+        update();
+
+    };
+
+    // Once the card is open and laid out.
+    requestAnimationFrame(() => requestAnimationFrame(start));
+
+    setTimeout(update, 700);
 
 }
 

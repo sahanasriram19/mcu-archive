@@ -102,3 +102,191 @@
     }
 
 }
+
+/*==================================================
+  FLIP-CLOCK COUNTDOWN (js/upcoming.js flips the digits)
+==================================================*/
+
+.countdown-clock > span{
+    perspective:300px;
+}
+
+.countdown-clock b{
+    display:inline-block;
+    transform-origin:50% 55%;
+    backface-visibility:hidden;
+}
+
+/* Desktop: each number on its own little split-flap tile. */
+@media (min-width: 769px) and (min-height: 501px){
+
+    .countdown-clock b{
+        position:relative;
+        min-width:34px;
+        padding:3px 5px 2px;
+        text-align:center;
+        border-radius:6px;
+        background:linear-gradient(180deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.05) 50%, rgba(0,0,0,.18) 50%, rgba(255,255,255,.03) 100%);
+        box-shadow:inset 0 0 0 1px rgba(255,255,255,.07), 0 3px 8px rgba(0,0,0,.35);
+    }
+
+    /* The hinge line across the middle of the flap. */
+    .countdown-clock b::after{
+        content:"";
+        position:absolute;
+        left:0;
+        right:0;
+        top:50%;
+        height:1px;
+        background:rgba(0,0,0,.45);
+    }
+
+    .countdown-clock i{
+        margin-top:4px;
+    }
+
+}
+
+/*==================================================
+  "WATCH BEFORE THIS" AS A HAND OF CARDS
+  (mouse only — on touch screens the row stays as it was)
+==================================================*/
+
+.watch-caption{
+    display:none;
+}
+
+@media (hover: hover) and (pointer: fine){
+
+    .watch-row{
+        gap:0;
+        padding:20px 12px 12px;
+        perspective:900px;
+    }
+
+    .watch-item{
+        position:relative;
+        flex:0 0 84px;
+        margin-left:-36px;
+        transform-origin:0 60%;
+        transform:rotateY(34deg);
+        transition:transform .35s cubic-bezier(.2,.8,.2,1), margin .35s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .watch-item:first-child{
+        margin-left:0;
+    }
+
+    /* The one you point at lifts out of the hand and turns
+       to face you... */
+    .watch-item:hover,
+    .watch-item:focus-visible{
+        z-index:5;
+        transform:translateY(-12px) translateZ(50px) rotateY(0deg);
+    }
+
+    /* ...and the cards after it slide over to make room. */
+    .watch-item:hover ~ .watch-item,
+    .watch-item:focus-visible ~ .watch-item{
+        transform:translateX(44px) rotateY(34deg);
+    }
+
+    /* Names go in the caption under the hand instead. */
+    .watch-item .watch-title,
+    .watch-item .watch-year{
+        display:none;
+    }
+
+    .watch-caption{
+        display:block;
+        min-height:18px;
+        margin-top:4px;
+        font-size:12px;
+        color:rgba(255,255,255,.4);
+        transition:color .2s ease;
+    }
+
+    .watch-caption.on{
+        color:var(--text);
+        font-weight:600;
+    }
+
+}
+
+/*==================================================
+  CAST COVERFLOW (js/movieDetails.js turns each photo)
+==================================================*/
+
+#movie-details-overlay #movie-details-cast-list.coverflow{
+    perspective:700px;
+    /* Room for the first and last photo to reach the middle. */
+    padding-left:calc(50% - 42px);
+    padding-right:calc(50% - 42px);
+    padding-top:6px;
+}
+
+#movie-details-overlay #movie-details-cast-list.coverflow .cast-member{
+    position:relative;
+    transition:transform .25s ease-out, opacity .25s ease-out;
+    will-change:transform;
+}
+
+/*==================================================
+  HINGED PANEL SECTIONS
+  The MCU / X-Men / Spider-Man sections (and the character
+  lists) swing down like a lid opening towards you.
+==================================================*/
+
+.view-panel-section-body.collapse,
+.character-dropdown.collapse{
+    perspective:600px;
+}
+
+.view-panel-section-body.collapse > .collapse-inner,
+.character-dropdown.collapse > .collapse-inner{
+    transform-origin:50% 0;
+    transform:rotateX(-80deg);
+    transition:transform .5s cubic-bezier(.2,.8,.2,1);
+}
+
+.view-panel-section-body.collapse.open > .collapse-inner,
+.character-dropdown.collapse.open > .collapse-inner{
+    transform:rotateX(0deg);
+}
+
+/*==================================================
+  LANDING PARALLAX (js/parallax.js sets --px / --py)
+==================================================*/
+
+.hero-portal{
+    transform:translate3d(calc(var(--px, 0) * 34px), calc(var(--py, 0) * 26px), 0);
+}
+
+#landing-card .landing-title,
+#landing-card .landing-tagline{
+    transform:translate3d(calc(var(--px, 0) * 12px), calc(var(--py, 0) * 9px), 0);
+}
+
+#landing-card .intro-scroll-hint{
+    transform:translate3d(calc(var(--px, 0) * 6px), calc(var(--py, 0) * 4px), 0);
+}
+
+/*==================================================
+  Reduced motion: none of the above moves
+==================================================*/
+
+@media (prefers-reduced-motion: reduce){
+
+    .watch-item,
+    .watch-item:hover,
+    .watch-item:hover ~ .watch-item,
+    .view-panel-section-body.collapse > .collapse-inner,
+    .character-dropdown.collapse > .collapse-inner,
+    .hero-portal,
+    #landing-card .landing-title,
+    #landing-card .landing-tagline,
+    #landing-card .intro-scroll-hint{
+        transform:none !important;
+    }
+
+}
