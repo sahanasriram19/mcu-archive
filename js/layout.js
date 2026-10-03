@@ -884,6 +884,99 @@ export function layoutCharacterJourney(nodes){
 }
 
 
+//--------------------------------------------------
+// ALL POSTERS (MCU) — every title from every world once,
+// no hub, no branches, no lines: just posters scattered
+// across the whole screen in a loose, staggered field, so
+// the space is used evenly. The order is shuffled (the
+// same way every time — from each title's id, never
+// Math.random()), so the worlds mix together.
+//--------------------------------------------------
+
+const SCATTER_CELL_W = 470;     // room per poster, world units (poster is 320 x 480)
+const SCATTER_CELL_H = 640;
+
+// A steady 0..1 number from a string / index.
+function hashOf(text){
+
+    let h = 2166136261;
+
+    for(let i = 0; i < text.length; i++){
+
+        h ^= text.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+
+    }
+
+    return (h >>> 0) / 4294967295;
+
+}
+
+export function layoutScatter(nodes){
+
+    const seen = new Set();
+    const shown = [];
+
+    nodes.forEach(node=>{
+
+        // A title on two maps (Deadpool & Wolverine…) is
+        // shown once; its second copy steps out of view.
+        if(seen.has(node.id)){
+
+            node.targetX = 100000;
+            node.targetY = 100000;
+
+            return;
+
+        }
+
+        seen.add(node.id);
+        shown.push(node);
+
+    });
+
+    const order = shown
+        .map(n => ({ n, k: hashOf(n.id) }))
+        .sort((a, b) => a.k - b.k)
+        .map(o => o.n);
+
+    const N = order.length;
+
+    // Rows and columns shaped like the screen.
+    const aspect = Math.min(2.6, Math.max(0.45, window.innerWidth / Math.max(1, window.innerHeight)));
+
+    const cols = Math.max(1, Math.min(N, Math.round(Math.sqrt(N * aspect * SCATTER_CELL_H / SCATTER_CELL_W))));
+    const rows = Math.ceil(N / cols);
+
+    order.forEach((node, i)=>{
+
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+
+        // The last row may be short: centre it.
+        const inRow = r === rows - 1 ? N - r * cols : cols;
+
+        // Every other row shifts half a cell, and each poster
+        // drifts a little off its spot, so it reads as a
+        // scattered field rather than a grid.
+        const shift = (r % 2 ? 0.25 : -0.25) * SCATTER_CELL_W;
+
+        const jx = (hashOf(node.id + "x") - 0.5) * SCATTER_CELL_W * 0.3;
+        const jy = (hashOf(node.id + "y") - 0.5) * SCATTER_CELL_H * 0.24;
+
+        node.layout = "scatter";
+
+        node.targetX = (c - (inRow - 1) / 2) * SCATTER_CELL_W + shift + jx;
+        node.targetY = (r - (rows - 1) / 2) * SCATTER_CELL_H + jy;
+
+    });
+
+    setBranchNodes([]);
+
+    resolveOverlaps(shown, 30);
+
+}
+
 //==================================================
 // REGISTRY
 //==================================================
@@ -892,6 +985,7 @@ export const LAYOUTS = {
 
     complete: layoutComplete,
     multiverse: layoutMultiverse,
+    scatter: layoutScatter,
     phases: layoutPhases,
     release: layoutRelease,
     chronology: layoutChronology,

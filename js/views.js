@@ -30,6 +30,18 @@ export const VIEWS = [
     },
 
     {
+        // Every title from every world, scattered evenly over
+        // the whole screen — no hub, branches or lines. Only on
+        // the combined MCU (see ui/panel.js), not in a world.
+        key: "scatter",
+        label: "All Posters",
+        layout: "scatter",
+        allOnly: true,
+        edges: { mode: "none" },
+        camera: { x: 0, y: 0, zoom: 0.08, fit: 0.96, minZoom: 0.03, maxZoom: 0.4, centre: true }
+    },
+
+    {
         key: "phases",
         label: "Phases",
         layout: "phases",

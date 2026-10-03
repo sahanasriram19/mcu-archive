@@ -1,5 +1,5 @@
 import { VIEWS } from "../js/views.js";
-import { setWorldView, getCurrentView, getWorld } from "../js/viewManager.js";
+import { setWorldView, getCurrentView, getWorld, refitView } from "../js/viewManager.js";
 import { ALL_WORLDS } from "../js/worlds.js";
 
 import {
@@ -171,6 +171,20 @@ if(window.visualViewport){
 const SECTIONS = [
 
     {
+        // Every world together. Its own dropdown, above the
+        // worlds: the three mind maps side by side, or every
+        // poster scattered over the whole screen.
+        world: ALL_WORLDS,
+        title: "MCU",
+        views: ["complete", "scatter"],
+        labels: {
+            complete: "Complete MCU",
+            scatter: "All Posters"
+        },
+        heroes: []
+    },
+
+    {
         world: "mcu",
         title: "Avengers World",
         labels: {
@@ -252,7 +266,7 @@ const SECTIONS = [
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
-const WORLD_SHORT = { mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man" };
+const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man" };
 
 const sectionEls = [];
 
@@ -278,32 +292,6 @@ function openSection(world){
     if(entry && !entry.el.classList.contains("open")) setSectionOpen(entry, true);
 
 }
-
-//--------------------------------------------------
-// MCU — every world's mind map together on one canvas
-// (the default view). Sits above the sections.
-//--------------------------------------------------
-
-const ALL_LABEL = "MCU";
-
-const allBtn = document.createElement("button");
-
-allBtn.type = "button";
-allBtn.className = "view-panel-btn view-panel-all";
-allBtn.dataset.view = "complete";
-allBtn.dataset.world = ALL_WORLDS;
-allBtn.textContent = ALL_LABEL;
-allBtn.title = "The Avengers, X-Men and Spider-Man mind maps together";
-
-allBtn.addEventListener("click", () => {
-
-    collapseIfCompact();
-
-    setWorldView(ALL_WORLDS, "complete");
-
-});
-
-list.appendChild(allBtn);
 
 SECTIONS.forEach(section => {
 
@@ -354,7 +342,14 @@ SECTIONS.forEach(section => {
 
     dropdown.appendChild(dropdownInner);
 
-    VIEWS.forEach(view => {
+    // A section lists its own views if it names them (the
+    // combined MCU); a world lists every view meant for a
+    // single world.
+    const sectionViews = section.views
+        ? VIEWS.filter(v => section.views.includes(v.key))
+        : VIEWS.filter(v => !v.allOnly);
+
+    sectionViews.forEach(view => {
 
         const btn = document.createElement("button");
 
@@ -375,9 +370,17 @@ SECTIONS.forEach(section => {
 
             // Close the phone panel first, so the new view frames
             // itself around the slim bar, not the open panel.
+            const wasOpen = panel.classList.contains("expanded");
+
             collapseIfCompact();
 
             setWorldView(section.world, view.key);
+
+            // On a phone the panel shrinks back to its slim bar
+            // over 0.4s; frame the view again once it has, so it
+            // fills the screen rather than the space left above
+            // the open panel.
+            if(wasOpen && isCompact()) setTimeout(refitView, 450);
 
         });
 
@@ -430,22 +433,12 @@ SECTIONS.forEach(section => {
 
 });
 
-openSection("mcu");
+openSection(ALL_WORLDS);
 
 function refreshActive(){
 
     const current = getCurrentView();
     const world = getWorld();
-
-    if(world === ALL_WORLDS){
-
-        currentLabel.textContent = ALL_LABEL;
-
-        list.querySelectorAll(".view-panel-btn").forEach(btn => btn.classList.toggle("active", btn === allBtn));
-
-        return;
-
-    }
 
     const section = SECTIONS.find(s => s.world === world) || SECTIONS[0];
 
