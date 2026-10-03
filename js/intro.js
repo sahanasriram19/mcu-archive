@@ -52,6 +52,13 @@ const START_GAP = 1500;       // depth before the first chapter
 const CHAPTER_GAP = 1300;     // chapter title -> its first poster
 const POSTER_GAP = 430;       // poster -> poster
 const GROUP_GAP = 700;        // extra space before the next chapter
+
+// Every chapter takes up at least this much of the trail.
+// Short ones (the X-Men and Spider-Man eras have 2-5 titles)
+// spread their posters out to fill it, so each chapter title
+// gets the same long, slow glow-in from the distance as the
+// big MCU phases instead of popping up close.
+const MIN_CHAPTER_LENGTH = 6500;
 const END_GAP = 900;          // after the last poster
 
 const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
@@ -259,18 +266,25 @@ export function initIntro(nodes, onEnter){
 
         // A chapter title waits until the one before it has
         // gone past before glowing in the distance, so two
-        // titles never sit on top of each other (the X-Men and
-        // Spider-Man eras are short, so chapters come close).
+        // titles never sit on top of each other. Its fade-in
+        // keeps the same shape however long the wait (fully
+        // lit a little over halfway in, like the first phases).
         const far = Math.max(CHAPTER_FADE_IN_FAR, lastChapterDepth + FADE_OUT_START - depth);
 
         items.push({
             el: chapter, depth, xFrac: 0, y: -40, rot: 0, kind: "chapter",
-            far, near: Math.max(CHAPTER_FADE_IN_NEAR, far + 1500)
+            far, near: far * (CHAPTER_FADE_IN_NEAR / CHAPTER_FADE_IN_FAR)
         });
 
         lastChapterDepth = depth;
 
         depth += CHAPTER_GAP;
+
+        // Short chapters space their posters out to fill the
+        // minimum length.
+        const n = group.members.length;
+
+        const posterGap = Math.max(POSTER_GAP, (MIN_CHAPTER_LENGTH - CHAPTER_GAP - GROUP_GAP) / Math.max(1, n));
 
         group.members.forEach(node => {
 
@@ -287,7 +301,7 @@ export function initIntro(nodes, onEnter){
 
             items.push({ el, poster, node, depth, xFrac, yFrac, rot, kind: "poster", imgSet: false });
 
-            depth += POSTER_GAP;
+            depth += posterGap;
 
             side = -side;
 
