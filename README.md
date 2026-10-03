@@ -8,10 +8,10 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 ## What it does
 
-The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each Phase opens with a title card, its films and series float past on either side, and a "Coming Soon" chapter closes it out. From about halfway along, the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
+The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each Phase — and each X-Men and Spider-Man era — opens with a title card in the order they began (the X-Men trilogy and Raimi's Spider-Man first), its films and series float past on either side, and a "Coming Soon" chapter closes it out. From about halfway along, the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
-- **Complete MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps tucked into the open space beside it (above and below on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
-- **Avengers** — the MCU on its own, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
+- **MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps tucked into the open space beside it (above and below on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
+- **Avengers World → Complete Avengers** — the MCU's own titles, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
 - **Phases** — six separate mini mind maps, one per phase (plus one for the Netflix *Defenders* shows), so you can compare each era's shape at a glance.
 - **Release Order** — a left-to-right timeline in real-world release order.
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
@@ -69,7 +69,7 @@ mcu-archive/
     ├── camera.js               # pan/zoom state + easing
     ├── input.js                 # drag to pan, wheel/pinch to zoom, click a poster
     ├── graph.js                  # node + edge data, per-frame easing
-    ├── layout.js                  # one layout function per view (Complete MCU / Avengers mind maps, Phases, Release, Chronology, Character Journeys)
+    ├── layout.js                  # one layout function per view (MCU / Complete Avengers mind maps, Phases, Release, Chronology, Character Journeys)
     ├── viewManager.js              # ties layout + edges + camera together per view
     ├── views.js                     # view registry (labels, default camera, phone framing)
     ├── responsive.js                 # decides phone vs desktop layouts (portrait / landscape)

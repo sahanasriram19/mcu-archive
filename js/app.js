@@ -5,7 +5,7 @@ import {
 
     graph,
 
-    worldNodes,
+    allNodes,
 
     initialiseGraph,
 
@@ -70,11 +70,11 @@ initParallax();
 
 // The landing page's 3D scroll fly-through (js/intro.js),
 // built from the MCU titles once they've loaded.
-graphReady.then(() => initIntro(worldNodes.mcu, () => enter("complete")));
+graphReady.then(() => initIntro(allNodes(), () => enter("complete")));
 
 // Also warm the map's posters a few seconds after load, for
 // anyone who skips the flight (see warmPosters in nodes.js).
-graphReady.then(() => setTimeout(() => warmPosters(worldNodes.mcu, 40), 3000));
+graphReady.then(() => setTimeout(() => warmPosters(allNodes(), 40), 3000));
 
 graphReady.then(() => {
 
@@ -209,7 +209,7 @@ async function enter(viewKey){
         await graphReady;
 
         // Let the view choose its own camera. The default,
-        // "Complete MCU", is every world's mind map together.
+        // "MCU", is every world's mind map together.
         if(viewKey === "complete") setWorldView(ALL_WORLDS, "complete");
         else setView(viewKey);
 

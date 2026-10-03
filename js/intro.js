@@ -2,13 +2,17 @@
 // 3D FLY-THROUGH INTRO
 //
 // Scrolling the landing page flies a camera forward
-// through space. Each MCU phase opens with a chapter
-// title in its colour; its titles then float past on
-// alternating sides, angled towards you. Phases come in
-// the order they began (so the Netflix "Defenders" shows
-// sit between Phase 2 and Phase 3), and a final "Coming
-// soon" chapter holds the titles not out yet. At the end,
-// the way into the archive appears.
+// through space. Each MCU phase — and each X-Men and
+// Spider-Man era — opens with a chapter title in its
+// colour; its titles then float past on alternating sides,
+// angled towards you. Chapters come in the order they began
+// (so the X-Men trilogy and Raimi's Spider-Man come before
+// Phase 1, and the Netflix "Defenders" shows sit between
+// Phase 2 and Phase 3), and a final "Coming soon" chapter
+// holds the titles not out yet. A title that belongs to two
+// worlds (Deadpool & Wolverine, Tom Holland's Spider-Man
+// films) appears once, in its MCU phase. At the end, the
+// way into the archive appears.
 //
 // How it works: #landing is a scroll container. Its
 // scroll position (smoothed) becomes a camera depth, and
@@ -88,9 +92,9 @@ let active = false;
 let smooth = 0;
 let onEnterCb = null;
 
-// The MCU titles, and how far along the flight the map's
-// posters were last warmed up (see warmPosters below).
-let mcuNodes = [];
+// Every world's titles, and how far along the flight the
+// map's posters were last warmed up (see warmPosters below).
+let mapNodes = [];
 let warmedAt = -1;
 
 // Deterministic "random" per index, so the scene is the
@@ -100,6 +104,15 @@ const jitter = (i, salt) => {
     const v = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
 
     return v - Math.floor(v);   // 0..1
+
+};
+
+// The small line above each chapter title.
+const WORLD_KICKERS = {
+
+    mcu: "The Marvel Cinematic Universe",
+    xmen: "The X-Men",
+    spider: "Spider-Man"
 
 };
 
@@ -166,7 +179,7 @@ export function initIntro(nodes, onEnter){
 
     onEnterCb = onEnter;
 
-    mcuNodes = nodes;
+    mapNodes = nodes;
 
     skipBtn.addEventListener("click", () => onEnterCb && onEnterCb());
     endBtn.addEventListener("click", () => onEnterCb && onEnterCb());
@@ -179,7 +192,19 @@ export function initIntro(nodes, onEnter){
         landing.scrollBy({ top: Math.round(window.innerHeight * 0.9), behavior: "smooth" })
     );
 
-    const titles = nodes.filter(n => !n.isBranch && n.status !== "cancelled");
+    // Every world's titles, each once (the MCU copy of a
+    // shared title comes first, so that's the one kept).
+    const seen = new Set();
+
+    const titles = nodes.filter(n => {
+
+        if(n.isBranch || n.status === "cancelled" || seen.has(n.id)) return false;
+
+        seen.add(n.id);
+
+        return true;
+
+    });
 
     const released = titles.filter(n => !isUpcoming(n));
     const upcoming = titles.filter(n => isUpcoming(n));
@@ -207,6 +232,8 @@ export function initIntro(nodes, onEnter){
 
     let depth = START_GAP;
 
+    let lastChapterDepth = -Infinity;
+
     let side = -1;
 
     let index = 0;
@@ -219,11 +246,22 @@ export function initIntro(nodes, onEnter){
 
         const chapter = group.phase === null
             ? makeChapter("Still to come", "Coming Soon", colour)
-            : makeChapter("The Marvel Cinematic Universe", groupName(group.phase), colour);
+            : makeChapter(WORLD_KICKERS[group.members[0].world] || WORLD_KICKERS.mcu, groupName(group.phase), colour);
 
         stage.appendChild(chapter);
 
-        items.push({ el: chapter, depth, xFrac: 0, y: -40, rot: 0, kind: "chapter" });
+        // A chapter title waits until the one before it has
+        // gone past before glowing in the distance, so two
+        // titles never sit on top of each other (the X-Men and
+        // Spider-Man eras are short, so chapters come close).
+        const far = Math.max(CHAPTER_FADE_IN_FAR, lastChapterDepth + FADE_OUT_START - depth);
+
+        items.push({
+            el: chapter, depth, xFrac: 0, y: -40, rot: 0, kind: "chapter",
+            far, near: Math.max(CHAPTER_FADE_IN_NEAR, far + 1500)
+        });
+
+        lastChapterDepth = depth;
 
         depth += CHAPTER_GAP;
 
@@ -323,7 +361,7 @@ function frame(){
 
             warmedAt = at;
 
-            warmPosters(mcuNodes, 40);
+            warmPosters(mapNodes, 40);
 
         }
 
@@ -395,8 +433,8 @@ function frame(){
 
         const rel = camZ - it.depth;   // < 0: still ahead of us
 
-        const far = it.kind === "chapter" ? CHAPTER_FADE_IN_FAR : FADE_IN_FAR;
-        const near = it.kind === "chapter" ? CHAPTER_FADE_IN_NEAR : FADE_IN_NEAR;
+        const far = it.kind === "chapter" ? it.far : FADE_IN_FAR;
+        const near = it.kind === "chapter" ? it.near : FADE_IN_NEAR;
 
         const visible = rel > far && rel < FADE_OUT_END;
 

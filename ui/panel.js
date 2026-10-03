@@ -172,11 +172,11 @@ const SECTIONS = [
 
     {
         world: "mcu",
-        title: "MCU",
+        title: "Avengers World",
         labels: {
-            // The Avengers' own mind map. ("Complete MCU", above
-            // the sections, is every world together.)
-            complete: "Avengers",
+            // The Avengers' own mind map. ("MCU", above the
+            // sections, is every world together.)
+            complete: "Complete Avengers",
             phases: "Phases",
             release: "Release Order",
             chronology: "Chronological Order",
@@ -252,7 +252,7 @@ const SECTIONS = [
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
-const WORLD_SHORT = { xmen: "X-Men", spider: "Spider-Man" };
+const WORLD_SHORT = { mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man" };
 
 const sectionEls = [];
 
@@ -280,11 +280,11 @@ function openSection(world){
 }
 
 //--------------------------------------------------
-// COMPLETE MCU — every world's mind map together on one
-// canvas (the default view). Sits above the sections.
+// MCU — every world's mind map together on one canvas
+// (the default view). Sits above the sections.
 //--------------------------------------------------
 
-const ALL_LABEL = "Complete MCU";
+const ALL_LABEL = "MCU";
 
 const allBtn = document.createElement("button");
 
@@ -450,15 +450,15 @@ function refreshActive(){
     const section = SECTIONS.find(s => s.world === world) || SECTIONS[0];
 
     // The phone bar's label: the current view's name (plus
-    // the hero, for a character journey), and the world
-    // when it's not the MCU.
+    // the hero, for a character journey), with its world in
+    // front (e.g. "Avengers · Phases").
     const name =
         current === "characters" && selectedHeroLabel
             ? selectedHeroLabel
             : (section.labels[current] || "");
 
     currentLabel.textContent =
-        world !== "mcu" && !name.startsWith("Complete") && current !== "characters"
+        !name.startsWith("Complete") && current !== "characters"
             ? `${WORLD_SHORT[world] || ""} · ${name}`
             : name;
 
