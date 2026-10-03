@@ -30,15 +30,17 @@ export const VIEWS = [
     },
 
     {
-        // Every title from every world, scattered evenly over
-        // the whole screen — no hub, branches or lines. Only on
-        // the combined MCU (see ui/panel.js), not in a world.
+        // Every title from every world, scattered far apart over
+        // a wide stretch of space — no hub, branches or lines.
+        // Only on the combined MCU (see ui/panel.js), not in a
+        // world. It opens close enough to read the posters in
+        // the middle; drag to roam, or zoom out to see them all.
         key: "scatter",
         label: "All Posters",
         layout: "scatter",
         allOnly: true,
         edges: { mode: "none" },
-        camera: { x: 0, y: 0, zoom: 0.08, fit: 0.96, minZoom: 0.03, maxZoom: 0.4, centre: true }
+        camera: { x: 0, y: 0, zoom: 0.17, userMinZoom: 0.03 }
     },
 
     {

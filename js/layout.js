@@ -886,15 +886,19 @@ export function layoutCharacterJourney(nodes){
 
 //--------------------------------------------------
 // ALL POSTERS (MCU) — every title from every world once,
-// no hub, no branches, no lines: just posters scattered
-// across the whole screen in a loose, staggered field, so
-// the space is used evenly. The order is shuffled (the
-// same way every time — from each title's id, never
-// Math.random()), so the worlds mix together.
+// no hub, no branches, no lines: just posters scattered far
+// apart across a wide stretch of space (several screens
+// across), to drift around and discover. The order and the
+// scatter are shuffled the same way every time — from each
+// title's id, never Math.random() — so the worlds mix.
 //--------------------------------------------------
 
-const SCATTER_CELL_W = 470;     // room per poster, world units (poster is 320 x 480)
-const SCATTER_CELL_H = 640;
+// Room per poster, world units (a poster is 320 x 480): each
+// gets a patch of space about four posters wide and sits
+// anywhere inside it, so the gaps between them vary.
+const SCATTER_CELL_W = 1400;
+const SCATTER_CELL_H = 1750;
+const SCATTER_WANDER = 0.72;    // how much of its patch a poster can wander over (0-1)
 
 // A steady 0..1 number from a string / index.
 function hashOf(text){
@@ -956,13 +960,13 @@ export function layoutScatter(nodes){
         // The last row may be short: centre it.
         const inRow = r === rows - 1 ? N - r * cols : cols;
 
-        // Every other row shifts half a cell, and each poster
-        // drifts a little off its spot, so it reads as a
-        // scattered field rather than a grid.
+        // Each poster sits anywhere in its own patch (clear of
+        // the patch edges), and every other row shifts half a
+        // patch, so there's no grid to see.
         const shift = (r % 2 ? 0.25 : -0.25) * SCATTER_CELL_W;
 
-        const jx = (hashOf(node.id + "x") - 0.5) * SCATTER_CELL_W * 0.3;
-        const jy = (hashOf(node.id + "y") - 0.5) * SCATTER_CELL_H * 0.24;
+        const jx = (hashOf(node.id + "x") - 0.5) * (SCATTER_CELL_W - POSTER_W) * SCATTER_WANDER;
+        const jy = (hashOf(node.id + "y") - 0.5) * (SCATTER_CELL_H - POSTER_H) * SCATTER_WANDER;
 
         node.layout = "scatter";
 
