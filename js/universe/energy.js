@@ -9,9 +9,10 @@ import { universe } from "./state.js";
 
 import {
 
-    worldToScreen
+    screenCopies
 
 } from "./utils.js";
+import { CONFIG } from "./config.js";
 
 //==================================================
 
@@ -60,7 +61,9 @@ export function drawEnergy(camera) {
     // Zoomed out (e.g. the Complete MCU map) these glowing
     // specks crowd the screen, so only every other one is
     // drawn there.
-    const step = camera.zoom < 0.5 ? 2 : 1;
+    // Further out still (the combined MCU map), fewer again,
+    // so the field doesn't fill up as more of it shows.
+    const step = camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1;
 
     for (let i = 0; i < universe.energy.length; i += step) {
 
@@ -80,31 +83,7 @@ export function drawEnergy(camera) {
 
             Math.sin(e.angle * 1.4) * e.orbit;
 
-        const screen = worldToScreen(
-
-            x,
-
-            y,
-
-            camera,
-
-            e.depth,
-
-            width,
-            height
-
-        );
-
-        if (
-
-            screen.x < -120 ||
-            screen.x > width + 120 ||
-            screen.y < -120 ||
-            screen.y > height + 120
-
-        ) {
-            continue;
-        }
+        for (const screen of screenCopies(x, y, camera, e.depth, width, height, 120, CONFIG.WORLD_SIZE)) {
 
         const pulse =
 
@@ -149,6 +128,8 @@ export function drawEnergy(camera) {
         ctx.fillStyle = `rgba(${e.colour},1)`;
 
         ctx.fill();
+
+        }
 
     }
 

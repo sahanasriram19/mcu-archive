@@ -25,7 +25,7 @@ export const VIEWS = [
         // can be zoomed out further. `centre` frames the middle
         // of all the maps rather than the Avengers logo.
         worlds: {
-            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 0.94, minZoom: 0.02, maxZoom: 0.4, centre: true, userMinZoom: 0.02 } }
+            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 0.94, minZoom: 0.025, maxZoom: 0.4, centre: true, userMinZoom: 0.03 } }
         }
     },
 

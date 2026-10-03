@@ -8,10 +8,11 @@ import { universe } from "./state.js";
 
 import {
 
-    worldToScreen,
+    screenCopies,
     clamp
 
 } from "./utils.js";
+import { CONFIG } from "./config.js";
 
 //==================================================
 // Star halo image — the same gradient every bright star
@@ -103,27 +104,7 @@ export function drawStars(camera) {
             Math.sin(t * 0.7 + star.driftOffset * 1.2) *
             driftAmount * 0.6;
 
-        const screen = worldToScreen(
-
-            worldX,
-            worldY,
-            camera,
-            star.depth,
-            width,
-            height
-
-        );
-
-        if (
-
-            screen.x < -300 ||
-            screen.x > width + 300 ||
-            screen.y < -300 ||
-            screen.y > height + 300
-
-        ) {
-            continue;
-        }
+        for (const screen of screenCopies(worldX, worldY, camera, star.depth, width, height, 300, CONFIG.WORLD_SIZE)) {
 
         const pulse =
 
@@ -285,6 +266,8 @@ export function drawStars(camera) {
                 // (Its four spike lines were removed.)
 
                 break;
+
+        }
 
         }
 
