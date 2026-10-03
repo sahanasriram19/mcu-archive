@@ -460,8 +460,18 @@
     font-weight: 900;
     line-height: 1;
     letter-spacing: .02em;
+    /* Always one line: longer names (The Amazing Spider-Man)
+       are shrunk to fit by js/intro.js rather than wrapping
+       onto two — a two-line title is twice as much to redraw
+       every frame as it flies past, which made it stutter. */
+    white-space: nowrap;
     color: rgb(var(--c));
-    text-shadow: 0 0 40px rgba(var(--c), .6), 0 0 90px rgba(var(--c), .35);
+    /* --g (1 → smaller) tightens the glow as the title flies
+       past you, so it doesn't balloon into a huge, slow blur
+       up close (js/intro.js). */
+    text-shadow:
+        0 0 calc(40px * var(--g, 1)) rgba(var(--c), .6),
+        0 0 calc(90px * var(--g, 1)) rgba(var(--c), .35);
 }
 
 

@@ -1,5 +1,19 @@
 //==================================================
 // 3D FLY-THROUGH INTRO
+//
+// Scrolling the landing page flies a camera forward
+// through space. Each MCU phase — and each X-Men and
+// Spider-Man era — opens with a chapter title in its
+// colour; its titles then float past on alternating sides,
+// angled towards you. The MCU phases come first, in the
+// order they began (so the Netflix "Defenders" shows sit
+// between Phase 2 and Phase 3), then the X-Men eras, then
+// the Spider-Man eras, and a final "Coming soon" chapter
+// holds the titles not out yet. A title that belongs to two
+// worlds (Deadpool & Wolverine, Tom Holland's Spider-Man
+// films) appears once, in its MCU phase. At the end, the
+// way into the archive appears.
+//
 // How it works: #landing is a scroll container. Its
 // scroll position (smoothed) becomes a camera depth, and
 // every poster is moved with translate3d() inside a
@@ -60,6 +74,18 @@ const FADE_OUT_START = 350;   // start fading as they pass...
 const FADE_OUT_END = 850;     // ...gone by here
 
 const SMOOTHING = 0.12;       // camera easing per frame
+
+// Poster art starts loading this much further out than
+// where the poster first appears.
+const PRELOAD_AHEAD = 6000;
+
+// Must match #intro-stage's CSS perspective (landing.css).
+const PERSPECTIVE = 1000;
+
+// Chapter titles are kept to one line no wider than this
+// many times their font size (about "DEFENDERS"); longer
+// names get a smaller font instead of wrapping.
+const CHAPTER_MAX_EMS = 7.5;
 
 // The logo at the end of the trail: how quickly it
 // grows as you approach (bigger = larger from far away),
@@ -259,6 +285,7 @@ export function initIntro(nodes, onEnter){
 
         items.push({
             el: chapter, depth, xFrac: 0, y: -40, rot: 0, kind: "chapter",
+            title: chapter.querySelector(".intro-chapter-title"), glow: 1,
             far, near: far * (CHAPTER_FADE_IN_NEAR / CHAPTER_FADE_IN_FAR)
         });
 
@@ -324,6 +351,39 @@ function layout(){
 
     spacer.style.height = Math.round(totalDepth * SCROLL_PER_DEPTH) + "px";
 
+    fitChapterTitles();
+
+}
+
+// One line each: a title too wide for its card (or wider
+// than CHAPTER_MAX_EMS) gets a smaller font, so the X-Men
+// and Spider-Man names fly past as lightly as "PHASE 4".
+function fitChapterTitles(){
+
+    for(const it of items){
+
+        if(it.kind !== "chapter") continue;
+
+        const t = it.title;
+
+        t.style.fontSize = "";
+
+        const base = parseFloat(getComputedStyle(t).fontSize);
+
+        const room = Math.min(t.clientWidth, base * CHAPTER_MAX_EMS);
+
+        // The text's own width (the box itself is always the
+        // full card width).
+        t.style.width = "max-content";
+
+        const need = t.offsetWidth;
+
+        t.style.width = "";
+
+        if(need > room) t.style.fontSize = Math.floor(base * room / need) + "px";
+
+    }
+
 }
 
 //--------------------------------------------------
@@ -331,6 +391,24 @@ function layout(){
 //--------------------------------------------------
 
 const clamp01 = v => Math.max(0, Math.min(1, v));
+
+// Only touch a style when its value actually changes, so the
+// browser doesn't redo work for nothing.
+const lastStyle = new WeakMap();
+
+function setStyle(el, prop, value){
+
+    let last = lastStyle.get(el);
+
+    if(!last) lastStyle.set(el, last = {});
+
+    if(last[prop] === value) return;
+
+    last[prop] = value;
+
+    el.style[prop] = value;
+
+}
 
 function frame(){
 
@@ -414,17 +492,25 @@ function frame(){
         PORTAL_PERSPECTIVE / (PORTAL_PERSPECTIVE + remaining)
     );
 
-    endScene.style.transform = `scale(${portalScale.toFixed(4)})`;
+    // While it's a small light far away, it only moves in 1%
+    // steps (too small to see), so the logo and its branches
+    // aren't redrawn on every frame while the posters fly
+    // past in front of it. Up close it follows exactly.
+    const shownScale = portalScale < 0.5
+        ? Math.exp(Math.round(Math.log(portalScale) / 0.01) * 0.01)
+        : portalScale;
+
+    setStyle(endScene, "transform", `scale(${shownScale.toFixed(4)})`);
 
     // The beacon is brightest while the logo is small and
     // fades away as the logo itself takes over.
-    beacon.style.opacity = (1 - clamp01((portalScale - 0.12) / 0.35)).toFixed(3);
+    setStyle(beacon, "opacity", (1 - clamp01((portalScale - 0.12) / 0.35)).toFixed(2));
 
     // Hidden for the first part of the flight, then slowly
     // revealed from about 60% of the way along the trail.
     const reveal = clamp01((smooth - END_REVEAL_FROM) / END_REVEAL_OVER);
 
-    endEl.style.opacity = (heroT * reveal).toFixed(3);
+    setStyle(endEl, "opacity", (heroT * reveal).toFixed(2));
 
     //--------------------------------------------------
     // Starfield rushes past a little faster as you go
@@ -442,6 +528,17 @@ function frame(){
 
         const far = it.kind === "chapter" ? it.far : FADE_IN_FAR;
         const near = it.kind === "chapter" ? it.near : FADE_IN_NEAR;
+
+        // Poster art: fetched and decoded well before the
+        // poster comes into view (posters.js fills node.poster
+        // in once TMDB answers), so it never has to be unpacked
+        // in the middle of the flight — that's what made some
+        // posters stutter as they came in.
+        if(it.kind === "poster" && !it.imgSet && it.node.poster && rel > FADE_IN_FAR - PRELOAD_AHEAD){
+
+            loadPosterArt(it);
+
+        }
 
         const visible = rel > far && rel < FADE_OUT_END;
 
@@ -472,31 +569,49 @@ function frame(){
         it.el.style.transform =
             `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${rel.toFixed(1)}px) rotateY(${it.rot}deg)`;
 
-        // Poster art: loaded as it approaches (posters.js
-        // fills node.poster in once TMDB answers).
-        if(it.kind === "poster" && !it.imgSet && it.node.poster){
+        // A chapter title's glow keeps the same on-screen size
+        // once it's passing you, instead of growing with the
+        // title into a huge blur that's slow to draw.
+        if(it.kind === "chapter"){
 
-            const src = typeof it.node.poster === "string"
-                ? it.node.poster
-                : (it.node.poster.medium || it.node.poster.small);
+            const glow = rel > 0 ? Math.max(0.05, (PERSPECTIVE - rel) / PERSPECTIVE) : 1;
 
-            if(src){
+            if(Math.abs(glow - it.glow) > 0.01 || (glow === 1 && it.glow !== 1)){
 
-                const img = new Image();
+                it.glow = glow;
 
-                img.alt = "";
-                img.decoding = "async";
-                img.src = src;
-
-                img.onload = () => { it.poster.innerHTML = ""; it.poster.appendChild(img); };
-
-                it.imgSet = true;
+                it.title.style.setProperty("--g", glow.toFixed(3));
 
             }
 
         }
 
     }
+
+}
+
+function loadPosterArt(it){
+
+    const src = typeof it.node.poster === "string"
+        ? it.node.poster
+        : (it.node.poster.medium || it.node.poster.small);
+
+    if(!src) return;
+
+    it.imgSet = true;
+
+    const img = new Image();
+
+    img.alt = "";
+    img.decoding = "async";
+    img.src = src;
+
+    const show = () => { it.poster.innerHTML = ""; it.poster.appendChild(img); };
+
+    // decode() unpacks the image off to the side first, so
+    // adding it to the page doesn't hold up a frame.
+    if(img.decode) img.decode().then(show, () => { if(img.complete && img.naturalWidth) show(); });
+    else img.onload = show;
 
 }
 
