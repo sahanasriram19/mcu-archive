@@ -8,7 +8,16 @@ import { getTimelineOrientation } from "./layout.js";
 
 function resolveAnchor(ref, graph){
 
-    if(ref === "hub") return { x:0, y:0 };
+    if(ref === "hub") return graph.hubs && graph.hubs[0] || { x:0, y:0 };
+
+    // One world's logo on the combined map ("hub:xmen").
+    if(typeof ref === "string" && ref.startsWith("hub:")){
+
+        const world = ref.slice("hub:".length);
+
+        return (graph.hubs || []).find(h => h.world === world) || null;
+
+    }
 
     if(typeof ref === "string" && ref.startsWith("branch:")){
 
@@ -23,23 +32,32 @@ function resolveAnchor(ref, graph){
 }
 
 // Control points for a mind-map branch, in world space.
-function curveControls(from, to){
+// `center` is the logo the branch grows from (0,0 unless
+// it's one of the side maps on the combined view).
+function curveControls(from, to, center){
+
+    const cx = center ? center.x : 0;
+    const cy = center ? center.y : 0;
 
     const len = Math.hypot(to.x - from.x, to.y - from.y);
 
     const outward = (p, fallback)=>{
 
-        const d = Math.hypot(p.x, p.y);
+        const px = p.x - cx, py = p.y - cy;
+
+        const d = Math.hypot(px, py);
 
         if(d < 1){
 
-            const f = Math.hypot(fallback.x, fallback.y) || 1;
+            const fx = fallback.x - cx, fy = fallback.y - cy;
 
-            return [fallback.x / f, fallback.y / f];
+            const f = Math.hypot(fx, fy) || 1;
+
+            return [fx / f, fy / f];
 
         }
 
-        return [p.x / d, p.y / d];
+        return [px / d, py / d];
 
     };
 
@@ -119,7 +137,7 @@ export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
 
         }
 
-        const [c1x, c1y, c2x, c2y] = curveControls(from, to);
+        const [c1x, c1y, c2x, c2y] = curveControls(from, to, edge.center);
 
         const x1 = sx(c1x), y1 = sy(c1y), x2 = sx(c2x), y2 = sy(c2y);
 
@@ -266,7 +284,7 @@ export function renderConnections(ctx, camera, graph){
             // parent heading away from the hub and arrives at
             // the child heading away from the hub too, so every
             // branch visibly "grows" outward from the centre.
-            const [c1x, c1y, c2x, c2y] = curveControls(from, to);
+            const [c1x, c1y, c2x, c2y] = curveControls(from, to, edge.center);
 
             target.bezierCurveTo(
 

@@ -1,5 +1,6 @@
 import { VIEWS } from "../js/views.js";
 import { setWorldView, getCurrentView, getWorld } from "../js/viewManager.js";
+import { ALL_WORLDS } from "../js/worlds.js";
 
 import {
 
@@ -173,7 +174,9 @@ const SECTIONS = [
         world: "mcu",
         title: "MCU",
         labels: {
-            complete: "Complete MCU",
+            // The Avengers' own mind map. ("Complete MCU", above
+            // the sections, is every world together.)
+            complete: "Avengers",
             phases: "Phases",
             release: "Release Order",
             chronology: "Chronological Order",
@@ -275,6 +278,32 @@ function openSection(world){
     if(entry && !entry.el.classList.contains("open")) setSectionOpen(entry, true);
 
 }
+
+//--------------------------------------------------
+// COMPLETE MCU — every world's mind map together on one
+// canvas (the default view). Sits above the sections.
+//--------------------------------------------------
+
+const ALL_LABEL = "Complete MCU";
+
+const allBtn = document.createElement("button");
+
+allBtn.type = "button";
+allBtn.className = "view-panel-btn view-panel-all";
+allBtn.dataset.view = "complete";
+allBtn.dataset.world = ALL_WORLDS;
+allBtn.textContent = ALL_LABEL;
+allBtn.title = "The Avengers, X-Men and Spider-Man mind maps together";
+
+allBtn.addEventListener("click", () => {
+
+    collapseIfCompact();
+
+    setWorldView(ALL_WORLDS, "complete");
+
+});
+
+list.appendChild(allBtn);
 
 SECTIONS.forEach(section => {
 
@@ -407,6 +436,16 @@ function refreshActive(){
 
     const current = getCurrentView();
     const world = getWorld();
+
+    if(world === ALL_WORLDS){
+
+        currentLabel.textContent = ALL_LABEL;
+
+        list.querySelectorAll(".view-panel-btn").forEach(btn => btn.classList.toggle("active", btn === allBtn));
+
+        return;
+
+    }
 
     const section = SECTIONS.find(s => s.world === world) || SECTIONS[0];
 

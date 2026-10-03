@@ -29,6 +29,8 @@ import { archive } from "./archiveCore.js";
 import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
 
+const DEFAULT_MIN_ZOOM = camera.minZoom;
+
 function buildEdges(recipe){
 
     if(recipe.mode === "chain") return edgesChain(recipe.field);
@@ -155,6 +157,18 @@ function fitCamera(cam){
 
     const nodes = visibleNodes();
 
+    // Frame the middle of everything (the combined map isn't
+    // centred on any one logo).
+    if(cam.centre && nodes.length){
+
+        const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
+
+        cam = { ...cam,
+            x: (Math.min(...xs) + Math.max(...xs)) / 2,
+            y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+
+    }
+
     const zoom0 = baseFitZoom(cam, nodes);
 
     const fallback = { x: cam.x, y: cam.y, zoom: zoom0 };
@@ -209,6 +223,33 @@ function fitCamera(cam){
         }
 
         return best;
+
+    }
+
+    //----------------------------------
+    // Phones, combined "Complete MCU" map: fit everything
+    // into the space between the countdown pill along the
+    // top and the panel along the bottom.
+    //----------------------------------
+
+    if(cam.centre){
+
+        const cd = countdownRect();
+
+        const top = cd && cd.bottom < H * 0.3 ? cd.bottom + PANEL_GAP : 0;
+        const bottom = r.top - PANEL_GAP;
+
+        const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
+
+        const minX = Math.min(...xs) - POSTER_HALF_W, maxX = Math.max(...xs) + POSTER_HALF_W;
+        const minY = Math.min(...ys) - POSTER_HALF_H, maxY = Math.max(...ys) + POSTER_HALF_H;
+
+        const zoom = Math.max(cam.minZoom || 0.02, Math.min(cam.maxZoom || 0.5,
+            Math.min(W / (maxX - minX), (bottom - top) / (maxY - minY)) * cam.fit));
+
+        const freeCy = (top + bottom) / 2 - H / 2;
+
+        return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 - freeCy / zoom, zoom };
 
     }
 
@@ -406,6 +447,10 @@ export function setView(key){
 
     lastLayoutMode = layoutModeKey();
 
+    // How far you can zoom out by hand: further on the big
+    // combined map, the usual limit everywhere else.
+    camera.minZoom = cameraFor(view).userMinZoom || DEFAULT_MIN_ZOOM;
+
     const phoneCfg = phoneCameraConfig(view);
 
     const phoneCam = phoneCfg ? phoneCamera(phoneCfg) : null;
@@ -529,6 +574,16 @@ export function focusPhase(phase){
     const branch = graph.branchNodes.find(b => b.key === "phase" + phase);
 
     frameNodes(members, branch ? [branch] : []);
+
+}
+
+// Zoom into one world's map on the combined "Complete MCU"
+// map (clicking its logo — see input.js).
+export function focusWorld(world){
+
+    const hub = graph.hubs.find(h => h.world === world);
+
+    frameNodes(graph.nodes.filter(n => n.world === world && Math.abs(n.targetX) < 50000), hub ? [{ targetX: hub.x, targetY: hub.y }] : []);
 
 }
 

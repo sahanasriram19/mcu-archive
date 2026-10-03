@@ -26,7 +26,7 @@
 import { graph, worldNodes, allNodes } from "./graph.js";
 import { showMovieDetails } from "./movieDetails.js";
 import { focusNodes, setWorldView, getCurrentView } from "./viewManager.js";
-import { getWorld } from "./worlds.js";
+import { getWorld, ALL_WORLDS } from "./worlds.js";
 
 //--------------------------------------------------
 // Dates
@@ -176,7 +176,11 @@ export function startWatchFocus(node){
     // are counted in the banner instead.
     const home = node.world || getWorld();
 
-    const nodes = list.filter(n => (n.world || home) === home);
+    // On the combined "Complete MCU" map every world is on
+    // screen, so the whole list can light up there.
+    const onCombined = getWorld() === ALL_WORLDS;
+
+    const nodes = onCombined ? list : list.filter(n => (n.world || home) === home);
 
     const elsewhere = list.length - nodes.length;
 
@@ -184,7 +188,7 @@ export function startWatchFocus(node){
 
     // Opened from the other world (e.g. the MCU countdown
     // while exploring X-Men): switch over first, same view.
-    if(node.world && node.world !== getWorld()){
+    if(!onCombined && node.world && node.world !== getWorld()){
 
         setWorldView(node.world, getCurrentView() === "characters" ? "complete" : getCurrentView());
 

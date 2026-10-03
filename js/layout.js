@@ -11,10 +11,10 @@
 // exactly the same layout instead of drifting.
 //==================================================
 
-import { setBranchNodes } from "./graph.js";
+import { setBranchNodes, setHubs } from "./graph.js";
 import { getSelectedCharacter } from "./characters/characterJourney.js";
 import { isCompact, isPortraitPhone } from "./responsive.js";
-import { groupName } from "./worlds.js";
+import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 
 //--------------------------------------------------
 // Short era name per phase, used as the branch node's
@@ -189,9 +189,9 @@ function mindmapTiers(members, wedge){
 
 }
 
-export function layoutComplete(nodes){
-
-    const { sx, sy } = mindmapStretch();
+// One world's mind map round (0, 0): sets each title's
+// target and returns the phase/era junctions (not the hub).
+function mindmapTargets(nodes, sx, sy){
 
     const groups = {};
 
@@ -213,14 +213,7 @@ export function layoutComplete(nodes){
     const weights = phaseKeys.map(p => groups[p].length + MINDMAP_WEDGE_PAD);
     const totalWeight = weights.reduce((a,b)=>a+b, 0);
 
-    const branches = [{
-        phase:null,
-        key:"hub",
-        label:"",
-        subtitle:"",
-        x:0,
-        y:0
-    }];
+    const branches = [];
 
     let cursor = -Math.PI/2 - (weights[0] / totalWeight) * Math.PI;
 
@@ -287,9 +280,156 @@ export function layoutComplete(nodes){
 
     });
 
-    setBranchNodes(branches);
-
     resolveOverlaps(nodes, 40);
+
+    return branches;
+
+}
+
+export function layoutComplete(nodes){
+
+    // The combined "Complete MCU" map: every world at once.
+    if(getWorld() === ALL_WORLDS) return layoutMultiverse(nodes);
+
+    const { sx, sy } = mindmapStretch();
+
+    const branches = mindmapTargets(nodes, sx, sy);
+
+    setHubs([{ world: getWorld(), x: 0, y: 0 }]);
+
+    setBranchNodes([
+        { phase:null, key:"hub", label:"", subtitle:"", x:0, y:0 },
+        ...branches
+    ]);
+
+}
+
+//--------------------------------------------------
+// COMPLETE MCU (all worlds) — the Avengers mind map in
+// the middle, exactly as on its own, with the X-Men and
+// Spider-Man mind maps tucked into the open space round
+// it: X-Men up and to the left, Spider-Man down and to the
+// right (above and below on an upright phone). Each is its
+// own map round its own logo — not joined to the Avengers
+// branches. Each side map slides out from the centre just
+// until none of its posters come near an Avengers poster,
+// so it settles into the empty corner of the oval.
+//--------------------------------------------------
+
+const MULTIVERSE_ORDER = ["mcu", "xmen", "spider"];
+const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
+const MULTIVERSE_STEP = 150;    // how far a side map slides out per try
+
+// Which way each side map sits from the Avengers map.
+function multiverseDirections(){
+
+    return isPortraitPhone()
+        ? { xmen: [-0.3, -1], spider: [0.3, 1] }
+        : { xmen: [-1, -0.7], spider: [1, 0.7] };
+
+}
+
+// Poster boxes (plus the logo) of one map, round its own hub.
+function boxesOf(nodes, hubX = 0, hubY = 0){
+
+    const halfW = POSTER_W / 2, halfH = POSTER_H / 2;
+
+    const boxes = nodes.map(n => ({
+        minX: n.targetX - halfW, maxX: n.targetX + halfW,
+        minY: n.targetY - halfH, maxY: n.targetY + halfH
+    }));
+
+    boxes.push({ minX: hubX - 450, maxX: hubX + 450, minY: hubY - 200, maxY: hubY + 200 });
+
+    return boxes;
+
+}
+
+function boxesClash(a, b, dx, dy, gap){
+
+    for(const p of a){
+
+        for(const q of b){
+
+            if(
+                p.minX + dx < q.maxX + gap && p.maxX + dx > q.minX - gap &&
+                p.minY + dy < q.maxY + gap && p.maxY + dy > q.minY - gap
+            ) return true;
+
+        }
+
+    }
+
+    return false;
+
+}
+
+export function layoutMultiverse(nodes){
+
+    const byWorld = {};
+
+    nodes.forEach(n => { (byWorld[n.world] = byWorld[n.world] || []).push(n); });
+
+    const worlds = MULTIVERSE_ORDER.filter(w => byWorld[w] && byWorld[w].length);
+
+    // The Avengers map keeps its usual screen-shaped spread;
+    // the smaller maps beside it stay round.
+    const stretch = mindmapStretch();
+
+    const maps = {};
+
+    worlds.forEach(w=>{
+
+        const round = w !== "mcu";
+
+        const branches = mindmapTargets(byWorld[w], round ? 1 : stretch.sx, round ? 1 : stretch.sy);
+
+        maps[w] = { branches, boxes: boxesOf(byWorld[w]), dx: 0, dy: 0 };
+
+    });
+
+    // Everything already placed (the Avengers map first).
+    const placed = maps.mcu ? [...maps.mcu.boxes] : [];
+
+    const dirs = multiverseDirections();
+
+    worlds.filter(w => w !== "mcu").forEach(w=>{
+
+        const m = maps[w];
+
+        const [ux, uy] = dirs[w] || [1, 0];
+
+        const len = Math.hypot(ux, uy);
+
+        let d = 0;
+
+        while(d < 60000 && boxesClash(m.boxes, placed, ux / len * d, uy / len * d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
+
+        m.dx = ux / len * d;
+        m.dy = uy / len * d;
+
+        m.boxes.forEach(b => placed.push({ minX: b.minX + m.dx, maxX: b.maxX + m.dx, minY: b.minY + m.dy, maxY: b.maxY + m.dy }));
+
+    });
+
+    const hubs = [];
+    const allBranches = [];
+
+    worlds.forEach(w=>{
+
+        const m = maps[w];
+
+        byWorld[w].forEach(n => { n.targetX += m.dx; n.targetY += m.dy; });
+
+        m.branches.forEach(b => allBranches.push({ ...b, world: w, x: b.x + m.dx, y: b.y + m.dy }));
+
+        hubs.push({ world: w, x: m.dx, y: m.dy });
+
+    });
+
+    setHubs(hubs);
+
+    setBranchNodes(allBranches);
 
 }
 
@@ -751,6 +891,7 @@ export function layoutCharacterJourney(nodes){
 export const LAYOUTS = {
 
     complete: layoutComplete,
+    multiverse: layoutMultiverse,
     phases: layoutPhases,
     release: layoutRelease,
     chronology: layoutChronology,

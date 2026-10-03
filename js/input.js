@@ -1,6 +1,6 @@
 import { camera } from "./camera.js";
 import { graph } from "./graph.js";
-import { getCurrentView, focusPhase, refitView } from "./viewManager.js";
+import { getCurrentView, focusPhase, refitView, focusWorld } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
 import { nodeScreenRect } from "./nodes.js";
@@ -162,6 +162,8 @@ function moveGesture(e){
 const JUNCTION_HIT_WORLD = 130;   // junction hit radius, world units...
 const JUNCTION_HIT_MIN_PX = 22;   // ...but never smaller than this on screen
 
+let lastHubFocus = null;          // world whose map a logo click last zoomed into
+
 const HUB_HALF_W = 450;           // Marvel logo size, world units (see hub.js)
 const HUB_HALF_H = 200;
 
@@ -190,6 +192,27 @@ function mindmapTargetAt(clientX, clientY, coarse = false){
 
     }
 
+    // A logo: one in the middle of the map, or one per world
+    // on the combined "Complete MCU" map. Checked before the
+    // lines, which start under the logo.
+    const hubs = graph.hubs && graph.hubs.length ? graph.hubs : [{ world: null, x: 0, y: 0 }];
+
+    for(const h of hubs){
+
+        const hx = halfW + (h.x - camera.x) * camera.zoom;
+        const hy = halfH + (h.y - camera.y) * camera.zoom;
+
+        if(
+            Math.abs(clientX - hx) <= HUB_HALF_W * camera.zoom &&
+            Math.abs(clientY - hy) <= HUB_HALF_H * camera.zoom
+        ){
+
+            return { type: "hub", world: hubs.length > 1 ? h.world : null };
+
+        }
+
+    }
+
     // A branch line: lights up (and zooms to) the phase it
     // belongs to. A line into a poster counts as that
     // poster's branch; a line into a phase junction counts
@@ -213,18 +236,6 @@ function mindmapTargetAt(clientX, clientY, coarse = false){
             return { type: "line", nodeIndex: null, phase: Number(edge.to.slice("branch:phase".length)) };
 
         }
-
-    }
-
-    const hx = halfW + (0 - camera.x) * camera.zoom;
-    const hy = halfH + (0 - camera.y) * camera.zoom;
-
-    if(
-        Math.abs(clientX - hx) <= HUB_HALF_W * camera.zoom &&
-        Math.abs(clientY - hy) <= HUB_HALF_H * camera.zoom
-    ){
-
-        return { type: "hub" };
 
     }
 
@@ -441,7 +452,22 @@ function endGesture(e){
 
                 if(isTouch) clearHover();
 
-                refitView();
+                // Combined map: a world's logo zooms into that
+                // world's map; clicking it again zooms back out.
+                // A single world's logo zooms back out to its map.
+                if(target.world && lastHubFocus !== target.world){
+
+                    lastHubFocus = target.world;
+
+                    focusWorld(target.world);
+
+                } else {
+
+                    lastHubFocus = null;
+
+                    refitView();
+
+                }
 
             }
 

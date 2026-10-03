@@ -1,24 +1,39 @@
 import { getWorld } from "./worlds.js";
+import { graph } from "./graph.js";
 
 const img = new Image();
 img.src = "assets/marvel-logo.jpg";
 
+// Draws each mind map's logo (graph.hubs): one in the middle
+// of a single world's map, or one per world on the combined
+// "Complete MCU" map.
 export function renderHub(ctx, camera){
 
+    const hubs = graph.hubs && graph.hubs.length ? graph.hubs : [{ world: getWorld(), x: 0, y: 0 }];
+
+    hubs.forEach(h => drawHub(ctx, camera, h));
+
+}
+
+function drawHub(ctx, camera, hub){
+
     const x = window.innerWidth/2 +
-        (0-camera.x)*camera.zoom;
+        (hub.x-camera.x)*camera.zoom;
 
     const y = window.innerHeight/2 +
-        (0-camera.y)*camera.zoom;
+        (hub.y-camera.y)*camera.zoom;
 
     const width = 900 * camera.zoom;
     const height = 400 * camera.zoom;
+
+    // Off screen: nothing to draw.
+    if(x + width < 0 || x - width > window.innerWidth || y + height < 0 || y - height > window.innerHeight) return;
 
     // X-Men / Spider-Man worlds: their own logo picture if
     // one is set (see WORLD_PLATES below), otherwise a plain
     // title plate — either way in place of the Marvel logo,
     // the same size so the branches meet it the same way.
-    const plate = WORLD_PLATES[getWorld()];
+    const plate = WORLD_PLATES[hub.world];
 
     if(plate){
 

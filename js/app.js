@@ -14,7 +14,8 @@ import {
 } from "./graph.js";
 
 import { updateArchive } from "./archive.js";
-import { setView, getCurrentView } from "./viewManager.js";
+import { setView, setWorldView, getCurrentView } from "./viewManager.js";
+import { ALL_WORLDS } from "./worlds.js";
 
 import "./input.js";
 import { initialisePanel } from "../ui/panel.js";
@@ -207,8 +208,10 @@ async function enter(viewKey){
 
         await graphReady;
 
-        // Let the view choose its own camera.
-        setView(viewKey);
+        // Let the view choose its own camera. The default,
+        // "Complete MCU", is every world's mind map together.
+        if(viewKey === "complete") setWorldView(ALL_WORLDS, "complete");
+        else setView(viewKey);
 
         initialisePanel();
 

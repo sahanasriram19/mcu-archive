@@ -218,6 +218,31 @@
     color:#FFFFFF;
 }
 
+/* "Complete MCU": every world's mind map together. Sits
+   above the world sections, a little bolder than a normal
+   view button, with a three-colour mark for the worlds it
+   holds (Marvel red, X-Men gold, Spider-Man blue). */
+.view-panel-all{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-color:rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    color:var(--text);
+    font-weight:600;
+    letter-spacing:.02em;
+}
+
+.view-panel-all::before{
+    content:"";
+    flex:0 0 auto;
+    width:22px;
+    height:7px;
+    border-radius:4px;
+    background:linear-gradient(90deg, #e62429 0 33%, #facc15 33% 66%, #4696ff 66%);
+}
+
 @keyframes float {
   0% {
     transform: translateY(0px);

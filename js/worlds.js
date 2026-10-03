@@ -76,6 +76,11 @@ export const MCU_GROUP_NAMES = {
 
 const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS };
 
+// "all" is the combined map (the "Complete MCU" view):
+// every world's mind map side by side on one canvas. It
+// has no data file of its own — it shows the other three.
+export const ALL_WORLDS = "all";
+
 let currentWorld = "mcu";
 
 export function getWorld(){
@@ -86,7 +91,7 @@ export function getWorld(){
 
 export function setCurrentWorld(key){
 
-    if(WORLDS[key]) currentWorld = key;
+    if(WORLDS[key] || key === ALL_WORLDS) currentWorld = key;
 
 }
 

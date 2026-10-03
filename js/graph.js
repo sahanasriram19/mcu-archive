@@ -3,7 +3,7 @@
 //==================================================
 
 import { loadPosters } from "./posters.js";
-import { WORLDS, setCurrentWorld } from "./worlds.js";
+import { WORLDS, ALL_WORLDS, setCurrentWorld } from "./worlds.js";
 
 export const graph = {
 
@@ -16,6 +16,12 @@ export const graph = {
     // MCU and Phases, trunk waypoints in the timeline
     // trail views. Never movies, never posters.
     branchNodes: [],
+
+    // The logo(s) a mind map grows out of: { world, x, y }.
+    // One (at 0,0) for a single world's map; three on the
+    // combined "Complete MCU" map, one in the middle of each
+    // world's mind map. Set by layout.js, drawn by hub.js.
+    hubs: [],
 
     // What the mouse is over on the Complete MCU mind map
     // (set by input.js, read by connections.js and
@@ -164,15 +170,33 @@ export function allNodes(){
 
 }
 
-// Switch the map to another world's titles. The caller
-// (viewManager.setWorldView) then lays out a view for it.
+// The combined map's titles: every world's own node objects
+// in one list (MCU first), so a title glides between its
+// place on the combined map and its own world's map.
+let combinedNodes = null;
+
+function nodesFor(key){
+
+    if(key !== ALL_WORLDS) return worldNodes[key];
+
+    if(!combinedNodes) combinedNodes = Object.keys(WORLDS).flatMap(k => worldNodes[k] || []);
+
+    return combinedNodes;
+
+}
+
+// Switch the map to another world's titles ("all" = every
+// world together). The caller (viewManager.setWorldView)
+// then lays out a view for it.
 export function useWorld(key){
 
-    if(!worldNodes[key] || graph.nodes === worldNodes[key]) return false;
+    const list = nodesFor(key);
+
+    if(!list || graph.nodes === list) return false;
 
     setCurrentWorld(key);
 
-    graph.nodes = worldNodes[key];
+    graph.nodes = list;
     graph.edges = [];
 
     graph.hover.nodeIndex = null;
@@ -210,6 +234,15 @@ export function useWorld(key){
 
 const branchMemory = new Map();
 
+// The mind map logos (see graph.hubs). Every other view has
+// none, so layouts that don't call this leave the last set,
+// which only the Complete views draw.
+export function setHubs(hubs){
+
+    graph.hubs = hubs;
+
+}
+
 export function setBranchNodes(targets){
 
     const existing = new Map(graph.branchNodes.map(b => [b.key, b]));
@@ -229,6 +262,7 @@ export function setBranchNodes(targets){
             prev.subtitle = t.subtitle || "";
             prev.hidden = !!t.hidden;
             prev.memberIds = t.memberIds || [];
+            prev.world = t.world || null;
 
             branchMemory.set(t.key, { x: t.x, y: t.y });
 
@@ -248,6 +282,7 @@ export function setBranchNodes(targets){
         node.phase = t.phase;
         node.hint = t.hint || "";
         node.hintSubtitle = t.hintSubtitle || "";
+        node.world = t.world || null;
 
         branchMemory.set(t.key, { x: t.x, y: t.y });
 
@@ -365,7 +400,18 @@ export function edgesMindmap(){
 
         if(!branch.key.startsWith("phase")) return;
 
-        edges.push({ from:"hub", to:"branch:"+branch.key, style:"curve" });
+        // Which logo this branch grows from: the only one on a
+        // single world's map, or its own world's on the combined
+        // map. The curves bend away from that logo (centre).
+        const hub = (branch.world && graph.hubs.find(h => h.world === branch.world)) || graph.hubs[0] || { x:0, y:0 };
+
+        const hubRef = branch.world ? "hub:" + branch.world : "hub";
+
+        const center = { x: hub.x, y: hub.y };
+
+        const curve = (from, to) => edges.push({ from, to, style:"curve", center });
+
+        curve(hubRef, "branch:"+branch.key);
 
         const phase = Number(branch.key.replace("phase",""));
 
@@ -387,7 +433,7 @@ export function edgesMindmap(){
 
                 if(ti === 0){
 
-                    edges.push({ from:"branch:"+branch.key, to:graph.nodes.indexOf(node), style:"curve" });
+                    curve("branch:"+branch.key, graph.nodes.indexOf(node));
 
                     return;
 
@@ -407,7 +453,7 @@ export function edgesMindmap(){
 
                 if(best){
 
-                    edges.push({ from:graph.nodes.indexOf(best), to:graph.nodes.indexOf(node), style:"curve" });
+                    curve(graph.nodes.indexOf(best), graph.nodes.indexOf(node));
 
                 }
 

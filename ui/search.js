@@ -27,7 +27,15 @@ export function initMovieSearch(){
 
         results = [];
 
+        // A title on two maps (e.g. Deadpool & Wolverine on the
+        // combined map) is listed once.
+        const seen = new Set();
+
         graph.nodes.forEach(node=>{
+
+            if(seen.has(node.id)) return;
+
+            seen.add(node.id);
 
             let score = 0;
 
