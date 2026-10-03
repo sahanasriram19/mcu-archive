@@ -1,19 +1,5 @@
 //==================================================
 // 3D FLY-THROUGH INTRO
-//
-// Scrolling the landing page flies a camera forward
-// through space. Each MCU phase — and each X-Men and
-// Spider-Man era — opens with a chapter title in its
-// colour; its titles then float past on alternating sides,
-// angled towards you. The MCU phases come first, in the
-// order they began (so the Netflix "Defenders" shows sit
-// between Phase 2 and Phase 3), then the X-Men eras, then
-// the Spider-Man eras, and a final "Coming soon" chapter
-// holds the titles not out yet. A title that belongs to two
-// worlds (Deadpool & Wolverine, Tom Holland's Spider-Man
-// films) appears once, in its MCU phase. At the end, the
-// way into the archive appears.
-//
 // How it works: #landing is a scroll container. Its
 // scroll position (smoothed) becomes a camera depth, and
 // every poster is moved with translate3d() inside a
