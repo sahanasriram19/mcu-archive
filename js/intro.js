@@ -70,8 +70,8 @@ const PORTAL_MIN_SCALE = 0.09;
 
 // It only starts to appear this far along the trail (0-1),
 // fading fully in over the next stretch.
-const END_REVEAL_FROM = 0.45;
-const END_REVEAL_OVER = 0.25;
+const END_REVEAL_FROM = 0.6;
+const END_REVEAL_OVER = 0.22;
 
 const STAR_ZOOM = 0.28;       // starfield zoom at the start...
 const STAR_ZOOM_BOOST = 1.6;  // ...rises by this factor to the end
@@ -403,7 +403,7 @@ function frame(){
 
     //--------------------------------------------------
     // The logo at the end: a small light in the distance
-    // from about halfway along, growing as the
+    // from about 60% of the way along, growing as the
     // trail runs out.
     //--------------------------------------------------
 
@@ -421,7 +421,7 @@ function frame(){
     beacon.style.opacity = (1 - clamp01((portalScale - 0.12) / 0.35)).toFixed(3);
 
     // Hidden for the first part of the flight, then slowly
-    // revealed from about halfway along the trail.
+    // revealed from about 60% of the way along the trail.
     const reveal = clamp01((smooth - END_REVEAL_FROM) / END_REVEAL_OVER);
 
     endEl.style.opacity = (heroT * reveal).toFixed(3);
