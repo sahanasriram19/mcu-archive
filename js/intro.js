@@ -5,10 +5,10 @@
 // through space. Each MCU phase — and each X-Men and
 // Spider-Man era — opens with a chapter title in its
 // colour; its titles then float past on alternating sides,
-// angled towards you. Chapters come in the order they began
-// (so the X-Men trilogy and Raimi's Spider-Man come before
-// Phase 1, and the Netflix "Defenders" shows sit between
-// Phase 2 and Phase 3), and a final "Coming soon" chapter
+// angled towards you. The MCU phases come first, in the
+// order they began (so the Netflix "Defenders" shows sit
+// between Phase 2 and Phase 3), then the X-Men eras, then
+// the Spider-Man eras, and a final "Coming soon" chapter
 // holds the titles not out yet. A title that belongs to two
 // worlds (Deadpool & Wolverine, Tom Holland's Spider-Man
 // films) appears once, in its MCU phase. At the end, the
@@ -106,6 +106,9 @@ const jitter = (i, salt) => {
     return v - Math.floor(v);   // 0..1
 
 };
+
+// Order of the worlds along the trail.
+const WORLD_ORDER = { mcu: 0, xmen: 1, spider: 2 };
 
 // The small line above each chapter title.
 const WORLD_KICKERS = {
@@ -219,7 +222,11 @@ export function initIntro(nodes, onEnter){
             phase: +phase,
             members: members.sort((a, b) => a.release.localeCompare(b.release))
         }))
-        .sort((a, b) => a.members[0].release.localeCompare(b.members[0].release));
+        // MCU phases first, then the X-Men eras, then the
+        // Spider-Man eras — each in the order they began.
+        .sort((a, b) =>
+            (WORLD_ORDER[a.members[0].world] ?? 9) - (WORLD_ORDER[b.members[0].world] ?? 9) ||
+            a.members[0].release.localeCompare(b.members[0].release));
 
     if(upcoming.length){
 
