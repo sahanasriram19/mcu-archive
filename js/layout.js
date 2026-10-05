@@ -325,7 +325,10 @@ function multiverseDirections(){
 
     return isPortraitPhone()
         ? { xmen: [-0.3, -1], spider: [0.3, 1] }
-        : { xmen: [-1, -0.7], spider: [1, 0.7] };
+        // Computers and sideways phones: straight out to
+        // each side of the Avengers map (they used to sit on
+        // the diagonals, which left two empty corners).
+        : { xmen: [-1, 0], spider: [1, 0] };
 
 }
 
