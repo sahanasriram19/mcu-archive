@@ -26,6 +26,7 @@ import { initTilt } from "./tilt.js";
 import { initParallax } from "./parallax.js";
 import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
+import { updateSway, swayOffset } from "./sway.js";
 
 //==========================================
 // LANDING
@@ -131,9 +132,11 @@ function hubOnScreen(){
 
     if(getCurrentView() !== "complete") return null;
 
+    const shift = swayOffset("map");
+
     return {
-        x: window.innerWidth / 2 - camera.x * camera.zoom,
-        y: window.innerHeight / 2 - camera.y * camera.zoom,
+        x: window.innerWidth / 2 - camera.x * camera.zoom + shift.x,
+        y: window.innerHeight / 2 - camera.y * camera.zoom + shift.y,
         width: HUB_WIDTH * camera.zoom,
         height: HUB_HEIGHT * camera.zoom
     };
@@ -185,8 +188,11 @@ async function enter(viewKey){
         if(at && nextView === "complete"){
 
             camera.zoom = at.width / HUB_WIDTH;
-            camera.x = (window.innerWidth / 2 - at.x) / camera.zoom;
-            camera.y = (window.innerHeight / 2 - at.y) / camera.zoom;
+            // (Allowing for the map's little mouse shift.)
+            const shift = swayOffset("map");
+
+            camera.x = (window.innerWidth / 2 + shift.x - at.x) / camera.zoom;
+            camera.y = (window.innerHeight / 2 + shift.y - at.y) / camera.zoom;
 
         }
 
@@ -288,6 +294,8 @@ function loop(){
     requestAnimationFrame(loop);
 
     updateCamera();
+
+    updateSway();
 
     updateGraph();
 

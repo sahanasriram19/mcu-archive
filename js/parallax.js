@@ -33,7 +33,7 @@ let running = false;
 
 // Only while the hero is on screen (not mid-flight, not in
 // the archive).
-function heroShowing(){
+export function heroShowing(){
 
     return landing.style.display !== "none" &&
         !landing.classList.contains("leaving") &&

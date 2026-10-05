@@ -20,7 +20,7 @@ The landing page opens on a glowing ring around the Marvel logo. Scroll to fly t
 - **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) and Tom Holland's MCU films, with *No Way Home* as the crossover. Same five views, grouped into eras.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
-Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. Clicking a poster flips it over into its details card (and back again when you close it). On a mouse, the countdown cards and small posters lean towards the cursor with a soft light. The countdown digits flip like a departure board (only the digits that change), the panel sections swing open on a hinge, and the landing page shifts in layers as you move the mouse. Entering the archive is a hyperspace jump.
+Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. Clicking a poster flips it over into its details card (and back again when you close it). On a mouse, the countdown cards and small posters lean towards the cursor with a soft light. The countdown digits flip like a departure board (only the digits that change), the panel sections swing open on a hinge, and the whole site shifts in layers as you move the mouse: the landing hero, the fly-through (far chapters slide one way, near posters the other), and the archive (stars drift against the map, posters float a little above it, the panels follow slightly). Entering the archive is a hyperspace jump.
 
 The whole thing sits on top of a custom-built starfield/nebula background engine (stars, energy particles, shooting stars, all on a seeded deterministic generator so it looks the same on every visit rather than randomly recoloring itself).
 
@@ -89,6 +89,7 @@ mcu-archive/
     ├── intro.js                                # the landing page's 3D scroll fly-through
     ├── tilt.js                                 # cards lean towards the mouse
     ├── parallax.js                             # the landing page shifts in layers with the mouse
+    ├── sway.js                                 # the rest of the site shifts in layers with the mouse
     ├── warp.js                                 # hyperspace jump into the archive
     ├── flip.js                                 # posters flip over into the details card
     ├── characters/                             # the Character Journeys sub-feature

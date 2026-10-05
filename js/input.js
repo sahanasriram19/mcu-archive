@@ -5,6 +5,7 @@ import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
 import { nodeScreenRect } from "./nodes.js";
 import { edgeAtScreenPoint } from "./connections.js";
+import { swayOffset } from "./sway.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -171,6 +172,13 @@ const HUB_HALF_H = 200;
 function mindmapTargetAt(clientX, clientY, coarse = false){
 
     if(getCurrentView() !== "complete") return null;
+
+    // The map is drawn shifted a little with the mouse
+    // (js/sway.js): look where it really is.
+    const shift = swayOffset("map");
+
+    clientX -= shift.x;
+    clientY -= shift.y;
 
     const halfW = window.innerWidth / 2;
     const halfH = window.innerHeight / 2;

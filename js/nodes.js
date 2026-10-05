@@ -10,6 +10,7 @@
 //--------------------------------------------------
 import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
+import { swayOffset } from "./sway.js";
 
 const posterCache = new Map();
 
@@ -683,6 +684,10 @@ export function nodeScreenRect(node, camera){
     const x = window.innerWidth / 2 + (node.x - camera.x) * camera.zoom;
     const y = window.innerHeight / 2 + (node.y - camera.y) * camera.zoom;
 
-    return { left: x - w / 2, top: y - h / 2, width: w, height: h };
+    // (Plus the little shift the mouse gives the posters,
+    // js/sway.js.)
+    const shift = swayOffset("posters");
+
+    return { left: x - w / 2 + shift.x, top: y - h / 2 + shift.y, width: w, height: h };
 
 }

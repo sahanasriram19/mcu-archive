@@ -24,10 +24,16 @@ import { renderNodes } from "./nodes.js";
 import { renderHub } from "./hub.js";
 import { graph } from "./graph.js";
 import { archive } from "./archiveCore.js";
+import { getSway, swayOffset, SWAY } from "./sway.js";
+import { heroShowing } from "./parallax.js";
 
 let generated = false;
 
 let shown = false;
+
+// 0 on the landing hero (where js/parallax.js moves the
+// stars itself), easing to 1 everywhere else.
+let starSwayMix = 0;
 
 //==================================================
 
@@ -53,6 +59,25 @@ export function renderUniverse(camera, entered){
     beginFrame();
 
     drawBackground();
+
+    //==================================================
+    // MOUSE SWAY (js/sway.js)
+    //
+    // The background layers are drawn as if the camera were
+    // nudged sideways: every star shifts by its own depth,
+    // so near ones slide against far ones, the opposite way
+    // to the mouse.
+    //==================================================
+
+    starSwayMix += ((heroShowing() ? 0 : 1) - starSwayMix) * 0.05;
+
+    const sway = getSway();
+
+    const skyCamera = starSwayMix > 0.001 ? {
+        ...camera,
+        x: camera.x + sway.x * 2 * SWAY.stars / camera.zoom * starSwayMix,
+        y: camera.y + sway.y * 2 * SWAY.stars / camera.zoom * starSwayMix
+    } : camera;
 
     //==================================================
     // ARCHIVE-ONLY NEBULAS
@@ -85,7 +110,7 @@ export function renderUniverse(camera, entered){
 
             ctx.globalAlpha = nebulaAlpha * 0.55;
 
-            drawNebulas(camera);
+            drawNebulas(skyCamera);
 
             ctx.restore();
 
@@ -93,7 +118,7 @@ export function renderUniverse(camera, entered){
 
     }
 
-    drawStars(camera);
+    drawStars(skyCamera);
 
     // Hero stars switched off: big glowing balls with four
     // spike lines. Like the dust, they're still generated so
@@ -101,7 +126,7 @@ export function renderUniverse(camera, entered){
     // this call back to restore them.
     // drawHeroStars(camera);
 
-    drawEnergy(camera);
+    drawEnergy(skyCamera);
 
     drawShootingStars();
 
@@ -113,6 +138,16 @@ export function renderUniverse(camera, entered){
         // drawing it unconditionally left a stray white
         // circle sitting at world origin in every other
         // view.
+        // The map follows the mouse a little, the posters
+        // (floating above it) a little more. Clicks allow for
+        // this (see swayOffset in nodeHitTest.js / input.js).
+        const mapShift = swayOffset("map");
+        const posterShift = swayOffset("posters");
+
+        ctx.save();
+
+        ctx.translate(mapShift.x, mapShift.y);
+
         renderConnections(ctx, camera, graph);
 
         if (archive.view === "complete") {
@@ -123,7 +158,16 @@ export function renderUniverse(camera, entered){
         }
 
         renderBranchNodes(ctx, camera, graph.branchNodes);
+
+        ctx.restore();
+
+        ctx.save();
+
+        ctx.translate(posterShift.x, posterShift.y);
+
         renderNodes(ctx, camera, graph.nodes);
+
+        ctx.restore();
 
     }
 

@@ -7,6 +7,8 @@
 // whichever poster is actually drawn under it.
 //==================================================
 
+import { swayOffset } from "./sway.js";
+
 const BASE_POSTER_SIZE = 320;
 
 function posterSizeFor(node, currentView){
@@ -43,6 +45,13 @@ function posterSizeFor(node, currentView){
 //--------------------------------------------------
 
 export function getNodeAtScreenPoint(screenX, screenY, camera, nodes, currentView){
+
+    // The posters are drawn shifted a little with the mouse
+    // (js/sway.js): look where they really are.
+    const shift = swayOffset("posters");
+
+    screenX -= shift.x;
+    screenY -= shift.y;
 
     const halfW = window.innerWidth/2;
     const halfH = window.innerHeight/2;
