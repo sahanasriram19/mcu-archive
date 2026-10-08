@@ -54,11 +54,12 @@ const POSTER_GAP = 430;       // poster -> poster
 const GROUP_GAP = 700;        // extra space before the next chapter
 
 // Every chapter takes up at least this much of the trail.
-// Short ones (the X-Men and Spider-Man eras have 2-5 titles)
-// spread their posters out to fill it, so each chapter title
-// gets the same long, slow glow-in from the distance as the
-// big MCU phases instead of popping up close.
+// Very short ones (2 or 3 titles) spread their posters out
+// to fill it, so each chapter title gets the same long,
+// slow glow-in from the distance as the big MCU phases
+// instead of popping up close.
 const MIN_CHAPTER_LENGTH = 6500;
+const SPREAD_UP_TO = 3;       // ...but only chapters with this many titles or fewer
 const END_GAP = 900;          // after the last poster
 
 const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
@@ -322,11 +323,15 @@ export function initIntro(nodes, onEnter){
 
         depth += CHAPTER_GAP;
 
-        // Short chapters space their posters out to fill the
-        // minimum length.
+        // Only the very short chapters (2 or 3 titles) space
+        // their posters out to fill the minimum length; the
+        // rest keep the usual poster-to-poster spacing, like
+        // the big phases.
         const n = group.members.length;
 
-        const posterGap = Math.max(POSTER_GAP, (MIN_CHAPTER_LENGTH - CHAPTER_GAP - GROUP_GAP) / Math.max(1, n));
+        const posterGap = n <= SPREAD_UP_TO
+            ? Math.max(POSTER_GAP, (MIN_CHAPTER_LENGTH - CHAPTER_GAP - GROUP_GAP) / Math.max(1, n))
+            : POSTER_GAP;
 
         group.members.forEach(node => {
 
