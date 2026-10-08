@@ -72,7 +72,23 @@
        the whole drawing for every frame of that, which
        roughly halved the landing page's frame rate, so it
        now stays still once drawn.) */
+
 }
+
+/* The glow round every line and dot: a soft, wider copy
+   behind each one (added by js/intro.js). These used to be
+   blur filters — one per line — which the browser had to
+   redraw on every frame while the logo grew towards you,
+   the main cause of the stutter near the end of the trail. */
+#landing-branches .lb path.halo        { stroke-width: 7;   opacity: .16; }
+#landing-branches .lb path.tw.halo     { stroke-width: 5;   opacity: .12; }
+#landing-branches .lb path.tw2.halo    { stroke-width: 4;   opacity: .1; }
+
+#landing-branches .lb circle.halo {
+    animation-name: node-halo-in;
+}
+
+@keyframes node-halo-in { to { opacity: .22; } }
 
 #landing-branches .lb path {
     fill: none;
@@ -80,7 +96,7 @@
     stroke-width: 2;
     stroke-linecap: round;
     opacity: .5;
-    filter: drop-shadow(0 0 4px rgba(var(--c), .9));
+    /* (Glow: see .halo below.) */
 
     /* Draw-in: each path starts fully dashed-away. */
     stroke-dasharray: 600;
@@ -95,7 +111,6 @@
 #landing-branches .lb circle {
     fill: rgb(var(--c));
     opacity: 0;
-    filter: drop-shadow(0 0 6px rgba(var(--c), 1));
     /* (There used to be a slow, endless glow pulse here too.
        Pulsing 40-odd glowing dots made the browser repaint
        the whole branch drawing every frame, which slowed
@@ -608,6 +623,13 @@
 #intro-end:not(.arrived) #landing-branches .lb path,
 #intro-end:not(.arrived) #landing-branches .lb circle {
     animation-play-state: paused;
+}
+
+/* ...and until then the drawing isn't there at all: even
+   undrawn, the browser was redrawing it (glow, edge fade
+   and all) on every frame of the approach. */
+#intro-end:not(.arrived) #landing-branches {
+    visibility: hidden;
 }
 
 /* The glowing ring (now on the landing page, #landing-card;

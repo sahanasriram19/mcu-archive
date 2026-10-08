@@ -197,6 +197,35 @@ function posterWidth(){
 
 }
 
+//--------------------------------------------------
+// The branch drawing round the end logo: give every line
+// and dot a soft glow by putting a wider, fainter copy of
+// it behind (css/landing.css .halo). Cheap to draw, unlike
+// the blur filters it replaces.
+//--------------------------------------------------
+
+function addBranchHalos(){
+
+    document.querySelectorAll("#landing-branches .lb path, #landing-branches .lb circle").forEach(el => {
+
+        const halo = el.cloneNode(false);
+
+        halo.classList.add("halo");
+
+        if(el.tagName.toLowerCase() === "circle"){
+
+            halo.setAttribute("r", (parseFloat(el.getAttribute("r")) || 4) * 2.6);
+
+        }
+
+        el.parentNode.insertBefore(halo, el);
+
+    });
+
+}
+
+addBranchHalos();
+
 export function initIntro(nodes, onEnter){
 
     onEnterCb = onEnter;

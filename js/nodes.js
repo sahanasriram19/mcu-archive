@@ -10,6 +10,7 @@
 //--------------------------------------------------
 import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
+import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 
 const posterCache = new Map();
@@ -113,7 +114,28 @@ function getPoster(source, screenWidth){
 
     const order = ["small", "medium", "large"];
 
-    const want = order.indexOf(sizeFor(screenWidth));
+    let want = order.indexOf(sizeFor(screenWidth));
+
+    // While the camera is still zooming (opening the
+    // archive, switching views) don't start fetching bigger
+    // sizes: the zoom is about to change again, and when the
+    // archive opens close in on the logo, that used to send
+    // off for the big version of nearly every poster at
+    // once — only to zoom out a moment later. Whatever's
+    // already loaded is used meanwhile.
+    if(want > 0 && Math.abs(camera.targetZoom - camera.zoom) > camera.zoom * 0.04){
+
+        for(let i = order.length - 1; i >= 0; i--){
+
+            const have = posterCache.get(source[order[i]]);
+
+            if(have && have.loaded && !have.failed) return have;
+
+        }
+
+        want = 0;
+
+    }
 
     const entry = loadEntry(source[order[want]]);
 
@@ -231,56 +253,19 @@ export function renderNodes(ctx, camera, nodes){
 
         const glowRadius = 110 * camera.zoom;
 
-        const glow = ctx.createRadialGradient(
+        // From one pre-drawn image per colour (a new radial
+        // gradient for every poster on every frame added up).
+        ctx.drawImage(
 
-            x + floatX,
-            y + floatY,
+            glowSprite(node.colour),
 
-            0,
+            x + floatX - glowRadius,
+            y + floatY - glowRadius,
 
-            x + floatX,
-            y + floatY,
-
-            glowRadius
-
-        );
-
-        const glowStrength = 0.08;
-
-        glow.addColorStop(
-            0,
-            `rgba(${node.colour},${glowStrength})`
-        );
-
-        glow.addColorStop(
-            0.45,
-            `rgba(${node.colour},${glowStrength * 0.45})`
-        );
-
-        glow.addColorStop(
-            1,
-            "rgba(0,0,0,0)"
-        );
-
-        ctx.fillStyle = glow;
-
-        ctx.beginPath();
-
-        ctx.arc(
-
-            x + floatX,
-
-            y + floatY,
-
-            glowRadius,
-
-            0,
-
-            Math.PI * 2
+            glowRadius * 2,
+            glowRadius * 2
 
         );
-
-        ctx.fill();
 
         //----------------------------------
         // Poster thumbnail (once loaded) or
@@ -353,68 +338,16 @@ export function renderNodes(ctx, camera, nodes){
 
 
     //------------------------------------
-    // Rounded rectangle
-    //------------------------------------
-
-    const radius = 12;
-
-    ctx.beginPath();
-
-    ctx.moveTo(left + radius, top);
-
-    ctx.lineTo(left + posterWidth - radius, top);
-
-    ctx.quadraticCurveTo(
-        left + posterWidth,
-        top,
-        left + posterWidth,
-        top + radius
-    );
-
-    ctx.lineTo(
-        left + posterWidth,
-        top + posterHeight - radius
-    );
-
-    ctx.quadraticCurveTo(
-        left + posterWidth,
-        top + posterHeight,
-        left + posterWidth - radius,
-        top + posterHeight
-    );
-
-    ctx.lineTo(
-        left + radius,
-        top + posterHeight
-    );
-
-    ctx.quadraticCurveTo(
-        left,
-        top + posterHeight,
-        left,
-        top + posterHeight - radius
-    );
-
-    ctx.lineTo(left, top + radius);
-
-    ctx.quadraticCurveTo(
-        left,
-        top,
-        left + radius,
-        top
-    );
-
-    ctx.closePath();
-
-    ctx.clip();
-
-    //------------------------------------
-    // Draw poster
+    // Draw poster: a copy with its corners already
+    // rounded (made once, see roundedPoster below).
+    // Cutting the corners with a clip on every frame, for
+    // every poster, was one of the heaviest parts of
+    // drawing the map.
     //------------------------------------
 
     ctx.drawImage(
 
-        poster.img,
+        roundedPoster(poster),
 
         left,
 
@@ -633,6 +566,80 @@ export function renderNodes(ctx, camera, nodes){
     if(hovered) drawNode(hovered);
 
     ctx.restore();
+
+}
+
+//--------------------------------------------------
+// Pre-drawn pieces
+//--------------------------------------------------
+
+// The soft coloured glow behind a poster, one image per
+// colour.
+const glowSprites = new Map();
+
+function glowSprite(colour){
+
+    let g = glowSprites.get(colour);
+
+    if(g) return g;
+
+    const size = 64;
+
+    g = document.createElement("canvas");
+    g.width = g.height = size;
+
+    const c = g.getContext("2d");
+
+    const grad = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+
+    grad.addColorStop(0, `rgba(${colour},0.08)`);
+    grad.addColorStop(0.45, `rgba(${colour},0.036)`);
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+
+    c.fillStyle = grad;
+    c.fillRect(0, 0, size, size);
+
+    glowSprites.set(colour, g);
+
+    return g;
+
+}
+
+// A poster picture with its corners rounded, made once per
+// picture. (Very large originals are made at a capped
+// size: it's still sharper than the screen ever shows it.)
+const ROUND_MAX_W = 1000;
+const ROUND_CORNER = 0.07;     // corner radius, as a share of the width
+
+function roundedPoster(entry){
+
+    if(entry.rounded) return entry.rounded;
+
+    const img = entry.img;
+
+    const scale = Math.min(1, ROUND_MAX_W / (img.naturalWidth || 1));
+
+    const w = Math.max(1, Math.round((img.naturalWidth || 185) * scale));
+    const h = Math.max(1, Math.round(w * 1.5));
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = w;
+    canvas.height = h;
+
+    const c = canvas.getContext("2d");
+
+    const r = w * ROUND_CORNER;
+
+    c.beginPath();
+    roundedRect(c, 0, 0, w, h, r);
+    c.clip();
+
+    c.drawImage(img, 0, 0, w, h);
+
+    entry.rounded = canvas;
+
+    return canvas;
 
 }
 

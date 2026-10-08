@@ -208,35 +208,8 @@
 
 }
 /*==================================================
-  MOUSE SWAY (js/sway.js sets --mx / --my, -0.5 … 0.5,
-  on the page; they stay 0 on touchscreens and with
-  "reduce motion"). The canvas layers (stars, map,
-  posters) are moved in js/universe.js; these are the
-  page's own layers, each by a few pixels.
+  MOUSE SWAY: the panel, countdown cards, watch-list
+  banner, and the trail's stage and end logo are moved by
+  js/sway.js directly (see LAYERS there); the canvas
+  layers (stars, map, posters) in js/universe.js.
 ==================================================*/
-
-/* The panel and countdown cards float just in front of
-   the map, so they follow the mouse a touch. (`translate`
-   adds to their own transforms instead of replacing them.) */
-#view-panel,
-#countdown,
-.character-panel{
-    translate:calc(var(--mx, 0) * 12px) calc(var(--my, 0) * 12px);
-}
-
-#watch-banner{
-    translate:calc(var(--mx, 0) * 8px) calc(var(--my, 0) * 8px);
-}
-
-/* The landing fly-through: the viewpoint shifts against the
-   mouse, so far chapters and posters slide one way and the
-   ones rushing past you the other — real depth. */
-#intro-stage{
-    perspective-origin:calc(50% - var(--mx, 0) * 120px) calc(50% - var(--my, 0) * 80px);
-}
-
-/* The logo waiting at the end of the trail drifts with the
-   mouse like the hero's ring. */
-#intro-end{
-    translate:calc(var(--mx, 0) * 24px) calc(var(--my, 0) * 18px);
-}

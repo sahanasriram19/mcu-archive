@@ -12,7 +12,7 @@
 //     and its lines follow the mouse a little, and the
 //     posters, floating "above" the map, a little more.
 //   - The panel, countdown cards and banners follow it
-//     slightly (css/tilt.css, via --mx / --my).
+//     slightly (LAYERS below).
 //   - Landing fly-through: the 3D trail's viewpoint shifts
 //     with the mouse, so near posters slide past far ones.
 //
@@ -33,8 +33,6 @@ export const SWAY = {
 
 const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-const root = document.documentElement;
 
 // -0.5 … 0.5 across the screen, eased.
 let targetX = 0, targetY = 0;
@@ -75,15 +73,83 @@ export function updateSway(){
     if(Math.abs(x) < 1e-4 && targetX === 0) x = 0;
     if(Math.abs(y) < 1e-4 && targetY === 0) y = 0;
 
-    // The page's own layers (css/tilt.css). Only written
-    // when it has visibly moved, to keep style work down.
+    // The page's own layers. Only written when they've
+    // visibly moved.
     if(Math.abs(x - lastCssX) > 0.0008 || Math.abs(y - lastCssY) > 0.0008){
 
         lastCssX = x;
         lastCssY = y;
 
-        root.style.setProperty("--mx", x.toFixed(4));
-        root.style.setProperty("--my", y.toFixed(4));
+        moveLayers();
+
+    }
+
+}
+
+//--------------------------------------------------
+// The page's own layers, each moved by a few pixels.
+//
+// Set straight onto just these elements. (This used to
+// set two variables on the whole page, which made the
+// browser re-check the style of every element on the page
+// on every frame the mouse moved — the main cause of the
+// lag near the end of the trail.)
+//
+//   [selector, x px, y px, how]
+//   `translate` adds to an element's own transform rather
+//   than replacing it; the trail's stage shifts its 3D
+//   viewpoint instead (against the mouse), so far
+//   chapters and posters slide one way and the ones
+//   rushing past you the other.
+//--------------------------------------------------
+
+const LAYERS = [
+    ["#view-panel", 12, 12, "translate"],
+    ["#countdown", 12, 12, "translate"],
+    [".character-panel", 12, 12, "translate"],
+    ["#watch-banner", 8, 8, "translate"],
+    ["#intro-end", 24, 18, "translate"],
+    ["#intro-stage", -120, -80, "origin"]
+];
+
+const found = new Map();
+
+function layer(selector){
+
+    let el = found.get(selector);
+
+    if(!el || !el.isConnected){
+
+        el = document.querySelector(selector);
+
+        if(el) found.set(selector, el);
+
+    }
+
+    return el;
+
+}
+
+function moveLayers(){
+
+    for(const [selector, ax, ay, how] of LAYERS){
+
+        const el = layer(selector);
+
+        if(!el) continue;
+
+        const dx = (x * ax).toFixed(1);
+        const dy = (y * ay).toFixed(1);
+
+        if(how === "origin"){
+
+            el.style.perspectiveOrigin = `calc(50% + ${dx}px) calc(50% + ${dy}px)`;
+
+        } else {
+
+            el.style.translate = (dx === "0.0" && dy === "0.0") ? "" : `${dx}px ${dy}px`;
+
+        }
 
     }
 

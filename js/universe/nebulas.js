@@ -85,14 +85,54 @@ function nebulaSprite(n){
 
 //==================================================
 
+// The nebulas are drawn into this small screen-shaped
+// image first (a quarter of the screen's size each way),
+// then stretched over the screen in one go. They're pure
+// soft glows, so it looks the same — but it's far less work
+// than painting two huge pictures across the whole screen
+// every frame, which was the single heaviest thing drawn
+// while the archive opened.
+const BUFFER_SCALE = 0.25;
+
+let buffer = null;
+let bufferCtx = null;
+
 export function drawNebulas(camera) {
-
-    ctx.save();
-
-    ctx.globalCompositeOperation = "screen";
 
     const width = universe.width;
     const height = universe.height;
+
+    const bw = Math.max(1, Math.ceil(width * BUFFER_SCALE));
+    const bh = Math.max(1, Math.ceil(height * BUFFER_SCALE));
+
+    if (!buffer) {
+
+        buffer = document.createElement("canvas");
+        bufferCtx = buffer.getContext("2d");
+
+    }
+
+    if (buffer.width !== bw || buffer.height !== bh) {
+
+        buffer.width = bw;
+        buffer.height = bh;
+
+    } else {
+
+        bufferCtx.setTransform(1, 0, 0, 1, 0, 0);
+        bufferCtx.clearRect(0, 0, bw, bh);
+
+    }
+
+    bufferCtx.setTransform(BUFFER_SCALE, 0, 0, BUFFER_SCALE, 0, 0);
+
+    // "lighter" (adds light) rather than "screen": on this
+    // dark background they look the same, but "screen" makes
+    // the graphics card copy the whole screen for every
+    // nebula on every frame.
+    bufferCtx.globalCompositeOperation = "lighter";
+
+    let drew = false;
 
     for (const n of universe.nebulas) {
 
@@ -126,15 +166,14 @@ export function drawNebulas(camera) {
         // The seven soft blobs that make up a nebula are
         // painted once into a small offscreen image and then
         // stretched to full size each frame — one drawImage
-        // instead of seven screen-sized gradient fills, which
-        // were the single most expensive thing on screen.
+        // instead of seven screen-sized gradient fills.
         // (They drift so slowly that repainting the image
         // every few seconds is plenty.)
         const sprite = nebulaSprite(n);
 
         const size = sprite.half * 2 * SPRITE_SCALE;
 
-        ctx.drawImage(
+        bufferCtx.drawImage(
 
             sprite.canvas,
 
@@ -146,7 +185,19 @@ export function drawNebulas(camera) {
 
         );
 
+        drew = true;
+
     }
+
+    if (!drew) return;
+
+    // Onto the screen, adding light (the caller's
+    // globalAlpha fades the whole layer in and out).
+    ctx.save();
+
+    ctx.globalCompositeOperation = "lighter";
+
+    ctx.drawImage(buffer, 0, 0, width, height);
 
     ctx.restore();
 
