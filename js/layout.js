@@ -319,6 +319,7 @@ export function layoutComplete(nodes){
 const MULTIVERSE_ORDER = ["mcu", "xmen", "spider"];
 const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
 const MULTIVERSE_STEP = 150;    // how far a side map slides out per try
+const SIDE_MAPS_RAISE = 1200;   // side maps sit this much higher than the Avengers map (side-by-side only)
 
 // Which way each side map sits from the Avengers map.
 function multiverseDirections(){
@@ -410,6 +411,18 @@ export function layoutMultiverse(nodes){
 
         m.dx = ux / len * d;
         m.dy = uy / len * d;
+
+        // Side by side (not on an upright phone): the X-Men
+        // and Spider-Man maps sit a little higher than the
+        // Avengers map. (They're raised rather than the
+        // Avengers map lowered, so its logo stays at the
+        // centre of the world, where the jump into the
+        // archive expects it; the camera frames the middle of
+        // all three, so on screen the Avengers map ends up a
+        // little lower and the other two a little higher.)
+        // Already clear of it side to side, so this can't
+        // make them overlap.
+        if(!isPortraitPhone()) m.dy -= SIDE_MAPS_RAISE;
 
         m.boxes.forEach(b => placed.push({ minX: b.minX + m.dx, maxX: b.maxX + m.dx, minY: b.minY + m.dy, maxY: b.maxY + m.dy }));
 
