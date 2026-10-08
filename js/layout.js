@@ -319,7 +319,7 @@ export function layoutComplete(nodes){
 const MULTIVERSE_ORDER = ["mcu", "xmen", "spider"];
 const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
 const MULTIVERSE_STEP = 150;    // how far a side map slides out per try
-const SIDE_MAPS_RAISE = 1200;   // side maps sit this much higher than the Avengers map (side-by-side only)
+const SIDE_MAPS_RAISE = 3600;   // side maps sit this much higher than the Avengers map (side-by-side only)
 
 // Which way each side map sits from the Avengers map.
 function multiverseDirections(){

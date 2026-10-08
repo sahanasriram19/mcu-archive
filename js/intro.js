@@ -53,13 +53,10 @@ const CHAPTER_GAP = 1300;     // chapter title -> its first poster
 const POSTER_GAP = 430;       // poster -> poster
 const GROUP_GAP = 700;        // extra space before the next chapter
 
-// Every chapter takes up at least this much of the trail.
-// Very short ones (2 or 3 titles) spread their posters out
-// to fill it, so each chapter title gets the same long,
-// slow glow-in from the distance as the big MCU phases
-// instead of popping up close.
-const MIN_CHAPTER_LENGTH = 6500;
-const SPREAD_UP_TO = 3;       // ...but only chapters with this many titles or fewer
+// Very short chapters (this many titles or fewer) space
+// their posters a little further apart than the rest.
+const SPREAD_UP_TO = 3;
+const SHORT_POSTER_GAP = 750;   // (normal: POSTER_GAP)
 const END_GAP = 900;          // after the last poster
 
 const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
@@ -324,14 +321,11 @@ export function initIntro(nodes, onEnter){
         depth += CHAPTER_GAP;
 
         // Only the very short chapters (2 or 3 titles) space
-        // their posters out to fill the minimum length; the
-        // rest keep the usual poster-to-poster spacing, like
-        // the big phases.
+        // their posters out a bit more; the rest keep the
+        // usual poster-to-poster spacing, like the big phases.
         const n = group.members.length;
 
-        const posterGap = n <= SPREAD_UP_TO
-            ? Math.max(POSTER_GAP, (MIN_CHAPTER_LENGTH - CHAPTER_GAP - GROUP_GAP) / Math.max(1, n))
-            : POSTER_GAP;
+        const posterGap = n <= SPREAD_UP_TO ? SHORT_POSTER_GAP : POSTER_GAP;
 
         group.members.forEach(node => {
 
