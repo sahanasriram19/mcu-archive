@@ -166,3 +166,4 @@ Each entry in `data/mcu.json` looks like this:
 
 - Data and imagery: [The Movie Database (TMDB)](https://www.themoviedb.org/) — this product uses the TMDB API but is not endorsed or certified by TMDB.
 - Marvel Cinematic Universe and all associated titles/characters are the property of Marvel Studios / The Walt Disney Company.
+- Font: [Inter](https://github.com/rsms/inter) by Rasmus Andersson, shipped in `assets/fonts` under the SIL Open Font License (see `assets/fonts/Inter-LICENSE.txt`).

@@ -70,6 +70,53 @@
     outline-offset: 3px;
 }
 
+/*--------------------------------------------------
+  Folded cards (computers): only the next release shows
+  its full card and clock; the ones after it fold down to
+  a slim line ("COMING UP · IN 70 DAYS / Avengers:
+  Doomsday") so they don't cover the map. Hovering the
+  cards (or tabbing to one) opens them all back up.
+--------------------------------------------------*/
+
+.countdown-in {
+    display: none;
+}
+
+@media (min-width: 769px) and (min-height: 501px) {
+
+    .countdown-card .countdown-meta,
+    .countdown-card .countdown-clock {
+        max-height: 60px;
+        overflow: hidden;
+        transition: max-height .35s ease, opacity .25s ease, margin-top .35s ease;
+    }
+
+    #countdown:not(:hover):not(:focus-within) .countdown-card:nth-child(n+2) {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    #countdown:not(:hover):not(:focus-within) .countdown-card:nth-child(n+2) .countdown-meta,
+    #countdown:not(:hover):not(:focus-within) .countdown-card:nth-child(n+2) .countdown-clock {
+        max-height: 0;
+        margin-top: 0;
+        opacity: 0;
+    }
+
+    #countdown:not(:hover):not(:focus-within) .countdown-card:nth-child(n+2) .countdown-in {
+        display: inline;
+    }
+
+    .countdown-in::before {
+        content: " · ";
+    }
+
+    #countdown:not(:hover):not(:focus-within) .countdown-card:nth-child(n+2) .countdown-title {
+        font-size: 13.5px;
+    }
+
+}
+
 /* Only as many cards as fit the screen's height. */
 @media (max-height: 720px) {
     .countdown-card:nth-child(n+4) {

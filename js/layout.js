@@ -910,10 +910,12 @@ export function layoutCharacterJourney(nodes){
 //--------------------------------------------------
 
 // Room per poster, world units (a poster is 320 x 480): each
-// gets a patch of space about four posters wide and sits
+// gets a patch of space about seven posters wide and sits
 // anywhere inside it, so the gaps between them vary.
-const SCATTER_CELL_W = 1400;
-const SCATTER_CELL_H = 1750;
+// (Were 1400 x 1750: spread further apart to use more of
+// the universe.)
+const SCATTER_CELL_W = 2300;
+const SCATTER_CELL_H = 2900;
 const SCATTER_WANDER = 0.72;    // how much of its patch a poster can wander over (0-1)
 
 // A steady 0..1 number from a string / index.

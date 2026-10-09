@@ -1,3 +1,16 @@
+/* Inter, the site's font, shipped with the site
+   (assets/fonts, SIL Open Font License) so every visitor
+   gets it — it used to be named but never loaded, so the
+   map's phase names fell back to a serif font. One
+   variable file covers every weight. */
+@font-face{
+    font-family:Inter;
+    src:url("../assets/fonts/InterVariable.woff2") format("woff2");
+    font-weight:100 900;
+    font-style:normal;
+    font-display:swap;
+}
+
 :root{
     --bg:#090B10;
     --panel:#11161E;

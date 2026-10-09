@@ -229,6 +229,10 @@ export function renderNodes(ctx, camera, nodes){
 
         if(!inFocus) ctx.globalAlpha = FOCUS_DIM_ALPHA;
 
+        // Hovering a phase on the mind map: the other phases
+        // step back (eased in graph.js, see hoverFade).
+        ctx.globalAlpha *= hoverDim(node.phase);
+
         //----------------------------------
         // Gentle Floating
         //----------------------------------
@@ -298,7 +302,14 @@ export function renderNodes(ctx, camera, nodes){
 
         }
 
-        if (posterReady) {
+        // Fade in: a poster cross-fades in over its title card
+        // when its picture arrives, instead of popping in.
+        if(posterReady) node.posterFade = Math.min(1, (node.posterFade || 0) + POSTER_FADE_STEP);
+        else node.posterFade = 0;
+
+        const fade = node.posterFade;
+
+        if (posterReady && fade >= 1) {
 
         let POSTER_SIZE = BASE_POSTER_SIZE;
 
@@ -413,6 +424,9 @@ export function renderNodes(ctx, camera, nodes){
 
             ctx.globalCompositeOperation = "source-over";
 
+            // Fading out under a poster that's fading in.
+            if(posterReady) ctx.globalAlpha *= 1 - fade;
+
             const radius = 12;
 
             ctx.beginPath();
@@ -454,7 +468,7 @@ export function renderNodes(ctx, camera, nodes){
             const maxTextWidth = posterWidth * 0.82;
             const fontSize = Math.max(13 * camera.zoom, 9);
 
-            ctx.font = `600 ${fontSize}px Inter`;
+            ctx.font = `600 ${fontSize}px Inter, Arial, sans-serif`;
             ctx.fillStyle = "rgba(255,255,255,.92)";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
@@ -492,6 +506,20 @@ export function renderNodes(ctx, camera, nodes){
             });
 
             ctx.restore();
+
+            // ...and the poster fading in on top of it.
+            if(posterReady){
+
+                ctx.save();
+
+                ctx.globalCompositeOperation = "source-over";
+                ctx.globalAlpha *= fade;
+
+                ctx.drawImage(roundedPoster(poster), left, top, posterWidth, posterHeight);
+
+                ctx.restore();
+
+            }
 
         }
 
@@ -648,6 +676,22 @@ function roundedPoster(entry){
 //--------------------------------------------------
 
 const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
+
+const POSTER_FADE_STEP = 0.07;  // per frame: a poster fades in over ~1/4 s
+
+const HOVER_DIM = 0.7;          // how far other phases fade while one is hovered
+
+// 1 for everything normally; less for titles outside the
+// hovered phase while a phase is hovered on the mind map.
+export function hoverDim(phase){
+
+    const f = graph.hoverFade;
+
+    if(!f || f.amount <= 0.001 || f.phase === null || phase === f.phase) return 1;
+
+    return 1 - HOVER_DIM * f.amount;
+
+}
 
 const FOCUS_DIM_ALPHA = 0.14;   // how faint titles outside a watch list get
 

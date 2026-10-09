@@ -39,7 +39,12 @@ export const graph = {
     // "What should I watch before…" (js/upcoming.js): when
     // set, only these node ids are shown at full strength and
     // everything else is dimmed. null = off.
-    focus: null   // { ids: Set, label: string } | null
+    focus: null,  // { ids: Set, label: string } | null
+
+    // Hovering a phase on the Complete MCU mind map dims the
+    // other phases: how far (0 … 1, eased) and which phase is
+    // being shown. The phase is kept while it fades back out.
+    hoverFade: { amount: 0, phase: null }
 
 };
 
@@ -591,6 +596,17 @@ export function setEdges(edges){
 //==================================================
 
 export function updateGraph(){
+
+    // Hover dimming (see hoverFade above).
+    const hf = graph.hoverFade;
+
+    if(graph.hover.phase !== null) hf.phase = graph.hover.phase;
+
+    const hfTarget = graph.hover.phase !== null ? 1 : 0;
+
+    hf.amount += (hfTarget - hf.amount) * 0.14;
+
+    if(hf.amount < 0.002 && hfTarget === 0){ hf.amount = 0; hf.phase = null; }
 
     const NODE_EASE = 0.16;
 

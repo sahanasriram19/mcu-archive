@@ -6,6 +6,10 @@ import { getTimelineOrientation } from "./layout.js";
 // CONNECTION RENDERER
 //==================================================
 
+// How far the other phases' branches fade while one phase
+// is hovered on the mind map.
+const HOVER_LINE_DIM = 0.7;
+
 function resolveAnchor(ref, graph){
 
     if(ref === "hub") return graph.hubs && graph.hubs[0] || { x:0, y:0 };
@@ -312,11 +316,26 @@ export function renderConnections(ctx, camera, graph){
 
     }
 
+    // Hovering a phase on the mind map: the other phases'
+    // branches step back with their posters (graph.hoverFade,
+    // eased in graph.js).
+    const hf = graph.hoverFade;
+
+    const keep = hf && hf.amount > 0.001 && hf.phase !== null ? HIGHLIGHT_COLOURS[hf.phase] : undefined;
+
+    const dimmed = keep === undefined ? 1 : 1 - HOVER_LINE_DIM * hf.amount;
+
     paths.forEach((path, colour)=>{
+
+        ctx.save();
+
+        if(keep !== undefined && colour !== keep) ctx.globalAlpha *= dimmed;
 
         if(colour === null) drawWhite(ctx, camera, path);
 
         else drawColoured(ctx, camera, path, colour);
+
+        ctx.restore();
 
     });
 

@@ -283,7 +283,7 @@ function buildCards(nodes){
         btn.className = "countdown-card";
 
         btn.innerHTML = `
-            <span class="countdown-kicker">${i === 0 ? "Next up" : "Coming up"}</span>
+            <span class="countdown-kicker">${i === 0 ? "Next up" : "Coming up"}<span class="countdown-in"></span></span>
             <span class="countdown-title"></span>
             <span class="countdown-meta"></span>
             <span class="countdown-clock" aria-live="off">
@@ -311,7 +311,11 @@ function buildCards(nodes){
             [...btn.querySelectorAll("[data-unit]")].map(el => [el.dataset.unit, el])
         );
 
-        return { node, units };
+        // "in 70 days" — shown instead of the clock while the
+        // later cards are folded down (css/upcoming.css).
+        const soon = btn.querySelector(".countdown-in");
+
+        return { node, units, soon };
 
     });
 
@@ -416,9 +420,13 @@ function tick(){
 
     }
 
-    cards.forEach(({ node, units }) => {
+    cards.forEach(({ node, units, soon }) => {
 
         const { d, h, m, s } = split(releaseTime(node) - now);
+
+        const inText = d > 1 ? `in ${d} days` : d === 1 ? "in 1 day" : h > 0 ? `in ${h} hrs` : "today";
+
+        if(soon.textContent !== inText) soon.textContent = inText;
 
         flipTo(units.d, String(d));
         flipTo(units.h, pad(h));

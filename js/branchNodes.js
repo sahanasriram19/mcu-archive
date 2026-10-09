@@ -176,7 +176,7 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.fillStyle = (hovered && !node.label) ? `rgb(${tint})` : "#FFFFFF";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter`;
+        ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter, Arial, sans-serif`;
 
         if(label){
 
@@ -193,7 +193,7 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
             ctx.fillStyle = "rgba(255,255,255,.8)";
             ctx.textAlign = "center";
-            ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter`;
+            ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter, Arial, sans-serif`;
 
             ctx.lineWidth = 3;
 

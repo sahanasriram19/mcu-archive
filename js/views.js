@@ -40,7 +40,7 @@ export const VIEWS = [
         layout: "scatter",
         allOnly: true,
         edges: { mode: "none" },
-        camera: { x: 0, y: 0, zoom: 0.17, userMinZoom: 0.03 }
+        camera: { x: 0, y: 0, zoom: 0.17, userMinZoom: 0.02 }
     },
 
     {
