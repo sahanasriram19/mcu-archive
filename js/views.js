@@ -40,9 +40,9 @@ export const VIEWS = [
         layout: "scatter",
         allOnly: true,
         edges: { mode: "none" },
-        // fillMinZoom: you can only zoom out until the posters
-        // fill the screen edge to edge (1 = just filling it;
-        // raise it to stop further in, with even less space).
+        // fillMinZoom: you can only zoom out until every poster
+        // is on screen, filling it (1 = all of them just fit;
+        // raise it to stop further in).
         camera: { x: 0, y: 0, zoom: 0.17, fillMinZoom: 1 }
     },
 

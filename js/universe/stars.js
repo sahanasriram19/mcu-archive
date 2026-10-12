@@ -14,6 +14,10 @@ import {
 } from "./utils.js";
 import { CONFIG } from "./config.js";
 
+// The landing page's starfield zoom (js/intro.js STAR_ZOOM):
+// the stars' drift is set to look right at this zoom.
+const LANDING_ZOOM = 0.28;
+
 //==================================================
 // Star halo image — the same gradient every bright star
 // used to build for itself each frame (white centre, a
@@ -77,6 +81,10 @@ export function drawStars(camera) {
         ? 1
         : Math.max(1, Math.round(1 / (camera.zoom * 0.6)));
 
+    // How much bigger the drift is when zoomed further out
+    // than the landing page (see driftAmount below).
+    const driftScale = Math.max(1, LANDING_ZOOM / Math.max(camera.zoom, 0.001));
+
     const stars = universe.stars;
 
     for (let idx = 0; idx < stars.length; idx += skip) {
@@ -91,8 +99,13 @@ export function drawStars(camera) {
 
         const t = universe.time * 0.008;
 
+        // The drift is in world units, so it used to shrink to
+        // almost nothing in the zoomed-out archive (the stars
+        // floated on the landing page but sat still on the
+        // map). Scaled up when zoomed out, it looks the same
+        // everywhere.
         const driftAmount =
-            250 * (0.3 + star.depth);
+            250 * (0.3 + star.depth) * driftScale;
 
         const worldX =
             star.baseX +

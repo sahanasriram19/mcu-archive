@@ -25,7 +25,7 @@ const EASE = 0.06;
 // How far each layer moves (CSS px) with the mouse at the
 // edge of the screen.
 export const SWAY = {
-    stars: 22,        // opposite way, times each star's depth
+    stars: 45,        // opposite way, times each star's depth
     map: 12,          // lines, logos, phase names
     posters: 18,      // posters float above the map
     ui: 6             // panel, countdown cards (css)

@@ -70,9 +70,10 @@ const POSTER_HALF_H = 240;
 
 const PANEL_GAP = 16;      // clear air kept between posters and the panel, px
 
-// The zoom at which the posters' spread exactly covers the
-// screen edge to edge (no empty space showing round it),
-// times `factor` (above 1 stops a little further in).
+// The zoom at which every poster just fits on screen (the
+// poster spread is laid out in the screen's shape, so it
+// also fills it, with little empty space round it), times
+// `factor` (above 1 stops a little further in).
 function fillZoom(factor){
 
     const nodes = visibleNodes();
@@ -81,10 +82,12 @@ function fillZoom(factor){
 
     const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
 
-    const w = Math.max(1, Math.max(...xs) - Math.min(...xs));
-    const h = Math.max(1, Math.max(...ys) - Math.min(...ys));
+    // (Plus a poster's size, so the ones at the edges are
+    // fully on screen too.)
+    const w = Math.max(1, Math.max(...xs) - Math.min(...xs) + 400);
+    const h = Math.max(1, Math.max(...ys) - Math.min(...ys) + 560);
 
-    return Math.max(window.innerWidth / w, window.innerHeight / h) * factor;
+    return Math.min(window.innerWidth / w, window.innerHeight / h) * factor;
 
 }
 

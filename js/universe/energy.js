@@ -65,6 +65,11 @@ export function drawEnergy(camera) {
     // so the field doesn't fill up as more of it shows.
     const step = camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1;
 
+    // Their circling is in world units, so zoomed out (the
+    // archive) it shrank to nothing: scaled up to look the
+    // same as on the landing page (see stars.js).
+    const orbitScale = Math.max(1, 0.28 / Math.max(camera.zoom, 0.001));
+
     for (let i = 0; i < universe.energy.length; i += step) {
 
         const e = universe.energy[i];
@@ -75,13 +80,13 @@ export function drawEnergy(camera) {
 
             e.x +
 
-            Math.cos(e.angle) * e.orbit;
+            Math.cos(e.angle) * e.orbit * orbitScale;
 
         const y =
 
             e.y +
 
-            Math.sin(e.angle * 1.4) * e.orbit;
+            Math.sin(e.angle * 1.4) * e.orbit * orbitScale;
 
         for (const screen of screenCopies(x, y, camera, e.depth, width, height, 120, CONFIG.WORLD_SIZE)) {
 
