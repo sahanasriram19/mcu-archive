@@ -42,8 +42,9 @@ export const VIEWS = [
         edges: { mode: "none" },
         // fillMinZoom: you can only zoom out until every poster
         // is on screen, filling it (1 = all of them just fit;
-        // raise it to stop further in).
-        camera: { x: 0, y: 0, zoom: 0.17, fillMinZoom: 1 }
+        // lower lets you zoom out further, with space round them;
+        // higher stops further in).
+        camera: { x: 0, y: 0, zoom: 0.17, fillMinZoom: 0.85 }
     },
 
     {
