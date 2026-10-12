@@ -44,7 +44,7 @@ export const VIEWS = [
         // is on screen, filling it (1 = all of them just fit;
         // lower lets you zoom out further, with space round them;
         // higher stops further in).
-        camera: { x: 0, y: 0, zoom: 0.17, fillMinZoom: 0.75 }
+        camera: { x: 0, y: 0, zoom: 0.17, fillMinZoom: 0.80 }
     },
 
     {
