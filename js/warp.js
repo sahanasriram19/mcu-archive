@@ -24,6 +24,18 @@
 
 const STREAK_COUNT = 320;
 
+// At most this many of the landing page's own stars become
+// streaks (the biggest first).
+const MAX_STAR_STREAKS = 600;
+
+function hexToRgb(hex){
+
+    const n = parseInt(String(hex || "#ffffff").slice(1), 16);
+
+    return `${n >> 16 & 255},${n >> 8 & 255},${n & 255}`;
+
+}
+
 const RUSH_MS = 1700;       // streaks speeding up (was 1350)
 const FLASH_IN_MS = 480;    // light builds over the end of the rush (was 380)
 const FLASH_OUT_MS = 950;   // light fades, revealing the map (was 750)
@@ -53,11 +65,16 @@ export function canWarp(){
 //   followTo — () => {x, y, width, height} of the map's logo
 //              once it's there, so this one rides along with
 //              it while it fades (null when there isn't one)
+//   stars    — the stars on screen right now ({x, y, r,
+//              colour}, from captureStars in stars.js): they
+//              become the first streaks, so the real stars
+//              round the logo are what stretch out and rush
+//              past you
 //
 // Returns { peak, done }: `peak` resolves at the full flash
 // with where the logo is then ({x, y, width}, or null
 // without one), `done` when the light has faded away.
-export function playWarp({ logo = null, followTo = null } = {}){
+export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
 
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -86,11 +103,37 @@ export function playWarp({ logo = null, followTo = null } = {}){
 
     // Each streak: a direction from the centre and a
     // distance (as a fraction of the way to the corner).
-    const streaks = Array.from({ length: STREAK_COUNT }, () => ({
+    //
+    // The first ones are the real stars that were on screen,
+    // starting exactly where they were, at their own size
+    // and colour (the starfield hides its own copies while
+    // this plays) — so the stars round the logo are what
+    // stretch out into the jump. The rest join in as it
+    // speeds up.
+    const seeds = stars
+        .filter(s => s.x > -20 && s.x < w + 20 && s.y > -20 && s.y < h + 20)
+        .sort((a, b) => b.r - a.r)
+        .slice(0, MAX_STAR_STREAKS)
+        .map(s => {
+
+            const dx = s.x - cx, dy = s.y - cy;
+
+            return {
+                a: Math.atan2(dy, dx),
+                d: Math.max(0.005, Math.hypot(dx, dy) / reach),
+                hue: hexToRgb(s.colour),
+                r: s.r,
+                seed: true
+            };
+
+        });
+
+    const streaks = seeds.concat(Array.from({ length: Math.max(0, STREAK_COUNT - seeds.length / 2) }, () => ({
         a: Math.random() * Math.PI * 2,
         d: 0.04 + Math.random() * 0.9,
-        hue: Math.random() < 0.25 ? "255,190,170" : (Math.random() < 0.5 ? "190,220,255" : "255,255,255")
-    }));
+        hue: Math.random() < 0.25 ? "255,190,170" : (Math.random() < 0.5 ? "190,220,255" : "255,255,255"),
+        seed: false
+    })));
 
     canvas.classList.add("show");
 
@@ -144,8 +187,11 @@ export function playWarp({ logo = null, followTo = null } = {}){
 
                 if(s.d > 1.4){
 
-                    // Off the edge: start again near the centre.
+                    // Off the edge: start again near the centre
+                    // (as an ordinary streak from now on).
                     s.d = 0.03 + Math.random() * 0.25;
+
+                    s.seed = false;
 
                     continue;
 
@@ -159,8 +205,17 @@ export function playWarp({ logo = null, followTo = null } = {}){
                 const x2 = cx + Math.cos(s.a) * s.d * reach;
                 const y2 = cy + Math.sin(s.a) * s.d * reach;
 
-                ctx.strokeStyle = `rgba(${s.hue},${Math.min(1, 0.25 + p * 0.9) * Math.min(1, s.d * 3)})`;
-                ctx.lineWidth = 0.6 + s.d * (1 + p * 2.2);
+                // A real star starts fully bright, at its own size
+                // (a zero-length round line is a dot); the others
+                // fade in as the jump speeds up.
+                const alpha = s.seed
+                    ? Math.min(1, s.d * 8)
+                    : Math.min(1, 0.25 + p * 0.9) * Math.min(1, s.d * 3);
+
+                ctx.strokeStyle = `rgba(${s.hue},${alpha})`;
+                ctx.lineWidth = s.seed
+                    ? Math.max(s.r * 2, 0.6 + s.d * (1 + p * 2.2))
+                    : 0.6 + s.d * (1 + p * 2.2);
 
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);

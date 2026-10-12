@@ -54,7 +54,36 @@ function glowSprite(){
 
 //==================================================
 
+//--------------------------------------------------
+// The jump into the archive (js/warp.js) turns the stars
+// on screen into its streaks: it asks where they all are
+// (captureStars), then hides them here while it draws them
+// itself, rushing past.
+//--------------------------------------------------
+
+let hidden = false;
+let capture = null;          // filled during the next draw
+let captureDone = null;
+
+export function setStarsHidden(on){
+
+    hidden = on;
+
+}
+
+// Resolves after the next frame with every star drawn on
+// screen: { x, y, r (radius px), colour }.
+export function captureStars(){
+
+    capture = [];
+
+    return new Promise(resolve => { captureDone = resolve; });
+
+}
+
 export function drawStars(camera) {
+
+    if (hidden) return;
 
     ctx.save();
 
@@ -140,6 +169,9 @@ export function drawStars(camera) {
             3.5
 
         );
+
+        if (capture) capture.push({ x: screen.x, y: screen.y, r: radius, colour: star.colour });
+
 
         //------------------------------------------
         // Glow
@@ -283,6 +315,18 @@ export function drawStars(camera) {
         }
 
         }
+
+    }
+
+    if (capture && captureDone) {
+
+        const found = capture;
+
+        capture = null;
+
+        captureDone(found);
+
+        captureDone = null;
 
     }
 

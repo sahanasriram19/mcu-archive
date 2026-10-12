@@ -26,6 +26,7 @@ import { initTilt } from "./tilt.js";
 import { initParallax } from "./parallax.js";
 import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
+import { captureStars, setStarsHidden } from "./universe/stars.js";
 import { updateSway, swayOffset } from "./sway.js";
 
 //==========================================
@@ -176,7 +177,17 @@ async function enter(viewKey){
 
         const nextView = entered ? getCurrentView() : viewKey;
 
-        const at = await playWarp({ logo: endLogo, followTo: hubOnScreen }).peak;
+        // The stars on screen become the jump's first streaks:
+        // find where they all are, then hide the starfield's
+        // own copies while the jump draws them rushing past.
+        const stars = await captureStars();
+
+        setStarsHidden(true);
+
+        const at = await playWarp({ logo: endLogo, followTo: hubOnScreen, stars }).peak;
+
+        // Behind the full flash: the archive's own stars back.
+        setStarsHidden(false);
 
         if(landing.classList.contains("leaving")) landing.style.display = "none";
 
