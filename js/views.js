@@ -40,7 +40,9 @@ export const VIEWS = [
         layout: "scatter",
         allOnly: true,
         edges: { mode: "none" },
-        camera: { x: 0, y: 0, zoom: 0.17, userMinZoom: 0.02 }
+        // userMaxZoom: how far in you can zoom by hand (the
+        // other views allow up to 4).
+        camera: { x: 0, y: 0, zoom: 0.17, userMinZoom: 0.02, userMaxZoom: 0.6 }
     },
 
     {
@@ -53,7 +55,7 @@ export const VIEWS = [
         // Fits itself to the screen, clear of the panel and
         // the countdown card (works for MCU Phases and X-Men
         // Eras alike). zoom is the fallback.
-        camera: { x: 0, y: 0, zoom: 0.16, fit: 0.92, minZoom: 0.07, maxZoom: 0.3 },
+        camera: { x: 0, y: 0, zoom: 0.16, fit: 0.92, minZoom: 0.05, maxZoom: 0.3 },
         // Phones (see viewManager.js phoneCamera): upright,
         // the phases stack in one column — fill the width and
         // start at the top. Sideways, they sit in one row —

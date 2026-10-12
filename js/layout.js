@@ -460,8 +460,19 @@ export function layoutMultiverse(nodes){
 // one overlapping its neighbours.
 //--------------------------------------------------
 
-const PHASE_GRID_X = 2800;
-const PHASE_GRID_Y = 2800;
+// (Were 2800 x 2800: the rings are bigger now, so their
+// posters have room between them.)
+const PHASE_GRID_X = 3200;
+const PHASE_GRID_Y = 3500;
+
+// Ring size: a base radius plus a little per title, so
+// busy phases get bigger rings. (Were 620 + 55 per title.)
+const PHASE_RING_BASE = 860;
+const PHASE_RING_PER_TITLE = 62;
+
+// How round the rings are: 1 = a circle; less squashes
+// them flatter. (Was 0.88.)
+const PHASE_RING_ROUND = 1;
 
 // Top row takes the larger half: 7 MCU phases -> 4 + 3,
 // 5 X-Men eras -> 3 + 2.
@@ -481,7 +492,7 @@ const topRowCount = n => Math.ceil(n / 2);
 function phaseRingRadius(n, label = ""){
 
     return Math.max(
-        620 + Math.max(0, n-6)*55,
+        PHASE_RING_BASE + Math.max(0, n-6)*PHASE_RING_PER_TITLE,
         300 + label.length * 38
     );
 
@@ -586,7 +597,7 @@ function placePhaseRings(branches, groups){
             const angle = (i/n)*Math.PI*2 - Math.PI/2;
 
             node.targetX = branch.x + Math.cos(angle)*radius;
-            node.targetY = branch.y + Math.sin(angle)*radius*0.88;
+            node.targetY = branch.y + Math.sin(angle)*radius*PHASE_RING_ROUND;
 
         });
 

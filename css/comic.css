@@ -1,0 +1,399 @@
+/*==================================================
+  COMIC THEME
+
+  The site's look, loaded last so it sits on top of the
+  layout styles in the other files.
+
+  Panels are solid, like comic caption boxes: a flat dark
+  fill with a faint halftone dot pattern, a red stripe
+  along the top, small corners and a hard drop shadow
+  instead of a soft glow. Headings use Bebas Neue (tall,
+  condensed, like Marvel's own titles); everything else
+  stays in Inter.
+
+  To go back to the old look, remove this file's <link>
+  from index.html.
+==================================================*/
+
+@font-face{
+    font-family:"Bebas Neue";
+    src:url("../assets/fonts/BebasNeue-Regular.woff") format("woff");
+    font-weight:400;
+    font-style:normal;
+    font-display:swap;
+}
+
+:root{
+    --display:"Bebas Neue", Impact, "Arial Narrow", sans-serif;
+
+    --ink:#07080b;                    /* comic "ink" for hard shadows */
+    --paper:#151922;                  /* panel fill */
+    --paper-2:#1c212c;                /* inputs, hovers */
+    --edge:rgba(255,255,255,.14);     /* panel outline */
+
+    --halftone:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.6px);
+
+    --radius:6px;
+}
+
+/*--------------------------------------------------
+  Panels: caption boxes
+--------------------------------------------------*/
+
+#view-panel,
+.countdown-card,
+#watch-banner,
+#movie-details-card,
+.character-panel,
+#movie-search-results,
+#intro-skip{
+    background-color:var(--paper);
+    background-image:var(--halftone);
+    background-size:6px 6px;
+    border:1px solid var(--edge);
+    border-top:3px solid var(--accent);
+    border-radius:var(--radius);
+    box-shadow:5px 5px 0 var(--ink);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+}
+
+/* The details card's backdrop: a plain dark wash, no blur. */
+#movie-details-overlay{
+    background:rgba(5,7,12,.78);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+}
+
+/* The character list slides in from the right edge, so its
+   stripe runs down the left instead. */
+.character-panel{
+    border-top:1px solid var(--edge);
+    border-left:3px solid var(--accent);
+    border-radius:0;
+    box-shadow:-5px 0 0 var(--ink);
+}
+
+#watch-banner{
+    border-radius:var(--radius);
+}
+
+/* Cards: the hover is a lift, not a glow. */
+.countdown-card:hover{
+    border-color:var(--edge);
+    border-top-color:var(--accent);
+    box-shadow:7px 7px 0 var(--ink);
+}
+
+/*--------------------------------------------------
+  Headings: Bebas Neue
+--------------------------------------------------*/
+
+.view-panel-title{
+    font-family:var(--display);
+    font-size:26px;
+    font-weight:400;
+    letter-spacing:.02em;
+    line-height:1;
+    text-transform:none;
+}
+
+.view-panel-title:hover{
+    color:var(--accent);
+    text-shadow:none;
+}
+
+/* The world headings in the panel. */
+.view-panel-section-head{
+    font-family:var(--display);
+    font-size:18px;
+    font-weight:400;
+    letter-spacing:.03em;
+    text-transform:none;
+}
+
+.view-panel-section-head span:first-child::before{
+    border-radius:1px;
+}
+
+.view-panel-list{
+    margin-top:12px;
+}
+
+.view-panel-btn{
+    border-radius:4px;
+}
+
+.view-panel-btn.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+    font-weight:600;
+}
+
+#movie-search,
+#movie-search-results{
+    border-radius:4px;
+}
+
+#movie-search{
+    background:var(--paper-2);
+    border:1px solid var(--edge);
+}
+
+.countdown-title{
+    font-family:var(--display);
+    font-size:24px;
+    font-weight:400;
+    letter-spacing:.02em;
+    line-height:1.05;
+}
+
+/* The later countdown cards, folded down to one line
+   (css/upcoming.css). */
+@media (min-width: 769px) and (min-height: 501px){
+
+    #countdown:not(:hover):not(:focus-within) .countdown-card:nth-child(n+2) .countdown-title{
+        font-size:19px;
+    }
+
+}
+
+#movie-details-title{
+    font-family:var(--display);
+    font-size:42px;
+    font-weight:400;
+    letter-spacing:.01em;
+    line-height:1;
+}
+
+.character-header h2{
+    font-family:var(--display);
+    font-size:32px;
+    font-weight:400;
+    letter-spacing:.02em;
+}
+
+/*--------------------------------------------------
+  Small labels: plain words, not tiny spaced capitals
+--------------------------------------------------*/
+
+.countdown-kicker,
+#movie-details-kicker,
+.watch-label,
+#movie-details-characters-label,
+#movie-details-overlay #movie-details-cast-label{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0;
+    text-transform:none;
+}
+
+/* (Computers only: on phones these labels shrink to
+   "d h m s", css/upcoming.css.) */
+@media (min-width: 769px) and (min-height: 501px){
+
+    .countdown-clock i{
+        letter-spacing:0;
+        text-transform:none;
+        font-size:10.5px;
+    }
+
+}
+
+/*--------------------------------------------------
+  Buttons
+--------------------------------------------------*/
+
+#movie-details-trailer,
+.watch-banner-clear{
+    border-radius:4px;
+}
+
+#movie-details-trailer{
+    box-shadow:3px 3px 0 var(--ink);
+}
+
+#movie-details-trailer:hover{
+    transform:translate(-1px, -1px);
+    box-shadow:4px 4px 0 var(--ink);
+}
+
+#movie-details-close{
+    border-radius:4px;
+}
+
+/*--------------------------------------------------
+  Landing page
+--------------------------------------------------*/
+
+/* The title under the logo: big, not tiny spaced capitals. */
+.landing-title{
+    margin-top:20px;
+    margin-right:0;
+    font-family:var(--display);
+    font-size:clamp(3rem, 8vw, 4.6rem);
+    font-weight:400;
+    letter-spacing:.01em;
+    line-height:.95;
+    text-transform:none;
+    color:#fff;
+    text-shadow:4px 4px 0 var(--ink);
+}
+
+.landing-tagline{
+    margin-top:12px;
+    color:rgba(255,255,255,.72);
+}
+
+/* The ring round the hero logo: a solid comic-style ring
+   that stays still, instead of a spinning, glowing one. */
+.hero-portal .portal-halo{
+    display:none;
+}
+
+.portal-ring{
+    background:var(--accent);
+    animation:none;
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+    mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+}
+
+.portal{
+    filter:drop-shadow(6px 6px 0 var(--ink));
+}
+
+.portal-core{
+    inset:8px;
+    background-color:#120d12;
+    background-image:var(--halftone);
+    background-size:7px 7px;
+    box-shadow:inset 0 0 0 3px rgba(255,255,255,.9);
+}
+
+.portal-core img{
+    box-shadow:3px 3px 0 var(--ink);
+}
+
+/* "Scroll to fly through the MCU": a plain button. */
+.intro-scroll-hint{
+    font-size:.95rem;
+    font-weight:600;
+    letter-spacing:0;
+    text-transform:none;
+}
+
+.intro-scroll-hint > span:first-child{
+    border:1px solid var(--edge);
+    border-radius:4px;
+    background:var(--paper);
+    box-shadow:4px 4px 0 var(--ink);
+    animation:none;
+}
+
+.intro-scroll-hint:hover > span:first-child{
+    background:var(--accent);
+    border-color:var(--accent);
+}
+
+#intro-skip{
+    border-top-width:1px;
+    font-weight:600;
+}
+
+#intro-skip:hover{
+    background:var(--accent);
+}
+
+/* Enter: a solid red button with a hard shadow, no pulsing
+   glow. */
+#enterButton,
+#intro-end-enter{
+    padding:12px 30px 10px;
+    border:none;
+    border-radius:4px;
+    background:var(--accent);
+    font-family:var(--display);
+    font-size:1.7rem;
+    font-weight:400;
+    letter-spacing:.03em;
+    text-transform:none;
+    line-height:1;
+    box-shadow:5px 5px 0 var(--ink);
+    animation:none;
+}
+
+#enterButton:hover,
+#intro-end-enter:hover{
+    transform:translate(-2px, -2px);
+    filter:none;
+    box-shadow:7px 7px 0 var(--ink);
+}
+
+#enterButton:active,
+#intro-end-enter:active{
+    transform:translate(3px, 3px);
+    filter:none;
+    box-shadow:2px 2px 0 var(--ink);
+}
+
+.landing-stat{
+    border-radius:4px;
+    background:var(--paper);
+}
+
+/* The Marvel logo at the end of the trail: a hard shadow
+   instead of a red glow. */
+.end-logo-img{
+    box-shadow:8px 8px 0 var(--ink);
+}
+
+/* The chapter titles flying past: Bebas, with a hard ink
+   shadow instead of a soft glow (also lighter to draw). */
+.intro-chapter-kicker{
+    font-family:var(--display);
+    font-size:30px;
+    font-weight:400;
+    letter-spacing:.06em;
+    margin-right:0;
+    text-transform:none;
+}
+
+.intro-chapter-title{
+    font-family:var(--display);
+    font-weight:400;
+    font-size:150px;
+    letter-spacing:.01em;
+    text-shadow:7px 7px 0 rgba(0,0,0,.65);
+}
+
+@media (max-width: 600px){
+
+    .intro-chapter-title{ font-size:88px; }
+
+}
+
+/*--------------------------------------------------
+  Phones
+--------------------------------------------------*/
+
+@media (max-width: 768px), (max-height: 500px){
+
+    #view-panel{
+        border-radius:var(--radius);
+    }
+
+    .view-panel-title{
+        font-size:22px;
+    }
+
+    .view-panel-toggle{
+        border-radius:4px;
+    }
+
+    /* The slim countdown bar along the top. */
+    .countdown-title{
+        font-size:17px;
+    }
+
+}

@@ -30,6 +30,7 @@ import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
 
 const DEFAULT_MIN_ZOOM = camera.minZoom;
+const DEFAULT_MAX_ZOOM = camera.maxZoom;
 
 function buildEdges(recipe){
 
@@ -450,6 +451,10 @@ export function setView(key){
     // How far you can zoom out by hand: further on the big
     // combined map, the usual limit everywhere else.
     camera.minZoom = cameraFor(view).userMinZoom || DEFAULT_MIN_ZOOM;
+
+    // ...and how far in (userMaxZoom in views.js; the usual
+    // limit where a view doesn't set one).
+    camera.maxZoom = cameraFor(view).userMaxZoom || DEFAULT_MAX_ZOOM;
 
     const phoneCfg = phoneCameraConfig(view);
 
