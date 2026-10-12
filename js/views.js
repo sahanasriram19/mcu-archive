@@ -40,9 +40,10 @@ export const VIEWS = [
         layout: "scatter",
         allOnly: true,
         edges: { mode: "none" },
-        // userMaxZoom: how far in you can zoom by hand (the
-        // other views allow up to 4).
-        camera: { x: 0, y: 0, zoom: 0.17, userMinZoom: 0.02, userMaxZoom: 0.6 }
+        // fillMinZoom: you can only zoom out until the posters
+        // fill the screen edge to edge (1 = just filling it;
+        // raise it to stop further in, with even less space).
+        camera: { x: 0, y: 0, zoom: 0.17, fillMinZoom: 1 }
     },
 
     {

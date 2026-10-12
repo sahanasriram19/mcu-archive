@@ -70,6 +70,24 @@ const POSTER_HALF_H = 240;
 
 const PANEL_GAP = 16;      // clear air kept between posters and the panel, px
 
+// The zoom at which the posters' spread exactly covers the
+// screen edge to edge (no empty space showing round it),
+// times `factor` (above 1 stops a little further in).
+function fillZoom(factor){
+
+    const nodes = visibleNodes();
+
+    if(!nodes.length) return DEFAULT_MIN_ZOOM;
+
+    const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
+
+    const w = Math.max(1, Math.max(...xs) - Math.min(...xs));
+    const h = Math.max(1, Math.max(...ys) - Math.min(...ys));
+
+    return Math.max(window.innerWidth / w, window.innerHeight / h) * factor;
+
+}
+
 function visibleNodes(){
 
     return graph.nodes.filter(n => Math.abs(n.targetX) < 50000);
@@ -450,7 +468,12 @@ export function setView(key){
 
     // How far you can zoom out by hand: further on the big
     // combined map, the usual limit everywhere else.
-    camera.minZoom = cameraFor(view).userMinZoom || DEFAULT_MIN_ZOOM;
+    // fillMinZoom (All Posters): stop zooming out at the
+    // point where the posters still fill the whole screen,
+    // so it always looks like a universe full of them.
+    camera.minZoom = cameraFor(view).fillMinZoom
+        ? fillZoom(cameraFor(view).fillMinZoom)
+        : (cameraFor(view).userMinZoom || DEFAULT_MIN_ZOOM);
 
     // ...and how far in (userMaxZoom in views.js; the usual
     // limit where a view doesn't set one).
