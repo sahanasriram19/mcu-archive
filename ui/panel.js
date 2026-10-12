@@ -31,8 +31,6 @@ panel.innerHTML = `
 
     </div>
 
-    <div class="view-panel-subtitle">Choose a view and zoom</div>
-
     <div class="view-panel-content" id="view-panel-content">
 
       <div class="view-panel-content-inner">

@@ -138,19 +138,9 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
         // Hovered mind-map junctions glow in the highlight
         // colour so they match the lit-up branch.
-        const glowColour = (hovered && !node.label) ? hintColour : colour;
 
-        const glow = ctx.createRadialGradient(x,y,0,x,y, radius*2.8);
-
-        glow.addColorStop(0, `rgba(${glowColour},.4)`);
-        glow.addColorStop(.4, `rgba(${glowColour},.16)`);
-        glow.addColorStop(1, "rgba(0,0,0,0)");
-
-        ctx.fillStyle = glow;
-
-        ctx.beginPath();
-        ctx.arc(x,y, radius*2.8, 0, Math.PI*2);
-        ctx.fill();
+        // (No glow behind the name any more: the map keeps
+        // its glow for the branches themselves.)
 
 
         //----------------------------------
@@ -176,7 +166,9 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.fillStyle = (hovered && !node.label) ? `rgb(${tint})` : "#FFFFFF";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `700 ${Math.max(19, 27 * camera.zoom)}px Inter, Arial, sans-serif`;
+        // Bebas Neue, the heading font (css/comic.css); it's
+        // narrow, so it's set a little bigger.
+        ctx.font = `400 ${Math.max(24, 34 * camera.zoom)}px "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
 
         if(label){
 
@@ -191,18 +183,21 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
         if(subtitle){
 
+            // Clear of the name above it, however big that is.
+            const subtitleGap = Math.max(radius + 8, Math.max(24, 34 * camera.zoom) * 0.62 + Math.max(16, 22 * camera.zoom) * 0.55);
+
             ctx.fillStyle = "rgba(255,255,255,.8)";
             ctx.textAlign = "center";
             ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter, Arial, sans-serif`;
 
             ctx.lineWidth = 3;
 
-            ctx.strokeText(subtitle, x, y + radius + 8);
+            ctx.strokeText(subtitle, x, y + subtitleGap);
 
             ctx.fillText(
                 subtitle,
                 x,
-                y + radius + 8
+                y + subtitleGap
             );
 
         }

@@ -61,6 +61,7 @@ mcu-archive/
 │   ├── movieDetails.css
 │   ├── upcoming.css           # countdown card, watch-list banner, "Watch before this"
 │   ├── tilt.css               # 3D tilt + light on cards, details card swing-in
+│   ├── comic.css              # the look: comic-style panels and Bebas Neue headings (loaded last)
 │   └── mobile.css             # phone-only overrides; desktop untouched
 ├── ui/
 │   ├── panel.js               # the top-left view-switcher panel
@@ -167,3 +168,4 @@ Each entry in `data/mcu.json` looks like this:
 - Data and imagery: [The Movie Database (TMDB)](https://www.themoviedb.org/) — this product uses the TMDB API but is not endorsed or certified by TMDB.
 - Marvel Cinematic Universe and all associated titles/characters are the property of Marvel Studios / The Walt Disney Company.
 - Font: [Inter](https://github.com/rsms/inter) by Rasmus Andersson, shipped in `assets/fonts` under the SIL Open Font License (see `assets/fonts/Inter-LICENSE.txt`).
+- Heading font: [Bebas Neue](https://github.com/dharmatype/Bebas-Neue) by Dharma Type, shipped in `assets/fonts` under the SIL Open Font License (see `assets/fonts/BebasNeue-LICENSE.txt`).

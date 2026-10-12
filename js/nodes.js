@@ -252,24 +252,35 @@ export function renderNodes(ctx, camera, nodes){
         const scaledRadius = node.radius * camera.zoom;
 
         //----------------------------------
-        // Outer Glow (tinted per-node colour)
+        // Glow (tinted per-node colour)
         //----------------------------------
 
-        const glowRadius = 110 * camera.zoom;
+        // Only round the poster under the mouse: a glow behind
+        // every poster made the whole map look washed in light.
+        if(lift > 0.02){
 
-        // From one pre-drawn image per colour (a new radial
-        // gradient for every poster on every frame added up).
-        ctx.drawImage(
+            const glowRadius = 110 * camera.zoom * 1.6;
 
-            glowSprite(node.colour),
+            ctx.save();
 
-            x + floatX - glowRadius,
-            y + floatY - glowRadius,
+            ctx.globalAlpha *= Math.min(1, lift) * 3;
 
-            glowRadius * 2,
-            glowRadius * 2
+            // From one pre-drawn image per colour.
+            ctx.drawImage(
 
-        );
+                glowSprite(node.colour),
+
+                x + floatX - glowRadius,
+                y + floatY - glowRadius,
+
+                glowRadius * 2,
+                glowRadius * 2
+
+            );
+
+            ctx.restore();
+
+        }
 
         //----------------------------------
         // Poster thumbnail (once loaded) or

@@ -364,6 +364,14 @@ export function initIntro(nodes, onEnter){
 
     window.addEventListener("resize", layout);
 
+    // The heading font (css/comic.css) may arrive after the
+    // titles were first measured: fit them again once it has.
+    if(document.fonts && document.fonts.addEventListener){
+
+        document.fonts.addEventListener("loadingdone", fitChapterTitles);
+
+    }
+
     active = true;
 
     requestAnimationFrame(frame);

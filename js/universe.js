@@ -152,7 +152,10 @@ export function renderUniverse(camera, entered){
 
         if (archive.view === "complete") {
 
-            renderArchive(ctx, camera);   // if this is your central glow
+            // (The soft glow behind the logo, renderArchive in
+            // archive.js, is switched off: the map keeps its glow
+            // for the branches. Put the call back to restore it.)
+            // renderArchive(ctx, camera);
             renderHub(ctx, camera);       // Marvel image
 
         }
