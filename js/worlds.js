@@ -78,7 +78,8 @@ export const SPIDER_ERAS = {
     25: "Sony's Spider-Man Universe",
     26: "Classic Cartoons",
     27: "Modern Cartoons",
-    28: "Spidey & Friends"
+    28: "Spidey & Friends",
+    29: "Venom"
 
 };
 
@@ -88,13 +89,14 @@ export const ANIMATED_ERAS = {
     31: "Classic Cartoons",
     32: "2000s Cartoons",
     33: "Disney XD Era",
-    34: "Shorts & Features",
+    34: "Shorts",
     35: "Marvel Rising",
     36: "Disney Junior",
     37: "LEGO Marvel",
     38: "Adult Animation",
     39: "Marvel Studios",
-    40: "Spider-Verse"
+    40: "Spider-Verse",
+    41: "Spider-Man Cartoons"
 
 };
 

@@ -38,22 +38,24 @@ export const PHASE_COLOURS = {
     22: "40,120,230",   // The Amazing Spider-Man — blue
     23: "240,70,170",   // Spider-Verse — magenta
     24: "255,190,60",   // MCU Spider-Man (Tom Holland) — gold
-    25: "120,120,135",  // Sony's Spider-Man Universe — symbiote grey
+    25: "120,120,135",  // Sony's Spider-Man Universe — grey
     26: "235,95,60",    // Classic Cartoons — orange
     27: "60,170,240",   // Modern Cartoons — sky blue
     28: "255,120,190",  // Spidey & Friends — pink
+    29: "90,95,120",    // Venom — symbiote black-blue
 
     // Animated eras (js/worlds.js)
     31: "214,160,90",   // Classic Cartoons — tan
     32: "120,170,90",   // 2000s Cartoons — olive
     33: "70,140,235",   // Disney XD Era — blue
-    34: "240,180,60",   // Shorts & Features — amber
+    34: "240,180,60",   // Shorts — amber
     35: "200,90,230",   // Marvel Rising — purple
     36: "80,200,220",   // Disney Junior — cyan
     37: "250,200,40",   // LEGO Marvel — yellow
     38: "200,60,60",    // Adult Animation — crimson
     39: "230,60,80",    // Marvel Studios Animation — red
-    40: "240,70,170"    // Spider-Verse — magenta
+    40: "240,70,170",   // Spider-Verse — magenta
+    41: "235,80,70"     // Spider-Man Cartoons — red
 
 };
 
@@ -92,17 +94,19 @@ export const HIGHLIGHT_COLOURS = {
     26: "255,120,60",   // Classic Cartoons
     27: "60,200,255",   // Modern Cartoons
     28: "255,130,210",  // Spidey & Friends
+    29: "130,140,200",  // Venom
 
     31: "235,180,100",  // Classic Cartoons
     32: "150,220,90",   // 2000s Cartoons
     33: "80,150,255",   // Disney XD Era
-    34: "255,190,50",   // Shorts & Features
+    34: "255,190,50",   // Shorts
     35: "215,100,255",  // Marvel Rising
     36: "70,225,240",   // Disney Junior
     37: "255,225,40",   // LEGO Marvel
     38: "255,70,70",    // Adult Animation
     39: "255,60,90",    // Marvel Studios Animation
-    40: "255,90,190"    // Spider-Verse
+    40: "255,90,190",   // Spider-Verse
+    41: "255,80,70"     // Spider-Man Cartoons
 
 };
 

@@ -218,11 +218,11 @@
         "id": "venom1",
         "title": "Venom",
         "type": "movie",
-        "phase": 25,
+        "phase": 29,
         "saga": "sony",
         "release": "2018-10-05",
         "timeline": 15,
-        "colour": "120,120,135",
+        "colour": "90,95,120",
         "characters": [
             "Eddie Brock"
         ],
@@ -232,11 +232,11 @@
         "id": "venom2",
         "title": "Venom: Let There Be Carnage",
         "type": "movie",
-        "phase": 25,
+        "phase": 29,
         "saga": "sony",
         "release": "2021-10-01",
         "timeline": 16,
-        "colour": "120,120,135",
+        "colour": "90,95,120",
         "characters": [
             "Eddie Brock",
             "Cletus Kasady"
@@ -275,11 +275,11 @@
         "id": "venom3",
         "title": "Venom: The Last Dance",
         "type": "movie",
-        "phase": 25,
+        "phase": 29,
         "saga": "sony",
         "release": "2024-10-25",
         "timeline": 18,
-        "colour": "120,120,135",
+        "colour": "90,95,120",
         "characters": [
             "Eddie Brock"
         ],
@@ -380,11 +380,11 @@
         "id": "spidermanunlimited",
         "title": "Spider-Man Unlimited",
         "type": "show",
-        "phase": 26,
+        "phase": 27,
         "saga": "marvel-animation",
         "release": "1999-10-02",
         "timeline": 24,
-        "colour": "235,95,60",
+        "colour": "60,170,240",
         "characters": [
             "Peter Parker (Animated)",
             "Venom",
