@@ -36,7 +36,7 @@ function sizeFor(screenWidth){
 
 }
 
-function loadEntry(url){
+function loadEntry(url, size = ""){
 
     let entry = posterCache.get(url);
 
@@ -49,6 +49,7 @@ function loadEntry(url){
         entry = {
 
             img,
+            size,
             loaded:false,
             failed:false
 
@@ -65,12 +66,13 @@ function loadEntry(url){
             if(img.decode){
 
                 img.decode()
-                    .then(()=> entry.loaded = true)
-                    .catch(()=> entry.loaded = true);
+                    .then(()=> { entry.loaded = true; entry.loadedAt = performance.now(); })
+                    .catch(()=> { entry.loaded = true; entry.loadedAt = performance.now(); });
 
             } else {
 
                 entry.loaded = true;
+                entry.loadedAt = performance.now();
 
             }
 
@@ -98,9 +100,15 @@ export function warmPosters(nodes, screenWidth){
 
         if(!n.poster || n.isBranch) return;
 
-        if(typeof n.poster === "string") loadEntry(n.poster);
+        if(typeof n.poster === "string") loadEntry(n.poster, "small");
 
-        else loadEntry(n.poster[sizeFor(screenWidth)] || n.poster.small);
+        else {
+
+            const size = n.poster[sizeFor(screenWidth)] ? sizeFor(screenWidth) : "small";
+
+            loadEntry(n.poster[size], size);
+
+        }
 
     });
 
@@ -110,7 +118,7 @@ function getPoster(source, screenWidth){
 
     if(!source) return null;
 
-    if(typeof source === "string") return loadEntry(source);
+    if(typeof source === "string") return loadEntry(source, "small");
 
     const order = ["small", "medium", "large"];
 
@@ -137,7 +145,7 @@ function getPoster(source, screenWidth){
 
     }
 
-    const entry = loadEntry(source[order[want]]);
+    const entry = loadEntry(source[order[want]], order[want]);
 
     if(entry.loaded && !entry.failed) return entry;
 
@@ -154,7 +162,7 @@ function getPoster(source, screenWidth){
 
     // Nothing loaded yet: make sure at least the small
     // one is on its way, since it arrives fastest.
-    if(want > 0) loadEntry(source.small);
+    if(want > 0) loadEntry(source.small, "small");
 
     return entry;
 
@@ -171,13 +179,76 @@ const NEW_POSTERS_PER_FRAME = 6;
 
 let newPosterBudget = NEW_POSTERS_PER_FRAME;
 
+//--------------------------------------------------
+// Letting go of poster copies that aren't being shown
+//
+// Every size of every poster that's ever been drawn used to
+// stay in memory for good — its picture plus a rounded copy.
+// With six worlds that's hundreds of large images, and the
+// memory pressure made scrolling and zooming sluggish. Now,
+// every few seconds, the bigger sizes that haven't been
+// drawn for a while are dropped (the small one is kept, so
+// a poster never falls back to its blank card). They're
+// fetched again — from the browser's cache — if needed.
+//--------------------------------------------------
+
+const SWEEP_EVERY = 5000;      // ms between clean-ups
+const KEEP_UNUSED = 20000;     // a bigger size unused this long is dropped
+
+let frameNow = 0;
+let lastSweep = 0;
+
+function sweepPosters(){
+
+    lastSweep = frameNow;
+
+    posterCache.forEach((entry, url) => {
+
+        if(entry.size === "small" || !entry.loaded) return;
+
+        if(frameNow - (entry.lastDrawn || entry.loadedAt || 0) < KEEP_UNUSED) return;
+
+        entry.rounded = null;
+        entry.img.src = "";
+
+        posterCache.delete(url);
+
+    });
+
+    // Placeholder cards at sizes not used lately.
+    graph.nodes.forEach(n => {
+
+        const cards = n.placeholderCards;
+
+        if(!cards) return;
+
+        Object.keys(cards).forEach(step => {
+
+            if(frameNow - (cards[step].lastUsed || 0) > KEEP_UNUSED) delete cards[step];
+
+        });
+
+    });
+
+}
+
 export function renderNodes(ctx, camera, nodes){
 
     newPosterBudget = NEW_POSTERS_PER_FRAME;
 
+    frameNow = performance.now();
+
+    if(frameNow - lastSweep > SWEEP_EVERY) sweepPosters();
+
     ctx.save();
 
-    ctx.globalCompositeOperation = "lighter";
+    // Posters are drawn normally (opaque, over the lines);
+    // only the hover glow below is added on as light. This
+    // used to be "lighter" for the whole layer with every
+    // poster switching back to normal and again — two blend
+    // changes per poster, 230+ posters, every frame, which
+    // stops the browser batching the drawing together.
+    ctx.globalCompositeOperation = "source-over";
 
     const halfW = window.innerWidth/2;
     const halfH = window.innerHeight/2;
@@ -262,6 +333,8 @@ export function renderNodes(ctx, camera, nodes){
             const glowRadius = 110 * camera.zoom * 1.6;
 
             ctx.save();
+
+            ctx.globalCompositeOperation = "lighter";
 
             ctx.globalAlpha *= Math.min(1, lift) * 3;
 
@@ -402,8 +475,6 @@ export function renderNodes(ctx, camera, nodes){
             // as a mystery blank node.
             //----------------------------------
 
-            const distance = Math.hypot(node.x, node.y);
-
            const BASE_POSTER_SIZE = 320;
 
             let POSTER_SIZE = BASE_POSTER_SIZE;
@@ -438,83 +509,13 @@ export function renderNodes(ctx, camera, nodes){
             // Fading out under a poster that's fading in.
             if(posterReady) ctx.globalAlpha *= 1 - fade;
 
-            const radius = 12;
-
-            ctx.beginPath();
-            ctx.moveTo(left + radius, top);
-            ctx.lineTo(left + posterWidth - radius, top);
-            ctx.quadraticCurveTo(left + posterWidth, top, left + posterWidth, top + radius);
-            ctx.lineTo(left + posterWidth, top + posterHeight - radius);
-            ctx.quadraticCurveTo(left + posterWidth, top + posterHeight, left + posterWidth - radius, top + posterHeight);
-            ctx.lineTo(left + radius, top + posterHeight);
-            ctx.quadraticCurveTo(left, top + posterHeight, left, top + posterHeight - radius);
-            ctx.lineTo(left, top + radius);
-            ctx.quadraticCurveTo(left, top, left + radius, top);
-            ctx.closePath();
-
-            const fill = ctx.createLinearGradient(left, top, left, top+posterHeight);
-            fill.addColorStop(0, `rgba(${node.colour},.35)`);
-            fill.addColorStop(1, `rgba(${node.colour},.14)`);
-
-            ctx.fillStyle = fill;
-            ctx.fill();
-
-            ctx.lineWidth = Math.max(1.5 * camera.zoom, 1);
-            ctx.strokeStyle = `rgba(${node.colour},.8)`;
-            ctx.stroke();
-
-            ctx.clip();
-
-            // Small icon so it still reads at a glance as
-            // "no art yet" rather than looking like a
-            // finished poster.
-            const iconSize = 26 * camera.zoom;
-
-            ctx.beginPath();
-            ctx.arc(x + floatX, top + posterHeight*0.32, iconSize*0.5, 0, Math.PI*2);
-            ctx.fillStyle = `rgba(${node.colour},.5)`;
-            ctx.fill();
-
-            // Title, word-wrapped to fit the card width.
-            const maxTextWidth = posterWidth * 0.82;
-            const fontSize = Math.max(13 * camera.zoom, 9);
-
-            ctx.font = `600 ${fontSize}px Inter, Arial, sans-serif`;
-            ctx.fillStyle = "rgba(255,255,255,.92)";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-
-            const words = node.title.split(" ");
-            const lines = [];
-            let line = "";
-
-            words.forEach(word=>{
-
-                const test = line ? line + " " + word : word;
-
-                if(ctx.measureText(test).width > maxTextWidth && line){
-
-                    lines.push(line);
-                    line = word;
-
-                } else {
-
-                    line = test;
-
-                }
-
-            });
-
-            if(line) lines.push(line);
-
-            const lineHeight = fontSize * 1.25;
-            const textStartY = (top + posterHeight*0.62) - ((lines.length-1)*lineHeight)/2;
-
-            lines.forEach((l,i)=>{
-
-                ctx.fillText(l, x + floatX, textStartY + i*lineHeight);
-
-            });
+            // The card is drawn once into a small picture (per
+            // title, per size step) and that picture is reused
+            // every frame. Building it on the spot — shape,
+            // gradient, clip and word-wrapped title, for every
+            // card, every frame — was the slowest part of
+            // drawing the map once it held 200+ titles.
+            ctx.drawImage(placeholderCard(node, posterWidth), left, top, posterWidth, posterHeight);
 
             ctx.restore();
 
@@ -647,10 +648,16 @@ function glowSprite(colour){
 // A poster picture with its corners rounded, made once per
 // picture. (Very large originals are made at a capped
 // size: it's still sharper than the screen ever shows it.)
-const ROUND_MAX_W = 1000;
+//
+// Capped at 700px wide: a 1000px copy took about 6MB of
+// memory per poster, and with 230+ titles across the
+// worlds that piled up and slowed everything down.
+const ROUND_MAX_W = 700;
 const ROUND_CORNER = 0.07;     // corner radius, as a share of the width
 
 function roundedPoster(entry){
+
+    entry.lastDrawn = frameNow;
 
     if(entry.rounded) return entry.rounded;
 
@@ -705,6 +712,114 @@ export function hoverDim(phase){
 }
 
 const FOCUS_DIM_ALPHA = 0.14;   // how faint titles outside a watch list get
+
+//--------------------------------------------------
+// Placeholder cards (titles with no poster yet), drawn
+// once per title per size step and reused. Size steps go
+// up in doublings (32, 64 … 512 px wide), so a card is
+// never drawn from a picture much smaller or bigger than
+// it appears.
+//--------------------------------------------------
+
+const PLACEHOLDER_MIN = 32;
+const PLACEHOLDER_MAX = 512;
+
+function placeholderCard(node, screenWidth){
+
+    const step = Math.min(PLACEHOLDER_MAX,
+        Math.pow(2, Math.ceil(Math.log2(Math.max(PLACEHOLDER_MIN, screenWidth)))));
+
+    const cache = node.placeholderCards || (node.placeholderCards = {});
+
+    // (Redrawn once the Inter font has arrived, if the first
+    // copy had to use a fallback font.)
+    const fonts = document.fonts ? document.fonts.status : "";
+
+    const key = step + "|" + node.title + "|" + node.colour + "|" + fonts;
+
+    if(cache[step] && cache[step].key === key){
+
+        cache[step].lastUsed = frameNow;
+
+        return cache[step].canvas;
+
+    }
+
+    const w = step, h = Math.round(step * 1.5);
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = w;
+    canvas.height = h;
+
+    const c = canvas.getContext("2d");
+
+    const lw = Math.max(1, 1.5 * w / 320);
+
+    c.beginPath();
+    roundedRect(c, lw / 2, lw / 2, w - lw, h - lw, Math.min(12, w * 0.06));
+
+    const fill = c.createLinearGradient(0, 0, 0, h);
+    fill.addColorStop(0, `rgba(${node.colour},.35)`);
+    fill.addColorStop(1, `rgba(${node.colour},.14)`);
+
+    c.fillStyle = fill;
+    c.fill();
+
+    c.lineWidth = lw;
+    c.strokeStyle = `rgba(${node.colour},.8)`;
+    c.stroke();
+
+    c.clip();
+
+    // Small icon so it still reads at a glance as "no art
+    // yet" rather than a finished poster.
+    c.beginPath();
+    c.arc(w / 2, h * 0.32, w * 0.04, 0, Math.PI * 2);
+    c.fillStyle = `rgba(${node.colour},.5)`;
+    c.fill();
+
+    // Title, word-wrapped to fit the card width.
+    const fontSize = Math.max(w * 0.041, 9);
+    const maxTextWidth = w * 0.82;
+
+    c.font = `600 ${fontSize}px Inter, Arial, sans-serif`;
+    c.fillStyle = "rgba(255,255,255,.92)";
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+
+    const lines = [];
+    let line = "";
+
+    node.title.split(" ").forEach(word=>{
+
+        const test = line ? line + " " + word : word;
+
+        if(c.measureText(test).width > maxTextWidth && line){
+
+            lines.push(line);
+            line = word;
+
+        } else {
+
+            line = test;
+
+        }
+
+    });
+
+    if(line) lines.push(line);
+
+    const lineHeight = fontSize * 1.25;
+    const startY = h * 0.62 - ((lines.length - 1) * lineHeight) / 2;
+
+    lines.forEach((l, i) => c.fillText(l, w / 2, startY + i * lineHeight));
+
+    cache[step] = { key, canvas, lastUsed: frameNow };
+
+    return canvas;
+
+}
 
 function roundedRect(ctx, x, y, w, h, r){
 

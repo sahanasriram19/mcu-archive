@@ -41,7 +41,7 @@ function drawHub(ctx, camera, hub){
 
         if(pic) drawFitted(ctx, pic, x, y, width, height);
 
-        else drawWorldPlate(ctx, x, y, width, height, plate);
+        else drawCachedPlate(ctx, x, y, width, height, plate);
 
         return;
 
@@ -117,6 +117,43 @@ function drawFitted(ctx, pic, x, y, w, h){
     const dh = pic.naturalHeight * scale;
 
     ctx.drawImage(pic, x - dw / 2, y - dh / 2, dw, dh);
+
+}
+
+// The title plate is drawn once into a picture (with room
+// round it for its glow) and reused, at a few sizes. Its
+// soft shadow glow is expensive to draw, so redrawing it
+// every frame slowed the map down.
+function drawCachedPlate(ctx, x, y, w, h, plate){
+
+    const step = Math.min(1024, Math.pow(2, Math.ceil(Math.log2(Math.max(64, w)))));
+
+    const fonts = document.fonts ? document.fonts.status : "";
+
+    plate.cache = plate.cache || {};
+
+    let entry = plate.cache[step];
+
+    if(!entry || entry.fonts !== fonts){
+
+        const pw = step, ph = step * (400 / 900);
+        const pad = Math.ceil(ph * 0.2);
+
+        const canvas = document.createElement("canvas");
+
+        canvas.width = Math.ceil(pw + pad * 2);
+        canvas.height = Math.ceil(ph + pad * 2);
+
+        drawWorldPlate(canvas.getContext("2d"), canvas.width / 2, canvas.height / 2, pw, ph, plate);
+
+        entry = plate.cache[step] = { canvas, pad: pad / pw, fonts };
+
+    }
+
+    const scale = w / step;
+
+    ctx.drawImage(entry.canvas, x - entry.canvas.width * scale / 2, y - entry.canvas.height * scale / 2,
+        entry.canvas.width * scale, entry.canvas.height * scale);
 
 }
 
