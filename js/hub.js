@@ -89,7 +89,9 @@ const WORLD_PLATES = {
     // Until assets/animation-logo.png exists, the Marvel logo
     // shows instead (marvelFallback), like the Avengers map.
     animated: { image: "assets/animation-logo.png", marvelFallback: true },
-    unscripted: { text: "UNSCRIPTED", top: "#2a2a2e", bottom: "#111114", rim: "230,170,60", ink: "#ffffff" }
+    // Until assets/unscripted-logo.png exists, the plain
+    // "UNSCRIPTED" plate shows instead.
+    unscripted: { image: "assets/unscripted-logo.png", text: "UNSCRIPTED", top: "#2a2a2e", bottom: "#111114", rim: "230,170,60", ink: "#ffffff" }
 
 };
 
