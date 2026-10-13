@@ -308,15 +308,16 @@ export function layoutComplete(nodes){
 // COMPLETE MCU (all worlds) — the Avengers mind map in
 // the middle, exactly as on its own, with the X-Men and
 // Spider-Man mind maps tucked into the open space round
-// it: X-Men up and to the left, Spider-Man down and to the
-// right (above and below on an upright phone). Each is its
+// it: X-Men to the left, Spider-Man to the right and
+// Marvel Animation underneath (stacked top to bottom on an
+// upright phone). Each is its
 // own map round its own logo — not joined to the Avengers
 // branches. Each side map slides out from the centre just
 // until none of its posters come near an Avengers poster,
 // so it settles into the empty corner of the oval.
 //--------------------------------------------------
 
-const MULTIVERSE_ORDER = ["mcu", "xmen", "spider"];
+const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated"];
 const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
 const MULTIVERSE_STEP = 150;    // how far a side map slides out per try
 const SIDE_MAPS_RAISE = 3600;   // side maps sit this much higher than the Avengers map (side-by-side only)
@@ -325,11 +326,12 @@ const SIDE_MAPS_RAISE = 3600;   // side maps sit this much higher than the Aveng
 function multiverseDirections(){
 
     return isPortraitPhone()
-        ? { xmen: [-0.3, -1], spider: [0.3, 1] }
+        ? { xmen: [-0.3, -1], spider: [0.3, 1], animated: [0, 1] }
         // Computers and sideways phones: straight out to
         // each side of the Avengers map (they used to sit on
         // the diagonals, which left two empty corners).
-        : { xmen: [-1, 0], spider: [1, 0] };
+        // The Animated map fills the open space underneath.
+        : { xmen: [-1, 0], spider: [1, 0], animated: [0, 1] };
 
 }
 
@@ -422,7 +424,7 @@ export function layoutMultiverse(nodes){
         // little lower and the other two a little higher.)
         // Already clear of it side to side, so this can't
         // make them overlap.
-        if(!isPortraitPhone()) m.dy -= SIDE_MAPS_RAISE;
+        if(!isPortraitPhone() && w !== "animated") m.dy -= SIDE_MAPS_RAISE;
 
         m.boxes.forEach(b => placed.push({ minX: b.minX + m.dx, maxX: b.maxX + m.dx, minY: b.minY + m.dy, maxY: b.maxY + m.dy }));
 

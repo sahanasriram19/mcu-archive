@@ -1,0 +1,1079 @@
+[
+    {
+        "id": "spiderman1967",
+        "title": "Spider-Man (1967)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1967-09-09",
+        "timeline": 1,
+        "colour": "214,160,90",
+        "characters": [
+            "Peter Parker",
+            "J. Jonah Jameson"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderwoman1979",
+        "title": "Spider-Woman",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1979-09-22",
+        "timeline": 2,
+        "colour": "214,160,90",
+        "characters": [
+            "Jessica Drew"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman1981",
+        "title": "Spider-Man (1981)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1981-09-12",
+        "timeline": 3,
+        "colour": "214,160,90",
+        "characters": [
+            "Peter Parker",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanamazingfriends",
+        "title": "Spider-Man and His Amazing Friends",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1981-09-12",
+        "timeline": 4,
+        "colour": "214,160,90",
+        "characters": [
+            "Peter Parker",
+            "Iceman",
+            "Firestar"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "incrediblehulk1982",
+        "title": "The Incredible Hulk (1982)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1982-09-18",
+        "timeline": 5,
+        "colour": "214,160,90",
+        "characters": [
+            "Bruce Banner",
+            "Rick Jones"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "xmen1992",
+        "title": "X-Men (1992)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1992-10-31",
+        "timeline": 6,
+        "colour": "214,160,90",
+        "characters": [
+            "Wolverine",
+            "Cyclops",
+            "Storm",
+            "Jean Grey",
+            "Rogue",
+            "Gambit",
+            "Beast",
+            "Charles Xavier",
+            "Magneto"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour1994",
+        "title": "Fantastic Four (1994)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1994-09-24",
+        "timeline": 7,
+        "colour": "214,160,90",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironman1994",
+        "title": "Iron Man (1994)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1994-09-24",
+        "timeline": 8,
+        "colour": "214,160,90",
+        "characters": [
+            "Tony Stark",
+            "War Machine",
+            "The Mandarin"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman1994",
+        "title": "Spider-Man (1994)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1994-11-19",
+        "timeline": 9,
+        "colour": "214,160,90",
+        "characters": [
+            "Peter Parker",
+            "Mary Jane Watson",
+            "Kingpin",
+            "Venom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "incrediblehulk1996",
+        "title": "The Incredible Hulk (1996)",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1996-09-08",
+        "timeline": 10,
+        "colour": "214,160,90",
+        "characters": [
+            "Bruce Banner",
+            "She-Hulk"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "silversurfer1998",
+        "title": "Silver Surfer",
+        "type": "show",
+        "phase": 31,
+        "saga": "marvel-animation",
+        "release": "1998-02-07",
+        "timeline": 11,
+        "colour": "214,160,90",
+        "characters": [
+            "Silver Surfer",
+            "Galactus",
+            "Thanos"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanunlimited",
+        "title": "Spider-Man Unlimited",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "1999-10-02",
+        "timeline": 12,
+        "colour": "120,170,90",
+        "characters": [
+            "Peter Parker",
+            "Venom",
+            "Carnage"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengersuts",
+        "title": "The Avengers: United They Stand",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "1999-10-30",
+        "timeline": 13,
+        "colour": "120,170,90",
+        "characters": [
+            "Ant-Man",
+            "Wasp",
+            "Vision",
+            "Hawkeye"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "xmenevolution",
+        "title": "X-Men: Evolution",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "2000-11-04",
+        "timeline": 14,
+        "colour": "120,170,90",
+        "characters": [
+            "Cyclops",
+            "Jean Grey",
+            "Wolverine",
+            "Rogue",
+            "Charles Xavier",
+            "Magneto"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfourwgh",
+        "title": "Fantastic Four: World's Greatest Heroes",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "2006-09-02",
+        "timeline": 15,
+        "colour": "120,170,90",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "wolverinexmen",
+        "title": "Wolverine and the X-Men",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "2009-01-23",
+        "timeline": 16,
+        "colour": "120,170,90",
+        "characters": [
+            "Wolverine",
+            "Charles Xavier",
+            "Cyclops",
+            "Storm",
+            "Magneto"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironmanarmored",
+        "title": "Iron Man: Armored Adventures",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "2009-04-24",
+        "timeline": 17,
+        "colour": "120,170,90",
+        "characters": [
+            "Tony Stark",
+            "War Machine",
+            "Pepper Potts"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "superherosquad",
+        "title": "The Super Hero Squad Show",
+        "type": "show",
+        "phase": 32,
+        "saga": "marvel-animation",
+        "release": "2009-09-14",
+        "timeline": 18,
+        "colour": "120,170,90",
+        "characters": [
+            "Tony Stark",
+            "Silver Surfer",
+            "Wolverine",
+            "Thor",
+            "Bruce Banner"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengersemh",
+        "title": "The Avengers: Earth's Mightiest Heroes",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2010-10-20",
+        "timeline": 19,
+        "colour": "70,140,235",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor",
+            "Bruce Banner",
+            "Ant-Man",
+            "Wasp"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ultimatespiderman",
+        "title": "Ultimate Spider-Man",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2012-04-01",
+        "timeline": 20,
+        "colour": "70,140,235",
+        "characters": [
+            "Peter Parker",
+            "Nick Fury",
+            "White Tiger",
+            "Nova",
+            "Miles Morales"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengersassemble",
+        "title": "Avengers Assemble",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2013-05-26",
+        "timeline": 21,
+        "colour": "70,140,235",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor",
+            "Bruce Banner",
+            "Falcon"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "hulksmash",
+        "title": "Hulk and the Agents of S.M.A.S.H.",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2013-08-11",
+        "timeline": 22,
+        "colour": "70,140,235",
+        "characters": [
+            "Bruce Banner",
+            "She-Hulk",
+            "Red Hulk",
+            "A-Bomb",
+            "Skaar"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironmanhulkheroes",
+        "title": "Iron Man & Hulk: Heroes United",
+        "type": "special",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2013-12-03",
+        "timeline": 23,
+        "colour": "240,180,60",
+        "characters": [
+            "Tony Stark",
+            "Bruce Banner"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironmancapheroes",
+        "title": "Iron Man & Captain America: Heroes United",
+        "type": "special",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2014-07-29",
+        "timeline": 24,
+        "colour": "240,180,60",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "gotgshorts",
+        "title": "Guardians of the Galaxy (Shorts)",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2015-09-05",
+        "timeline": 25,
+        "colour": "240,180,60",
+        "characters": [
+            "Peter Quill",
+            "Rocket",
+            "Groot"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "gotgseries",
+        "title": "Guardians of the Galaxy (2015)",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2015-09-26",
+        "timeline": 26,
+        "colour": "70,140,235",
+        "characters": [
+            "Peter Quill",
+            "Gamora",
+            "Drax",
+            "Rocket",
+            "Groot"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ultimatecomics",
+        "title": "Marvel Ultimate Comics",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2016-01-01",
+        "timeline": 27,
+        "colour": "240,180,60",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "funkoshorts",
+        "title": "Marvel Funko Shorts",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2016-06-01",
+        "timeline": 28,
+        "colour": "240,180,60",
+        "characters": [
+            "Peter Parker",
+            "Tony Stark",
+            "Rocket",
+            "Groot",
+            "Deadpool"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "hulkmonsters",
+        "title": "Hulk: Where Monsters Dwell",
+        "type": "special",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2016-10-21",
+        "timeline": 29,
+        "colour": "240,180,60",
+        "characters": [
+            "Bruce Banner",
+            "Stephen Strange"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "superheroadventures",
+        "title": "Marvel Super Hero Adventures",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2017-06-01",
+        "timeline": 30,
+        "colour": "240,180,60",
+        "characters": [
+            "Peter Parker",
+            "Tony Stark",
+            "Steve Rogers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "antmanshorts",
+        "title": "Ant-Man (Shorts)",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2017-06-17",
+        "timeline": 31,
+        "colour": "240,180,60",
+        "characters": [
+            "Ant-Man",
+            "Wasp"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "secretwarsshorts",
+        "title": "Avengers: Secret Wars (Shorts)",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2017-06-18",
+        "timeline": 32,
+        "colour": "240,180,60",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Black Panther"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "rocketgroot",
+        "title": "Rocket & Groot",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2017-07-10",
+        "timeline": 33,
+        "colour": "240,180,60",
+        "characters": [
+            "Rocket",
+            "Groot"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "futureavengers",
+        "title": "Marvel Future Avengers",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2017-07-22",
+        "timeline": 34,
+        "colour": "70,140,235",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanshorts",
+        "title": "Spider-Man (Shorts)",
+        "type": "show",
+        "phase": 34,
+        "saga": "marvel-animation",
+        "release": "2017-08-05",
+        "timeline": 35,
+        "colour": "240,180,60",
+        "characters": [
+            "Peter Parker"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "marvelsspiderman",
+        "title": "Marvel's Spider-Man",
+        "type": "show",
+        "phase": 33,
+        "saga": "marvel-animation",
+        "release": "2017-08-19",
+        "timeline": 36,
+        "colour": "70,140,235",
+        "characters": [
+            "Peter Parker",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risinginitiation",
+        "title": "Marvel Rising: Initiation",
+        "type": "show",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2018-08-13",
+        "timeline": 37,
+        "colour": "200,90,230",
+        "characters": [
+            "Kamala Khan",
+            "Squirrel Girl",
+            "Ghost-Spider"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risingsecretwarriors",
+        "title": "Marvel Rising: Secret Warriors",
+        "type": "special",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2018-09-30",
+        "timeline": 38,
+        "colour": "200,90,230",
+        "characters": [
+            "Kamala Khan",
+            "Squirrel Girl",
+            "America Chavez"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "intospiderverse",
+        "title": "Spider-Man: Into the Spider-Verse",
+        "type": "movie",
+        "phase": 40,
+        "saga": "sony",
+        "release": "2018-12-14",
+        "timeline": 39,
+        "colour": "240,70,170",
+        "characters": [
+            "Miles Morales",
+            "Gwen Stacy (Spider-Gwen)"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risingchasingghosts",
+        "title": "Marvel Rising: Chasing Ghosts",
+        "type": "special",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2019-01-16",
+        "timeline": 40,
+        "colour": "200,90,230",
+        "characters": [
+            "Ghost-Spider",
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risingheartofiron",
+        "title": "Marvel Rising: Heart of Iron",
+        "type": "special",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2019-04-03",
+        "timeline": 41,
+        "colour": "200,90,230",
+        "characters": [
+            "Riri Williams",
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risingbattlebands",
+        "title": "Marvel Rising: Battle of the Bands",
+        "type": "special",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2019-08-28",
+        "timeline": 42,
+        "colour": "200,90,230",
+        "characters": [
+            "Ghost-Spider",
+            "Squirrel Girl"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risingoperationshuri",
+        "title": "Marvel Rising: Operation Shuri",
+        "type": "special",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2019-10-11",
+        "timeline": 43,
+        "colour": "200,90,230",
+        "characters": [
+            "Shuri",
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "risingplayingwithfire",
+        "title": "Marvel Rising: Playing with Fire",
+        "type": "special",
+        "phase": 35,
+        "saga": "marvel-animation",
+        "release": "2019-12-18",
+        "timeline": 44,
+        "colour": "200,90,230",
+        "characters": [
+            "Inferno",
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "legoclimate",
+        "title": "LEGO Marvel Avengers: Climate Conundrum",
+        "type": "show",
+        "phase": 37,
+        "saga": "marvel-animation",
+        "release": "2020-11-01",
+        "timeline": 45,
+        "colour": "250,200,40",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Thor"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "modok",
+        "title": "M.O.D.O.K.",
+        "type": "show",
+        "phase": 38,
+        "saga": "marvel-animation",
+        "release": "2021-05-21",
+        "timeline": 46,
+        "colour": "200,60,60",
+        "characters": [
+            "M.O.D.O.K."
+        ],
+        "poster": ""
+    },
+    {
+        "id": "meetspidey",
+        "title": "Meet Spidey and His Amazing Friends",
+        "type": "show",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2021-07-19",
+        "timeline": 47,
+        "colour": "80,200,220",
+        "characters": [
+            "Peter Parker",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spideyamazingfriends",
+        "title": "Spidey and His Amazing Friends",
+        "type": "show",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2021-08-06",
+        "timeline": 48,
+        "colour": "80,200,220",
+        "characters": [
+            "Peter Parker",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "whatif1",
+        "title": "What If...? (Season 1)",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2021-08-11",
+        "timeline": 49,
+        "colour": "230,60,80",
+        "characters": [
+            "The Watcher"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "hitmonkey",
+        "title": "Hit-Monkey",
+        "type": "show",
+        "phase": 38,
+        "saga": "marvel-animation",
+        "release": "2021-11-17",
+        "timeline": 50,
+        "colour": "200,60,60",
+        "characters": [
+            "Hit-Monkey"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "iamgroot1",
+        "title": "I Am Groot (Season 1)",
+        "type": "special",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2022-08-10",
+        "timeline": 51,
+        "colour": "230,60,80",
+        "characters": [
+            "Groot"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "moongirl",
+        "title": "Moon Girl and Devil Dinosaur",
+        "type": "show",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2023-02-10",
+        "timeline": 52,
+        "colour": "80,200,220",
+        "characters": [
+            "Lunella Lafayette",
+            "Devil Dinosaur"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "acrossspiderverse",
+        "title": "Spider-Man: Across the Spider-Verse",
+        "type": "movie",
+        "phase": 40,
+        "saga": "sony",
+        "release": "2023-06-02",
+        "timeline": 53,
+        "colour": "240,70,170",
+        "characters": [
+            "Miles Morales",
+            "Gwen Stacy (Spider-Gwen)"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "iamgroot2",
+        "title": "I Am Groot (Season 2)",
+        "type": "special",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2023-09-06",
+        "timeline": 54,
+        "colour": "230,60,80",
+        "characters": [
+            "Groot"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "legocodered",
+        "title": "LEGO Marvel Avengers: Code Red",
+        "type": "special",
+        "phase": 37,
+        "saga": "marvel-animation",
+        "release": "2023-10-27",
+        "timeline": 55,
+        "colour": "250,200,40",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers",
+            "Natasha Romanoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "whatif2",
+        "title": "What If...? (Season 2)",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2023-12-22",
+        "timeline": 56,
+        "colour": "230,60,80",
+        "characters": [
+            "The Watcher"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "xmen97",
+        "title": "X-Men '97",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2024-03-20",
+        "timeline": 57,
+        "colour": "230,60,80",
+        "characters": [
+            "Cyclops",
+            "Jean Grey",
+            "Storm",
+            "Wolverine",
+            "Rogue",
+            "Gambit",
+            "Magneto",
+            "Beast"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "legomissiondemolition",
+        "title": "LEGO Marvel Avengers: Mission Demolition",
+        "type": "special",
+        "phase": 37,
+        "saga": "marvel-animation",
+        "release": "2024-10-18",
+        "timeline": 58,
+        "colour": "250,200,40",
+        "characters": [
+            "Tony Stark",
+            "Steve Rogers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "whatif3",
+        "title": "What If...? (Season 3)",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2024-12-22",
+        "timeline": 59,
+        "colour": "230,60,80",
+        "characters": [
+            "The Watcher"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "yfnsm",
+        "title": "Your Friendly Neighborhood Spider-Man",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2025-01-29",
+        "timeline": 60,
+        "colour": "230,60,80",
+        "characters": [
+            "Peter Parker",
+            "Norman Osborn",
+            "Nico Minoru"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "meetironman",
+        "title": "Meet Iron Man and His Awesome Friends",
+        "type": "show",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2025-07-15",
+        "timeline": 61,
+        "colour": "80,200,220",
+        "characters": [
+            "Tony Stark",
+            "Riri Williams",
+            "Amadeus Cho"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "eyesofwakanda",
+        "title": "Eyes of Wakanda",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2025-08-01",
+        "timeline": 62,
+        "colour": "230,60,80",
+        "characters": [
+            "T'Challa"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironmanawesomefriends",
+        "title": "Iron Man and His Awesome Friends",
+        "type": "show",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2025-08-12",
+        "timeline": 63,
+        "colour": "80,200,220",
+        "characters": [
+            "Tony Stark",
+            "Riri Williams",
+            "Amadeus Cho"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "marvelzombies",
+        "title": "Marvel Zombies",
+        "type": "show",
+        "phase": 39,
+        "saga": "marvel-studios",
+        "release": "2025-09-24",
+        "timeline": 64,
+        "colour": "230,60,80",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "spideyironmanteamup",
+        "title": "Spidey and Iron Man: Avengers Team-Up!",
+        "type": "special",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2025-10-17",
+        "timeline": 65,
+        "colour": "80,200,220",
+        "characters": [
+            "Peter Parker",
+            "Tony Stark",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "legostrangetails",
+        "title": "LEGO Marvel Avengers: Strange Tails",
+        "type": "show",
+        "phase": 37,
+        "saga": "marvel-animation",
+        "release": "2025-11-14",
+        "timeline": 66,
+        "colour": "250,200,40",
+        "characters": [
+            "Stephen Strange",
+            "Tony Stark"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "jeffsuperherofriends",
+        "title": "Jeff and His Super Hero Friends",
+        "type": "show",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2026-01-01",
+        "timeline": 67,
+        "colour": "80,200,220",
+        "characters": [
+            "Jeff the Land Shark"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spideyhalloweenteamup",
+        "title": "Spidey and the Avengers: Halloween Team-Up!",
+        "type": "special",
+        "phase": 36,
+        "saga": "marvel-animation",
+        "release": "2026-09-25",
+        "timeline": 68,
+        "colour": "80,200,220",
+        "characters": [
+            "Peter Parker",
+            "Miles Morales",
+            "Gwen Stacy",
+            "Tony Stark"
+        ],
+        "poster": ""
+    }
+]

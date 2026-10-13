@@ -8,16 +8,17 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 ## What it does
 
-The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each Phase — and each X-Men and Spider-Man era — opens with a title card (the MCU phases first, then the X-Men and Spider-Man eras), its films and series float past on either side, and a "Coming Soon" chapter closes it out. From about 60% of the way along (once the MCU phases are behind you), the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
+The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each Phase — and each X-Men, Spider-Man and Marvel Animation era — opens with a title card (the MCU phases first, then the X-Men, Spider-Man and Animation eras), its films and series float past on either side, and a "Coming Soon" chapter closes it out. From about 60% of the way along (once the MCU phases are behind you), the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
-- **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps tucked into the open space beside it (above and below on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
+- **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps on either side and the Marvel Animation map underneath (all stacked top to bottom on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
 - **MCU → All Posters** — every title from every world once, with no hub, branches or lines: just posters scattered far apart across a wide stretch of space (several screens across) to drag around and discover, worlds mixed together.
 - **Avengers World → Complete Avengers** — the MCU's own titles, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
 - **Phases** — six separate mini mind maps, one per phase (plus one for the Netflix *Defenders* shows), so you can compare each era's shape at a glance.
 - **Release Order** — a left-to-right timeline in real-world release order.
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
-- **X-Men World** — a second world in the same app: the Fox X-Men films plus *X-Men '97*, with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.
-- **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) and Tom Holland's MCU films, with *No Way Home* as the crossover. Same five views, grouped into eras.
+- **X-Men World** — a second world in the same app: the Fox X-Men films plus the X-Men cartoons (*X-Men* 1992, *X-Men: Evolution*, *Wolverine and the X-Men* and *X-Men '97*), with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.
+- **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) Tom Holland's MCU films, Sony's Spider-Man Universe (the *Venom* films, *Morbius*, *Madame Web*, *Kraven the Hunter*) and the Spider-Man cartoons on Disney+ (1967 to *Your Friendly Neighborhood Spider-Man* and *Spidey and His Amazing Friends*), with *No Way Home* as the crossover. Same five views, grouped into eras.
+- **Animated World** — every Marvel Animation series, short and special on Disney+: the classic cartoons, the 2000s and Disney XD shows, the shorts, *Marvel Rising*, Disney Junior, LEGO Marvel, *M.O.D.O.K.* and *Hit-Monkey*, and Marvel Studios Animation (*What If…?*, *X-Men '97*, *Eyes of Wakanda*, *Marvel Zombies*…). Same five views, grouped into eras. Cartoons that belong to the X-Men or Spider-Man worlds appear there too, under the same id.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
 Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. Clicking a poster flips it over into its details card (and back again when you close it). On a mouse, the countdown cards and small posters lean towards the cursor with a soft light. The countdown digits flip like a departure board (only the digits that change), the panel sections swing open on a hinge, and the whole site shifts in layers as you move the mouse: the landing hero, the fly-through (far chapters slide one way, near posters the other), and the archive (stars drift against the map, posters float a little above it, the panels follow slightly). Entering the archive is a hyperspace jump.
@@ -47,8 +48,9 @@ mcu-archive/
 │   └── marvel-logo.jpg           # the logo on the landing card and the mind map's centre
 ├── data/
 │   ├── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
-│   ├── xmen.json             # the X-Men world: Fox films + X-Men '97, grouped by era
-│   └── spiderman.json        # the Spider-Man world: Raimi, Amazing, Spider-Verse and Tom Holland films
+│   ├── xmen.json             # the X-Men world: Fox films + X-Men cartoons, grouped by era
+│   ├── spiderman.json        # the Spider-Man world: Raimi, Amazing, Spider-Verse, Tom Holland, Sony's Spider-Man Universe and the cartoons
+│   └── animated.json         # the Animated world: every Marvel Animation title on Disney+
 ├── css/
 │   ├── main.css
 │   ├── background.css
@@ -75,13 +77,13 @@ mcu-archive/
     ├── viewManager.js              # ties layout + edges + camera together per view
     ├── views.js                     # view registry (labels, default camera, phone framing)
     ├── responsive.js                 # decides phone vs desktop layouts (portrait / landscape)
-    ├── worlds.js                      # the three worlds (MCU / X-Men / Spider-Man) plus "all" for the combined map, era names, current world
+    ├── worlds.js                      # the four worlds (MCU / X-Men / Spider-Man / Animated) plus "all" for the combined map, era names, current world
     ├── universe.js                   # draws every layer each frame, background first
     ├── connections.js                 # renders the glowing connection lines (curved branches on the mind map)
     ├── nodes.js                        # renders poster nodes
     ├── nodeHitTest.js                   # works out which poster a click landed on
     ├── branchNodes.js                    # renders the labelled "Phase" hub circles
-    ├── hub.js                             # the logo at the centre of each mind map (Marvel / X-Men / Spider-Man)
+    ├── hub.js                             # the logo at the centre of each mind map (Marvel / X-Men / Spider-Man / Animation)
     ├── archive.js / archiveCore.js         # the central hub orb + view state
     ├── posters.js                           # TMDB lookups (poster, overview, rating, cast, trailer)
     ├── tmdbConfig.js                         # your TMDB API key goes here

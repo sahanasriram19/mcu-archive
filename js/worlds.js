@@ -1,24 +1,31 @@
 //==================================================
 // WORLDS
 //
-// The archive holds three worlds, each with its own data
+// The archive holds four worlds, each with its own data
 // file and its own set of views:
 //
 //   mcu   — data/mcu.json, grouped by Phase (0-6)
 //   xmen  — data/xmen.json, the Fox X-Men films plus
-//           Marvel Studios' X-Men '97, grouped by era
+//           the X-Men cartoons (X-Men '97 included),
+//           grouped by era
 //   spider — data/spiderman.json, the Raimi and Amazing
-//           Spider-Man films, Sony's animated Spider-Verse
-//           and Tom Holland's MCU films, grouped by era
+//           Spider-Man films, Sony's animated Spider-Verse,
+//           Tom Holland's MCU films, Sony's Spider-Man
+//           Universe (Venom…) and the Spider-Man cartoons,
+//           grouped by era
+//   animated — data/animated.json, every Marvel Animation
+//           series, short and special on Disney+, grouped
+//           by era
 //
 // Those were their own continuities; they're tied to the
-// MCU through the multiverse. Deadpool & Wolverine and
+// MCU through the multiverse. Deadpool & Wolverine,
 // Tom Holland's Spider-Man films (No Way Home is the
-// crossover) appear in two worlds.
+// crossover) and the cartoons appear in more than one
+// world — a shared title keeps the same id everywhere.
 //
-// X-Men eras use group numbers 11+ and Spider-Man eras
-// 21+ (in each file's "phase" field) so they can never be
-// mistaken for an MCU phase — the colour tables in
+// X-Men eras use group numbers 11+, Spider-Man eras 21+
+// and Animated eras 31+ (in each file's "phase" field)
+// so they can never be mistaken for an MCU phase — the colour tables in
 // branchNodes.js key off the same numbers.
 //==================================================
 
@@ -40,6 +47,12 @@ export const WORLDS = {
         key: "spider",
         label: "Spider-Man",
         file: "./data/spiderman.json"
+    },
+
+    animated: {
+        key: "animated",
+        label: "Animated",
+        file: "./data/animated.json"
     }
 
 };
@@ -51,7 +64,7 @@ export const XMEN_ERAS = {
     12: "Wolverine",
     13: "First Class Saga",
     14: "Deadpool",
-    15: "New Mutants & '97"
+    15: "Animated X-Men"
 
 };
 
@@ -61,7 +74,27 @@ export const SPIDER_ERAS = {
     21: "Raimi Trilogy",
     22: "The Amazing Spider-Man",
     23: "Spider-Verse",
-    24: "MCU Spider-Man"
+    24: "MCU Spider-Man",
+    25: "Sony's Spider-Man Universe",
+    26: "Classic Cartoons",
+    27: "Modern Cartoons",
+    28: "Spidey & Friends"
+
+};
+
+// Marvel Animation eras, keyed by the number in animated.json.
+export const ANIMATED_ERAS = {
+
+    31: "Classic Cartoons",
+    32: "2000s Cartoons",
+    33: "Disney XD Era",
+    34: "Shorts & Features",
+    35: "Marvel Rising",
+    36: "Disney Junior",
+    37: "LEGO Marvel",
+    38: "Adult Animation",
+    39: "Marvel Studios",
+    40: "Spider-Verse"
 
 };
 
@@ -74,11 +107,11 @@ export const MCU_GROUP_NAMES = {
 
 };
 
-const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS };
+const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS, ...ANIMATED_ERAS };
 
 // "all" is the combined map (the "Complete MCU" view):
 // every world's mind map side by side on one canvas. It
-// has no data file of its own — it shows the other three.
+// has no data file of its own — it shows all the others.
 export const ALL_WORLDS = "all";
 
 let currentWorld = "mcu";

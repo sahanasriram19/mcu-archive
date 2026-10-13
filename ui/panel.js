@@ -255,7 +255,33 @@ const SECTIONS = [
             { label: "Spider-Gwen", character: "Gwen Stacy (Spider-Gwen)" },
             { label: "Green Goblin", character: "Norman Osborn" },
             { label: "Doctor Octopus", character: "Otto Octavius" },
-            { label: "Harry Osborn", character: "Harry Osborn" }
+            { label: "Harry Osborn", character: "Harry Osborn" },
+            { label: "Animated Spider-Man", character: "Peter Parker (Animated)", journey: "Animated Spider-Man's Journey" },
+            { label: "Venom", character: "Eddie Brock" }
+        ]
+    },
+
+    {
+        world: "animated",
+        title: "Animated World",
+        labels: {
+            complete: "Complete Animated",
+            phases: "Eras",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            { label: "Spider-Man", character: "Peter Parker" },
+            { label: "Iron Man", character: "Tony Stark" },
+            { label: "Captain America", character: "Steve Rogers" },
+            { label: "Hulk", character: "Bruce Banner" },
+            { label: "Thor", character: "Thor" },
+            { label: "Wolverine", character: "Wolverine" },
+            { label: "Miles Morales", character: "Miles Morales" },
+            { label: "Ms. Marvel", character: "Kamala Khan" },
+            { label: "Groot", character: "Groot" },
+            { label: "The Watcher", character: "The Watcher" }
         ]
     }
 
@@ -264,7 +290,7 @@ const SECTIONS = [
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
-const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man" };
+const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", animated: "Animated" };
 
 const sectionEls = [];
 

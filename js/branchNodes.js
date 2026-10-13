@@ -31,13 +31,29 @@ export const PHASE_COLOURS = {
     12: "240,160,40",   // Wolverine — amber
     13: "40,190,170",   // First Class Saga — teal
     14: "225,45,60",    // Deadpool — red
-    15: "150,110,240",  // New Mutants & '97 — violet
+    15: "150,110,240",  // Animated X-Men — violet
 
     // Spider-Man eras (js/worlds.js)
     21: "220,45,55",    // Raimi Trilogy — red
     22: "40,120,230",   // The Amazing Spider-Man — blue
     23: "240,70,170",   // Spider-Verse — magenta
-    24: "255,190,60"    // MCU Spider-Man (Tom Holland) — gold
+    24: "255,190,60",   // MCU Spider-Man (Tom Holland) — gold
+    25: "120,120,135",  // Sony's Spider-Man Universe — symbiote grey
+    26: "235,95,60",    // Classic Cartoons — orange
+    27: "60,170,240",   // Modern Cartoons — sky blue
+    28: "255,120,190",  // Spidey & Friends — pink
+
+    // Animated eras (js/worlds.js)
+    31: "214,160,90",   // Classic Cartoons — tan
+    32: "120,170,90",   // 2000s Cartoons — olive
+    33: "70,140,235",   // Disney XD Era — blue
+    34: "240,180,60",   // Shorts & Features — amber
+    35: "200,90,230",   // Marvel Rising — purple
+    36: "80,200,220",   // Disney Junior — cyan
+    37: "250,200,40",   // LEGO Marvel — yellow
+    38: "200,60,60",    // Adult Animation — crimson
+    39: "230,60,80",    // Marvel Studios Animation — red
+    40: "240,70,170"    // Spider-Verse — magenta
 
 };
 
@@ -66,12 +82,27 @@ export const HIGHLIGHT_COLOURS = {
     12: "255,176,40",   // Wolverine
     13: "40,220,195",   // First Class Saga
     14: "255,60,80",    // Deadpool
-    15: "180,120,255",  // New Mutants & '97
+    15: "180,120,255",  // Animated X-Men
 
     21: "255,70,80",    // Raimi Trilogy
     22: "70,150,255",   // The Amazing Spider-Man
     23: "255,90,190",   // Spider-Verse
-    24: "255,200,70"    // MCU Spider-Man
+    24: "255,200,70",   // MCU Spider-Man
+    25: "170,175,195",  // Sony's Spider-Man Universe
+    26: "255,120,60",   // Classic Cartoons
+    27: "60,200,255",   // Modern Cartoons
+    28: "255,130,210",  // Spidey & Friends
+
+    31: "235,180,100",  // Classic Cartoons
+    32: "150,220,90",   // 2000s Cartoons
+    33: "80,150,255",   // Disney XD Era
+    34: "255,190,50",   // Shorts & Features
+    35: "215,100,255",  // Marvel Rising
+    36: "70,225,240",   // Disney Junior
+    37: "255,225,40",   // LEGO Marvel
+    38: "255,70,70",    // Adult Animation
+    39: "255,60,90",    // Marvel Studios Animation
+    40: "255,90,190"    // Spider-Verse
 
 };
 

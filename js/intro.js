@@ -125,14 +125,15 @@ const jitter = (i, salt) => {
 };
 
 // Order of the worlds along the trail.
-const WORLD_ORDER = { mcu: 0, xmen: 1, spider: 2 };
+const WORLD_ORDER = { mcu: 0, xmen: 1, spider: 2, animated: 3 };
 
 // The small line above each chapter title.
 const WORLD_KICKERS = {
 
     mcu: "The Marvel Cinematic Universe",
     xmen: "The X-Men",
-    spider: "Spider-Man"
+    spider: "Spider-Man",
+    animated: "Marvel Animation"
 
 };
 
@@ -269,7 +270,8 @@ export function initIntro(nodes, onEnter){
             members: members.sort((a, b) => a.release.localeCompare(b.release))
         }))
         // MCU phases first, then the X-Men eras, then the
-        // Spider-Man eras — each in the order they began.
+        // Spider-Man eras, then Marvel Animation — each in
+        // the order they began.
         .sort((a, b) =>
             (WORLD_ORDER[a.members[0].world] ?? 9) - (WORLD_ORDER[b.members[0].world] ?? 9) ||
             a.members[0].release.localeCompare(b.members[0].release));

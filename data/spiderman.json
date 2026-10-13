@@ -213,5 +213,313 @@
             "acrossspiderverse"
         ],
         "poster": ""
+    },
+    {
+        "id": "venom1",
+        "title": "Venom",
+        "type": "movie",
+        "phase": 25,
+        "saga": "sony",
+        "release": "2018-10-05",
+        "timeline": 15,
+        "colour": "120,120,135",
+        "characters": [
+            "Eddie Brock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "venom2",
+        "title": "Venom: Let There Be Carnage",
+        "type": "movie",
+        "phase": 25,
+        "saga": "sony",
+        "release": "2021-10-01",
+        "timeline": 16,
+        "colour": "120,120,135",
+        "characters": [
+            "Eddie Brock",
+            "Cletus Kasady"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "morbius",
+        "title": "Morbius",
+        "type": "movie",
+        "phase": 25,
+        "saga": "sony",
+        "release": "2022-04-01",
+        "timeline": 17,
+        "colour": "120,120,135",
+        "characters": [
+            "Michael Morbius"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "madameweb",
+        "title": "Madame Web",
+        "type": "movie",
+        "phase": 25,
+        "saga": "sony",
+        "release": "2024-02-14",
+        "timeline": 13,
+        "colour": "120,120,135",
+        "characters": [
+            "Cassandra Webb"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "venom3",
+        "title": "Venom: The Last Dance",
+        "type": "movie",
+        "phase": 25,
+        "saga": "sony",
+        "release": "2024-10-25",
+        "timeline": 18,
+        "colour": "120,120,135",
+        "characters": [
+            "Eddie Brock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "kraven",
+        "title": "Kraven the Hunter",
+        "type": "movie",
+        "phase": 25,
+        "saga": "sony",
+        "release": "2024-12-13",
+        "timeline": 14,
+        "colour": "120,120,135",
+        "characters": [
+            "Sergei Kravinoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman1967",
+        "title": "Spider-Man (1967)",
+        "type": "show",
+        "phase": 26,
+        "saga": "marvel-animation",
+        "release": "1967-09-09",
+        "timeline": 19,
+        "colour": "235,95,60",
+        "characters": [
+            "Peter Parker (Animated)",
+            "J. Jonah Jameson"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderwoman1979",
+        "title": "Spider-Woman",
+        "type": "show",
+        "phase": 26,
+        "saga": "marvel-animation",
+        "release": "1979-09-22",
+        "timeline": 20,
+        "colour": "235,95,60",
+        "characters": [
+            "Jessica Drew"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman1981",
+        "title": "Spider-Man (1981)",
+        "type": "show",
+        "phase": 26,
+        "saga": "marvel-animation",
+        "release": "1981-09-12",
+        "timeline": 21,
+        "colour": "235,95,60",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanamazingfriends",
+        "title": "Spider-Man and His Amazing Friends",
+        "type": "show",
+        "phase": 26,
+        "saga": "marvel-animation",
+        "release": "1981-09-12",
+        "timeline": 22,
+        "colour": "235,95,60",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Iceman",
+            "Firestar"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spiderman1994",
+        "title": "Spider-Man (1994)",
+        "type": "show",
+        "phase": 26,
+        "saga": "marvel-animation",
+        "release": "1994-11-19",
+        "timeline": 23,
+        "colour": "235,95,60",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Mary Jane Watson",
+            "Kingpin",
+            "Venom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanunlimited",
+        "title": "Spider-Man Unlimited",
+        "type": "show",
+        "phase": 26,
+        "saga": "marvel-animation",
+        "release": "1999-10-02",
+        "timeline": 24,
+        "colour": "235,95,60",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Venom",
+            "Carnage"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ultimatespiderman",
+        "title": "Ultimate Spider-Man",
+        "type": "show",
+        "phase": 27,
+        "saga": "marvel-animation",
+        "release": "2012-04-01",
+        "timeline": 25,
+        "colour": "60,170,240",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Nick Fury",
+            "White Tiger",
+            "Nova",
+            "Miles Morales"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spidermanshorts",
+        "title": "Spider-Man (Shorts)",
+        "type": "show",
+        "phase": 27,
+        "saga": "marvel-animation",
+        "release": "2017-08-05",
+        "timeline": 26,
+        "colour": "60,170,240",
+        "characters": [
+            "Peter Parker (Animated)"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "marvelsspiderman",
+        "title": "Marvel's Spider-Man",
+        "type": "show",
+        "phase": 27,
+        "saga": "marvel-animation",
+        "release": "2017-08-19",
+        "timeline": 27,
+        "colour": "60,170,240",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "meetspidey",
+        "title": "Meet Spidey and His Amazing Friends",
+        "type": "show",
+        "phase": 28,
+        "saga": "marvel-animation",
+        "release": "2021-07-19",
+        "timeline": 28,
+        "colour": "255,120,190",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spideyamazingfriends",
+        "title": "Spidey and His Amazing Friends",
+        "type": "show",
+        "phase": 28,
+        "saga": "marvel-animation",
+        "release": "2021-08-06",
+        "timeline": 29,
+        "colour": "255,120,190",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "yfnsm",
+        "title": "Your Friendly Neighborhood Spider-Man",
+        "type": "show",
+        "phase": 27,
+        "saga": "marvel-animation",
+        "release": "2025-01-29",
+        "timeline": 30,
+        "colour": "60,170,240",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Norman Osborn",
+            "Nico Minoru"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spideyironmanteamup",
+        "title": "Spidey and Iron Man: Avengers Team-Up!",
+        "type": "special",
+        "phase": 28,
+        "saga": "marvel-animation",
+        "release": "2025-10-17",
+        "timeline": 31,
+        "colour": "255,120,190",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Tony Stark",
+            "Miles Morales",
+            "Gwen Stacy"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "spideyhalloweenteamup",
+        "title": "Spidey and the Avengers: Halloween Team-Up!",
+        "type": "special",
+        "phase": 28,
+        "saga": "marvel-animation",
+        "release": "2026-09-25",
+        "timeline": 32,
+        "colour": "255,120,190",
+        "characters": [
+            "Peter Parker (Animated)",
+            "Miles Morales",
+            "Gwen Stacy",
+            "Tony Stark"
+        ],
+        "poster": ""
     }
 ]
