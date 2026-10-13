@@ -334,9 +334,9 @@ export function layoutComplete(nodes){
 //--------------------------------------------------
 // COMPLETE MCU (all worlds) — the Avengers mind map exactly
 // in the middle, as on its own, with the other four maps on
-// the four corners round it: X-Men top left, Spider-Man top
-// right, Marvel Animation bottom left, Marvel Unscripted
-// bottom right — and the Fantastic Four straight above it,
+// the four corners round it: X-Men top left, Marvel
+// Unscripted top right, Marvel Animation bottom left,
+// Spider-Man bottom right — and the Fantastic Four straight above it,
 // in the middle of the top. Each is its own map round its own
 // logo — not joined to the Avengers branches.
 //
@@ -353,10 +353,10 @@ const MULTIVERSE_STEP = 150;    // how far the corners move out per try
 
 // Which corner each map sits in: [across, up/down].
 const MULTIVERSE_CORNERS = {
-    xmen:     [-1, -1],
-    spider:   [ 1, -1],
+    xmen:       [-1, -1],
+    unscripted: [ 1, -1],
     animated:   [-1,  1],
-    unscripted: [ 1,  1]
+    spider:     [ 1,  1]
 };
 
 // The one map that sits straight above the Avengers map.
