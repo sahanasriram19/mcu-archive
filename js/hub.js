@@ -35,13 +35,19 @@ function drawHub(ctx, camera, hub){
     // the same size so the branches meet it the same way.
     const plate = WORLD_PLATES[hub.world];
 
-    if(plate){
+    const pic = plate ? plateImage(plate) : null;
 
-        const pic = plateImage(plate);
+    if(pic){
 
-        if(pic) drawFitted(ctx, pic, x, y, width, height);
+        drawFitted(ctx, pic, x, y, width, height);
 
-        else drawCachedPlate(ctx, x, y, width, height, plate);
+        return;
+
+    }
+
+    if(plate && !plate.marvelFallback){
+
+        drawCachedPlate(ctx, x, y, width, height, plate);
 
         return;
 
@@ -77,12 +83,13 @@ const WORLD_PLATES = {
 
     xmen:   { image: "assets/xmen-logo.png", text: "X-MEN",      top: "#1c2a5e", bottom: "#0d1433", rim: "250,204,21", ink: "rgb(250,204,21)" },
     spider: { image: "assets/spiderman-logo.png", text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" },
-    // No picture yet — add `image: "assets/fantasticfour-logo.png"`
-    // once there's a Fantastic Four logo in the assets folder.
-    ff:     { text: "FANTASTIC FOUR", top: "#1d4fb0", bottom: "#0b2257", rim: "255,255,255", ink: "#ffffff" },
+    // Until assets/fantasticfour-logo.png exists, the plain
+    // "FANTASTIC FOUR" plate shows instead.
+    ff:     { image: "assets/fantasticfour-logo.png", text: "FANTASTIC FOUR", top: "#1d4fb0", bottom: "#0b2257", rim: "255,255,255", ink: "#ffffff" },
+    // Until assets/animation-logo.png exists, the Marvel logo
+    // shows instead (marvelFallback), like the Avengers map.
+    animated: { image: "assets/animation-logo.png", marvelFallback: true },
     unscripted: { text: "UNSCRIPTED", top: "#2a2a2e", bottom: "#111114", rim: "230,170,60", ink: "#ffffff" }
-    // The Animated world has no plate: it uses the Marvel logo,
-    // like the Avengers map.
 
 };
 

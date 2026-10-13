@@ -404,7 +404,11 @@
     pointer-events: auto;
     cursor: pointer;
     background: linear-gradient(180deg, rgba(var(--c), .45), rgba(var(--c), .15));
-    box-shadow: 0 20px 40px rgba(0,0,0,.5);
+    /* No big soft drop shadow: posters are redrawn at their
+       new size every frame as they fly in (see .intro-item),
+       and a 40px blur round each one — growing with the
+       poster — was the slowest part of drawing the trail. */
+    box-shadow: 0 0 0 1px rgba(255,255,255,.06);
 }
 
 .intro-poster img {
@@ -439,7 +443,9 @@
     font-size: 14px;
     font-weight: 600;
     color: rgba(255,255,255,.85);
-    text-shadow: 0 2px 10px rgba(0,0,0,.8);
+    /* A tight shadow (a wide blur under every caption, every
+       frame, was costly). */
+    text-shadow: 0 1px 3px rgba(0,0,0,.9);
     pointer-events: none;
 }
 

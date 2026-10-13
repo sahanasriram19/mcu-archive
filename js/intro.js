@@ -89,10 +89,11 @@ const WORLD_CHAPTERS = [
 
 const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
 
-const FADE_IN_FAR = -3200;    // items appear from here (closer than before:
-                              // with posters in waves, a longer view ahead
-                              // showed a crowded queue of them)...
-const FADE_IN_NEAR = -2000;   // ...fully visible from here
+const FADE_IN_FAR = -2600;    // items appear from here (fairly close: with
+                              // posters in waves of four, a longer view
+                              // ahead meant 20+ posters on screen at once,
+                              // all redrawn every frame — the slowdown)...
+const FADE_IN_NEAR = -1700;   // ...fully visible from here
 
 // Chapter titles show from much further away, so the next
 // chapter is already glowing in the distance.
