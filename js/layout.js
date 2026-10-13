@@ -335,9 +335,9 @@ export function layoutComplete(nodes){
 // COMPLETE MCU (all worlds) — the Avengers mind map exactly
 // in the middle, as on its own, with the other four maps on
 // the four corners round it: X-Men top left, Spider-Man top
-// right, Marvel Animation bottom left, Fantastic Four bottom
-// right — and Marvel Unscripted straight above it, in the
-// middle of the top. Each is its own map round its own
+// right, Marvel Animation bottom left, Marvel Unscripted
+// bottom right — and the Fantastic Four straight above it,
+// in the middle of the top. Each is its own map round its own
 // logo — not joined to the Avengers branches.
 //
 // The corners are mirror images: every corner logo sits the
@@ -355,9 +355,12 @@ const MULTIVERSE_STEP = 150;    // how far the corners move out per try
 const MULTIVERSE_CORNERS = {
     xmen:     [-1, -1],
     spider:   [ 1, -1],
-    animated: [-1,  1],
-    ff:       [ 1,  1]
+    animated:   [-1,  1],
+    unscripted: [ 1,  1]
 };
+
+// The one map that sits straight above the Avengers map.
+const MULTIVERSE_TOP = "ff";
 
 // Poster boxes (plus the logo) of one map, round its own hub.
 function boxesOf(nodes, hubX = 0, hubY = 0){
@@ -466,10 +469,12 @@ export function layoutMultiverse(nodes){
 
     });
 
-    // Unscripted: straight up from the Avengers logo (so left
-    // and right stay mirror images), just far enough to clear
-    // every map already placed.
-    if(maps.unscripted){
+    // The top map: straight up from the Avengers logo (so
+    // left and right stay mirror images), just far enough to
+    // clear every map already placed.
+    const top = maps[MULTIVERSE_TOP];
+
+    if(top){
 
         const placed = [];
 
@@ -480,9 +485,9 @@ export function layoutMultiverse(nodes){
 
         let d = 0;
 
-        while(d < 60000 && boxesClash(maps.unscripted.boxes, placed, 0, -d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
+        while(d < 60000 && boxesClash(top.boxes, placed, 0, -d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
 
-        maps.unscripted.dy = -d;
+        top.dy = -d;
 
     }
 
