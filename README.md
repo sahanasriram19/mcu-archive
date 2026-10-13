@@ -8,7 +8,7 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 ## What it does
 
-The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each Phase — and each X-Men, Spider-Man and Marvel Animation era — opens with a title card (the MCU phases first, then the X-Men, Spider-Man and Animation eras), its films and series float past on either side, and a "Coming Soon" chapter closes it out. From about 60% of the way along (once the MCU phases are behind you), the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
+The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each world — the Avengers, X-Men, Spider-Man and Marvel Animation — opens with a title card, its films and series float past in small waves on either side (four at a time on a computer, two on a phone, each captioned with its year and phase or era), and a "Coming Soon" chapter closes it out. From about 60% of the way along, the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
 - **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps on either side and the Marvel Animation map underneath (all stacked top to bottom on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
 - **MCU → All Posters** — every title from every world once, with no hub, branches or lines: just posters scattered far apart across a wide stretch of space (several screens across) to drag around and discover, worlds mixed together.
@@ -83,7 +83,7 @@ mcu-archive/
     ├── nodes.js                        # renders poster nodes
     ├── nodeHitTest.js                   # works out which poster a click landed on
     ├── branchNodes.js                    # renders the labelled "Phase" hub circles
-    ├── hub.js                             # the logo at the centre of each mind map (Marvel / X-Men / Spider-Man / Animation)
+    ├── hub.js                             # the logo at the centre of each mind map (Marvel for the Avengers and Animated maps / X-Men / Spider-Man)
     ├── archive.js / archiveCore.js         # the central hub orb + view state
     ├── posters.js                           # TMDB lookups (poster, overview, rating, cast, trailer)
     ├── tmdbConfig.js                         # your TMDB API key goes here

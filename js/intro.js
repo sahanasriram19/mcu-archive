@@ -2,16 +2,16 @@
 // 3D FLY-THROUGH INTRO
 //
 // Scrolling the landing page flies a camera forward
-// through space. Each MCU phase — and each X-Men and
-// Spider-Man era — opens with a chapter title in its
-// colour; its titles then float past on alternating sides,
-// angled towards you. The MCU phases come first, in the
-// order they began (so the Netflix "Defenders" shows sit
-// between Phase 2 and Phase 3), then the X-Men eras, then
-// the Spider-Man eras, and a final "Coming soon" chapter
-// holds the titles not out yet. A title that belongs to two
+// through space. Each world — the Avengers (MCU), X-Men,
+// Spider-Man and Marvel Animation — opens with a chapter
+// title in its colour; its titles then float past in small
+// waves (four at a time on a computer, two on a phone),
+// angled towards you, phase by phase or era by era (each
+// caption names it). A final "Coming soon" chapter holds
+// the titles not out yet. A title that belongs to two
 // worlds (Deadpool & Wolverine, Tom Holland's Spider-Man
-// films) appears once, in its MCU phase. At the end, the
+// films, the cartoons) appears once, in the first world
+// that has it. At the end, the
 // way into the archive appears.
 //
 // How it works: #landing is a scroll container. Its
@@ -29,7 +29,6 @@
 import { camera } from "./camera.js";
 import { showMovieDetails } from "./movieDetails.js";
 import { groupName } from "./worlds.js";
-import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 import { isUpcoming } from "./upcoming.js";
 import { warmPosters } from "./nodes.js";
 
@@ -49,22 +48,46 @@ const beacon = endEl.querySelector(".portal-beacon");
 //--------------------------------------------------
 
 const START_GAP = 1500;       // depth before the first chapter
-const CHAPTER_GAP = 1300;     // chapter title -> its first poster
-const POSTER_GAP = 430;       // poster -> poster
+const CHAPTER_GAP = 1300;     // chapter title -> its first wave of posters
+const WAVE_GAP = 760;         // one wave of posters -> the next
+const WAVE_STAGGER = 120;     // posters within a wave sit this far apart in depth
 const GROUP_GAP = 700;        // extra space before the next chapter
-
-// Very short chapters (this many titles or fewer) space
-// their posters a little further apart than the rest.
-const SPREAD_UP_TO = 3;
-const SHORT_POSTER_GAP = 750;   // (normal: POSTER_GAP)
 const END_GAP = 900;          // after the last poster
+
+// Posters fly past in small waves rather than one at a
+// time, which keeps the trail short now that it holds
+// every world. Each slot is [xFrac, yFrac]: how far out
+// from the middle (share of the screen width; minus is
+// left) and how far up or down (share of the height).
+// Computers get waves of four, phones waves of two.
+const WAVE_SLOTS_WIDE = [
+    [-0.22, -0.17],
+    [ 0.22,  0.17],
+    [-0.4,   0.19],
+    [ 0.4,  -0.19]
+];
+
+const WAVE_SLOTS_NARROW = [
+    [-0.2, -0.11],
+    [ 0.2,  0.11]
+];
+
+// One chapter card per world, in this order.
+const WORLD_CHAPTERS = [
+    { world: "mcu",      title: "The Avengers", colour: "248,72,94" },
+    { world: "xmen",     title: "X-Men",        colour: "250,210,30" },
+    { world: "spider",   title: "Spider-Man",   colour: "70,150,255" },
+    { world: "animated", title: "Animation",    colour: "70,225,240" }
+];
 
 const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
 
-const FADE_IN_FAR = -4400;    // items appear from here...
-const FADE_IN_NEAR = -3000;   // ...fully visible from here
+const FADE_IN_FAR = -3200;    // items appear from here (closer than before:
+                              // with posters in waves, a longer view ahead
+                              // showed a crowded queue of them)...
+const FADE_IN_NEAR = -2000;   // ...fully visible from here
 
-// Phase titles show from much further away, so the next
+// Chapter titles show from much further away, so the next
 // chapter is already glowing in the distance.
 const CHAPTER_FADE_IN_FAR = -11000;
 const CHAPTER_FADE_IN_NEAR = -6000;
@@ -124,9 +147,6 @@ const jitter = (i, salt) => {
 
 };
 
-// Order of the worlds along the trail.
-const WORLD_ORDER = { mcu: 0, xmen: 1, spider: 2, animated: 3 };
-
 // The small line above each chapter title.
 const WORLD_KICKERS = {
 
@@ -181,8 +201,12 @@ function makePoster(node){
 
     el.querySelector(".intro-poster-title").textContent = node.title;
     el.querySelector(".intro-caption span").textContent = node.title;
+    // Year, plus the phase or era (the trail no longer has
+    // a chapter card for each one).
     el.querySelector(".intro-caption small").textContent =
-        isUpcoming(node) ? "Coming " + node.release.slice(0, 4) : node.release.slice(0, 4);
+        isUpcoming(node)
+            ? "Coming " + node.release.slice(0, 4)
+            : node.release.slice(0, 4) + " · " + groupName(node.phase, { upper: false });
 
     poster.addEventListener("click", () => showMovieDetails(node, { from: poster }));
 
@@ -259,57 +283,56 @@ export function initIntro(nodes, onEnter){
     const released = titles.filter(n => !isUpcoming(n));
     const upcoming = titles.filter(n => isUpcoming(n));
 
-    // Group by phase, in the order each phase began.
-    const byPhase = {};
+    // One chapter per world. Within a world, titles go phase
+    // by phase (or era by era), each in the order it began,
+    // then by release date.
+    const eraStart = {};
 
-    released.forEach(n => (byPhase[n.phase] = byPhase[n.phase] || []).push(n));
+    released.forEach(n => {
+        if(!eraStart[n.phase] || n.release < eraStart[n.phase]) eraStart[n.phase] = n.release;
+    });
 
-    const groups = Object.entries(byPhase)
-        .map(([phase, members]) => ({
-            phase: +phase,
-            members: members.sort((a, b) => a.release.localeCompare(b.release))
+    const groups = WORLD_CHAPTERS
+        .map(ch => ({
+            ...ch,
+            kicker: WORLD_KICKERS[ch.world],
+            members: released
+                .filter(n => n.world === ch.world)
+                .sort((a, b) =>
+                    eraStart[a.phase].localeCompare(eraStart[b.phase]) ||
+                    a.phase - b.phase ||
+                    a.release.localeCompare(b.release))
         }))
-        // MCU phases first, then the X-Men eras, then the
-        // Spider-Man eras, then Marvel Animation — each in
-        // the order they began.
-        .sort((a, b) =>
-            (WORLD_ORDER[a.members[0].world] ?? 9) - (WORLD_ORDER[b.members[0].world] ?? 9) ||
-            a.members[0].release.localeCompare(b.members[0].release));
+        .filter(g => g.members.length);
 
     if(upcoming.length){
 
         groups.push({
-            phase: null,
+            kicker: "Still to come",
+            title: "Coming Soon",
+            colour: "230,36,41",
             members: upcoming.sort((a, b) => a.release.localeCompare(b.release))
         });
 
     }
 
+    const slots = window.innerWidth >= 900 ? WAVE_SLOTS_WIDE : WAVE_SLOTS_NARROW;
+
     let depth = START_GAP;
 
     let lastChapterDepth = -Infinity;
-
-    let side = -1;
 
     let index = 0;
 
     groups.forEach(group => {
 
-        const colour = group.phase === null
-            ? "230,36,41"
-            : (HIGHLIGHT_COLOURS[group.phase] || "255,255,255");
-
-        const chapter = group.phase === null
-            ? makeChapter("Still to come", "Coming Soon", colour)
-            : makeChapter(WORLD_KICKERS[group.members[0].world] || WORLD_KICKERS.mcu, groupName(group.phase), colour);
+        const chapter = makeChapter(group.kicker, group.title, group.colour);
 
         stage.appendChild(chapter);
 
         // A chapter title waits until the one before it has
         // gone past before glowing in the distance, so two
-        // titles never sit on top of each other. Its fade-in
-        // keeps the same shape however long the wait (fully
-        // lit a little over halfway in, like the first phases).
+        // titles never sit on top of each other.
         const far = Math.max(CHAPTER_FADE_IN_FAR, lastChapterDepth + FADE_OUT_START - depth);
 
         items.push({
@@ -322,37 +345,36 @@ export function initIntro(nodes, onEnter){
 
         depth += CHAPTER_GAP;
 
-        // Only the very short chapters (2 or 3 titles) space
-        // their posters out a bit more; the rest keep the
-        // usual poster-to-poster spacing, like the big phases.
-        const n = group.members.length;
+        group.members.forEach((node, i) => {
 
-        const posterGap = n <= SPREAD_UP_TO ? SHORT_POSTER_GAP : POSTER_GAP;
+            const slot = i % slots.length;
 
-        group.members.forEach(node => {
+            // A new wave starts every few posters.
+            if(slot === 0 && i > 0) depth += WAVE_GAP;
 
             const { el, poster } = makePoster(node);
 
             stage.appendChild(el);
 
-            // Alternate left/right, all at the same height,
-            // with a little variety in how far out and how
-            // much each is angled.
-            const xFrac = side * (0.2 + jitter(index, 1) * 0.1);
-            const yFrac = 0;
-            const rot = -side * (14 + jitter(index, 3) * 10);
+            const [sx, sy] = slots[slot];
 
-            items.push({ el, poster, node, depth, xFrac, yFrac, rot, kind: "poster", imgSet: false });
+            // A little variety in how far out, how high and
+            // how much each is angled, so waves don't look
+            // stamped out.
+            const xFrac = sx + Math.sign(sx) * jitter(index, 1) * 0.05;
+            const yFrac = sy + (jitter(index, 2) - 0.5) * 0.06;
+            const rot = -Math.sign(sx) * (14 + jitter(index, 3) * 10);
 
-            depth += posterGap;
-
-            side = -side;
+            items.push({
+                el, poster, node, depth: depth + slot * WAVE_STAGGER,
+                xFrac, yFrac, rot, kind: "poster", imgSet: false
+            });
 
             index++;
 
         });
 
-        depth += GROUP_GAP;
+        depth += (slots.length - 1) * WAVE_STAGGER + GROUP_GAP;
 
     });
 
