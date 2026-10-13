@@ -60,16 +60,20 @@ const END_GAP = 900;          // after the last poster
 // from the middle (share of the screen width; minus is
 // left) and how far up or down (share of the height).
 // Computers get waves of four, phones waves of two.
+// The two sides mirror each other: on each side an outer
+// row up high and an inner row down low. Slots come in
+// left/right pairs, and both posters of a pair sit at the
+// same depth.
 const WAVE_SLOTS_WIDE = [
-    [-0.22, -0.17],
-    [ 0.22,  0.17],
-    [-0.4,   0.19],
-    [ 0.4,  -0.19]
+    [-0.4,  -0.19],
+    [ 0.4,  -0.19],
+    [-0.22,  0.17],
+    [ 0.22,  0.17]
 ];
 
 const WAVE_SLOTS_NARROW = [
-    [-0.2, -0.11],
-    [ 0.2,  0.11]
+    [-0.2, 0],
+    [ 0.2, 0]
 ];
 
 // One chapter card per world, in this order.
@@ -136,16 +140,6 @@ let onEnterCb = null;
 // map's posters were last warmed up (see warmPosters below).
 let mapNodes = [];
 let warmedAt = -1;
-
-// Deterministic "random" per index, so the scene is the
-// same on every visit.
-const jitter = (i, salt) => {
-
-    const v = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
-
-    return v - Math.floor(v);   // 0..1
-
-};
 
 // The small line above each chapter title.
 const WORLD_KICKERS = {
@@ -322,8 +316,6 @@ export function initIntro(nodes, onEnter){
 
     let lastChapterDepth = -Infinity;
 
-    let index = 0;
-
     groups.forEach(group => {
 
         const chapter = makeChapter(group.kicker, group.title, group.colour);
@@ -358,23 +350,20 @@ export function initIntro(nodes, onEnter){
 
             const [sx, sy] = slots[slot];
 
-            // A little variety in how far out, how high and
-            // how much each is angled, so waves don't look
-            // stamped out.
-            const xFrac = sx + Math.sign(sx) * jitter(index, 1) * 0.05;
-            const yFrac = sy + (jitter(index, 2) - 0.5) * 0.06;
-            const rot = -Math.sign(sx) * (14 + jitter(index, 3) * 10);
+            // Exactly mirrored left and right: same distance
+            // out, same height, same angle.
+            const xFrac = sx;
+            const yFrac = sy;
+            const rot = -Math.sign(sx) * 18;
 
             items.push({
-                el, poster, node, depth: depth + slot * WAVE_STAGGER,
+                el, poster, node, depth: depth + Math.floor(slot / 2) * WAVE_STAGGER,
                 xFrac, yFrac, rot, kind: "poster", imgSet: false
             });
 
-            index++;
-
         });
 
-        depth += (slots.length - 1) * WAVE_STAGGER + GROUP_GAP;
+        depth += Math.floor((slots.length - 1) / 2) * WAVE_STAGGER + GROUP_GAP;
 
     });
 
