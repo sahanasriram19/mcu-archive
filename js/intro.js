@@ -65,8 +65,8 @@ const END_GAP = 900;          // after the last poster
 // left/right pairs, and both posters of a pair sit at the
 // same depth.
 const WAVE_SLOTS_WIDE = [
-    [-0.4,  -0.19],
-    [ 0.4,  -0.19],
+    [-0.4,  -0.27],
+    [ 0.4,  -0.27],
     [-0.22,  0.17],
     [ 0.22,  0.17]
 ];
