@@ -1,7 +1,7 @@
 //==================================================
 // WORLDS
 //
-// The archive holds five worlds, each with its own data
+// The archive holds six worlds, each with its own data
 // file and its own set of views:
 //
 //   mcu   — data/mcu.json, grouped by Phase (0-6)
@@ -16,6 +16,9 @@
 //   ff    — data/fantasticfour.json, the Fantastic Four
 //           cartoons, Fox films and Marvel Studios films,
 //           grouped by era
+//   unscripted — data/unscripted.json, Marvel's unscripted
+//           documentaries and specials on Disney+ (Assembled,
+//           Legends, 616…), grouped by kind
 //   animated — data/animated.json, every Marvel Animation
 //           series, short and special on Disney+, grouped
 //           by era
@@ -27,8 +30,8 @@
 // world — a shared title keeps the same id everywhere.
 //
 // X-Men eras use group numbers 11+, Spider-Man eras 21+,
-// Animated eras 31+ and Fantastic Four eras 51+ (in each
-// file's "phase" field)
+// Animated eras 31+, Fantastic Four eras 51+ and
+// Unscripted groups 61+ (in each file's "phase" field)
 // so they can never be mistaken for an MCU phase — the colour tables in
 // branchNodes.js key off the same numbers.
 //==================================================
@@ -57,6 +60,12 @@ export const WORLDS = {
         key: "ff",
         label: "Fantastic Four",
         file: "./data/fantasticfour.json"
+    },
+
+    unscripted: {
+        key: "unscripted",
+        label: "Unscripted",
+        file: "./data/unscripted.json"
     },
 
     animated: {
@@ -119,6 +128,18 @@ export const FF_ERAS = {
 
 };
 
+// Marvel Unscripted groups, keyed by the number in unscripted.json.
+export const UNSCRIPTED_ERAS = {
+
+    61: "Docuseries",
+    62: "Specials",
+    63: "Assembled 2021",
+    64: "Assembled 2022",
+    65: "Assembled 2023",
+    66: "Assembled 2024"
+
+};
+
 // The MCU's "Phase 0" — the Netflix Defenders-saga shows
 // (Daredevil, Jessica Jones, Luke Cage…) — is shown by
 // name everywhere rather than as a phase number.
@@ -128,7 +149,7 @@ export const MCU_GROUP_NAMES = {
 
 };
 
-const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS, ...ANIMATED_ERAS, ...FF_ERAS };
+const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS, ...ANIMATED_ERAS, ...FF_ERAS, ...UNSCRIPTED_ERAS };
 
 // "all" is the combined map (the "Complete MCU" view):
 // every world's mind map side by side on one canvas. It

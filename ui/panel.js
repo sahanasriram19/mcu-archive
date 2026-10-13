@@ -282,6 +282,26 @@ const SECTIONS = [
     },
 
     {
+        world: "unscripted",
+        title: "Unscripted World",
+        labels: {
+            complete: "Complete Unscripted",
+            phases: "Groups",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            { label: "Stan Lee", character: "Stan Lee" },
+            { label: "Wanda Maximoff", character: "Wanda Maximoff" },
+            { label: "Loki", character: "Loki" },
+            { label: "Kamala Khan", character: "Kamala Khan" },
+            { label: "Carol Danvers", character: "Carol Danvers" },
+            { label: "Stephen Strange", character: "Stephen Strange" }
+        ]
+    },
+
+    {
         world: "animated",
         title: "Animated World",
         labels: {
@@ -310,7 +330,7 @@ const SECTIONS = [
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
-const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", ff: "Fantastic Four", animated: "Animated" };
+const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", ff: "Fantastic Four", unscripted: "Unscripted", animated: "Animated" };
 
 const sectionEls = [];
 

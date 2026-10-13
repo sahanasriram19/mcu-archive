@@ -37,6 +37,9 @@ function normalizeTitle(s) {
 
     return (s || "")
         .toLowerCase()
+        // "&" and "and" count as the same ("Jeff & His Super
+        // Hero Friends" / "Jeff and His Super Hero Friends").
+        .replace(/&/g, " and ")
         .replace(/[:.'’]/g, "")
         .replace(/[-–—]/g, " ")
         .replace(/\s+/g, " ")
@@ -359,7 +362,7 @@ async function fetchTrailer(endpoint, id) {
 // quietly falls back to searching like before.
 //--------------------------------------------------
 
-const CACHE_KEY = "mcu-archive:tmdb-lookups:v1";
+const CACHE_KEY = "mcu-archive:tmdb-lookups:v2";
 
 const HIT_TTL = 14 * 24 * 60 * 60 * 1000;
 const MISS_TTL = 24 * 60 * 60 * 1000;

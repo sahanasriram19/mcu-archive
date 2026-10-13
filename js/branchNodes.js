@@ -60,7 +60,15 @@ export const PHASE_COLOURS = {
     // Fantastic Four eras (js/worlds.js)
     51: "120,170,255",  // Cartoons — light blue
     52: "240,120,40",   // Fox Films — flame orange
-    53: "70,110,230"    // Marvel Studios — FF blue
+    53: "70,110,230",   // Marvel Studios — FF blue
+
+    // Marvel Unscripted groups (js/worlds.js)
+    61: "230,170,60",   // Docuseries — gold
+    62: "200,90,200",   // Specials — magenta
+    63: "230,60,80",    // Assembled 2021 — red
+    64: "90,150,240",   // Assembled 2022 — blue
+    65: "60,190,150",   // Assembled 2023 — teal
+    66: "240,120,50"    // Assembled 2024 — orange
 
 };
 
@@ -115,7 +123,14 @@ export const HIGHLIGHT_COLOURS = {
 
     51: "130,190,255",  // Cartoons
     52: "255,130,40",   // Fox Films
-    53: "80,130,255"    // Marvel Studios
+    53: "80,130,255",   // Marvel Studios
+
+    61: "255,190,60",   // Docuseries
+    62: "225,100,235",  // Specials
+    63: "255,70,90",    // Assembled 2021
+    64: "90,160,255",   // Assembled 2022
+    65: "60,225,170",   // Assembled 2023
+    66: "255,135,50"    // Assembled 2024
 
 };
 

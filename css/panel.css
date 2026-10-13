@@ -114,7 +114,7 @@
 }
 
 /* A small colour mark per world: Marvel red / X-Men gold /
-   Spider-Man blue / Fantastic Four white / Animated cyan. */
+   Spider-Man blue / Fantastic Four white / Unscripted amber / Animated cyan. */
 .view-panel-section-head span:first-child::before{
     content:"";
     display:inline-block;
@@ -138,17 +138,22 @@
     background:rgb(235,240,255);
 }
 
+.view-panel-section[data-world="unscripted"] .view-panel-section-head span:first-child::before{
+    background:rgb(230,170,60);
+}
+
 .view-panel-section[data-world="animated"] .view-panel-section-head span:first-child::before{
     background:rgb(80,200,220);
 }
 
-/* MCU (every world together): a five-colour mark for the
+/* MCU (every world together): a six-colour mark for the
    worlds it holds. */
 .view-panel-section[data-world="all"] .view-panel-section-head span:first-child::before{
     width:18px;
     height:7px;
     border-radius:4px;
-    background:linear-gradient(90deg, #e62429 0 20%, #facc15 20% 40%, #4696ff 40% 60%, #ebf0ff 60% 80%, #50c8dc 80%);
+    width:22px;
+    background:linear-gradient(90deg, #e62429 0 16.6%, #facc15 16.6% 33.3%, #4696ff 33.3% 50%, #ebf0ff 50% 66.6%, #e6aa3c 66.6% 83.3%, #50c8dc 83.3%);
 }
 
 .view-panel-section-chevron{

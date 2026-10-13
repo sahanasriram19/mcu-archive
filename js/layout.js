@@ -336,8 +336,9 @@ export function layoutComplete(nodes){
 // in the middle, as on its own, with the other four maps on
 // the four corners round it: X-Men top left, Spider-Man top
 // right, Marvel Animation bottom left, Fantastic Four bottom
-// right. Each is its own map round its own logo — not joined
-// to the Avengers branches.
+// right — and Marvel Unscripted straight above it, in the
+// middle of the top. Each is its own map round its own
+// logo — not joined to the Avengers branches.
 //
 // The corners are mirror images: every corner logo sits the
 // same distance across and the same distance up or down from
@@ -346,7 +347,7 @@ export function layoutComplete(nodes){
 // come near each other.
 //--------------------------------------------------
 
-const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff"];
+const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff", "unscripted"];
 const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
 const MULTIVERSE_STEP = 150;    // how far the corners move out per try
 
@@ -452,16 +453,38 @@ export function layoutMultiverse(nodes){
 
     const ax = Math.sqrt(aspect), ay = 1 / Math.sqrt(aspect);
 
+    const cornerWorlds = worlds.filter(w => w === "mcu" || MULTIVERSE_CORNERS[w]);
+
     let t = 0;
 
-    while(t < 60000 && cornersClash(maps, worlds, ax * t, ay * t)) t += MULTIVERSE_STEP;
+    while(t < 60000 && cornersClash(maps, cornerWorlds, ax * t, ay * t)) t += MULTIVERSE_STEP;
 
-    worlds.filter(w => w !== "mcu").forEach(w=>{
+    cornerWorlds.filter(w => w !== "mcu").forEach(w=>{
 
         maps[w].dx = MULTIVERSE_CORNERS[w][0] * ax * t;
         maps[w].dy = MULTIVERSE_CORNERS[w][1] * ay * t;
 
     });
+
+    // Unscripted: straight up from the Avengers logo (so left
+    // and right stay mirror images), just far enough to clear
+    // every map already placed.
+    if(maps.unscripted){
+
+        const placed = [];
+
+        cornerWorlds.forEach(w => maps[w].boxes.forEach(b => placed.push({
+            minX: b.minX + maps[w].dx, maxX: b.maxX + maps[w].dx,
+            minY: b.minY + maps[w].dy, maxY: b.maxY + maps[w].dy
+        })));
+
+        let d = 0;
+
+        while(d < 60000 && boxesClash(maps.unscripted.boxes, placed, 0, -d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
+
+        maps.unscripted.dy = -d;
+
+    }
 
     const hubs = [];
     const allBranches = [];

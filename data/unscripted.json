@@ -1,0 +1,445 @@
+[
+    {
+        "id": "expandinguniverse",
+        "title": "Marvel Studios: Expanding the Universe",
+        "type": "special",
+        "phase": 62,
+        "saga": "marvel-unscripted",
+        "release": "2019-11-12",
+        "timeline": 1,
+        "colour": "200,90,200",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "heroproject",
+        "title": "Marvel's Hero Project",
+        "type": "show",
+        "phase": 61,
+        "saga": "marvel-unscripted",
+        "release": "2019-11-12",
+        "timeline": 2,
+        "colour": "230,170,60",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "marvels616",
+        "title": "Marvel's 616",
+        "type": "show",
+        "phase": 61,
+        "saga": "marvel-unscripted",
+        "release": "2020-11-20",
+        "timeline": 3,
+        "colour": "230,170,60",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "legends",
+        "title": "Marvel Studios: Legends",
+        "type": "show",
+        "phase": 61,
+        "saga": "marvel-unscripted",
+        "release": "2021-01-08",
+        "timeline": 4,
+        "colour": "230,170,60",
+        "characters": [
+            "Wanda Maximoff",
+            "Vision",
+            "Loki",
+            "Thor",
+            "Stephen Strange",
+            "Carol Danvers"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "behindthemask",
+        "title": "Marvel's Behind the Mask",
+        "type": "special",
+        "phase": 61,
+        "saga": "marvel-unscripted",
+        "release": "2021-02-12",
+        "timeline": 5,
+        "colour": "230,170,60",
+        "characters": [
+            "Stan Lee"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-wandavision",
+        "title": "Assembled: The Making of WandaVision",
+        "type": "special",
+        "phase": 63,
+        "saga": "marvel-unscripted",
+        "release": "2021-03-12",
+        "timeline": 6,
+        "colour": "230,60,80",
+        "characters": [
+            "Wanda Maximoff",
+            "Vision"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-thefalconandthewintersoldier",
+        "title": "Assembled: The Making of The Falcon and the Winter Soldier",
+        "type": "special",
+        "phase": 63,
+        "saga": "marvel-unscripted",
+        "release": "2021-04-30",
+        "timeline": 7,
+        "colour": "230,60,80",
+        "characters": [
+            "Sam Wilson",
+            "Bucky Barnes"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-loki",
+        "title": "Assembled: The Making of Loki",
+        "type": "special",
+        "phase": 63,
+        "saga": "marvel-unscripted",
+        "release": "2021-07-21",
+        "timeline": 8,
+        "colour": "230,60,80",
+        "characters": [
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-blackwidow",
+        "title": "Assembled: The Making of Black Widow",
+        "type": "special",
+        "phase": 63,
+        "saga": "marvel-unscripted",
+        "release": "2021-10-20",
+        "timeline": 9,
+        "colour": "230,60,80",
+        "characters": [
+            "Natasha Romanoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-whatif",
+        "title": "Assembled: The Making of What If...?",
+        "type": "special",
+        "phase": 63,
+        "saga": "marvel-unscripted",
+        "release": "2021-10-27",
+        "timeline": 10,
+        "colour": "230,60,80",
+        "characters": [
+            "The Watcher"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-shangchiandthelegendoftheten",
+        "title": "Assembled: The Making of Shang-Chi and the Legend of the Ten Rings",
+        "type": "special",
+        "phase": 63,
+        "saga": "marvel-unscripted",
+        "release": "2021-11-12",
+        "timeline": 11,
+        "colour": "230,60,80",
+        "characters": [
+            "Shang-Chi"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "disneyplusday2021",
+        "title": "Marvel Studios 2021 Disney+ Day Special",
+        "type": "special",
+        "phase": 62,
+        "saga": "marvel-unscripted",
+        "release": "2021-11-12",
+        "timeline": 12,
+        "colour": "200,90,200",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "assembled-hawkeye",
+        "title": "Assembled: The Making of Hawkeye",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-02-09",
+        "timeline": 13,
+        "colour": "90,150,240",
+        "characters": [
+            "Clint Barton",
+            "Kate Bishop"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-eternals",
+        "title": "Assembled: The Making of Eternals",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-02-16",
+        "timeline": 14,
+        "colour": "90,150,240",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "assembled-moonknight",
+        "title": "Assembled: The Making of Moon Knight",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-05-25",
+        "timeline": 15,
+        "colour": "90,150,240",
+        "characters": [
+            "Marc Spector"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fansguidemsmarvel",
+        "title": "A Fan's Guide to Ms. Marvel",
+        "type": "special",
+        "phase": 62,
+        "saga": "marvel-unscripted",
+        "release": "2022-06-01",
+        "timeline": 16,
+        "colour": "200,90,200",
+        "characters": [
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-doctorstrangeinthemultiverse",
+        "title": "Assembled: The Making of Doctor Strange in the Multiverse of Madness",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-07-08",
+        "timeline": 17,
+        "colour": "90,150,240",
+        "characters": [
+            "Stephen Strange",
+            "Wanda Maximoff"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-msmarvel",
+        "title": "Assembled: The Making of Ms. Marvel",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-08-03",
+        "timeline": 18,
+        "colour": "90,150,240",
+        "characters": [
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-thorloveandthunder",
+        "title": "Assembled: The Making of Thor: Love and Thunder",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-09-08",
+        "timeline": 19,
+        "colour": "90,150,240",
+        "characters": [
+            "Thor"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-shehulkattorneyatlaw",
+        "title": "Assembled: The Making of She-Hulk: Attorney at Law",
+        "type": "special",
+        "phase": 64,
+        "saga": "marvel-unscripted",
+        "release": "2022-11-03",
+        "timeline": 20,
+        "colour": "90,150,240",
+        "characters": [
+            "Jennifer Walters"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-blackpantherwakandaforever",
+        "title": "Assembled: The Making of Black Panther: Wakanda Forever",
+        "type": "special",
+        "phase": 65,
+        "saga": "marvel-unscripted",
+        "release": "2023-02-08",
+        "timeline": 21,
+        "colour": "60,190,150",
+        "characters": [
+            "Shuri"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "voicesrising",
+        "title": "Voices Rising: The Music of Wakanda Forever",
+        "type": "show",
+        "phase": 62,
+        "saga": "marvel-unscripted",
+        "release": "2023-02-28",
+        "timeline": 22,
+        "colour": "200,90,200",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "stanlee",
+        "title": "Stan Lee",
+        "type": "movie",
+        "phase": 62,
+        "saga": "marvel-unscripted",
+        "release": "2023-06-16",
+        "timeline": 23,
+        "colour": "200,90,200",
+        "characters": [
+            "Stan Lee"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-antmanandthewaspquantumania",
+        "title": "Assembled: The Making of Ant-Man and the Wasp: Quantumania",
+        "type": "special",
+        "phase": 65,
+        "saga": "marvel-unscripted",
+        "release": "2023-07-19",
+        "timeline": 24,
+        "colour": "60,190,150",
+        "characters": [
+            "Scott Lang"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-guardiansofthegalaxyvol3",
+        "title": "Assembled: The Making of Guardians of the Galaxy Vol. 3",
+        "type": "special",
+        "phase": 65,
+        "saga": "marvel-unscripted",
+        "release": "2023-09-13",
+        "timeline": 25,
+        "colour": "60,190,150",
+        "characters": [
+            "Peter Quill",
+            "Rocket"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-secretinvasion",
+        "title": "Assembled: The Making of Secret Invasion",
+        "type": "special",
+        "phase": 65,
+        "saga": "marvel-unscripted",
+        "release": "2023-09-20",
+        "timeline": 26,
+        "colour": "60,190,150",
+        "characters": [
+            "Nick Fury"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-lokiseason2",
+        "title": "Assembled: The Making of Loki: Season 2",
+        "type": "special",
+        "phase": 65,
+        "saga": "marvel-unscripted",
+        "release": "2023-11-22",
+        "timeline": 27,
+        "colour": "60,190,150",
+        "characters": [
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-echo",
+        "title": "Assembled: The Making of Echo",
+        "type": "special",
+        "phase": 66,
+        "saga": "marvel-unscripted",
+        "release": "2024-01-31",
+        "timeline": 28,
+        "colour": "240,120,50",
+        "characters": [
+            "Maya Lopez"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-themarvels",
+        "title": "Assembled: The Making of The Marvels",
+        "type": "special",
+        "phase": 66,
+        "saga": "marvel-unscripted",
+        "release": "2024-02-07",
+        "timeline": 29,
+        "colour": "240,120,50",
+        "characters": [
+            "Carol Danvers",
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "assembled-xmen97",
+        "title": "Assembled: The Making of X-Men '97",
+        "type": "special",
+        "phase": 66,
+        "saga": "marvel-unscripted",
+        "release": "2024-05-22",
+        "timeline": 30,
+        "colour": "240,120,50",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "assembled-deadpoolwolverine",
+        "title": "Assembled: The Making of Deadpool & Wolverine",
+        "type": "special",
+        "phase": 66,
+        "saga": "marvel-unscripted",
+        "release": "2024-11-12",
+        "timeline": 31,
+        "colour": "240,120,50",
+        "characters": [],
+        "poster": ""
+    },
+    {
+        "id": "assembled-agathaallalong",
+        "title": "Assembled: The Making of Agatha All Along",
+        "type": "special",
+        "phase": 66,
+        "saga": "marvel-unscripted",
+        "release": "2024-11-13",
+        "timeline": 32,
+        "colour": "240,120,50",
+        "characters": [
+            "Agatha Harkness"
+        ],
+        "poster": ""
+    }
+]

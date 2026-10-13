@@ -79,7 +79,8 @@ const WORLD_PLATES = {
     spider: { image: "assets/spiderman-logo.png", text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" },
     // No picture yet — add `image: "assets/fantasticfour-logo.png"`
     // once there's a Fantastic Four logo in the assets folder.
-    ff:     { text: "FANTASTIC FOUR", top: "#1d4fb0", bottom: "#0b2257", rim: "255,255,255", ink: "#ffffff" }
+    ff:     { text: "FANTASTIC FOUR", top: "#1d4fb0", bottom: "#0b2257", rim: "255,255,255", ink: "#ffffff" },
+    unscripted: { text: "UNSCRIPTED", top: "#2a2a2e", bottom: "#111114", rim: "230,170,60", ink: "#ffffff" }
     // The Animated world has no plate: it uses the Marvel logo,
     // like the Avengers map.
 
