@@ -1,0 +1,204 @@
+[
+    {
+        "id": "fantasticfour1967",
+        "title": "Fantastic Four (1967)",
+        "type": "show",
+        "phase": 51,
+        "saga": "marvel-animation",
+        "release": "1967-09-09",
+        "timeline": 1,
+        "colour": "120,170,255",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom",
+            "Galactus"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "newfantasticfour1978",
+        "title": "The New Fantastic Four",
+        "type": "show",
+        "phase": 51,
+        "saga": "marvel-animation",
+        "release": "1978-09-09",
+        "timeline": 2,
+        "colour": "120,170,255",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Ben Grimm",
+            "H.E.R.B.I.E."
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour1994",
+        "title": "Fantastic Four (1994)",
+        "type": "show",
+        "phase": 51,
+        "saga": "marvel-animation",
+        "release": "1994-09-24",
+        "timeline": 3,
+        "colour": "120,170,255",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfourwgh",
+        "title": "Fantastic Four: World's Greatest Heroes",
+        "type": "show",
+        "phase": 51,
+        "saga": "marvel-animation",
+        "release": "2006-09-02",
+        "timeline": 6,
+        "colour": "120,170,255",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour2005",
+        "title": "Fantastic Four (2005)",
+        "type": "movie",
+        "phase": 52,
+        "saga": "fox",
+        "release": "2005-07-08",
+        "timeline": 4,
+        "colour": "240,120,40",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour2007",
+        "title": "Fantastic Four: Rise of the Silver Surfer",
+        "type": "movie",
+        "phase": 52,
+        "saga": "fox",
+        "release": "2007-06-15",
+        "timeline": 5,
+        "colour": "240,120,40",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Silver Surfer",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour2015",
+        "title": "Fantastic Four (2015)",
+        "type": "movie",
+        "phase": 52,
+        "saga": "fox",
+        "release": "2015-08-07",
+        "timeline": 7,
+        "colour": "240,120,40",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "fantasticfour",
+        "title": "The Fantastic Four: First Steps",
+        "type": "movie",
+        "phase": 53,
+        "saga": "multiverse",
+        "release": "2025-07-25",
+        "timeline": 8,
+        "colour": "70,110,230",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Silver Surfer",
+            "Galactus"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "avengersdoomsday",
+        "title": "Avengers: Doomsday",
+        "type": "movie",
+        "phase": 53,
+        "saga": "multiverse",
+        "release": "2026-12-18",
+        "timeline": 9,
+        "colour": "70,110,230",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom"
+        ],
+        "watchBefore": [
+            "xmen1",
+            "x2",
+            "endgame",
+            "loki1",
+            "shangchi",
+            "blackpanther2",
+            "antmanquantumania",
+            "deadpoolwolverine",
+            "cap4",
+            "thunderbolts",
+            "fantasticfour"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "secretwars",
+        "title": "Avengers: Secret Wars",
+        "type": "movie",
+        "phase": 53,
+        "saga": "multiverse",
+        "release": "2027-12-17",
+        "timeline": 10,
+        "colour": "70,110,230",
+        "characters": [
+            "Reed Richards",
+            "Sue Storm",
+            "Johnny Storm",
+            "Ben Grimm",
+            "Doctor Doom"
+        ],
+        "watchBefore": [
+            "endgame",
+            "loki1",
+            "spidermannwh",
+            "drstrange2",
+            "fantasticfour",
+            "avengersdoomsday"
+        ],
+        "poster": ""
+    }
+]

@@ -262,6 +262,26 @@ const SECTIONS = [
     },
 
     {
+        world: "ff",
+        title: "Fantastic Four World",
+        labels: {
+            complete: "Complete Fantastic Four",
+            phases: "Eras",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            { label: "Mister Fantastic", character: "Reed Richards" },
+            { label: "Invisible Woman", character: "Sue Storm" },
+            { label: "Human Torch", character: "Johnny Storm" },
+            { label: "The Thing", character: "Ben Grimm" },
+            { label: "Doctor Doom", character: "Doctor Doom" },
+            { label: "Silver Surfer", character: "Silver Surfer" }
+        ]
+    },
+
+    {
         world: "animated",
         title: "Animated World",
         labels: {
@@ -290,7 +310,7 @@ const SECTIONS = [
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
-const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", animated: "Animated" };
+const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", ff: "Fantastic Four", animated: "Animated" };
 
 const sectionEls = [];
 

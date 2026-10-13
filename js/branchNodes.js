@@ -55,7 +55,12 @@ export const PHASE_COLOURS = {
     38: "200,60,60",    // Adult Animation — crimson
     39: "230,60,80",    // Marvel Studios Animation — red
     40: "240,70,170",   // Spider-Verse — magenta
-    41: "235,80,70"     // Spider-Man Cartoons — red
+    41: "235,80,70",    // Spider-Man Cartoons — red
+
+    // Fantastic Four eras (js/worlds.js)
+    51: "120,170,255",  // Cartoons — light blue
+    52: "240,120,40",   // Fox Films — flame orange
+    53: "70,110,230"    // Marvel Studios — FF blue
 
 };
 
@@ -106,7 +111,11 @@ export const HIGHLIGHT_COLOURS = {
     38: "255,70,70",    // Adult Animation
     39: "255,60,90",    // Marvel Studios Animation
     40: "255,90,190",   // Spider-Verse
-    41: "255,80,70"     // Spider-Man Cartoons
+    41: "255,80,70",    // Spider-Man Cartoons
+
+    51: "130,190,255",  // Cartoons
+    52: "255,130,40",   // Fox Films
+    53: "80,130,255"    // Marvel Studios
 
 };
 

@@ -76,7 +76,10 @@ function drawHub(ctx, camera, hub){
 const WORLD_PLATES = {
 
     xmen:   { image: "assets/xmen-logo.png", text: "X-MEN",      top: "#1c2a5e", bottom: "#0d1433", rim: "250,204,21", ink: "rgb(250,204,21)" },
-    spider: { image: "assets/spiderman-logo.png", text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" }
+    spider: { image: "assets/spiderman-logo.png", text: "SPIDER-MAN", top: "#7a1018", bottom: "#3a060b", rim: "70,150,255", ink: "#ffffff" },
+    // No picture yet — add `image: "assets/fantasticfour-logo.png"`
+    // once there's a Fantastic Four logo in the assets folder.
+    ff:     { text: "FANTASTIC FOUR", top: "#1d4fb0", bottom: "#0b2257", rim: "255,255,255", ink: "#ffffff" }
     // The Animated world has no plate: it uses the Marvel logo,
     // like the Avengers map.
 

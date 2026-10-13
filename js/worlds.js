@@ -1,7 +1,7 @@
 //==================================================
 // WORLDS
 //
-// The archive holds four worlds, each with its own data
+// The archive holds five worlds, each with its own data
 // file and its own set of views:
 //
 //   mcu   — data/mcu.json, grouped by Phase (0-6)
@@ -13,6 +13,9 @@
 //           Tom Holland's MCU films, Sony's Spider-Man
 //           Universe (Venom…) and the Spider-Man cartoons,
 //           grouped by era
+//   ff    — data/fantasticfour.json, the Fantastic Four
+//           cartoons, Fox films and Marvel Studios films,
+//           grouped by era
 //   animated — data/animated.json, every Marvel Animation
 //           series, short and special on Disney+, grouped
 //           by era
@@ -23,8 +26,9 @@
 // crossover) and the cartoons appear in more than one
 // world — a shared title keeps the same id everywhere.
 //
-// X-Men eras use group numbers 11+, Spider-Man eras 21+
-// and Animated eras 31+ (in each file's "phase" field)
+// X-Men eras use group numbers 11+, Spider-Man eras 21+,
+// Animated eras 31+ and Fantastic Four eras 51+ (in each
+// file's "phase" field)
 // so they can never be mistaken for an MCU phase — the colour tables in
 // branchNodes.js key off the same numbers.
 //==================================================
@@ -47,6 +51,12 @@ export const WORLDS = {
         key: "spider",
         label: "Spider-Man",
         file: "./data/spiderman.json"
+    },
+
+    ff: {
+        key: "ff",
+        label: "Fantastic Four",
+        file: "./data/fantasticfour.json"
     },
 
     animated: {
@@ -100,6 +110,15 @@ export const ANIMATED_ERAS = {
 
 };
 
+// Fantastic Four eras, keyed by the number in fantasticfour.json.
+export const FF_ERAS = {
+
+    51: "Cartoons",
+    52: "Fox Films",
+    53: "Marvel Studios"
+
+};
+
 // The MCU's "Phase 0" — the Netflix Defenders-saga shows
 // (Daredevil, Jessica Jones, Luke Cage…) — is shown by
 // name everywhere rather than as a phase number.
@@ -109,7 +128,7 @@ export const MCU_GROUP_NAMES = {
 
 };
 
-const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS, ...ANIMATED_ERAS };
+const ERA_NAMES = { ...MCU_GROUP_NAMES, ...XMEN_ERAS, ...SPIDER_ERAS, ...ANIMATED_ERAS, ...FF_ERAS };
 
 // "all" is the combined map (the "Complete MCU" view):
 // every world's mind map side by side on one canvas. It

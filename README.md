@@ -8,9 +8,9 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 ## What it does
 
-The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each world — the Avengers, X-Men, Spider-Man and Marvel Animation — opens with a title card, its films and series float past in small waves on either side (four at a time on a computer, two on a phone, each captioned with its year and phase or era), and a "Coming Soon" chapter closes it out. From about 60% of the way along, the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
+The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each world — the Avengers, X-Men, Spider-Man, Fantastic Four and Marvel Animation — opens with a title card, its films and series float past in small waves on either side (four at a time on a computer, two on a phone, each captioned with its year and phase or era), and a "Coming Soon" chapter closes it out. From about 60% of the way along, the Marvel logo appears at the far end of the trail and grows as you approach; when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Enter the archive and the whole MCU flies outward from a central hub, forming a living mind map. From there:
 
-- **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps on either side and the Marvel Animation map underneath (all stacked top to bottom on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
+- **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map in the middle, with the X-Men and Spider-Man mind maps on either side, the Fantastic Four map above and the Marvel Animation map underneath (all stacked top to bottom on an upright phone). Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out.
 - **MCU → All Posters** — every title from every world once, with no hub, branches or lines: just posters scattered far apart across a wide stretch of space (several screens across) to drag around and discover, worlds mixed together.
 - **Avengers World → Complete Avengers** — the MCU's own titles, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
 - **Phases** — six separate mini mind maps, one per phase (plus one for the Netflix *Defenders* shows), so you can compare each era's shape at a glance.
@@ -18,6 +18,7 @@ The landing page opens on a glowing ring around the Marvel logo. Scroll to fly t
 - **Chronological Order** — the same timeline shape, but ordered by in-universe chronology instead.
 - **X-Men World** — a second world in the same app: the Fox X-Men films plus the X-Men cartoons (*X-Men* 1992, *X-Men: Evolution*, *Wolverine and the X-Men* and *X-Men '97*), with its own Complete map (grouped into eras), Eras, Release Order, Chronological Order and Character Journeys. *Deadpool & Wolverine* appears in both worlds as the bridge.
 - **Spider-Man World** — the Raimi trilogy, both *Amazing Spider-Man* films and the animated *Spider-Verse* films (including the upcoming *Beyond the Spider-Verse*) Tom Holland's MCU films, Sony's Spider-Man Universe (*Morbius*, *Madame Web*, *Kraven the Hunter*, with the three *Venom* films on their own branch) and the Spider-Man cartoons on Disney+ (1967 to *Your Friendly Neighborhood Spider-Man* and *Spidey and His Amazing Friends*), with *No Way Home* as the crossover. Same five views, grouped into eras.
+- **Fantastic Four World** — the FF cartoons (1967, 1978, 1994 and *World's Greatest Heroes*), the three Fox films (2005, *Rise of the Silver Surfer*, 2015) and Marvel Studios' *First Steps*, with *Avengers: Doomsday* and *Secret Wars* shared with the Avengers map. Same five views, grouped into eras.
 - **Animated World** — every Marvel Animation series, short and special on Disney+: the classic cartoons, the Spider-Man cartoons, the 2000s and Disney XD shows, the shorts, *Marvel Rising*, Disney Junior, LEGO Marvel, *M.O.D.O.K.* and *Hit-Monkey*, and Marvel Studios Animation (*What If…?*, *X-Men '97*, *Eyes of Wakanda*, *Marvel Zombies*…). Same five views, grouped into eras. Cartoons that belong to the X-Men or Spider-Man worlds appear there too, under the same id.
 - **Character Journeys** — pick a character from a Marvel-style selector (portrait, name, appearance count, first/last year) and watch the graph reorganize into just their arc across the MCU.
 
@@ -50,7 +51,8 @@ mcu-archive/
 │   ├── mcu.json              # the archive's own dataset (titles, phases, timeline order, characters)
 │   ├── xmen.json             # the X-Men world: Fox films + X-Men cartoons, grouped by era
 │   ├── spiderman.json        # the Spider-Man world: Raimi, Amazing, Spider-Verse, Tom Holland, Sony's Spider-Man Universe and the cartoons
-│   └── animated.json         # the Animated world: every Marvel Animation title on Disney+
+│   ├── animated.json         # the Animated world: every Marvel Animation title on Disney+
+│   └── fantasticfour.json    # the Fantastic Four world: cartoons, Fox films, Marvel Studios
 ├── css/
 │   ├── main.css
 │   ├── background.css
@@ -77,13 +79,13 @@ mcu-archive/
     ├── viewManager.js              # ties layout + edges + camera together per view
     ├── views.js                     # view registry (labels, default camera, phone framing)
     ├── responsive.js                 # decides phone vs desktop layouts (portrait / landscape)
-    ├── worlds.js                      # the four worlds (MCU / X-Men / Spider-Man / Animated) plus "all" for the combined map, era names, current world
+    ├── worlds.js                      # the five worlds (MCU / X-Men / Spider-Man / Fantastic Four / Animated) plus "all" for the combined map, era names, current world
     ├── universe.js                   # draws every layer each frame, background first
     ├── connections.js                 # renders the glowing connection lines (curved branches on the mind map)
     ├── nodes.js                        # renders poster nodes
     ├── nodeHitTest.js                   # works out which poster a click landed on
     ├── branchNodes.js                    # renders the labelled "Phase" hub circles
-    ├── hub.js                             # the logo at the centre of each mind map (Marvel for the Avengers and Animated maps / X-Men / Spider-Man)
+    ├── hub.js                             # the logo at the centre of each mind map (Marvel for the Avengers and Animated maps / X-Men / Spider-Man / Fantastic Four)
     ├── archive.js / archiveCore.js         # the central hub orb + view state
     ├── posters.js                           # TMDB lookups (poster, overview, rating, cast, trailer)
     ├── tmdbConfig.js                         # your TMDB API key goes here

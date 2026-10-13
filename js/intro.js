@@ -3,7 +3,7 @@
 //
 // Scrolling the landing page flies a camera forward
 // through space. Each world — the Avengers (MCU), X-Men,
-// Spider-Man and Marvel Animation — opens with a chapter
+// Spider-Man, Fantastic Four and Marvel Animation — opens with a chapter
 // title in its colour; its titles then float past in small
 // waves (four at a time on a computer, two on a phone),
 // angled towards you, phase by phase or era by era (each
@@ -81,6 +81,7 @@ const WORLD_CHAPTERS = [
     { world: "mcu",      title: "The Avengers", colour: "248,72,94" },
     { world: "xmen",     title: "X-Men",        colour: "250,210,30" },
     { world: "spider",   title: "Spider-Man",   colour: "70,150,255" },
+    { world: "ff",       title: "Fantastic Four", colour: "235,240,255" },
     { world: "animated", title: "Animation",    colour: "70,225,240" }
 ];
 
@@ -147,6 +148,7 @@ const WORLD_KICKERS = {
     mcu: "The Marvel Cinematic Universe",
     xmen: "The X-Men",
     spider: "Spider-Man",
+    ff: "The Fantastic Four",
     animated: "Marvel Animation"
 
 };
