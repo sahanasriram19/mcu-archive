@@ -332,36 +332,31 @@ export function layoutComplete(nodes){
 }
 
 //--------------------------------------------------
-// COMPLETE MCU (all worlds) — the Avengers mind map in
-// the middle, exactly as on its own, with the X-Men and
-// Spider-Man mind maps tucked into the open space round
-// it: X-Men to the left, Spider-Man to the right, the
-// Fantastic Four above and Marvel Animation underneath
-// (stacked top to bottom on an upright phone). Each is its
-// own map round its own logo — not joined to the Avengers
-// branches. Each side map slides out from the centre just
-// until none of its posters come near an Avengers poster,
-// so it settles into the empty corner of the oval.
+// COMPLETE MCU (all worlds) — the Avengers mind map exactly
+// in the middle, as on its own, with the other four maps on
+// the four corners round it: X-Men top left, Spider-Man top
+// right, Marvel Animation bottom left, Fantastic Four bottom
+// right. Each is its own map round its own logo — not joined
+// to the Avengers branches.
+//
+// The corners are mirror images: every corner logo sits the
+// same distance across and the same distance up or down from
+// the Avengers logo. That distance starts small and grows
+// (keeping the screen's shape) until no two maps' posters
+// come near each other.
 //--------------------------------------------------
 
 const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff"];
 const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
-const MULTIVERSE_STEP = 150;    // how far a side map slides out per try
-const SIDE_MAPS_RAISE = 3600;   // side maps sit this much higher than the Avengers map (side-by-side only)
+const MULTIVERSE_STEP = 150;    // how far the corners move out per try
 
-// Which way each side map sits from the Avengers map.
-function multiverseDirections(){
-
-    return isPortraitPhone()
-        ? { xmen: [-0.3, -1], spider: [0.3, 1], animated: [0, 1], ff: [0, -1] }
-        // Computers and sideways phones: straight out to
-        // each side of the Avengers map (they used to sit on
-        // the diagonals, which left two empty corners).
-        // The Animated map fills the open space underneath,
-        // the Fantastic Four map the space above.
-        : { xmen: [-1, 0], spider: [1, 0], animated: [0, 1], ff: [0, -1] };
-
-}
+// Which corner each map sits in: [across, up/down].
+const MULTIVERSE_CORNERS = {
+    xmen:     [-1, -1],
+    spider:   [ 1, -1],
+    animated: [-1,  1],
+    ff:       [ 1,  1]
+};
 
 // Poster boxes (plus the logo) of one map, round its own hub.
 function boxesOf(nodes, hubX = 0, hubY = 0){
@@ -398,6 +393,30 @@ function boxesClash(a, b, dx, dy, gap){
 
 }
 
+// Do any two maps overlap with the corners this far out?
+function cornersClash(maps, worlds, cx, cy){
+
+    const at = w => w === "mcu"
+        ? [0, 0]
+        : [MULTIVERSE_CORNERS[w][0] * cx, MULTIVERSE_CORNERS[w][1] * cy];
+
+    for(let i = 0; i < worlds.length; i++){
+
+        for(let j = i + 1; j < worlds.length; j++){
+
+            const [ax, ay] = at(worlds[i]);
+            const [bx, by] = at(worlds[j]);
+
+            if(boxesClash(maps[worlds[i]].boxes, maps[worlds[j]].boxes, ax - bx, ay - by, MULTIVERSE_GAP)) return true;
+
+        }
+
+    }
+
+    return false;
+
+}
+
 export function layoutMultiverse(nodes){
 
     const byWorld = {};
@@ -413,10 +432,9 @@ export function layoutMultiverse(nodes){
 
     worlds.forEach(w=>{
 
-        // Beside the Avengers map, the X-Men map stays round.
-        // The Spider-Man and Animated maps keep their wider
-        // oval on a computer (on an upright phone everything
-        // is stacked in one narrow column, so they stay round).
+        // The X-Men and Fantastic Four maps stay round; the
+        // Spider-Man and Animated maps keep their wider oval
+        // (round on an upright phone, where it's all narrow).
         const shape = w === "mcu"
             ? stretch
             : isPortraitPhone() ? { sx: 1, sy: 1 } : worldShape(w, { sx: 1, sy: 1 });
@@ -427,39 +445,21 @@ export function layoutMultiverse(nodes){
 
     });
 
-    // Everything already placed (the Avengers map first).
-    const placed = maps.mcu ? [...maps.mcu.boxes] : [];
+    // How far out the corners sit, across vs up/down, follows
+    // the screen's shape (wider on a computer, taller on an
+    // upright phone).
+    const aspect = Math.min(2.2, Math.max(0.5, window.innerWidth / Math.max(1, window.innerHeight)));
 
-    const dirs = multiverseDirections();
+    const ax = Math.sqrt(aspect), ay = 1 / Math.sqrt(aspect);
+
+    let t = 0;
+
+    while(t < 60000 && cornersClash(maps, worlds, ax * t, ay * t)) t += MULTIVERSE_STEP;
 
     worlds.filter(w => w !== "mcu").forEach(w=>{
 
-        const m = maps[w];
-
-        const [ux, uy] = dirs[w] || [1, 0];
-
-        const len = Math.hypot(ux, uy);
-
-        let d = 0;
-
-        while(d < 60000 && boxesClash(m.boxes, placed, ux / len * d, uy / len * d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
-
-        m.dx = ux / len * d;
-        m.dy = uy / len * d;
-
-        // Side by side (not on an upright phone): the X-Men
-        // and Spider-Man maps sit a little higher than the
-        // Avengers map. (They're raised rather than the
-        // Avengers map lowered, so its logo stays at the
-        // centre of the world, where the jump into the
-        // archive expects it; the camera frames the middle of
-        // all three, so on screen the Avengers map ends up a
-        // little lower and the other two a little higher.)
-        // Already clear of it side to side, so this can't
-        // make them overlap.
-        if(!isPortraitPhone() && (w === "xmen" || w === "spider")) m.dy -= SIDE_MAPS_RAISE;
-
-        m.boxes.forEach(b => placed.push({ minX: b.minX + m.dx, maxX: b.maxX + m.dx, minY: b.minY + m.dy, maxY: b.maxY + m.dy }));
+        maps[w].dx = MULTIVERSE_CORNERS[w][0] * ax * t;
+        maps[w].dy = MULTIVERSE_CORNERS[w][1] * ay * t;
 
     });
 

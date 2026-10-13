@@ -179,17 +179,11 @@ function fitCamera(cam){
 
     const nodes = visibleNodes();
 
-    // Frame the middle of everything (the combined map isn't
-    // centred on any one logo).
-    if(cam.centre && nodes.length){
-
-        const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
-
-        cam = { ...cam,
-            x: (Math.min(...xs) + Math.max(...xs)) / 2,
-            y: (Math.min(...ys) + Math.max(...ys)) / 2 };
-
-    }
+    // The combined map: the Avengers logo stays exactly in
+    // the middle of the screen, with the four corner maps
+    // round it (the zoom is fitted to whichever reaches
+    // furthest, the same on every side).
+    if(cam.centre) cam = { ...cam, x: 0, y: 0 };
 
     const zoom0 = baseFitZoom(cam, nodes);
 
@@ -261,17 +255,17 @@ function fitCamera(cam){
         const top = cd && cd.bottom < H * 0.3 ? cd.bottom + PANEL_GAP : 0;
         const bottom = r.top - PANEL_GAP;
 
-        const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
-
-        const minX = Math.min(...xs) - POSTER_HALF_W, maxX = Math.max(...xs) + POSTER_HALF_W;
-        const minY = Math.min(...ys) - POSTER_HALF_H, maxY = Math.max(...ys) + POSTER_HALF_H;
+        // Centred on the Avengers logo, fitted to whichever
+        // map reaches furthest from it.
+        const reachX = Math.max(...nodes.map(n => Math.abs(n.targetX))) + POSTER_HALF_W;
+        const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY))) + POSTER_HALF_H;
 
         const zoom = Math.max(cam.minZoom || 0.02, Math.min(cam.maxZoom || 0.5,
-            Math.min(W / (maxX - minX), (bottom - top) / (maxY - minY)) * cam.fit));
+            Math.min(W / (reachX * 2), (bottom - top) / (reachY * 2)) * cam.fit));
 
         const freeCy = (top + bottom) / 2 - H / 2;
 
-        return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 - freeCy / zoom, zoom };
+        return { x: 0, y: -freeCy / zoom, zoom };
 
     }
 
