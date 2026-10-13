@@ -48,7 +48,8 @@ const beacon = endEl.querySelector(".portal-beacon");
 // Tuning
 //--------------------------------------------------
 
-const START_GAP = 1500;       // depth before the first chapter
+const START_GAP = 3000;       // depth before the first chapter (a longer
+                              // run-up before the Avengers title)
 const CHAPTER_GAP = 1300;     // chapter title -> its first wave of posters
 const WAVE_GAP = 760;         // one wave of posters -> the next
 const WAVE_STAGGER = 120;     // posters within a wave sit this far apart in depth
