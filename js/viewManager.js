@@ -74,11 +74,23 @@ const PANEL_GAP = 16;      // clear air kept between posters and the panel, px
 // poster spread is laid out in the screen's shape, so it
 // also fills it, with little empty space round it), times
 // `factor` (above 1 stops a little further in).
-function fillZoom(factor){
+function fillZoom(factor, centred = false){
 
     const nodes = visibleNodes();
 
     if(!nodes.length) return DEFAULT_MIN_ZOOM;
+
+    // Views that stay centred on the middle of the world (the
+    // Complete MCU map, round the Avengers logo): measured
+    // out from the centre to whichever side reaches furthest.
+    if(centred){
+
+        const reachX = Math.max(...nodes.map(n => Math.abs(n.targetX))) * 2 + 400;
+        const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY))) * 2 + 560;
+
+        return Math.min(window.innerWidth / reachX, window.innerHeight / reachY) * factor;
+
+    }
 
     const xs = nodes.map(n => n.targetX), ys = nodes.map(n => n.targetY);
 
@@ -469,7 +481,7 @@ export function setView(key){
     // point where the posters still fill the whole screen,
     // so it always looks like a universe full of them.
     camera.minZoom = cameraFor(view).fillMinZoom
-        ? fillZoom(cameraFor(view).fillMinZoom)
+        ? fillZoom(cameraFor(view).fillMinZoom, !!cameraFor(view).centre)
         : (cameraFor(view).userMinZoom || DEFAULT_MIN_ZOOM);
 
     // ...and how far in (userMaxZoom in views.js; the usual
@@ -492,7 +504,9 @@ export function setView(key){
 
         camera.targetX = fit.x;
         camera.targetY = fit.y;
-        camera.targetZoom = fit.zoom;
+
+        // Never start further out than the view lets you zoom.
+        camera.targetZoom = Math.max(fit.zoom, camera.minZoom);
 
         lastFitAspect = window.innerWidth / Math.max(1, window.innerHeight);
 
@@ -685,6 +699,6 @@ export function refitView(){
 
     camera.targetX = fit.x;
     camera.targetY = fit.y;
-    camera.targetZoom = fit.zoom;
+    camera.targetZoom = Math.max(fit.zoom, camera.minZoom);
 
 }

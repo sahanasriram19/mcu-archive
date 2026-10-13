@@ -25,7 +25,12 @@ export const VIEWS = [
         // can be zoomed out further. `centre` frames the middle
         // of all the maps rather than the Avengers logo.
         worlds: {
-            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 0.94, minZoom: 0.015, maxZoom: 0.4, centre: true, userMinZoom: 0.015 } },
+            // fillMinZoom: you can only zoom out until the maps
+            // reach the edges of the screen, so they always fill
+            // the universe rather than floating in empty space.
+            // Raise it to stop further in; lower it to allow
+            // zooming out further.
+            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 1 } },
             // The Animated and Spider-Man maps are spread wider
             // (WORLD_SHAPES in layout.js), so they need to zoom
             // out further to fit on screen.

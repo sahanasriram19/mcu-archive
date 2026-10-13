@@ -90,16 +90,18 @@ const WORLD_CHAPTERS = [
 
 const SCROLL_PER_DEPTH = 0.24; // px of scrolling per unit of depth
 
-const FADE_IN_FAR = -2600;    // items appear from here (fairly close: with
-                              // posters in waves of four, a longer view
-                              // ahead meant 20+ posters on screen at once,
-                              // all redrawn every frame — the slowdown)...
-const FADE_IN_NEAR = -1700;   // ...fully visible from here
+// Posters come into view from far down the trail — small,
+// faint shapes in the distance that brighten as you fly
+// towards them, the way the Marvel logo grows at the end.
+// (Far away they're tiny, so they cost little to draw.)
+const FADE_IN_FAR = -9000;    // items start to appear from here...
+const FADE_IN_NEAR = -2200;   // ...fully visible from here
+const FADE_IN_CURVE = 2;      // >1: stays faint for longer, then brightens
 
 // Chapter titles show from much further away, so the next
 // chapter is already glowing in the distance.
-const CHAPTER_FADE_IN_FAR = -11000;
-const CHAPTER_FADE_IN_NEAR = -6000;
+const CHAPTER_FADE_IN_FAR = -16000;
+const CHAPTER_FADE_IN_NEAR = -7000;
 const FADE_OUT_START = 350;   // start fading as they pass...
 const FADE_OUT_END = 850;     // ...gone by here
 
@@ -608,7 +610,7 @@ function frame(){
 
         if(!it.shown){ it.el.style.visibility = "visible"; it.shown = true; }
 
-        const fadeIn = clamp01((rel - far) / (near - far));
+        const fadeIn = Math.pow(clamp01((rel - far) / (near - far)), FADE_IN_CURVE);
         const fadeOut = 1 - clamp01((rel - FADE_OUT_START) / (FADE_OUT_END - FADE_OUT_START));
 
         // Items stay out of sight until the hero has gone,
