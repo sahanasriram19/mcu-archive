@@ -137,6 +137,33 @@ const MINDMAP_WEDGE_PAD = 4;        // extra "weight" per phase so small phases 
 // a phone — so the map fills the screen instead of sitting
 // in a circle with empty space either side. Area stays
 // roughly the same, it's just redistributed.
+// Some worlds' maps are pulled out further than the
+// plain screen-shaped oval, so a big map reads as a wide
+// spread rather than a tight circle. `long` stretches
+// along the screen's long side (across on a computer,
+// down on an upright phone), `short` along the other.
+// 1 = the usual shape.
+const WORLD_SHAPES = {
+
+    animated: { long: 1.5, short: 1.12 },
+    spider:   { long: 1.3, short: 1.06 }
+
+};
+
+function worldShape(world, { sx, sy }){
+
+    const shape = WORLD_SHAPES[world];
+
+    if(!shape) return { sx, sy };
+
+    const wide = window.innerWidth >= window.innerHeight;
+
+    return wide
+        ? { sx: sx * shape.long, sy: sy * shape.short }
+        : { sx: sx * shape.short, sy: sy * shape.long };
+
+}
+
 function mindmapStretch(){
 
     const aspect = Math.min(2.2, Math.max(0.5,
@@ -291,7 +318,7 @@ export function layoutComplete(nodes){
     // The combined "Complete MCU" map: every world at once.
     if(getWorld() === ALL_WORLDS) return layoutMultiverse(nodes);
 
-    const { sx, sy } = mindmapStretch();
+    const { sx, sy } = worldShape(getWorld(), mindmapStretch());
 
     const branches = mindmapTargets(nodes, sx, sy);
 
@@ -378,17 +405,22 @@ export function layoutMultiverse(nodes){
 
     const worlds = MULTIVERSE_ORDER.filter(w => byWorld[w] && byWorld[w].length);
 
-    // The Avengers map keeps its usual screen-shaped spread;
-    // the smaller maps beside it stay round.
+    // The Avengers map keeps its usual screen-shaped spread.
     const stretch = mindmapStretch();
 
     const maps = {};
 
     worlds.forEach(w=>{
 
-        const round = w !== "mcu";
+        // Beside the Avengers map, the X-Men map stays round.
+        // The Spider-Man and Animated maps keep their wider
+        // oval on a computer (on an upright phone everything
+        // is stacked in one narrow column, so they stay round).
+        const shape = w === "mcu"
+            ? stretch
+            : isPortraitPhone() ? { sx: 1, sy: 1 } : worldShape(w, { sx: 1, sy: 1 });
 
-        const branches = mindmapTargets(byWorld[w], round ? 1 : stretch.sx, round ? 1 : stretch.sy);
+        const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy);
 
         maps[w] = { branches, boxes: boxesOf(byWorld[w]), dx: 0, dy: 0 };
 
