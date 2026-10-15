@@ -12,7 +12,7 @@ import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
-import { projectNode } from "./depth.js";
+import { project, projectNode, nodeHeight, screenDepth, viewAngles } from "./depth.js";
 
 const posterCache = new Map();
 
@@ -610,11 +610,144 @@ export function renderNodes(ctx, camera, nodes){
 
     order.sort((a, b) => b.at.z - a.at.z);
 
+    // Shadows first, all of them, so no shadow ever lands on
+    // top of a poster.
+    order.forEach(o => drawShadow(ctx, o.node, focus));
+
+    if(hovered) drawShadow(ctx, hovered, focus);
+
     order.forEach(o => drawNode(o.node, o.at));
 
     if(hovered) drawNode(hovered, projectNode(hovered));
 
     ctx.restore();
+
+}
+
+//--------------------------------------------------
+// Poster shadows
+//
+// Each poster floats above the map (js/depth.js) and casts
+// a soft shadow straight down onto it, nudged a little down
+// and to the right as if lit from the top left. The higher
+// a poster is, the further its shadow falls from it and the
+// softer and fainter the shadow gets — that gap is what
+// makes the height readable. With the map tilted, the
+// shadow lies flat on the surface, so it's squashed with
+// it.
+//--------------------------------------------------
+
+const SHADOW_ALPHA = 0.55;      // darkness right under a low poster
+const SHADOW_FALL_X = 0.35;     // how far it falls, per px of height
+const SHADOW_FALL_Y = 0.55;
+const SHADOW_SPREAD = 0.0025;   // grows this much wider per px of height
+const SHADOW_FADE = 0.004;      // ...and this much fainter
+
+function posterBaseSize(node){
+
+    if(currentView === "release" || currentView === "chronology" || currentView === "characters") return 300;
+
+    if(currentView === "complete") return 320 + Math.min(node.ring || 0, 4) * 35;
+
+    return 320;
+
+}
+
+function drawShadow(ctx, node, focus){
+
+    const height = nodeHeight(node);
+
+    if(height <= 1) return;
+
+    // Height in screen px, as the poster itself is lifted.
+    const H = Math.abs(screenDepth(-height));
+
+    // Where it lands on the surface (world units).
+    const fall = H / camera.zoom;
+
+    const at = project(node.x + fall * SHADOW_FALL_X, node.y + fall * SHADOW_FALL_Y, 0);
+
+    const w = posterBaseSize(node) * camera.zoom * at.s * (1 + H * SHADOW_SPREAD);
+
+    if(w < 2) return;
+
+    // Lying flat on the tilted map: squashed top to bottom.
+    const h = w * 1.5 * Math.max(0.25, Math.cos(viewAngles().pitch));
+
+    // The posters are drawn shifted with the mouse a little
+    // more than the map is (js/sway.js); the shadow belongs
+    // to the map.
+    const mapShift = swayOffset("map");
+    const posterShift = swayOffset("posters");
+
+    const x = at.x + mapShift.x - posterShift.x;
+    const y = at.y + mapShift.y - posterShift.y;
+
+    // Off screen: skip.
+    if(x + w < 0 || x - w > window.innerWidth || y + h < 0 || y - h > window.innerHeight) return;
+
+    let alpha = SHADOW_ALPHA / (1 + H * SHADOW_FADE);
+
+    if(focus && !focus.ids.has(node.id)) alpha *= FOCUS_DIM_ALPHA;
+
+    alpha *= hoverDim(node.phase);
+
+    const sprite = shadowSprite();
+
+    // The sprite has soft padding round the card shape.
+    const sw = w * sprite.scaleW;
+    const sh = h * sprite.scaleH;
+
+    ctx.save();
+
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(sprite.canvas, x - sw / 2, y - sh / 2, sw, sh);
+
+    ctx.restore();
+
+}
+
+// One soft, dark card-shaped blur, drawn once and stretched
+// to fit every shadow.
+let shadowCache = null;
+
+function shadowSprite(){
+
+    if(shadowCache) return shadowCache;
+
+    const cw = 100, ch = 150;       // the card
+    const pad = 46;                 // room for the blur
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = cw + pad * 2;
+    canvas.height = ch + pad * 2;
+
+    const c = canvas.getContext("2d");
+
+    // Drawn off to one side so only its blurred shadow lands
+    // on the canvas (canvas shadows work in every browser;
+    // filter: blur() doesn't in Safari).
+    const away = 2000;
+
+    c.shadowColor = "rgba(0,0,0,1)";
+    c.shadowBlur = 26;
+    c.shadowOffsetX = away;
+
+    c.fillStyle = "#000";
+    c.beginPath();
+    roundedRect(c, pad - away, pad, cw, ch, 8);
+    c.fill();
+
+    shadowCache = {
+        canvas,
+        scaleW: canvas.width / cw,
+        scaleH: canvas.height / ch
+    };
+
+    return shadowCache;
 
 }
 

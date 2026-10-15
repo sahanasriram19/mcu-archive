@@ -22,6 +22,7 @@ import { renderConnections } from "./connections.js";
 import { renderBranchNodes } from "./branchNodes.js";
 import { renderNodes } from "./nodes.js";
 import { renderHub } from "./hub.js";
+import { renderGround } from "./ground.js";
 import { graph } from "./graph.js";
 import { archive } from "./archiveCore.js";
 import { getSway, swayOffset, SWAY } from "./sway.js";
@@ -156,6 +157,9 @@ export function renderUniverse(camera, entered){
         ctx.save();
 
         ctx.translate(mapShift.x, mapShift.y);
+
+        // The faint grid the map lies on (js/ground.js).
+        renderGround(ctx, camera);
 
         renderConnections(ctx, camera, graph);
 

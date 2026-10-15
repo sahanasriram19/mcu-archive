@@ -6,13 +6,14 @@
 // adds two things on top of that, still on the same 2D
 // canvas — no 3D library:
 //
-//   1. Every node has a depth: how far "behind" the map's
-//      surface it sits. On the mind map each logo is the
-//      nearest thing, its phase junctions a little behind
-//      it, and each ring of posters further back again, so
-//      every world reads as a shallow bowl around its logo.
-//      The other views get a gentler, steady spread so the
-//      posters float at slightly different distances.
+//   1. Every node has a height above the map's surface.
+//      The lines, logos and floor grid (js/ground.js) lie on
+//      the surface; the posters float above it, each casting
+//      a soft shadow down onto it (nodes.js), so you can see
+//      how high it is. On the mind map the outer rings float
+//      a little higher than the inner ones; the other views
+//      give each title its own steady height. A hovered
+//      poster rises further.
 //
 //   2. The camera can pitch: the whole map tips back like
 //      a table you look across (right-drag / Shift-drag /
@@ -28,9 +29,10 @@
 //      the rest of the site's sway (js/sway.js), so it's off
 //      on touch screens and with "reduce motion".
 //
-// Depth is in world units, so — like a real camera pulling
-// away — the full-map view looks almost flat and the depth
-// shows more the further in you zoom. Posters stay facing
+// Heights shrink as you zoom out (like a real camera pulling
+// away), but more gently than the map itself, so they still
+// show on the full view without pulling the posters away
+// from their own logos. Posters stay facing
 // you (like cards standing on a table), they just get
 // smaller and drift with distance.
 //
@@ -51,26 +53,38 @@ import { getSway } from "./sway.js";
 
 // Focal length, as a share of the larger screen side.
 // Smaller = stronger perspective.
-const FOCAL = 1.15;
+const FOCAL = 0.9;
 
 // Depth (in screen px, after zoom) is eased off towards
 // this so that zooming right in doesn't stretch it out.
 const DEPTH_LIMIT = 420;
 
-// Mind map ("complete"): world units behind the logo.
-const MAP_JUNCTION = 60;     // phase junctions
-const MAP_FIRST_TIER = 120;  // the first ring of posters
-const MAP_PER_TIER = 90;     // each ring after that
-const MAP_JITTER = 40;       // a little per-title variety
+// How heights shrink with zoom: screen px = height *
+// HEIGHT_SCALE * zoom^HEIGHT_POWER. A power of 1 would shrink
+// them exactly like the map (gone on the full view); less
+// keeps them showing further out. The scale is set so they
+// match the map at zoom 0.3 (about one world filling the
+// screen).
+const HEIGHT_POWER = 0.7;
+const HEIGHT_SCALE = Math.pow(0.3, 1 - HEIGHT_POWER);
+
+// Mind map ("complete"): how high above the surface.
+const MAP_JUNCTION = 20;     // phase junctions
+const MAP_FLOAT = 170;       // the first ring of posters
+const MAP_PER_TIER = 45;     // each ring after that, a little higher
+const MAP_JITTER = 60;       // a little per-title variety
 
 // Other views: base + up to `spread` per title.
-const VIEW_DEPTH = {
-    phases:     { base: 70,  spread: 140 },
-    release:    { base: 50,  spread: 170 },
-    chronology: { base: 50,  spread: 170 },
-    characters: { base: 50,  spread: 150 },
-    scatter:    { base: 150, spread: 900 }    // All Posters: a real volume
+const VIEW_HEIGHT = {
+    phases:     { base: 130, spread: 160 },
+    release:    { base: 120, spread: 180 },
+    chronology: { base: 120, spread: 180 },
+    characters: { base: 120, spread: 160 },
+    scatter:    { base: 120, spread: 800 }    // All Posters: a real volume
 };
+
+// How much higher a poster rises while hovered.
+const LIFT_RISE = 90;
 
 const DEPTH_EASE = 0.08;     // how fast a node moves to a new depth
 
@@ -78,7 +92,7 @@ export const MAX_PITCH = 0.9;   // radians (~52°)
 
 // How far the map is tipped back when the archive opens
 // (and where T returns it to). 0 = flat.
-export const REST_PITCH = 0.35; // radians (~20°)
+export const REST_PITCH = 0.5;  // radians (~29°)
 
 // Look-around: how far the map turns with the mouse at the
 // edge of the screen.
@@ -105,7 +119,10 @@ function steady(str){
 
 }
 
-function targetDepth(node){
+// A node's height above the surface for the current view.
+// (Stored as node.depth, which is negative for "above":
+// depth runs away from you.)
+function targetHeight(node){
 
     const r = node.depthSeed ?? (node.depthSeed = steady(String(node.id || node.key || "")));
 
@@ -113,17 +130,23 @@ function targetDepth(node){
 
         if(node.isBranch) return MAP_JUNCTION;
 
-        return MAP_FIRST_TIER + (node.tier || 0) * MAP_PER_TIER + (r - 0.5) * MAP_JITTER;
+        return MAP_FLOAT + (node.tier || 0) * MAP_PER_TIER + (r - 0.5) * MAP_JITTER;
 
     }
 
     // Labels and junctions in the other views sit just
-    // behind the surface, in front of their posters.
-    if(node.isBranch) return 30;
+    // above the surface, below their posters.
+    if(node.isBranch) return 10;
 
-    const v = VIEW_DEPTH[currentView] || VIEW_DEPTH.phases;
+    const v = VIEW_HEIGHT[currentView] || VIEW_HEIGHT.phases;
 
     return v.base + r * v.spread;
+
+}
+
+function targetDepth(node){
+
+    return -targetHeight(node);
 
 }
 
@@ -175,26 +198,18 @@ export function project(wx, wy, depth = 0){
     const X = (wx - camera.x) * zoom;
     const Y = (wy - camera.y) * zoom;
 
-    // Depth in screen px, eased off at the far end.
-    let D = depth * zoom;
+    const D = screenDepth(depth);
 
-    D = DEPTH_LIMIT * Math.tanh(D / DEPTH_LIMIT);
-
-    // Look-around: the side of the map nearest the mouse
-    // dips away from you (like pressing on it), the far side
-    // comes up.
-    const look = getSway();          // -0.5 … 0.5 each way, eased
-
-    const yaw = -look.x * 2 * LOOK_YAW;
+    const { pitch: p, yaw } = viewAngles();
 
     // Tip the map back about the screen's horizontal centre
-    // line: its top goes away from you, and anything behind
-    // the surface rises slightly with it.
-    const p = (camera.pitch || 0) - look.y * 2 * LOOK_PITCH;
-
+    // line: its top goes away from you. Anything floating
+    // above the surface (D < 0) rises up the screen with it,
+    // the way a card standing on a table does as you lean
+    // over it.
     const c = Math.cos(p), sn = Math.sin(p);
 
-    const Yr = Y * c - D * sn;
+    const Yr = Y * c + D * sn;
     const Zp = -Y * sn + D * c;
 
     // ...then turn it about the screen's vertical centre line.
@@ -221,9 +236,43 @@ export function project(wx, wy, depth = 0){
 
 }
 
+// A depth (or height) in world units → screen px, as
+// project() uses it: shrinking with zoom (more gently than
+// the map), eased off at the far end.
+export function screenDepth(depth){
+
+    const D = depth * HEIGHT_SCALE * Math.pow(camera.zoom, HEIGHT_POWER);
+
+    return DEPTH_LIMIT * Math.tanh(D / DEPTH_LIMIT);
+
+}
+
+// The camera's angles right now: the map's tilt plus the
+// look-around (the side of the map nearest the mouse dips
+// away from you, like pressing on it; the far side comes
+// up).
+export function viewAngles(){
+
+    const look = getSway();          // -0.5 … 0.5 each way, eased
+
+    return {
+        pitch: (camera.pitch || 0) - look.y * 2 * LOOK_PITCH,
+        yaw: -look.x * 2 * LOOK_YAW
+    };
+
+}
+
+// How high a node is floating right now (world units),
+// including the extra rise while it's hovered.
+export function nodeHeight(node){
+
+    return -(node.depth || 0) + (node.lift || 0) * LIFT_RISE;
+
+}
+
 // Shorthand for a node (or a hub / anchor with no depth).
 export function projectNode(node){
 
-    return project(node.x, node.y, node.depth || 0);
+    return project(node.x, node.y, -nodeHeight(node));
 
 }
