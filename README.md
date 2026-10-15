@@ -25,6 +25,8 @@ The landing page opens on a glowing ring around the Marvel logo. Scroll to fly t
 
 Switching between views never reloads the page — nodes ease smoothly from their old position to their new one, and the connecting lines redraw to match. Clicking any poster opens a details card with synopsis, rating, cast, and trailer, pulled live from TMDB. Clicking a poster flips it over into its details card (and back again when you close it). On a mouse, the countdown cards and small posters lean towards the cursor with a soft light. The countdown digits flip like a departure board (only the digits that change), the panel sections swing open on a hinge, and the whole site shifts in layers as you move the mouse: the landing hero, the fly-through (far chapters slide one way, near posters the other), and the archive (stars drift against the map, posters float a little above it, the panels follow slightly). Entering the archive is a hyperspace jump.
 
+The archive has depth, too. On the mind map each logo sits nearest to you and each ring of posters further back, so every world reads as a shallow bowl around its logo; the other views float their posters at slightly different distances, so they slide past each other as you pan and zoom in. The map can also be tipped back like a table you look across — drag with the right mouse button (or Shift + drag), slide two fingers up or down on a phone, or press **T** — and the stars turn with it. It's all the same 2D canvas, projected with a little perspective (`js/depth.js`), no 3D library.
+
 The whole thing sits on top of a custom-built starfield/nebula background engine (stars, energy particles, shooting stars, all on a seeded deterministic generator so it looks the same on every visit rather than randomly recoloring itself).
 
 ---
@@ -74,7 +76,8 @@ mcu-archive/
 │   └── search.js              # the movie/character search box
 └── js/
     ├── app.js                 # entry point / render loop
-    ├── camera.js               # pan/zoom state + easing
+    ├── camera.js               # pan/zoom/tilt state + easing
+    ├── depth.js                # 2.5D: each node's depth, the map's tilt, world → screen projection
     ├── input.js                 # drag to pan, wheel/pinch to zoom, click a poster
     ├── graph.js                  # node + edge data, per-frame easing
     ├── layout.js                  # one layout function per view (MCU / Complete Avengers mind maps, Phases, Release, Chronology, Character Journeys)

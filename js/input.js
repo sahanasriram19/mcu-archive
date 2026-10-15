@@ -6,6 +6,7 @@ import { showMovieDetails } from "./movieDetails.js";
 import { nodeScreenRect } from "./nodes.js";
 import { edgeAtScreenPoint } from "./connections.js";
 import { swayOffset } from "./sway.js";
+import { project, projectNode, MAX_PITCH } from "./depth.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -18,6 +19,38 @@ let tapMoved = false;
 let pinchDistance = 0;
 
 const CLICK_TOLERANCE = 8;
+
+//--------------------------------------------------
+// TILT (js/depth.js)
+//
+// The map can be tipped back like a table you look
+// across:
+//   • mouse: drag with the right button, or Shift + drag
+//   • touch: slide two fingers up or down together
+//     (spreading them apart still zooms)
+//   • keyboard: T tips it back / lays it flat again
+//--------------------------------------------------
+
+const TILT_PER_PX = 0.0045;       // radians per px of drag (mouse)
+const TILT_PER_PX_TOUCH = 0.006;  // ...and of a two-finger slide
+const TILT_PRESET = 0.6;          // where T tips it to (~34°)
+
+// How far two fingers have to move before we decide
+// whether they're pinching or sliding together.
+const TWO_FINGER_DECIDE_PX = 14;
+
+let tilting = false;              // this mouse drag tilts rather than pans
+
+let twoFingerMode = null;         // null (undecided) | "pinch" | "tilt"
+let twoFingerSpread = 0;          // how much the fingers' distance has changed
+let twoFingerSlideX = 0;          // ...and how far they've moved together
+let twoFingerSlideY = 0;
+
+function clampPitch(value){
+
+    return Math.max(0, Math.min(MAX_PITCH, value));
+
+}
 
 function isUiTarget(target){
 
@@ -66,6 +99,8 @@ function startGesture(e){
         lastY = e.clientY;
         tapMoved = false;
 
+        tilting = e.pointerType === "mouse" && (e.button === 2 || e.shiftKey);
+
     } else if(pointers.size === 2){
 
         const [a,b] = [...pointers.values()];
@@ -74,6 +109,9 @@ function startGesture(e){
             1,
             distance(a,b)
         );
+
+        twoFingerMode = null;
+        twoFingerSpread = twoFingerSlideX = twoFingerSlideY = 0;
 
     }
 
@@ -93,7 +131,10 @@ function moveGesture(e){
 
 
     //--------------------------------------------------
-    // Two-finger pinch zoom
+    // Two fingers: pinch to zoom, or slide together
+    // up/down to tilt. Decided once per gesture, from
+    // whichever the fingers start doing, so a pinch
+    // doesn't also wobble the tilt.
     //--------------------------------------------------
 
     if(pointers.size === 2){
@@ -108,7 +149,40 @@ function moveGesture(e){
             )
         );
 
-        if(pinchDistance){
+        tapMoved = true;
+
+        if(twoFingerMode === null){
+
+            twoFingerSpread += Math.abs(currentDistance - (pinchDistance || currentDistance));
+            twoFingerSlideX += dx / 2;
+            twoFingerSlideY += dy / 2;
+
+            const slide = Math.abs(twoFingerSlideY);
+
+            if(twoFingerSpread + slide + Math.abs(twoFingerSlideX) > TWO_FINGER_DECIDE_PX){
+
+                twoFingerMode =
+                    slide > twoFingerSpread * 1.5 && slide > Math.abs(twoFingerSlideX)
+                        ? "tilt"
+                        : "pinch";
+
+            }
+
+        }
+
+        if(twoFingerMode === "tilt"){
+
+            // Each finger reports its own move; half of each
+            // is the pair's shared movement.
+            camera.targetPitch = clampPitch(camera.targetPitch + (dy / 2) * TILT_PER_PX_TOUCH);
+
+            pinchDistance = currentDistance;
+
+            return;
+
+        }
+
+        if(pinchDistance && twoFingerMode === "pinch"){
 
             const factor =
                 currentDistance / pinchDistance;
@@ -120,7 +194,6 @@ function moveGesture(e){
         }
 
         pinchDistance = currentDistance;
-        tapMoved = true;
 
         return;
 
@@ -142,11 +215,29 @@ function moveGesture(e){
 
 
     //--------------------------------------------------
+    // Tilt (right-drag / Shift-drag)
+    //--------------------------------------------------
+
+    if(tilting){
+
+        camera.targetPitch = clampPitch(camera.targetPitch + dy * TILT_PER_PX);
+
+        return;
+
+    }
+
+
+    //--------------------------------------------------
     // Pan camera
     //--------------------------------------------------
 
+    // Tipped back, the map's up/down is squashed on screen,
+    // so it moves a little further per pixel to stay under
+    // the finger.
+    const squash = Math.max(0.4, Math.cos(camera.pitch));
+
     camera.targetX -= dx / camera.zoom;
-    camera.targetY -= dy / camera.zoom;
+    camera.targetY -= dy / (camera.zoom * squash);
 
 }
 
@@ -180,19 +271,16 @@ function mindmapTargetAt(clientX, clientY, coarse = false){
     clientX -= shift.x;
     clientY -= shift.y;
 
-    const halfW = window.innerWidth / 2;
-    const halfH = window.innerHeight / 2;
-
-    const radius = Math.max(coarse ? 30 : JUNCTION_HIT_MIN_PX, JUNCTION_HIT_WORLD * camera.zoom);
-
     for(const branch of graph.branchNodes){
 
         if(!branch.key.startsWith("phase")) continue;
 
-        const x = halfW + (branch.x - camera.x) * camera.zoom;
-        const y = halfH + (branch.y - camera.y) * camera.zoom;
+        // Where it's drawn, with depth and tilt (js/depth.js).
+        const at = projectNode(branch);
 
-        if(Math.hypot(clientX - x, clientY - y) <= radius){
+        const radius = Math.max(coarse ? 30 : JUNCTION_HIT_MIN_PX, JUNCTION_HIT_WORLD * camera.zoom * at.s);
+
+        if(Math.hypot(clientX - at.x, clientY - at.y) <= radius){
 
             return { type: "junction", phase: branch.phase };
 
@@ -207,12 +295,11 @@ function mindmapTargetAt(clientX, clientY, coarse = false){
 
     for(const h of hubs){
 
-        const hx = halfW + (h.x - camera.x) * camera.zoom;
-        const hy = halfH + (h.y - camera.y) * camera.zoom;
+        const at = project(h.x, h.y, 0);
 
         if(
-            Math.abs(clientX - hx) <= HUB_HALF_W * camera.zoom &&
-            Math.abs(clientY - hy) <= HUB_HALF_H * camera.zoom
+            Math.abs(clientX - at.x) <= HUB_HALF_W * camera.zoom * at.s &&
+            Math.abs(clientY - at.y) <= HUB_HALF_H * camera.zoom * at.s
         ){
 
             return { type: "hub", world: hubs.length > 1 ? h.world : null };
@@ -397,6 +484,11 @@ function endGesture(e){
 
     const wasSinglePointer = pointers.size === 1;
 
+    // A right-button press is for tilting, never a click.
+    const wasTilt = tilting || e.button === 2;
+
+    if(pointers.size === 1) tilting = false;
+
     const tapX = e.clientX;
     const tapY = e.clientY;
 
@@ -405,6 +497,8 @@ function endGesture(e){
     if(pointers.size < 2){
 
         pinchDistance = 0;
+
+        twoFingerMode = null;
 
     }
 
@@ -416,6 +510,7 @@ function endGesture(e){
     if(
         wasSinglePointer &&
         !tapMoved &&
+        !wasTilt &&
         !isUiTarget(e.target)
     ){
 
@@ -514,10 +609,52 @@ viewport.addEventListener(
 
         pinchDistance = 0;
 
+        twoFingerMode = null;
+
+        tilting = false;
+
         tapMoved = true;
 
     }
 );
+
+//--------------------------------------------------
+// Tilt extras
+//--------------------------------------------------
+
+// Right-drag tilts the map, so no right-click menu over it.
+viewport.addEventListener("contextmenu", e => {
+
+    if(!isUiTarget(e.target)) e.preventDefault();
+
+});
+
+// T: tip the map back, or lay it flat again.
+window.addEventListener("keydown", e => {
+
+    if(e.key !== "t" && e.key !== "T") return;
+
+    if(e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if(viewport.style.display === "none") return;
+
+    // Not while typing (the search box).
+    const el = document.activeElement;
+
+    if(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+
+    camera.targetPitch = camera.targetPitch > TILT_PRESET / 2 ? 0 : TILT_PRESET;
+
+});
+
+// Back to the landing page: lay the map flat, so the
+// hyperspace jump lines its logo up exactly again on the
+// way back in (app.js).
+window.addEventListener("mcu:go-to-landing", () => {
+
+    camera.pitch = camera.targetPitch = 0;
+
+});
 
 
 //--------------------------------------------------

@@ -35,6 +35,10 @@ let shown = false;
 // stars itself), easing to 1 everywhere else.
 let starSwayMix = 0;
 
+// How far (screen px) the stars drift at the map's full
+// tilt, per radian.
+const TILT_STAR_SHIFT = 220;
+
 //==================================================
 
 export function initialiseUniverse(){
@@ -73,10 +77,15 @@ export function renderUniverse(camera, entered){
 
     const sway = getSway();
 
-    const skyCamera = starSwayMix > 0.001 ? {
+    // Tipping the map back (js/depth.js) also turns the
+    // view slightly, so the stars drift with it (near ones
+    // more than far ones) instead of staying pinned.
+    const tilt = (camera.pitch || 0) * TILT_STAR_SHIFT;
+
+    const skyCamera = (starSwayMix > 0.001 || tilt) ? {
         ...camera,
         x: camera.x + sway.x * 2 * SWAY.stars / camera.zoom * starSwayMix,
-        y: camera.y + sway.y * 2 * SWAY.stars / camera.zoom * starSwayMix
+        y: camera.y + (sway.y * 2 * SWAY.stars * starSwayMix - tilt) / camera.zoom
     } : camera;
 
     //==================================================

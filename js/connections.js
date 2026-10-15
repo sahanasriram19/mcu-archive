@@ -1,6 +1,7 @@
 import { getCurrentView } from "./viewManager.js";
 import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 import { getTimelineOrientation } from "./layout.js";
+import { project } from "./depth.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -79,6 +80,36 @@ function curveControls(from, to, center){
 
 }
 
+// A line's points on screen, with depth (js/depth.js): its
+// two ends at their own depths, and — for a curve — its
+// two control points a third and two thirds of the way
+// between them, so a branch slopes smoothly from the logo
+// back to its poster.
+function depthOf(anchor){
+
+    return anchor.depth || 0;
+
+}
+
+function projectEdge(from, to, edge){
+
+    const d0 = depthOf(from), d3 = depthOf(to);
+
+    const a = project(from.x, from.y, d0);
+    const b = project(to.x, to.y, d3);
+
+    if(edge.style !== "curve") return { a, b };
+
+    const [c1x, c1y, c2x, c2y] = curveControls(from, to, edge.center);
+
+    return {
+        a, b,
+        c1: project(c1x, c1y, d0 + (d3 - d0) / 3),
+        c2: project(c2x, c2y, d0 + (d3 - d0) * 2 / 3)
+    };
+
+}
+
 //--------------------------------------------------
 // LINE HIT TEST (Complete MCU mind map)
 //
@@ -107,12 +138,6 @@ function distToSegment(px, py, ax, ay, bx, by){
 
 export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
 
-    const halfW = window.innerWidth/2;
-    const halfH = window.innerHeight/2;
-
-    const sx = x => halfW + (x - camera.x) * camera.zoom;
-    const sy = y => halfH + (y - camera.y) * camera.zoom;
-
     let best = -1, bestD = tolerance;
 
     graph.edges.forEach((edge, i)=>{
@@ -122,8 +147,10 @@ export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
 
         if(!from || !to) return;
 
-        const x0 = sx(from.x), y0 = sy(from.y);
-        const x3 = sx(to.x), y3 = sy(to.y);
+        const pts = projectEdge(from, to, edge);
+
+        const x0 = pts.a.x, y0 = pts.a.y;
+        const x3 = pts.b.x, y3 = pts.b.y;
 
         // Quick reject: point nowhere near this line's box.
         if(
@@ -141,9 +168,7 @@ export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
 
         }
 
-        const [c1x, c1y, c2x, c2y] = curveControls(from, to, edge.center);
-
-        const x1 = sx(c1x), y1 = sy(c1y), x2 = sx(c2x), y2 = sy(c2y);
+        const x1 = pts.c1.x, y1 = pts.c1.y, x2 = pts.c2.x, y2 = pts.c2.y;
 
         let lx = x0, ly = y0;
 
@@ -191,9 +216,6 @@ export function renderConnections(ctx, camera, graph){
         return;
 
     }
-
-    const halfW = window.innerWidth/2;
-    const halfH = window.innerHeight/2;
 
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -255,11 +277,11 @@ export function renderConnections(ctx, camera, graph){
 
         if(!from || !to) return;
 
-        const x1 = halfW + (from.x - camera.x) * camera.zoom;
-        const y1 = halfH + (from.y - camera.y) * camera.zoom;
+        const pts = projectEdge(from, to, edge);
 
-        const x2 = halfW + (to.x - camera.x) * camera.zoom;
-        const y2 = halfH + (to.y - camera.y) * camera.zoom;
+        const x1 = pts.a.x, y1 = pts.a.y;
+
+        const x2 = pts.b.x, y2 = pts.b.y;
 
         if(
 
@@ -288,14 +310,10 @@ export function renderConnections(ctx, camera, graph){
             // parent heading away from the hub and arrives at
             // the child heading away from the hub too, so every
             // branch visibly "grows" outward from the centre.
-            const [c1x, c1y, c2x, c2y] = curveControls(from, to, edge.center);
-
             target.bezierCurveTo(
 
-                halfW + (c1x - camera.x) * camera.zoom,
-                halfH + (c1y - camera.y) * camera.zoom,
-                halfW + (c2x - camera.x) * camera.zoom,
-                halfH + (c2y - camera.y) * camera.zoom,
+                pts.c1.x, pts.c1.y,
+                pts.c2.x, pts.c2.y,
                 x2, y2
 
             );
@@ -440,9 +458,6 @@ function drawColoured(ctx, camera, path, colour){
 
 function renderTimeline(ctx, camera, graph){
 
-    const halfW = window.innerWidth / 2;
-    const halfH = window.innerHeight / 2;
-
     // Left to right normally; top to bottom on an upright
     // phone (see layoutTimeline in layout.js).
     const vertical = getTimelineOrientation() === "vertical";
@@ -461,25 +476,13 @@ function renderTimeline(ctx, camera, graph){
 
     const first = movies[0], last = movies[movies.length-1];
 
-    let x1, y1, x2, y2;
+    // The spine lies on the map's surface (depth 0); with the
+    // map tilted (js/depth.js) it's still a straight line,
+    // just seen in perspective.
+    const start = vertical ? project(0, first.targetY, 0) : project(first.targetX, 0, 0);
+    const end = vertical ? project(0, last.targetY, 0) : project(last.targetX, 0, 0);
 
-    if(vertical){
-
-        const lineX = halfW + (0 - camera.x) * camera.zoom;
-
-        x1 = x2 = lineX;
-        y1 = halfH + (first.targetY - camera.y) * camera.zoom;
-        y2 = halfH + (last.targetY - camera.y) * camera.zoom;
-
-    } else {
-
-        const lineY = halfH + (0 - camera.y) * camera.zoom;
-
-        y1 = y2 = lineY;
-        x1 = halfW + (first.targetX - camera.x) * camera.zoom;
-        x2 = halfW + (last.targetX - camera.x) * camera.zoom;
-
-    }
+    const x1 = start.x, y1 = start.y, x2 = end.x, y2 = end.y;
 
     const glow = ctx.createLinearGradient(x1, y1, x2, y2);
 
@@ -524,20 +527,14 @@ function renderTimeline(ctx, camera, graph){
 
     movies.forEach(node=>{
 
-        const x = halfW + (node.x - camera.x) * camera.zoom;
-        const y = halfH + (node.y - camera.y) * camera.zoom;
+        // From the spine, straight back to the poster at
+        // its own depth.
+        const foot = vertical ? project(0, node.y, 0) : project(node.x, 0, 0);
+        const at = project(node.x, node.y, node.depth || 0);
 
-        if(vertical){
+        branchPath.moveTo(foot.x, foot.y);
 
-            branchPath.moveTo(x1, y);
-
-        } else {
-
-            branchPath.moveTo(x, y1);
-
-        }
-
-        branchPath.lineTo(x, y);
+        branchPath.lineTo(at.x, at.y);
 
     });
 

@@ -15,6 +15,7 @@ const BASE_RADIUS = 72;     // circle size in world units, before zoom
 const PULSE = false;        // set true to bring back the gentle breathing effect
 
 import { graph } from "./graph.js";
+import { projectNode } from "./depth.js";
 
 export const PHASE_COLOURS = {
 
@@ -142,13 +143,17 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
     ctx.globalCompositeOperation = "lighter";
 
-    const halfW = window.innerWidth/2;
-    const halfH = window.innerHeight/2;
-
     branchNodes.forEach(node=>{
 
-        const x = halfW + (node.x - camera.x) * camera.zoom;
-        const y = halfH + (node.y - camera.y) * camera.zoom;
+        // With depth and tilt (js/depth.js).
+        const at = projectNode(node);
+
+        const x = at.x;
+        const y = at.y;
+
+        // Labels shrink a little with distance, but never
+        // below the sizes they already had as a minimum.
+        const z = camera.zoom * at.s;
 
         if(
 
@@ -173,7 +178,7 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
         const pulse = PULSE ? (0.9 + Math.sin(node.pulse) * 0.1) : 1;
 
-        const radius = BASE_RADIUS * camera.zoom * pulse;
+        const radius = BASE_RADIUS * z * pulse;
 
         const phaseNum = typeof node.phase === "number" ? node.phase : null;
 
@@ -227,7 +232,7 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.textBaseline = "middle";
         // Bebas Neue, the heading font (css/comic.css); it's
         // narrow, so it's set a little bigger.
-        ctx.font = `400 ${Math.max(24, 34 * camera.zoom)}px "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
+        ctx.font = `400 ${Math.max(24, 34 * z)}px "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
 
         if(label){
 
@@ -243,11 +248,11 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         if(subtitle){
 
             // Clear of the name above it, however big that is.
-            const subtitleGap = Math.max(radius + 8, Math.max(24, 34 * camera.zoom) * 0.62 + Math.max(16, 22 * camera.zoom) * 0.55);
+            const subtitleGap = Math.max(radius + 8, Math.max(24, 34 * z) * 0.62 + Math.max(16, 22 * z) * 0.55);
 
             ctx.fillStyle = "rgba(255,255,255,.8)";
             ctx.textAlign = "center";
-            ctx.font = `${Math.max(16, 22 * camera.zoom)}px Inter, Arial, sans-serif`;
+            ctx.font = `${Math.max(16, 22 * z)}px Inter, Arial, sans-serif`;
 
             ctx.lineWidth = 3;
 

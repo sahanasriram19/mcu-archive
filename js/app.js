@@ -28,6 +28,7 @@ import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
 import { captureStars, setStarsHidden } from "./universe/stars.js";
 import { updateSway, swayOffset } from "./sway.js";
+import { updateDepth } from "./depth.js";
 
 //==========================================
 // LANDING
@@ -309,6 +310,10 @@ function loop(){
     updateSway();
 
     updateGraph();
+
+    // Each node eases to its depth for the current view
+    // (js/depth.js).
+    updateDepth();
 
     updateArchive();
 

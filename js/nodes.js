@@ -12,6 +12,7 @@ import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
+import { projectNode } from "./depth.js";
 
 const posterCache = new Map();
 
@@ -250,21 +251,21 @@ export function renderNodes(ctx, camera, nodes){
     // stops the browser batching the drawing together.
     ctx.globalCompositeOperation = "source-over";
 
-    const halfW = window.innerWidth/2;
-    const halfH = window.innerHeight/2;
-
     const focus = graph.focus;
 
-    const drawNode = node=>{
+    const drawNode = (node, at)=>{
 
         //----------------------------------
-        // Screen Position (camera-zoom aware,
-        // consistent with the universe engine)
+        // Screen Position — with depth and the
+        // map's tilt (js/depth.js). `depthScale`
+        // shrinks posters that sit further back.
         //----------------------------------
 
-        const x = halfW + (node.x - camera.x) * camera.zoom;
+        const x = at.x;
 
-        const y = halfH + (node.y - camera.y) * camera.zoom;
+        const y = at.y;
+
+        const depthScale = at.s;
 
         //----------------------------------
         // Cull offscreen nodes
@@ -273,7 +274,7 @@ export function renderNodes(ctx, camera, nodes){
         // Margin grows with the drawn poster, so big posters
         // (zoomed in, or lifted on hover) don't vanish while
         // part of them is still on screen.
-        const cullMargin = Math.max(120, 300 * camera.zoom);
+        const cullMargin = Math.max(120, 300 * camera.zoom * depthScale);
 
         if(
 
@@ -290,7 +291,7 @@ export function renderNodes(ctx, camera, nodes){
         // graph.js updateGraph), used to scale it up a little.
         const lift = node.lift || 0;
 
-        const scale = 1 + LIFT_SCALE * lift;
+        const scale = (1 + LIFT_SCALE * lift) * depthScale;
 
         // "What should I watch before…" (js/upcoming.js):
         // titles outside the list fade right back.
@@ -320,7 +321,7 @@ export function renderNodes(ctx, camera, nodes){
 
         const pulse = 1;
         
-        const scaledRadius = node.radius * camera.zoom;
+        const scaledRadius = node.radius * camera.zoom * depthScale;
 
         //----------------------------------
         // Glow (tinted per-node colour)
@@ -330,7 +331,7 @@ export function renderNodes(ctx, camera, nodes){
         // every poster made the whole map look washed in light.
         if(lift > 0.02){
 
-            const glowRadius = 110 * camera.zoom * 1.6;
+            const glowRadius = 110 * camera.zoom * 1.6 * depthScale;
 
             ctx.save();
 
@@ -365,7 +366,7 @@ export function renderNodes(ctx, camera, nodes){
         const onScreenWidth =
             (currentView === "release" || currentView === "chronology" || currentView === "characters" ? 300 :
              currentView === "complete" ? BASE_POSTER_SIZE + Math.min(node.ring || 0, 4) * 35 :
-             BASE_POSTER_SIZE) * camera.zoom;
+             BASE_POSTER_SIZE) * camera.zoom * depthScale;
 
         const poster = getPoster(node.poster, onScreenWidth);
         let posterReady = !!(poster && poster.loaded && !poster.failed);
@@ -547,7 +548,7 @@ export function renderNodes(ctx, camera, nodes){
 
         if(markFocus){
 
-            const w = onScreenWidth * scale;
+            const w = onScreenWidth * (1 + LIFT_SCALE * lift);
             const h = w * 1.5;
 
             ctx.save();
@@ -597,13 +598,21 @@ export function renderNodes(ctx, camera, nodes){
 
     };
 
-    // The hovered poster is drawn last so it lifts over its
+    // Back to front: posters further away are drawn first,
+    // so nearer ones overlap them (js/depth.js). The hovered
+    // poster is drawn last of all so it lifts over its
     // neighbours instead of tucking under them.
     const hovered = graph.hoverPoster !== null ? nodes[graph.hoverPoster] : null;
 
-    nodes.forEach(node=>{ if(node !== hovered) drawNode(node); });
+    const order = [];
 
-    if(hovered) drawNode(hovered);
+    nodes.forEach(node=>{ if(node !== hovered) order.push({ node, at: projectNode(node) }); });
+
+    order.sort((a, b) => b.at.z - a.at.z);
+
+    order.forEach(o => drawNode(o.node, o.at));
+
+    if(hovered) drawNode(hovered, projectNode(hovered));
 
     ctx.restore();
 
@@ -855,11 +864,13 @@ export function nodeScreenRect(node, camera){
 
     }
 
-    const w = size * camera.zoom * (1 + LIFT_SCALE * (node.lift || 0));
+    const at = projectNode(node);
+
+    const w = size * camera.zoom * at.s * (1 + LIFT_SCALE * (node.lift || 0));
     const h = w * 1.5;
 
-    const x = window.innerWidth / 2 + (node.x - camera.x) * camera.zoom;
-    const y = window.innerHeight / 2 + (node.y - camera.y) * camera.zoom;
+    const x = at.x;
+    const y = at.y;
 
     // (Plus the little shift the mouse gives the posters,
     // js/sway.js.)

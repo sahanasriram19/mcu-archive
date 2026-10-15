@@ -2,12 +2,13 @@
 // NODE HIT TESTING
 //
 // Mirrors the screen-position math in nodes.js's
-// renderNodes (poster size per view, ring growth for
-// Complete MCU) so a click can be matched back to
+// renderNodes (depth and tilt from js/depth.js, poster
+// size per view, ring growth for Complete MCU) so a click can be matched back to
 // whichever poster is actually drawn under it.
 //==================================================
 
 import { swayOffset } from "./sway.js";
+import { projectNode } from "./depth.js";
 
 const BASE_POSTER_SIZE = 320;
 
@@ -53,13 +54,16 @@ export function getNodeAtScreenPoint(screenX, screenY, camera, nodes, currentVie
     screenX -= shift.x;
     screenY -= shift.y;
 
-    const halfW = window.innerWidth/2;
-    const halfH = window.innerHeight/2;
-
     // A small fixed margin covers the ±2px "gentle floating"
     // offset nodes.js applies, so the hit box doesn't feel a
     // few pixels stingier than the poster actually drawn.
     const MARGIN = 6;
+
+    // With depth (js/depth.js) posters can overlap in any
+    // order, so the one nearest the camera wins — that's the
+    // one drawn on top.
+    let best = null;
+    let bestZ = Infinity;
 
     for(let i = nodes.length - 1; i >= 0; i--){
 
@@ -67,14 +71,13 @@ export function getNodeAtScreenPoint(screenX, screenY, camera, nodes, currentVie
 
         if(node.isBranch) continue;
 
-        const x = halfW + (node.x - camera.x) * camera.zoom;
-        const y = halfH + (node.y - camera.y) * camera.zoom;
+        const at = projectNode(node);
 
-        const posterWidth = posterSizeFor(node, currentView) * camera.zoom;
+        const posterWidth = posterSizeFor(node, currentView) * camera.zoom * at.s;
         const posterHeight = posterWidth * 1.5;
 
-        const left = x - posterWidth/2 - MARGIN;
-        const top = y - posterHeight/2 - MARGIN;
+        const left = at.x - posterWidth/2 - MARGIN;
+        const top = at.y - posterHeight/2 - MARGIN;
         const right = left + posterWidth + MARGIN*2;
         const bottom = top + posterHeight + MARGIN*2;
 
@@ -85,12 +88,21 @@ export function getNodeAtScreenPoint(screenX, screenY, camera, nodes, currentVie
 
         ){
 
-            return node;
+            // The poster under the mouse is drawn last (lifted
+            // over its neighbours), so it keeps the hover.
+            if(node.lift > 0.5) return node;
+
+            if(at.z < bestZ){
+
+                bestZ = at.z;
+                best = node;
+
+            }
 
         }
 
     }
 
-    return null;
+    return best;
 
 }

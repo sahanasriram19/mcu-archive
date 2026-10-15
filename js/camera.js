@@ -19,7 +19,14 @@ export const camera = {
 
     positionSmoothing: 0.09,
 
-    zoomSmoothing: 0.045
+    zoomSmoothing: 0.045,
+
+    // How far the map is tipped back, in radians (0 = flat,
+    // looking straight down at it). See js/depth.js.
+    pitch: 0,
+    targetPitch: 0,
+
+    pitchSmoothing: 0.12
 
 };
 
@@ -42,5 +49,11 @@ export function updateCamera(){
     camera.zoom +=
         (camera.targetZoom - camera.zoom) *
         zoomSpeed;
+
+    camera.pitch +=
+        (camera.targetPitch - camera.pitch) *
+        camera.pitchSmoothing;
+
+    if(Math.abs(camera.targetPitch - camera.pitch) < 1e-4) camera.pitch = camera.targetPitch;
 
 }

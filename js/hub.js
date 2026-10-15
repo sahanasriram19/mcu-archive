@@ -1,5 +1,6 @@
 import { getWorld } from "./worlds.js";
 import { graph } from "./graph.js";
+import { project } from "./depth.js";
 
 const img = new Image();
 img.src = "assets/marvel-logo.jpg";
@@ -17,14 +18,16 @@ export function renderHub(ctx, camera){
 
 function drawHub(ctx, camera, hub){
 
-    const x = window.innerWidth/2 +
-        (hub.x-camera.x)*camera.zoom;
+    // The logo is the nearest thing on its map (depth 0, see
+    // js/depth.js); with the map tilted it still shrinks or
+    // grows with where it sits.
+    const at = project(hub.x, hub.y, 0);
 
-    const y = window.innerHeight/2 +
-        (hub.y-camera.y)*camera.zoom;
+    const x = at.x;
+    const y = at.y;
 
-    const width = 900 * camera.zoom;
-    const height = 400 * camera.zoom;
+    const width = 900 * camera.zoom * at.s;
+    const height = 400 * camera.zoom * at.s;
 
     // Off screen: nothing to draw.
     if(x + width < 0 || x - width > window.innerWidth || y + height < 0 || y - height > window.innerHeight) return;
