@@ -12,6 +12,8 @@ import { fetchDetails } from "./posters.js";
 import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
 import { groupName, WORLDS } from "./worlds.js";
 import { canFlip, flipOpen, flipClose, hideFlipper, goodRect } from "./flip.js";
+import { isWatched, toggleWatched } from "./watched.js";
+import { setLinkTitle, copyLink } from "./links.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -24,7 +26,11 @@ overlay.innerHTML = `
             <div id="movie-details-kicker"></div>
             <h2 id="movie-details-title"></h2>
             <div id="movie-details-meta"></div>
-            <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
+            <div id="movie-details-actions">
+                <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
+                <button type="button" id="movie-details-watched" aria-pressed="false"></button>
+                <button type="button" id="movie-details-share">Copy link</button>
+            </div>
             <p id="movie-details-overview"></p>
             <div id="movie-details-characters"></div>
             <div id="movie-details-cast"></div>
@@ -44,6 +50,56 @@ const trailerEl = overlay.querySelector("#movie-details-trailer");
 const charactersEl = overlay.querySelector("#movie-details-characters");
 const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
+const watchedBtn = overlay.querySelector("#movie-details-watched");
+const shareBtn = overlay.querySelector("#movie-details-share");
+
+//--------------------------------------------------
+// Watched (js/watched.js): a toggle on the card. Not
+// offered for titles that aren't out yet.
+//--------------------------------------------------
+
+function renderWatchedButton(node){
+
+    const canWatch = !isUpcoming(node) && node.status !== "cancelled";
+
+    watchedBtn.style.display = canWatch ? "" : "none";
+
+    const on = isWatched(node.id);
+
+    watchedBtn.classList.toggle("on", on);
+    watchedBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    watchedBtn.textContent = on ? "✓ Watched" : "Mark as watched";
+
+}
+
+watchedBtn.addEventListener("click", () => {
+
+    if(openNode) toggleWatched(openNode.id);
+
+});
+
+window.addEventListener("mcu:watched-changed", () => {
+
+    if(!openNode) return;
+
+    renderWatchedButton(openNode);
+    renderWatchBefore(openNode);
+
+});
+
+// Copy link (js/links.js): the address already points at
+// this card; this just puts it on the clipboard.
+shareBtn.addEventListener("click", async () => {
+
+    const ok = await copyLink();
+
+    shareBtn.textContent = ok ? "Link copied" : "Copy the address bar";
+
+    clearTimeout(shareBtn.resetTimer);
+
+    shareBtn.resetTimer = setTimeout(() => { shareBtn.textContent = "Copy link"; }, 1800);
+
+});
 
 //--------------------------------------------------
 // "Watch before this" — see js/upcoming.js for where the
@@ -65,8 +121,19 @@ function renderWatchBefore(node){
     }
 
     const note = source === "curated"
-        ? "Watch these first"
+        ? "The essentials"
         : "Earlier titles with the same characters";
+
+    // Ticked off already (js/watched.js)?
+    const seenCount = nodes.filter(n => isWatched(n.id)).length;
+
+    const left = nodes.length - seenCount;
+
+    const countText = seenCount === 0
+        ? `${nodes.length} title${nodes.length === 1 ? "" : "s"}`
+        : left === 0
+            ? "all watched"
+            : `${left} of ${nodes.length} left`;
 
     // A row of small posters, like the cast row above it.
     // Uses TMDB's smallest poster size (w185) — plenty for
@@ -107,13 +174,13 @@ function renderWatchBefore(node){
         <div class="watch-head">
             <div>
                 <div class="watch-label">Watch before this</div>
-                <div class="watch-note">${note} · ${nodes.length} title${nodes.length === 1 ? "" : "s"}</div>
+                <div class="watch-note">${note} · ${countText}</div>
             </div>
             ${onLanding ? "" : `<button type="button" class="watch-show">Show on map</button>`}
         </div>
         <div class="watch-row">
             ${nodes.map((n, i) => `
-                <button type="button" class="watch-item" data-i="${i}" title="${n.title}">
+                <button type="button" class="watch-item${isWatched(n.id) ? " seen" : ""}" data-i="${i}" title="${n.title}">
                     <div class="watch-poster">${thumb(n)}</div>
                     <div class="watch-title">${n.title}</div>
                     <div class="watch-year">${(n.release || "").slice(0, 4)}${otherWorld(n)}</div>
@@ -179,6 +246,8 @@ function hideMovieDetails() {
     if(!overlay.classList.contains("open") && !overlay.classList.contains("dim")) return;
 
     openNode = null;
+
+    setLinkTitle(null);
 
     const back = flipFrom && canFlip() ? rectOf(flipFrom) : null;
 
@@ -308,6 +377,10 @@ export async function showMovieDetails(node, opts = {}) {
 
     openNode = node;
 
+    setLinkTitle(node.id);
+
+    shareBtn.textContent = "Copy link";
+
     const startRect = opts.from && canFlip() ? rectOf(opts.from) : null;
 
     const flipping = goodRect(startRect);
@@ -380,6 +453,8 @@ export async function showMovieDetails(node, opts = {}) {
 
     metaEl.textContent = metaParts.join("  ·  ");
 
+    renderWatchedButton(node);
+
     overviewEl.textContent = node.overview ||
         "No synopsis yet.";
 
@@ -405,15 +480,6 @@ export async function showMovieDetails(node, opts = {}) {
     // time it's called for a node that's already loaded/
     // loading, so this doesn't double the network cost).
         await fetchDetails(node);
-
-        console.log("DETAILS DEBUG:", {
-            title: node.title,
-            tmdbId: node.tmdbId,
-            tmdbEndpoint: node.tmdbEndpoint,
-            cast: node.cast,
-            castCount: node.cast?.length,
-            trailer: node.trailerUrl
-        });
 
         if (openNode !== node) return;
 

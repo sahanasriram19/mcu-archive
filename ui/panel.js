@@ -10,6 +10,9 @@ import {
 
 import { initMovieSearch } from "./search.js";
 import { isCompact } from "../js/responsive.js";
+import { worldNodes, allNodes } from "../js/graph.js";
+import { progress } from "../js/watched.js";
+import { isUpcoming } from "../js/upcoming.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -369,7 +372,7 @@ SECTIONS.forEach(section => {
 
     head.type = "button";
     head.className = "view-panel-section-head";
-    head.innerHTML = `<span>${section.title}</span><span class="view-panel-section-chevron" aria-hidden="true">&#9662;</span>`;
+    head.innerHTML = `<span>${section.title}</span><span class="view-panel-section-progress"></span><span class="view-panel-section-chevron" aria-hidden="true">&#9662;</span>`;
 
     head.addEventListener("click", () => {
 
@@ -538,9 +541,39 @@ function refreshActive(){
 // "Show on map" switching worlds) — stay in step.
 window.addEventListener("mcu:view-changed", refreshActive);
 
+//--------------------------------------------------
+// Watched counts (js/watched.js): "12/58" beside each
+// world's heading once you've ticked something off there.
+// Only titles that are out count.
+//--------------------------------------------------
+
+const released = n => !isUpcoming(n) && n.status !== "cancelled";
+
+function refreshProgress(){
+
+    sectionEls.forEach(({ world, head }) => {
+
+        const el = head.querySelector(".view-panel-section-progress");
+
+        if(!el) return;
+
+        const nodes = world === ALL_WORLDS ? allNodes() : (worldNodes[world] || []);
+
+        const { done, total } = progress(nodes, released);
+
+        el.textContent = done > 0 ? `${done}/${total}` : "";
+        el.title = done > 0 ? `${done} of ${total} watched` : "";
+
+    });
+
+}
+
+window.addEventListener("mcu:watched-changed", refreshProgress);
+
 export function initialisePanel(){
 
     initMovieSearch();
     refreshActive();
+    refreshProgress();
 
 }

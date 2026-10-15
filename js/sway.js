@@ -16,7 +16,8 @@
 //   - Landing fly-through: the 3D trail's viewpoint shifts
 //     with the mouse, so near posters slide past far ones.
 //
-// Mouse only (not touch), and off with the OS "reduce
+// The mouse on a computer; tilting the phone on a touch
+// screen (PHONE TILT below). Off with the OS "reduce
 // motion" setting. Positions are eased so it always glides.
 //==================================================
 
@@ -42,7 +43,7 @@ let lastCssX = 99, lastCssY = 99;   // (forces the first write)
 
 function enabled(){
 
-    return fine.matches && !reduceMotion.matches;
+    return (fine.matches || tiltActive) && !reduceMotion.matches;
 
 }
 
@@ -57,6 +58,88 @@ window.addEventListener("pointermove", e => {
 
 // Mouse leaves the window: settle back to the middle.
 document.addEventListener("mouseleave", () => { targetX = targetY = 0; });
+
+//--------------------------------------------------
+// PHONE TILT
+//
+// On a touch screen there's no mouse to follow, so tilting
+// the phone does the same job: lean it left/right or
+// towards/away from you and everything sways the same way
+// the mouse moves it on a computer (and the archive's map
+// turns with it, js/depth.js).
+//
+// It works from how the phone is held *now* compared with
+// a few seconds ago (the resting angle slowly catches up),
+// so it settles back whether you're sitting up or lying
+// down. iPhones ask permission first; that's requested on
+// the first tap, since iOS only allows asking then.
+//--------------------------------------------------
+
+const TILT_RANGE = 22;        // degrees of tilt for a full swing
+const TILT_STRENGTH = 0.8;    // a little less than the mouse at full stretch
+const TILT_SETTLE = 0.015;    // how fast the resting angle catches up, per reading
+
+let tiltActive = false;
+let restBeta = null, restGamma = null;
+
+const coarse = window.matchMedia("(hover: none) and (pointer: coarse)");
+
+function onOrientation(e){
+
+    if(e.beta === null || e.gamma === null) return;
+
+    tiltActive = true;
+
+    // Which way is "across" depends on how the phone is
+    // turned.
+    const angle = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+
+    let across = e.gamma, along = e.beta;
+
+    if(angle === 90){ across = e.beta; along = -e.gamma; }
+    else if(angle === -90 || angle === 270){ across = -e.beta; along = e.gamma; }
+    else if(angle === 180){ across = -e.gamma; along = -e.beta; }
+
+    if(restBeta === null){ restGamma = across; restBeta = along; }
+
+    restGamma += (across - restGamma) * TILT_SETTLE;
+    restBeta += (along - restBeta) * TILT_SETTLE;
+
+    const clamp = v => Math.max(-0.5, Math.min(0.5, v));
+
+    targetX = clamp((across - restGamma) / TILT_RANGE * 0.5) * TILT_STRENGTH;
+    targetY = clamp((along - restBeta) / TILT_RANGE * 0.5) * TILT_STRENGTH;
+
+}
+
+function startTilt(){
+
+    window.addEventListener("deviceorientation", onOrientation);
+
+}
+
+if(coarse.matches && "DeviceOrientationEvent" in window){
+
+    if(typeof DeviceOrientationEvent.requestPermission === "function"){
+
+        // iOS: ask on the first tap.
+        const ask = () => {
+
+            DeviceOrientationEvent.requestPermission()
+                .then(state => { if(state === "granted") startTilt(); })
+                .catch(() => {});
+
+        };
+
+        window.addEventListener("touchend", ask, { once: true });
+
+    } else {
+
+        startTilt();
+
+    }
+
+}
 
 // Called once a frame from the render loop (app.js).
 export function updateSway(){

@@ -408,3 +408,15 @@
     }
 
 }
+
+/* Watched count beside a world's heading (js/watched.js). */
+.view-panel-section-progress{
+    margin-left:auto;
+    margin-right:10px;
+    font-family:Inter, Arial, sans-serif;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.02em;
+    color:var(--muted);
+    font-variant-numeric:tabular-nums;
+}

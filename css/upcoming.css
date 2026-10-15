@@ -546,3 +546,28 @@
 .watch-banner-more {
     color: var(--muted);
 }
+
+/* Already watched (js/watched.js): faded back, with a tick. */
+.watch-item.seen .watch-poster{
+    position:relative;
+}
+
+.watch-item.seen .watch-poster > *{
+    opacity:.45;
+}
+
+.watch-item.seen .watch-poster::after{
+    content:"\2713";
+    position:absolute;
+    top:5px;
+    right:5px;
+    width:18px;
+    height:18px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:#E62429;
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+}

@@ -12,6 +12,7 @@ import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
+import { isWatched } from "./watched.js";
 import { projectNode, nodeHeight, shadowPoint, viewAngles } from "./depth.js";
 
 const posterCache = new Map();
@@ -537,6 +538,19 @@ export function renderNodes(ctx, camera, nodes){
         }
 
         //----------------------------------
+        // Watched (js/watched.js): a small red
+        // tick in the poster's top-right corner.
+        //----------------------------------
+
+        if(isWatched(node.id)){
+
+            const w = onScreenWidth * (1 + LIFT_SCALE * lift);
+
+            if(w >= 28) drawWatchedBadge(ctx, x + floatX + w / 2, y + floatY - w * 0.75, w);
+
+        }
+
+        //----------------------------------
         // Watch-list outline around the poster
         // (hovering only enlarges it — no
         // outline).
@@ -619,6 +633,42 @@ export function renderNodes(ctx, camera, nodes){
     order.forEach(o => drawNode(o.node, o.at));
 
     if(hovered) drawNode(hovered, projectNode(hovered));
+
+    ctx.restore();
+
+}
+
+// The "watched" tick, tucked into the poster's top-right
+// corner (cornerX, cornerY) and sized to the poster.
+function drawWatchedBadge(ctx, cornerX, cornerY, posterWidth){
+
+    const r = Math.min(15, posterWidth * 0.1);
+
+    const cx = cornerX - r * 1.35;
+    const cy = cornerY + r * 1.35;
+
+    ctx.save();
+
+    ctx.globalCompositeOperation = "source-over";
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#E62429";
+    ctx.fill();
+
+    ctx.lineWidth = Math.max(1, r * 0.16);
+    ctx.strokeStyle = "rgba(0,0,0,.55)";
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.45, cy + r * 0.02);
+    ctx.lineTo(cx - r * 0.1, cy + r * 0.38);
+    ctx.lineTo(cx + r * 0.48, cy - r * 0.34);
+    ctx.lineWidth = Math.max(1.2, r * 0.24);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#fff";
+    ctx.stroke();
 
     ctx.restore();
 

@@ -29,6 +29,9 @@ import { canWarp, playWarp } from "./warp.js";
 import { captureStars, setStarsHidden } from "./universe/stars.js";
 import { updateSway, swayOffset } from "./sway.js";
 import { updateDepth, REST_PITCH } from "./depth.js";
+import { readLink, onLinkChange } from "./links.js";
+import { showMovieDetails } from "./movieDetails.js";
+import { setSelectedCharacter } from "./characters/characterJourney.js";
 
 //==========================================
 // LANDING
@@ -145,7 +148,10 @@ function hubOnScreen(){
 
 }
 
-async function enter(viewKey){
+// opts.world: open this world's view rather than the
+// combined map. opts.instant: no hyperspace jump (opening a
+// shared link goes straight in).
+async function enter(viewKey, opts = {}){
 
     if(landing.classList.contains("leaving")) return;   // already on the way in
 
@@ -158,7 +164,7 @@ async function enter(viewKey){
     // The fly-through stops steering the camera.
     setIntroActive(false);
 
-    if(canWarp()){
+    if(canWarp() && !opts.instant){
 
         // Hyperspace jump (js/warp.js): the landing rushes
         // away under the streaks, and the archive is set up
@@ -208,6 +214,10 @@ async function enter(viewKey){
 
         }
 
+    } else if(opts.instant){
+
+        landing.style.display = "none";
+
     } else {
 
         setTimeout(() => {
@@ -228,7 +238,8 @@ async function enter(viewKey){
 
         // Let the view choose its own camera. The default,
         // "MCU", is every world's mind map together.
-        if(viewKey === "complete") setWorldView(ALL_WORLDS, "complete");
+        if(opts.world) setWorldView(opts.world, viewKey);
+        else if(viewKey === "complete") setWorldView(ALL_WORLDS, "complete");
         else setView(viewKey);
 
         initialisePanel();
@@ -291,6 +302,59 @@ window.addEventListener("mcu:go-to-landing", () => {
     viewport.style.display = "none";
 
 });
+
+//==========================================
+// SHARED LINKS (js/links.js)
+//
+// Opened with a link like #/xmen/release?title=x2: skip the
+// landing page, go straight to that view, and open the
+// title's card once the map has settled.
+//==========================================
+
+const TITLE_OPEN_DELAY = 900;   // ms, after the view has framed itself
+
+function openLinkedTitle(id){
+
+    if(!id) return;
+
+    const node = graph.nodes.find(n => n.id === id && !n.isBranch) ||
+        allNodes().find(n => n.id === id);
+
+    if(node) setTimeout(() => showMovieDetails(node), TITLE_OPEN_DELAY);
+
+}
+
+async function followLink(link){
+
+    if(link.character) setSelectedCharacter(link.character);
+
+    if(!entered){
+
+        await enter(link.view, { world: link.world, instant: true });
+
+    } else {
+
+        setWorldView(link.world, link.view);
+
+    }
+
+    openLinkedTitle(link.title);
+
+}
+
+const startLink = readLink();
+
+if(startLink){
+
+    // Hidden straight away, so the landing page doesn't
+    // flash up first.
+    landing.style.display = "none";
+
+    graphReady.then(() => followLink(startLink));
+
+}
+
+onLinkChange(link => graphReady.then(() => followLink(link)));
 
 //==========================================
 // INITIALISE
