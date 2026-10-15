@@ -65,7 +65,7 @@ function renderWatchBefore(node){
     }
 
     const note = source === "curated"
-        ? "Hand-picked essentials"
+        ? "Watch these first"
         : "Earlier titles with the same characters";
 
     // A row of small posters, like the cast row above it.
@@ -381,7 +381,7 @@ export async function showMovieDetails(node, opts = {}) {
     metaEl.textContent = metaParts.join("  ·  ");
 
     overviewEl.textContent = node.overview ||
-        "No synopsis available yet for this entry.";
+        "No synopsis yet.";
 
     if (node.characters && node.characters.length) {
 

@@ -450,61 +450,18 @@ export function renderConnections(ctx, camera, graph){
 
 }
 
-//----------------------------------
-// Glow without shadowBlur.
-//
-// The lines' glow used to come from the canvas shadowBlur
-// setting — one of the slowest things a 2D canvas can do,
-// and it ran for every colour, every frame, over the whole
-// screen. It turned out to cost more than everything else
-// on the map put together, and was what made entering the
-// archive stutter. The same soft halo is now built from a
-// couple of wider, fainter strokes underneath the line,
-// which looks nearly identical and is many times cheaper.
-//----------------------------------
+// Plain solid lines, no glow: the shadows underneath
+// (strokeShadows) already lift them off the background.
 
-function glowStroke(ctx, path, halo, haloAlpha, width, blur){
-
-    ctx.lineCap = "round";
-
-    ctx.strokeStyle = `rgba(${halo},${haloAlpha * 0.12})`;
-    ctx.lineWidth = width + blur * 1.6;
-    ctx.stroke(path);
-
-    ctx.strokeStyle = `rgba(${halo},${haloAlpha * 0.25})`;
-    ctx.lineWidth = width + blur * 0.7;
-    ctx.stroke(path);
-
-}
-
-// The original pale-blue/white glowing lines: one wide
-// glow, a tighter bloom, and a bright core.
+// White lines (Character Journeys).
 function drawWhite(ctx, camera, path){
 
-    const z = camera.zoom;
-
     ctx.save();
 
-    ctx.globalCompositeOperation = "lighter";
-
-    // Capped in screen pixels: Character Journeys sits much
-    // closer in than the other views, and without a cap these
-    // lines came out several times thicker there than the
-    // lines everywhere else.
-    const band = Math.min(10 * z, 3);
-
-    glowStroke(ctx, path, "140,210,255", 1, band, Math.min(32 * z, 9));
-
-    ctx.strokeStyle = "rgba(170,225,255,.75)";
-    ctx.lineWidth = band;
-    ctx.stroke(path);
-
-    ctx.restore();
-
-    ctx.save();
-
-    ctx.strokeStyle = "rgba(255,255,255,.92)";
-    ctx.lineWidth = Math.min(Math.max(2.5 * z, 1.2), 2);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(225,235,250,.9)";
+    // Capped: Character Journeys sits much closer in.
+    ctx.lineWidth = Math.min(Math.max(2.5 * camera.zoom, 1.2), 2.2);
 
     ctx.stroke(path);
 
@@ -512,32 +469,17 @@ function drawWhite(ctx, camera, path){
 
 }
 
-// Phase-coloured lines: the same glow-and-core look in the
-// phase's colour. The core is the colour lifted towards
-// white, so it still reads as a lit strand.
+// Phase-coloured lines, a little lighter than the phase
+// colour so they read on the dark background.
 function drawColoured(ctx, camera, path, colour){
 
-    const core = colour.split(",").map(c => Math.round(+c + (255 - +c) * 0.35)).join(",");
-
-    const z = camera.zoom;
+    const tone = colour.split(",").map(c => Math.round(+c + (255 - +c) * 0.15)).join(",");
 
     ctx.save();
 
-    ctx.globalCompositeOperation = "lighter";
-
-    glowStroke(ctx, path, colour, 1, 9 * z, 28 * z);
-
-    ctx.strokeStyle = `rgba(${colour},.55)`;
-    ctx.lineWidth = 9 * z;
-
-    ctx.stroke(path);
-
-    ctx.restore();
-
-    ctx.save();
-
-    ctx.strokeStyle = `rgba(${core},.95)`;
-    ctx.lineWidth = Math.max(2.5 * z, 1.3);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = `rgb(${tone})`;
+    ctx.lineWidth = Math.max(3 * camera.zoom, 1.4);
 
     ctx.stroke(path);
 
@@ -587,34 +529,16 @@ function renderTimeline(ctx, camera, graph){
 
     strokeShadows(ctx, camera, shadows);
 
-    const glow = ctx.createLinearGradient(x1, y1, x2, y2);
-
-    glow.addColorStop(0,"rgba(130,205,255,.25)");
-    glow.addColorStop(.5,"rgba(190,240,255,.65)");
-    glow.addColorStop(1,"rgba(255,255,255,.25)");
-
     const spine = new Path2D();
 
     spine.moveTo(x1, y1);
     spine.lineTo(x2, y2);
 
     ctx.save();
-    ctx.globalCompositeOperation = "lighter";
 
-    // Soft halo (see glowStroke above), then the gradient
-    // band.
-    glowStroke(ctx, spine, "140,210,255", .4, 10 * camera.zoom, 18 * camera.zoom);
-
-    ctx.strokeStyle = glow;
-    ctx.lineWidth = 10 * camera.zoom;
-
-    ctx.stroke(spine);
-    ctx.restore();
-
-    ctx.save();
-
-    ctx.strokeStyle = "rgba(255,255,255,.9)";
-    ctx.lineWidth = Math.max(2.5 * camera.zoom,1.2);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(220,235,255,.9)";
+    ctx.lineWidth = Math.max(4 * camera.zoom, 1.8);
 
     ctx.stroke(spine);
     ctx.restore();
@@ -633,7 +557,7 @@ function renderTimeline(ctx, camera, graph){
         // From the spine, straight back to the poster at
         // its own depth.
         const foot = vertical ? project(0, node.y, 0) : project(node.x, 0, 0);
-        const at = project(node.x, node.y, node.depth || 0);
+        const at = project(node.x, node.y, -nodeHeight(node));
 
         branchPath.moveTo(foot.x, foot.y);
 
@@ -643,9 +567,8 @@ function renderTimeline(ctx, camera, graph){
 
     ctx.save();
 
-    glowStroke(ctx, branchPath, "200,230,255", .7, Math.max(2 * camera.zoom, 1), 6 * camera.zoom);
-
-    ctx.strokeStyle = "rgba(255,255,255,.85)";
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(220,235,255,.75)";
     ctx.lineWidth = Math.max(2 * camera.zoom,1);
 
     ctx.stroke(branchPath);
