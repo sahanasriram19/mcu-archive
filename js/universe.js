@@ -36,6 +36,16 @@ let shown = false;
 // stars itself), easing to 1 everywhere else.
 let starSwayMix = 0;
 
+// "Calm": zoomed out in the archive, where far more of the
+// sky is on screen at once, the background tones down —
+// softer star glows, fewer and fainter drifting specks,
+// rarer shooting stars, a fainter nebula — so the map reads
+// first and the sky sits back behind it. 0 = as on the
+// landing page and zoomed in; 1 = fully calm. Read by
+// stars.js, energy.js and shootingStars.js (universe.calm).
+const CALM_FROM_ZOOM = 0.2;     // starts calming below this zoom...
+const CALM_FULL_ZOOM = 0.08;    // ...fully calm by this one
+
 // How far (screen px) the stars drift at the map's full
 // tilt, per radian.
 const TILT_STAR_SHIFT = 220;
@@ -75,6 +85,12 @@ export function renderUniverse(camera, entered){
     //==================================================
 
     starSwayMix += ((heroShowing() ? 0 : 1) - starSwayMix) * 0.05;
+
+    const calmTarget = entered
+        ? Math.max(0, Math.min(1, (CALM_FROM_ZOOM - camera.zoom) / (CALM_FROM_ZOOM - CALM_FULL_ZOOM)))
+        : 0;
+
+    universe.calm = (universe.calm || 0) + (calmTarget - (universe.calm || 0)) * 0.05;
 
     const sway = getSway();
 
@@ -118,7 +134,8 @@ export function renderUniverse(camera, entered){
 
             ctx.save();
 
-            ctx.globalAlpha = nebulaAlpha * 0.55;
+            // (Was 0.55: a bit much behind the zoomed-out map.)
+            ctx.globalAlpha = nebulaAlpha * 0.32;
 
             drawNebulas(skyCamera);
 

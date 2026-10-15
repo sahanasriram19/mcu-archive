@@ -63,7 +63,11 @@ export function drawEnergy(camera) {
     // drawn there.
     // Further out still (the combined MCU map), fewer again,
     // so the field doesn't fill up as more of it shows.
-    const step = camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1;
+    // Calm (zoomed out in the archive, see universe.js):
+    // half as many again, and fainter.
+    const calm = universe.calm || 0;
+
+    const step = (camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1) * (calm > 0.5 ? 2 : 1);
 
     // Their circling is in world units, so zoomed out (the
     // archive) it shrank to nothing: scaled up to look the
@@ -104,7 +108,7 @@ export function drawEnergy(camera) {
         // new gradient per speck per frame.
         const size = e.radius * 28;
 
-        ctx.globalAlpha = e.alpha * pulse;
+        ctx.globalAlpha = e.alpha * pulse * (1 - 0.5 * calm);
 
         ctx.drawImage(haloFor(e.colour), screen.x - size / 2, screen.y - size / 2, size, size);
 

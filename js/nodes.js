@@ -12,7 +12,7 @@ import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
-import { project, projectNode, nodeHeight, screenDepth, viewAngles } from "./depth.js";
+import { projectNode, nodeHeight, shadowPoint, viewAngles } from "./depth.js";
 
 const posterCache = new Map();
 
@@ -637,9 +637,7 @@ export function renderNodes(ctx, camera, nodes){
 // it.
 //--------------------------------------------------
 
-const SHADOW_ALPHA = 0.55;      // darkness right under a low poster
-const SHADOW_FALL_X = 0.35;     // how far it falls, per px of height
-const SHADOW_FALL_Y = 0.55;
+const SHADOW_ALPHA = 0.36;      // darkness right under a low poster
 const SHADOW_SPREAD = 0.0025;   // grows this much wider per px of height
 const SHADOW_FADE = 0.004;      // ...and this much fainter
 
@@ -659,13 +657,9 @@ function drawShadow(ctx, node, focus){
 
     if(height <= 1) return;
 
-    // Height in screen px, as the poster itself is lifted.
-    const H = Math.abs(screenDepth(-height));
-
-    // Where it lands on the surface (world units).
-    const fall = H / camera.zoom;
-
-    const at = project(node.x + fall * SHADOW_FALL_X, node.y + fall * SHADOW_FALL_Y, 0);
+    // Where it lands on the surface, and the poster's height
+    // in screen px (js/depth.js).
+    const { at, H } = shadowPoint(node.x, node.y, height);
 
     const w = posterBaseSize(node) * camera.zoom * at.s * (1 + H * SHADOW_SPREAD);
 

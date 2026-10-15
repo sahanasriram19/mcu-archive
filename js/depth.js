@@ -270,6 +270,25 @@ export function nodeHeight(node){
 
 }
 
+// Shadows (posters in nodes.js, lines in connections.js):
+// lit from the top left, so a shadow lands a little down and
+// to the right of whatever casts it, further the higher it is.
+const SHADOW_FALL_X = 0.35;     // per px of height
+const SHADOW_FALL_Y = 0.55;
+
+// Where the shadow of a point `height` above the surface
+// lands on it. Returns the projected point and the height in
+// screen px (for how soft/faint to make it).
+export function shadowPoint(x, y, height){
+
+    const H = Math.abs(screenDepth(-Math.max(0, height)));
+
+    const fall = H / camera.zoom;
+
+    return { at: project(x + fall * SHADOW_FALL_X, y + fall * SHADOW_FALL_Y, 0), H };
+
+}
+
 // Shorthand for a node (or a hub / anchor with no depth).
 export function projectNode(node){
 

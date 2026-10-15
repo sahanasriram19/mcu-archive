@@ -148,6 +148,10 @@ export function drawStars(camera) {
 
         for (const screen of screenCopies(worldX, worldY, camera, star.depth, width, height, 300, CONFIG.WORLD_SIZE)) {
 
+        // Calmer zoomed out in the archive (universe.calm,
+        // see universe.js): a gentler twinkle.
+        const calm = universe.calm || 0;
+
         const pulse =
 
             0.75 +
@@ -156,7 +160,7 @@ export function drawStars(camera) {
 
                 star.twinkle
 
-            ) * 0.25;
+            ) * 0.25 * (1 - 0.6 * calm);
 
         const radius = clamp(
 
@@ -183,7 +187,8 @@ export function drawStars(camera) {
             // a new gradient per star per frame.
             const size = radius * 20;
 
-            ctx.globalAlpha = pulse;
+            // (Softer halos when calm.)
+            ctx.globalAlpha = pulse * (1 - 0.5 * calm);
 
             ctx.drawImage(glowSprite(), screen.x - size / 2, screen.y - size / 2, size, size);
 

@@ -96,6 +96,12 @@ export function drawShootingStars() {
 
     ctx.globalCompositeOperation = "lighter";
 
+    // Calm (zoomed out in the archive, see universe.js):
+    // fainter, and further apart.
+    const calm = universe.calm || 0;
+
+    ctx.globalAlpha = 1 - 0.45 * calm;
+
     const width = universe.width;
     const height = universe.height;
 
@@ -141,7 +147,7 @@ export function drawShootingStars() {
 
             star.active = false;
 
-            star.timer = random(120, 700);
+            star.timer = random(120, 700) * (1 + 2 * calm);
 
             return;
 
