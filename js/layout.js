@@ -24,7 +24,7 @@ import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 
 
 
-function phaseSubtitle(members){
+function phaseSubtitle(members) {
 
     const years = members.map(m => new Date(m.release).getFullYear());
 
@@ -53,18 +53,18 @@ const POSTER_H = POSTER_W * 1.5;
 const OVERLAP_MARGIN = 0;      // clear air kept between poster edges
 const OVERLAP_ITERATIONS = 200; // converges in well under this for 80 nodes
 
-function resolveOverlaps(nodes, margin = OVERLAP_MARGIN){
+function resolveOverlaps(nodes, margin = OVERLAP_MARGIN) {
 
     const minW = POSTER_W + margin;
     const minH = POSTER_H + margin;
 
-    for(let iter=0; iter<OVERLAP_ITERATIONS; iter++){
+    for (let iter = 0; iter < OVERLAP_ITERATIONS; iter++) {
 
         let moved = false;
 
-        for(let i=0;i<nodes.length;i++){
+        for (let i = 0; i < nodes.length; i++) {
 
-            for(let j=i+1;j<nodes.length;j++){
+            for (let j = i + 1; j < nodes.length; j++) {
 
                 const a = nodes[i], b = nodes[j];
 
@@ -74,7 +74,7 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN){
                 const overlapX = minW - Math.abs(dx);
                 const overlapY = minH - Math.abs(dy);
 
-                if(overlapX > 0 && overlapY > 0){
+                if (overlapX > 0 && overlapY > 0) {
 
                     moved = true;
 
@@ -82,21 +82,21 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN){
                     // closest to clear — keeps the nudge as
                     // small (and as true to the original
                     // layout) as possible.
-                    if(overlapX < overlapY){
+                    if (overlapX < overlapY) {
 
-                        const push = overlapX/2 + 0.5;
-                        const sign = dx !== 0 ? Math.sign(dx) : (j%2===0 ? 1 : -1);
+                        const push = overlapX / 2 + 0.5;
+                        const sign = dx !== 0 ? Math.sign(dx) : (j % 2 === 0 ? 1 : -1);
 
-                        a.targetX -= sign*push;
-                        b.targetX += sign*push;
+                        a.targetX -= sign * push;
+                        b.targetX += sign * push;
 
                     } else {
 
-                        const push = overlapY/2 + 0.5;
-                        const sign = dy !== 0 ? Math.sign(dy) : (j%2===0 ? 1 : -1);
+                        const push = overlapY / 2 + 0.5;
+                        const sign = dy !== 0 ? Math.sign(dy) : (j % 2 === 0 ? 1 : -1);
 
-                        a.targetY -= sign*push;
-                        b.targetY += sign*push;
+                        a.targetY -= sign * push;
+                        b.targetY += sign * push;
 
                     }
 
@@ -106,7 +106,7 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN){
 
         }
 
-        if(!moved) break;
+        if (!moved) break;
 
     }
 
@@ -146,15 +146,15 @@ const MINDMAP_WEDGE_PAD = 4;        // extra "weight" per phase so small phases 
 const WORLD_SHAPES = {
 
     animated: { long: 1.5, short: 1.12 },
-    spider:   { long: 1.3, short: 1.06 }
+    spider: { long: 1.3, short: 1.06 }
 
 };
 
-function worldShape(world, { sx, sy }){
+function worldShape(world, { sx, sy }) {
 
     const shape = WORLD_SHAPES[world];
 
-    if(!shape) return { sx, sy };
+    if (!shape) return { sx, sy };
 
     const wide = window.innerWidth >= window.innerHeight;
 
@@ -164,7 +164,7 @@ function worldShape(world, { sx, sy }){
 
 }
 
-function mindmapStretch(){
+function mindmapStretch() {
 
     const aspect = Math.min(2.2, Math.max(0.5,
         window.innerWidth / Math.max(1, window.innerHeight)
@@ -180,7 +180,7 @@ function mindmapStretch(){
 // into rows radiating out from its branch: a few "lead"
 // titles first, then progressively wider rows — that's
 // what gives each branch its fanned-out, tree-like look.
-function mindmapTiers(members, wedge){
+function mindmapTiers(members, wedge) {
 
     const tiers = [];
 
@@ -189,7 +189,7 @@ function mindmapTiers(members, wedge){
 
     let wanted = Math.max(2, Math.min(4, Math.round(members.length / 4)));
 
-    while(index < members.length){
+    while (index < members.length) {
 
         const radius = MINDMAP_FIRST_TIER + tier * MINDMAP_TIER_STEP;
 
@@ -201,7 +201,7 @@ function mindmapTiers(members, wedge){
         // end if it can fit on the row before it.
         const left = members.length - index - count;
 
-        if(left > 0 && left <= 2 && count + left <= capacity) count += left;
+        if (left > 0 && left <= 2 && count + left <= capacity) count += left;
 
         tiers.push({ radius, members: members.slice(index, index + count) });
 
@@ -218,11 +218,11 @@ function mindmapTiers(members, wedge){
 
 // One world's mind map round (0, 0): sets each title's
 // target and returns the phase/era junctions (not the hub).
-function mindmapTargets(nodes, sx, sy){
+function mindmapTargets(nodes, sx, sy) {
 
     const groups = {};
 
-    nodes.forEach(node=>{
+    nodes.forEach(node => {
 
         groups[node.phase] = groups[node.phase] || [];
         groups[node.phase].push(node);
@@ -231,24 +231,24 @@ function mindmapTargets(nodes, sx, sy){
 
     const phaseKeys = [
         ...MINDMAP_PHASE_ORDER.filter(p => groups[p] && groups[p].length),
-        ...Object.keys(groups).map(Number).filter(p => !MINDMAP_PHASE_ORDER.includes(p)).sort((a,b)=>a-b)
+        ...Object.keys(groups).map(Number).filter(p => !MINDMAP_PHASE_ORDER.includes(p)).sort((a, b) => a - b)
     ];
 
     // Wedge size grows with phase size, so Phase 4's 17
     // titles get more of the circle than Phase 0's 6 —
     // the padding keeps small phases from being squeezed.
     const weights = phaseKeys.map(p => groups[p].length + MINDMAP_WEDGE_PAD);
-    const totalWeight = weights.reduce((a,b)=>a+b, 0);
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
 
     const branches = [];
 
-    let cursor = -Math.PI/2 - (weights[0] / totalWeight) * Math.PI;
+    let cursor = -Math.PI / 2 - (weights[0] / totalWeight) * Math.PI;
 
-    phaseKeys.forEach((phase, pi)=>{
+    phaseKeys.forEach((phase, pi) => {
 
         const wedge = (weights[pi] / totalWeight) * Math.PI * 2;
 
-        const centre = cursor + wedge/2;
+        const centre = cursor + wedge / 2;
 
         cursor += wedge;
 
@@ -261,7 +261,7 @@ function mindmapTargets(nodes, sx, sy){
         branches.push({
 
             phase,
-            key: "phase"+phase,
+            key: "phase" + phase,
             label: "",
             subtitle: "",
             // Shown only while that branch is hovered.
@@ -272,13 +272,13 @@ function mindmapTargets(nodes, sx, sy){
 
         });
 
-        const members = [...groups[phase]].sort((a,b)=>a.timeline-b.timeline);
+        const members = [...groups[phase]].sort((a, b) => a.timeline - b.timeline);
 
         // Leave a little clear air at each wedge edge so
         // neighbouring phases read as separate branches.
         const usable = wedge * 0.86;
 
-        mindmapTiers(members, usable).forEach((tier, ti)=>{
+        mindmapTiers(members, usable).forEach((tier, ti) => {
 
             const n = tier.members.length;
 
@@ -289,9 +289,9 @@ function mindmapTargets(nodes, sx, sy){
             // lining up in rigid columns.
             const stagger = (ti % 2 === 1 && n > 1) ? step * 0.18 : 0;
 
-            tier.members.forEach((node, i)=>{
+            tier.members.forEach((node, i) => {
 
-                const angle = centre + (i - (n-1)/2) * step + stagger;
+                const angle = centre + (i - (n - 1) / 2) * step + stagger;
 
                 node.layout = "complete";
                 node.ring = 0;
@@ -313,10 +313,10 @@ function mindmapTargets(nodes, sx, sy){
 
 }
 
-export function layoutComplete(nodes){
+export function layoutComplete(nodes) {
 
     // The combined "Complete MCU" map: every world at once.
-    if(getWorld() === ALL_WORLDS) return layoutMultiverse(nodes);
+    if (getWorld() === ALL_WORLDS) return layoutMultiverse(nodes);
 
     const { sx, sy } = worldShape(getWorld(), mindmapStretch());
 
@@ -325,7 +325,7 @@ export function layoutComplete(nodes){
     setHubs([{ world: getWorld(), x: 0, y: 0 }]);
 
     setBranchNodes([
-        { phase:null, key:"hub", label:"", subtitle:"", x:0, y:0 },
+        { phase: null, key: "hub", label: "", subtitle: "", x: 0, y: 0 },
         ...branches
     ]);
 
@@ -351,19 +351,27 @@ const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff", "unscripted
 const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
 const MULTIVERSE_STEP = 150;    // how far the corners move out per try
 
+// How much further apart the maps are spread than the
+// tightest fit above (1 = just clearing each other). Every
+// map keeps its place — X-Men top left, Fantastic Four
+// straight up and so on — they're just pushed further out
+// from the Avengers logo, leaving more open universe to
+// drift through between them.
+const MULTIVERSE_SPREAD = 1.8;
+
 // Which corner each map sits in: [across, up/down].
 const MULTIVERSE_CORNERS = {
-    xmen:       [-1, -1],
-    unscripted: [ 1, -1],
-    animated:   [-1,  1],
-    spider:     [ 1,  1]
+    xmen: [-1, -1],
+    unscripted: [1, -1],
+    animated: [-1, 1],
+    spider: [1, 1]
 };
 
 // The one map that sits straight above the Avengers map.
 const MULTIVERSE_TOP = "ff";
 
 // Poster boxes (plus the logo) of one map, round its own hub.
-function boxesOf(nodes, hubX = 0, hubY = 0){
+function boxesOf(nodes, hubX = 0, hubY = 0) {
 
     const halfW = POSTER_W / 2, halfH = POSTER_H / 2;
 
@@ -378,13 +386,13 @@ function boxesOf(nodes, hubX = 0, hubY = 0){
 
 }
 
-function boxesClash(a, b, dx, dy, gap){
+function boxesClash(a, b, dx, dy, gap) {
 
-    for(const p of a){
+    for (const p of a) {
 
-        for(const q of b){
+        for (const q of b) {
 
-            if(
+            if (
                 p.minX + dx < q.maxX + gap && p.maxX + dx > q.minX - gap &&
                 p.minY + dy < q.maxY + gap && p.maxY + dy > q.minY - gap
             ) return true;
@@ -398,20 +406,20 @@ function boxesClash(a, b, dx, dy, gap){
 }
 
 // Do any two maps overlap with the corners this far out?
-function cornersClash(maps, worlds, cx, cy){
+function cornersClash(maps, worlds, cx, cy) {
 
     const at = w => w === "mcu"
         ? [0, 0]
         : [MULTIVERSE_CORNERS[w][0] * cx, MULTIVERSE_CORNERS[w][1] * cy];
 
-    for(let i = 0; i < worlds.length; i++){
+    for (let i = 0; i < worlds.length; i++) {
 
-        for(let j = i + 1; j < worlds.length; j++){
+        for (let j = i + 1; j < worlds.length; j++) {
 
             const [ax, ay] = at(worlds[i]);
             const [bx, by] = at(worlds[j]);
 
-            if(boxesClash(maps[worlds[i]].boxes, maps[worlds[j]].boxes, ax - bx, ay - by, MULTIVERSE_GAP)) return true;
+            if (boxesClash(maps[worlds[i]].boxes, maps[worlds[j]].boxes, ax - bx, ay - by, MULTIVERSE_GAP)) return true;
 
         }
 
@@ -421,7 +429,7 @@ function cornersClash(maps, worlds, cx, cy){
 
 }
 
-export function layoutMultiverse(nodes){
+export function layoutMultiverse(nodes) {
 
     const byWorld = {};
 
@@ -434,7 +442,7 @@ export function layoutMultiverse(nodes){
 
     const maps = {};
 
-    worlds.forEach(w=>{
+    worlds.forEach(w => {
 
         // The X-Men and Fantastic Four maps stay round; the
         // Spider-Man and Animated maps keep their wider oval
@@ -460,9 +468,9 @@ export function layoutMultiverse(nodes){
 
     let t = 0;
 
-    while(t < 60000 && cornersClash(maps, cornerWorlds, ax * t, ay * t)) t += MULTIVERSE_STEP;
+    while (t < 60000 && cornersClash(maps, cornerWorlds, ax * t, ay * t)) t += MULTIVERSE_STEP;
 
-    cornerWorlds.filter(w => w !== "mcu").forEach(w=>{
+    cornerWorlds.filter(w => w !== "mcu").forEach(w => {
 
         maps[w].dx = MULTIVERSE_CORNERS[w][0] * ax * t;
         maps[w].dy = MULTIVERSE_CORNERS[w][1] * ay * t;
@@ -474,7 +482,7 @@ export function layoutMultiverse(nodes){
     // clear every map already placed.
     const top = maps[MULTIVERSE_TOP];
 
-    if(top){
+    if (top) {
 
         const placed = [];
 
@@ -485,16 +493,25 @@ export function layoutMultiverse(nodes){
 
         let d = 0;
 
-        while(d < 60000 && boxesClash(top.boxes, placed, 0, -d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
+        while (d < 60000 && boxesClash(top.boxes, placed, 0, -d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
 
         top.dy = -d;
 
     }
 
+    // Push every map out from the Avengers logo, all by the
+    // same amount, so the layout keeps its shape.
+    worlds.forEach(w => {
+
+        maps[w].dx *= MULTIVERSE_SPREAD;
+        maps[w].dy *= MULTIVERSE_SPREAD;
+
+    });
+
     const hubs = [];
     const allBranches = [];
 
-    worlds.forEach(w=>{
+    worlds.forEach(w => {
 
         const m = maps[w];
 
@@ -552,20 +569,20 @@ const topRowCount = n => Math.ceil(n / 2);
 // longer than "PHASE 1", and with only 3-4 titles the ring
 // was small enough for posters to sit on the label. Short
 // MCU labels come out under 620, so MCU rings are unchanged.
-function phaseRingRadius(n, label = ""){
+function phaseRingRadius(n, label = "") {
 
     return Math.max(
-        PHASE_RING_BASE + Math.max(0, n-6)*PHASE_RING_PER_TITLE,
+        PHASE_RING_BASE + Math.max(0, n - 6) * PHASE_RING_PER_TITLE,
         300 + label.length * 38
     );
 
 }
 
-export function layoutPhases(nodes){
+export function layoutPhases(nodes) {
 
     const groups = {};
 
-    nodes.forEach(node=>{
+    nodes.forEach(node => {
 
         groups[node.phase] = groups[node.phase] || [];
         groups[node.phase].push(node);
@@ -577,7 +594,7 @@ export function layoutPhases(nodes){
     const phaseKeys = Object.keys(groups)
         .map(Number)
         .filter(phase => groups[phase].length > 0)
-        .sort((a,b)=>a-b);
+        .sort((a, b) => a - b);
 
     // Upright phone: one phase per row, top to bottom, so
     // each ring is big enough to read and you scroll down
@@ -586,14 +603,14 @@ export function layoutPhases(nodes){
     // Phone held sideways: the same idea turned on its side —
     // one row, left to right, that you swipe through. (Two
     // rows are too tall for a ~340px-high screen.)
-    if(isCompact()){
+    if (isCompact()) {
 
         const portrait = isPortraitPhone();
 
-        const column = phaseKeys.map((phase, pi)=>({
+        const column = phaseKeys.map((phase, pi) => ({
 
             phase,
-            key: "phase"+phase,
+            key: "phase" + phase,
             label: groupName(phase),
             subtitle: phaseSubtitle(groups[phase]),
             x: portrait ? 0 : pi * PHASE_GRID_X,
@@ -611,7 +628,7 @@ export function layoutPhases(nodes){
 
     }
 
-    const branchTargets = phaseKeys.map((phase,pi)=>{
+    const branchTargets = phaseKeys.map((phase, pi) => {
 
         const row = pi < topRowCount(phaseKeys.length) ? 0 : 1;
 
@@ -624,10 +641,10 @@ export function layoutPhases(nodes){
         return {
 
             phase,
-            key: "phase"+phase,
+            key: "phase" + phase,
             label: groupName(phase),
             subtitle: phaseSubtitle(groups[phase]),
-            x: (col - (rowCount-1)/2) * PHASE_GRID_X,
+            x: (col - (rowCount - 1) / 2) * PHASE_GRID_X,
             y: (row - 0.5) * PHASE_GRID_Y
 
         };
@@ -645,22 +662,22 @@ export function layoutPhases(nodes){
 }
 
 // Rings each phase's titles around its branch position.
-function placePhaseRings(branches, groups){
+function placePhaseRings(branches, groups) {
 
-    branches.forEach(branch=>{
+    branches.forEach(branch => {
 
-        const members = [...groups[branch.phase]].sort((a,b)=>a.timeline-b.timeline);
+        const members = [...groups[branch.phase]].sort((a, b) => a.timeline - b.timeline);
 
         const n = members.length;
 
         const radius = phaseRingRadius(n, groupName(branch.phase));
 
-        members.forEach((node,i)=>{
+        members.forEach((node, i) => {
 
-            const angle = (i/n)*Math.PI*2 - Math.PI/2;
+            const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
 
-            node.targetX = branch.x + Math.cos(angle)*radius;
-            node.targetY = branch.y + Math.sin(angle)*radius*PHASE_RING_ROUND;
+            node.targetX = branch.x + Math.cos(angle) * radius;
+            node.targetY = branch.y + Math.sin(angle) * radius * PHASE_RING_ROUND;
 
         });
 
@@ -713,7 +730,7 @@ const TIMELINE_SIDE_X = 330;
 // posters, which is where it goes on wider screens.
 const TIMELINE_GROUP_GAP_Y = 520;
 
-function verticalTimelineY(i){
+function verticalTimelineY(i) {
 
     return i * TIMELINE_SPACING_Y + (Math.floor(i / TIMELINE_LABEL_EVERY) + 1) * TIMELINE_GROUP_GAP_Y;
 
@@ -722,22 +739,22 @@ function verticalTimelineY(i){
 // "2008–2011": the span of real-world release years in a
 // group of titles — shown under each timeline marker in
 // both Release Order and Chronological Order.
-function releaseYears(members){
+function releaseYears(members) {
 
-    const years = members.map(m=>new Date(m.release).getFullYear());
+    const years = members.map(m => new Date(m.release).getFullYear());
 
     const min = Math.min(...years), max = Math.max(...years);
 
-    return min===max ? `${min}` : `${min}–${max}`;
+    return min === max ? `${min}` : `${min}–${max}`;
 
 }
 
-export function layoutRelease(nodes){
+export function layoutRelease(nodes) {
 
     layoutTimeline(
 
         nodes,
-        (a,b)=> new Date(a.release)-new Date(b.release),
+        (a, b) => new Date(a.release) - new Date(b.release),
         members => phaseLabel(members),
         releaseYears
 
@@ -745,12 +762,12 @@ export function layoutRelease(nodes){
 
 }
 
-export function layoutChronology(nodes){
+export function layoutChronology(nodes) {
 
     layoutTimeline(
 
         nodes,
-        (a,b)=> a.timeline-b.timeline,
+        (a, b) => a.timeline - b.timeline,
         members => phaseLabel(members),
         releaseYears
 
@@ -764,15 +781,15 @@ export function layoutChronology(nodes){
 // boundary, which for chunks touching Phase 0 (Defenders)
 // could read as an odd "PHASE 0–3" — a single representative
 // number reads more cleanly on the timeline.
-function phaseLabel(members){
+function phaseLabel(members) {
 
     const counts = {};
 
-    members.forEach(m=>{
+    members.forEach(m => {
 
-        if(typeof m.phase === "number"){
+        if (typeof m.phase === "number") {
 
-            counts[m.phase] = (counts[m.phase]||0) + 1;
+            counts[m.phase] = (counts[m.phase] || 0) + 1;
 
         }
 
@@ -780,9 +797,9 @@ function phaseLabel(members){
 
     const phases = Object.keys(counts).map(Number);
 
-    if(!phases.length) return "";
+    if (!phases.length) return "";
 
-    phases.sort((a,b)=> counts[b]-counts[a] || a-b);
+    phases.sort((a, b) => counts[b] - counts[a] || a - b);
 
     return groupName(phases[0]);
 
@@ -792,20 +809,20 @@ function phaseLabel(members){
 // "vertical"); read by connections.js.
 let timelineOrientation = "horizontal";
 
-export function getTimelineOrientation(){
+export function getTimelineOrientation() {
 
     return timelineOrientation;
 
 }
 
-function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
+function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
     const sorted = [...nodes].sort(compareFn);
 
-    sorted.forEach(node=>{
-    node.layout = "timeline";
-    node.ring = 0;
-});
+    sorted.forEach(node => {
+        node.layout = "timeline";
+        node.ring = 0;
+    });
 
     const vertical = isPortraitPhone();
 
@@ -817,44 +834,44 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
     // centred, so the camera (see views.js) lands right on
     // the beginning of the timeline instead of somewhere in
     // the middle of it.
-        sorted.forEach((node,i)=>{
+    sorted.forEach((node, i) => {
 
-            const side = i % 2 === 0 ? -1 : 1;
+        const side = i % 2 === 0 ? -1 : 1;
 
-            if(vertical){
+        if (vertical) {
 
-                node.targetX = side * TIMELINE_SIDE_X;
+            node.targetX = side * TIMELINE_SIDE_X;
 
-                node.targetY = verticalTimelineY(i);
+            node.targetY = verticalTimelineY(i);
 
-            } else {
+        } else {
 
-                node.targetX = i * TIMELINE_SPACING_X;
+            node.targetX = i * TIMELINE_SPACING_X;
 
-                node.targetY = side * (TIMELINE_STEM + 80);
+            node.targetY = side * (TIMELINE_STEM + 80);
 
-            }
+        }
 
-        });
+    });
 
     // Small floating date-range labels sitting right on the
     // centre line, just for reference — no edges connect to
     // these, they're not part of the chain.
     const labels = [];
 
-    for(let i=0; i<sorted.length; i+=TIMELINE_LABEL_EVERY){
+    for (let i = 0; i < sorted.length; i += TIMELINE_LABEL_EVERY) {
 
-        const chunk = sorted.slice(i, i+TIMELINE_LABEL_EVERY);
+        const chunk = sorted.slice(i, i + TIMELINE_LABEL_EVERY);
 
-        const midIndex = i + (chunk.length-1)/2;
+        const midIndex = i + (chunk.length - 1) / 2;
 
         labels.push({
 
-            phase:null,
+            phase: null,
 
-            key:"era"+i,
+            key: "era" + i,
 
-            label:labelFn(chunk),
+            label: labelFn(chunk),
 
             subtitle: subtitleFn ? subtitleFn(chunk) : "",
 
@@ -863,7 +880,7 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
             // Vertical: centred in the gap above the group.
             y: vertical ? verticalTimelineY(i) - (TIMELINE_SPACING_Y + TIMELINE_GROUP_GAP_Y) / 2 : 0,
 
-            memberIds:chunk.map(movie=>movie.id)
+            memberIds: chunk.map(movie => movie.id)
 
         });
 
@@ -882,11 +899,11 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn){
 // character, in the order they first appear.
 //--------------------------------------------------
 
-export function layoutCharacters(nodes){
+export function layoutCharacters(nodes) {
 
     const character = getSelectedCharacter();
 
-    if(!character) return;
+    if (!character) return;
 
     setBranchNodes([]);
 
@@ -894,24 +911,24 @@ export function layoutCharacters(nodes){
         .filter(node =>
             (node.characters || []).includes(character)
         )
-        .sort((a,b)=>a.timeline-b.timeline);
+        .sort((a, b) => a.timeline - b.timeline);
 
-        nodes.forEach(node=>{
+    nodes.forEach(node => {
 
-    if(!movies.includes(node)){
+        if (!movies.includes(node)) {
 
-        node.targetX = 100000;
-        node.targetY = 100000;
+            node.targetX = 100000;
+            node.targetY = 100000;
 
-    }
+        }
 
-});
+    });
 
     const SPACING = 650;
 
     const vertical = isPortraitPhone();
 
-    movies.forEach((node,i)=>{
+    movies.forEach((node, i) => {
 
         const side = i % 2 === 0 ? -1 : 1;
 
@@ -919,7 +936,7 @@ export function layoutCharacters(nodes){
         // titles by this, whichever way the layout runs.
         node.journeyIndex = i;
 
-        if(vertical){
+        if (vertical) {
 
             // Top to bottom, alternating left/right. Same-side
             // neighbours sit 2 x 270 apart, clearing a 450-tall
@@ -940,15 +957,15 @@ export function layoutCharacters(nodes){
 
 }
 
-export function layoutCharacterJourney(nodes){
+export function layoutCharacterJourney(nodes) {
 
     const character = getSelectedCharacter();
 
-    if(!character) return;
+    if (!character) return;
 
     setBranchNodes([]);
 
-    nodes.forEach(node=>{
+    nodes.forEach(node => {
 
         node.targetX = 100000;
         node.targetY = 100000;
@@ -960,11 +977,11 @@ export function layoutCharacterJourney(nodes){
             n.characters &&
             n.characters.includes(character)
         )
-        .sort((a,b)=>a.timeline-b.timeline);
+        .sort((a, b) => a.timeline - b.timeline);
 
     const spacing = 700;
 
-    movies.forEach((movie,index)=>{
+    movies.forEach((movie, index) => {
 
         movie.targetX = index * spacing;
         movie.targetY = 0;
@@ -993,11 +1010,11 @@ const SCATTER_CELL_H = 2900;
 const SCATTER_WANDER = 0.72;    // how much of its patch a poster can wander over (0-1)
 
 // A steady 0..1 number from a string / index.
-function hashOf(text){
+function hashOf(text) {
 
     let h = 2166136261;
 
-    for(let i = 0; i < text.length; i++){
+    for (let i = 0; i < text.length; i++) {
 
         h ^= text.charCodeAt(i);
         h = Math.imul(h, 16777619);
@@ -1008,16 +1025,16 @@ function hashOf(text){
 
 }
 
-export function layoutScatter(nodes){
+export function layoutScatter(nodes) {
 
     const seen = new Set();
     const shown = [];
 
-    nodes.forEach(node=>{
+    nodes.forEach(node => {
 
         // A title on two maps (Deadpool & Wolverine…) is
         // shown once; its second copy steps out of view.
-        if(seen.has(node.id)){
+        if (seen.has(node.id)) {
 
             node.targetX = 100000;
             node.targetY = 100000;
@@ -1044,7 +1061,7 @@ export function layoutScatter(nodes){
     const cols = Math.max(1, Math.min(N, Math.round(Math.sqrt(N * aspect * SCATTER_CELL_H / SCATTER_CELL_W))));
     const rows = Math.ceil(N / cols);
 
-    order.forEach((node, i)=>{
+    order.forEach((node, i) => {
 
         const r = Math.floor(i / cols);
         const c = i % cols;

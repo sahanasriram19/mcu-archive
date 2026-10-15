@@ -30,7 +30,11 @@ export const VIEWS = [
             // the universe rather than floating in empty space.
             // Raise it to stop further in; lower it to allow
             // zooming out further.
-            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 1 } },
+            // (0.7 rather than 1: with the maps spread further apart —
+            // MULTIVERSE_SPREAD in layout.js — the opening view
+            // needs room to step back far enough that the top
+            // corner maps clear the panel and countdown cards.)
+            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 0.7 } },
             // The Animated and Spider-Man maps are spread wider
             // (WORLD_SHAPES in layout.js), so they need to zoom
             // out further to fit on screen.

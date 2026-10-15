@@ -6,7 +6,7 @@ import { showMovieDetails } from "./movieDetails.js";
 import { nodeScreenRect } from "./nodes.js";
 import { edgeAtScreenPoint } from "./connections.js";
 import { swayOffset } from "./sway.js";
-import { project, projectNode, MAX_PITCH } from "./depth.js";
+import { project, projectNode, MAX_PITCH, REST_PITCH } from "./depth.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -28,12 +28,12 @@ const CLICK_TOLERANCE = 8;
 //   • mouse: drag with the right button, or Shift + drag
 //   • touch: slide two fingers up or down together
 //     (spreading them apart still zooms)
-//   • keyboard: T tips it back / lays it flat again
+//   • keyboard: T lays it flat / tips it back to where it
+//     opened (REST_PITCH in depth.js)
 //--------------------------------------------------
 
 const TILT_PER_PX = 0.0045;       // radians per px of drag (mouse)
 const TILT_PER_PX_TOUCH = 0.006;  // ...and of a two-finger slide
-const TILT_PRESET = 0.6;          // where T tips it to (~34°)
 
 // How far two fingers have to move before we decide
 // whether they're pinching or sliding together.
@@ -629,7 +629,7 @@ viewport.addEventListener("contextmenu", e => {
 
 });
 
-// T: tip the map back, or lay it flat again.
+// T: lay the map flat, or tip it back to where it opened.
 window.addEventListener("keydown", e => {
 
     if(e.key !== "t" && e.key !== "T") return;
@@ -643,13 +643,13 @@ window.addEventListener("keydown", e => {
 
     if(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
 
-    camera.targetPitch = camera.targetPitch > TILT_PRESET / 2 ? 0 : TILT_PRESET;
+    camera.targetPitch = camera.targetPitch > 0.05 ? 0 : REST_PITCH;
 
 });
 
 // Back to the landing page: lay the map flat, so the
 // hyperspace jump lines its logo up exactly again on the
-// way back in (app.js).
+// way back in (app.js tips it back once it's through).
 window.addEventListener("mcu:go-to-landing", () => {
 
     camera.pitch = camera.targetPitch = 0;

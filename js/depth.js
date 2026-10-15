@@ -17,7 +17,16 @@
 //   2. The camera can pitch: the whole map tips back like
 //      a table you look across (right-drag / Shift-drag /
 //      two-finger swipe / T key — see input.js). The top
-//      recedes, the bottom comes towards you.
+//      recedes, the bottom comes towards you. The archive
+//      opens already tipped back a little (REST_PITCH).
+//
+//   3. Look-around: on a mouse, the map turns a few degrees
+//      towards the cursor — left/right and up/down — as if
+//      you were leaning to look into a model. Because it's a
+//      real rotation, nearer things shift against further
+//      ones. It rides on the same eased mouse position as
+//      the rest of the site's sway (js/sway.js), so it's off
+//      on touch screens and with "reduce motion".
 //
 // Depth is in world units, so — like a real camera pulling
 // away — the full-map view looks almost flat and the depth
@@ -34,6 +43,7 @@
 import { camera } from "./camera.js";
 import { graph } from "./graph.js";
 import { currentView } from "./viewManager.js";
+import { getSway } from "./sway.js";
 
 //--------------------------------------------------
 // Tuning
@@ -65,6 +75,15 @@ const VIEW_DEPTH = {
 const DEPTH_EASE = 0.08;     // how fast a node moves to a new depth
 
 export const MAX_PITCH = 0.9;   // radians (~52°)
+
+// How far the map is tipped back when the archive opens
+// (and where T returns it to). 0 = flat.
+export const REST_PITCH = 0.35; // radians (~20°)
+
+// Look-around: how far the map turns with the mouse at the
+// edge of the screen.
+const LOOK_YAW = 0.12;          // left/right, radians (~7°)
+const LOOK_PITCH = 0.07;        // up/down, radians (~4°)
 
 //--------------------------------------------------
 // Per-title variety: a steady 0..1 number from its id,
@@ -161,26 +180,39 @@ export function project(wx, wy, depth = 0){
 
     D = DEPTH_LIMIT * Math.tanh(D / DEPTH_LIMIT);
 
+    // Look-around: the side of the map nearest the mouse
+    // dips away from you (like pressing on it), the far side
+    // comes up.
+    const look = getSway();          // -0.5 … 0.5 each way, eased
+
+    const yaw = -look.x * 2 * LOOK_YAW;
+
     // Tip the map back about the screen's horizontal centre
     // line: its top goes away from you, and anything behind
     // the surface rises slightly with it.
-    const p = camera.pitch || 0;
+    const p = (camera.pitch || 0) - look.y * 2 * LOOK_PITCH;
 
     const c = Math.cos(p), sn = Math.sin(p);
 
     const Yr = Y * c - D * sn;
+    const Zp = -Y * sn + D * c;
+
+    // ...then turn it about the screen's vertical centre line.
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+
+    const Xr = X * cy + Zp * sy;
 
     const F = focalLength();
 
     // Never closer than this (or the bottom edge would blow
     // up when tipped far back).
-    const Zr = Math.max(-F * 0.6, -Y * sn + D * c);
+    const Zr = Math.max(-F * 0.6, -X * sy + Zp * cy);
 
     const s = F / (F + Zr);
 
     return {
 
-        x: window.innerWidth / 2 + X * s,
+        x: window.innerWidth / 2 + Xr * s,
         y: window.innerHeight / 2 + Yr * s,
         s,
         z: Zr

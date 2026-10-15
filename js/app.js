@@ -28,7 +28,7 @@ import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
 import { captureStars, setStarsHidden } from "./universe/stars.js";
 import { updateSway, swayOffset } from "./sway.js";
-import { updateDepth } from "./depth.js";
+import { updateDepth, REST_PITCH } from "./depth.js";
 
 //==========================================
 // LANDING
@@ -240,6 +240,11 @@ async function enter(viewKey){
         setView(getCurrentView());
 
     }
+
+    // The map opens tipped back a little (js/depth.js). It
+    // starts flat — so the jump's logo lines up exactly with
+    // the map's — and eases back as the camera pulls out.
+    camera.targetPitch = REST_PITCH;
 
 }
 
