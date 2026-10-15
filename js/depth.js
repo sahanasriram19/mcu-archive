@@ -96,8 +96,8 @@ export const REST_PITCH = 0.5;  // radians (~29°)
 
 // Look-around: how far the map turns with the mouse at the
 // edge of the screen.
-const LOOK_YAW = 0.12;          // left/right, radians (~7°)
-const LOOK_PITCH = 0.07;        // up/down, radians (~4°)
+const LOOK_YAW = 0.08;          // left/right, radians (~4.5°)
+const LOOK_PITCH = 0.045;       // up/down, radians (~2.5°)
 
 //--------------------------------------------------
 // Per-title variety: a steady 0..1 number from its id,

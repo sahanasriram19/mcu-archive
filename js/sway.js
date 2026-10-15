@@ -108,8 +108,10 @@ const LAYERS = [
     ["#countdown", 12, 12, "translate"],
     [".character-panel", 12, 12, "translate"],
     ["#watch-banner", 8, 8, "translate"],
-    ["#intro-end", 24, 18, "translate"],
-    ["#intro-stage", -120, -80, "origin"]
+    ["#intro-end", 14, 10, "translate"],
+    // (Was -120, -80: with the mouse near the top, the trail's
+    // upper posters and their captions slid off the screen.)
+    ["#intro-stage", -60, -36, "origin"]
 ];
 
 const found = new Map();

@@ -179,12 +179,12 @@
 ==================================================*/
 
 .hero-portal{
-    transform:translate3d(calc(var(--px, 0) * 34px), calc(var(--py, 0) * 26px), 0);
+    transform:translate3d(calc(var(--px, 0) * 26px), calc(var(--py, 0) * 20px), 0);
 }
 
 #landing-card .landing-title,
 #landing-card .landing-tagline{
-    transform:translate3d(calc(var(--px, 0) * 12px), calc(var(--py, 0) * 9px), 0);
+    transform:translate3d(calc(var(--px, 0) * 9px), calc(var(--py, 0) * 7px), 0);
 }
 
 #landing-card .intro-scroll-hint{
