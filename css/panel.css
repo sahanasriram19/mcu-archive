@@ -420,3 +420,7 @@
     color:var(--muted);
     font-variant-numeric:tabular-nums;
 }
+/* A little room between the title and the search bar. */
+.view-panel-content-inner > .search-container:first-child{
+    margin-top:12px;
+}
