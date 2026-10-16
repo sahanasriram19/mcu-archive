@@ -48,18 +48,28 @@ export function renderGround(ctx, camera){
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = POOL_ALPHA;
 
+    const base = ctx.getTransform();
+
     for(const pool of pools){
 
         const at = project(pool.x, pool.y, 0);
 
         const w = pool.rx * 2 * camera.zoom * at.s;
-        const h = pool.ry * 2 * camera.zoom * at.s * squash;
+        const h = pool.ry * 2 * camera.zoom * at.s;
 
         if(w < 4) continue;
 
-        if(at.x + w / 2 < 0 || at.x - w / 2 > window.innerWidth || at.y + h / 2 < 0 || at.y - h / 2 > window.innerHeight) continue;
+        const reach = Math.max(w, h) / 2;
 
-        ctx.drawImage(sprite, at.x - w / 2, at.y - h / 2, w, h);
+        if(at.x + reach < 0 || at.x - reach > window.innerWidth || at.y + reach < 0 || at.y - reach > window.innerHeight) continue;
+
+        // Turned with the map (camera.spin), then squashed as
+        // the surface tips back.
+        ctx.setTransform(base.multiply(new DOMMatrix().translate(at.x, at.y).scale(1, squash).rotate((camera.spin || 0) * 180 / Math.PI)));
+
+        ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+
+        ctx.setTransform(base);
 
     }
 

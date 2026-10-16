@@ -71,20 +71,20 @@ const HEIGHT_SCALE = Math.pow(0.3, 1 - HEIGHT_POWER);
 // Mind map ("complete"): how high above the surface.
 const MAP_JUNCTION = 20;     // phase junctions
 const MAP_FLOAT = 170;       // the first ring of posters
-const MAP_PER_TIER = 45;     // each ring after that, a little higher
-const MAP_JITTER = 60;       // a little per-title variety
+const MAP_PER_TIER = 70;     // each ring after that, a little higher
+const MAP_JITTER = 150;       // a little per-title variety
 
 // Other views: base + up to `spread` per title.
 const VIEW_HEIGHT = {
-    phases:     { base: 130, spread: 160 },
-    release:    { base: 120, spread: 180 },
-    chronology: { base: 120, spread: 180 },
-    characters: { base: 120, spread: 160 },
+    phases:     { base: 120, spread: 240 },
+    release:    { base: 110, spread: 260 },
+    chronology: { base: 110, spread: 260 },
+    characters: { base: 110, spread: 240 },
     scatter:    { base: 120, spread: 800 }    // All Posters: a real volume
 };
 
 // How much higher a poster rises while hovered.
-const LIFT_RISE = 90;
+const LIFT_RISE = 140;
 
 const DEPTH_EASE = 0.08;     // how fast a node moves to a new depth
 
@@ -93,6 +93,11 @@ export const MAX_PITCH = 0.9;   // radians (~52°)
 // How far the map is tipped back when the archive opens
 // (and where T returns it to). 0 = flat.
 export const REST_PITCH = 0.5;  // radians (~29°)
+
+// How far the map can be turned on the spot, either way
+// (drag with the right mouse button / Shift, or twist two
+// fingers): camera.spin.
+export const MAX_SPIN = 0.6;    // radians (~35°)
 
 // Look-around: how far the map turns with the mouse at the
 // edge of the screen.
@@ -195,8 +200,23 @@ export function project(wx, wy, depth = 0){
 
     const zoom = camera.zoom;
 
-    const X = (wx - camera.x) * zoom;
-    const Y = (wy - camera.y) * zoom;
+    let X = (wx - camera.x) * zoom;
+    let Y = (wy - camera.y) * zoom;
+
+    // Turntable: turn the map on the spot about the middle
+    // of the screen, before it's tipped back.
+    const spin = camera.spin || 0;
+
+    if(spin){
+
+        const cs = Math.cos(spin), ss = Math.sin(spin);
+
+        const sx = X * cs - Y * ss;
+
+        Y = X * ss + Y * cs;
+        X = sx;
+
+    }
 
     const D = screenDepth(depth);
 
@@ -285,7 +305,15 @@ export function shadowPoint(x, y, height){
 
     const fall = H / camera.zoom;
 
-    return { at: project(x + fall * SHADOW_FALL_X, y + fall * SHADOW_FALL_Y, 0), H };
+    // The light stays put on screen while the map turns, so
+    // the fall direction turns back the other way.
+    const spin = camera.spin || 0;
+    const cs = Math.cos(spin), ss = Math.sin(spin);
+
+    const fx = SHADOW_FALL_X * cs + SHADOW_FALL_Y * ss;
+    const fy = -SHADOW_FALL_X * ss + SHADOW_FALL_Y * cs;
+
+    return { at: project(x + fall * fx, y + fall * fy, 0), H };
 
 }
 

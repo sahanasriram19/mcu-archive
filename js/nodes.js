@@ -15,6 +15,21 @@ import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
 import { projectNode, nodeHeight, shadowPoint, viewAngles } from "./depth.js";
 
+// Where the mouse is (for the hovered poster's lean).
+let mouseX = -1, mouseY = -1;
+
+window.addEventListener("pointermove", e => {
+
+    if(e.pointerType !== "mouse") return;
+
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+}, { passive: true });
+
+const LEAN = 0.08;              // how far a hovered poster leans towards the mouse
+const LEAN_EASE = 0.18;
+
 const posterCache = new Map();
 
 // Which size to use for a poster drawn `screenWidth` CSS
@@ -305,6 +320,44 @@ export function renderNodes(ctx, camera, nodes){
         // Hovering a phase on the mind map: the other phases
         // step back (eased in graph.js, see hoverFade).
         ctx.globalAlpha *= hoverDim(node.phase);
+
+        //----------------------------------
+        // Lean: the hovered poster tips a few
+        // degrees, the side under the mouse
+        // pressing away, like a card picked up.
+        //----------------------------------
+
+        const isHovered = graph.hoverPoster !== null && graph.nodes[graph.hoverPoster] === node;
+
+        let leanX = 0, leanY = 0;
+
+        if(isHovered && mouseX >= 0){
+
+            // (The posters are drawn shifted a little with the
+            // mouse, js/sway.js.)
+            const shift = swayOffset("posters");
+
+            const half = posterBaseSize(node) * camera.zoom * scale / 2;
+
+            leanX = Math.max(-1, Math.min(1, (mouseX - shift.x - x) / Math.max(1, half)));
+            leanY = Math.max(-1, Math.min(1, (mouseY - shift.y - y) / Math.max(1, half * 1.5)));
+
+        }
+
+        node.leanX = (node.leanX || 0) + (leanX - (node.leanX || 0)) * LEAN_EASE;
+        node.leanY = (node.leanY || 0) + (leanY - (node.leanY || 0)) * LEAN_EASE;
+
+        if(Math.abs(node.leanX) > 0.002 || Math.abs(node.leanY) > 0.002){
+
+            const lx = node.leanX, ly = node.leanY;
+
+            // Narrower across as it turns side to side, shorter
+            // as it tips up or down, and slanted the way it turns.
+            ctx.translate(x, y);
+            ctx.transform(1 - LEAN * 0.9 * Math.abs(lx), -lx * LEAN * 0.6, -ly * LEAN * 0.5, 1 - LEAN * 0.8 * Math.abs(ly), 0, 0);
+            ctx.translate(-x, -y);
+
+        }
 
         //----------------------------------
         // Gentle Floating

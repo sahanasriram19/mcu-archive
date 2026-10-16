@@ -6,7 +6,7 @@ import { showMovieDetails } from "./movieDetails.js";
 import { nodeScreenRect } from "./nodes.js";
 import { edgeAtScreenPoint } from "./connections.js";
 import { swayOffset } from "./sway.js";
-import { project, projectNode, MAX_PITCH, REST_PITCH } from "./depth.js";
+import { project, projectNode, MAX_PITCH, REST_PITCH, MAX_SPIN } from "./depth.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -45,6 +45,18 @@ let twoFingerMode = null;         // null (undecided) | "pinch" | "tilt"
 let twoFingerSpread = 0;          // how much the fingers' distance has changed
 let twoFingerSlideX = 0;          // ...and how far they've moved together
 let twoFingerSlideY = 0;
+
+// Turning the map on the spot (js/depth.js): sideways in a
+// right-drag / Shift-drag, or a two-finger twist.
+const SPIN_PER_PX = 0.004;       // radians per px of sideways drag
+
+let pinchAngle = null;           // angle between two fingers, last move
+
+function clampSpin(value){
+
+    return Math.max(-MAX_SPIN, Math.min(MAX_SPIN, value));
+
+}
 
 function clampPitch(value){
 
@@ -112,6 +124,8 @@ function startGesture(e){
 
         twoFingerMode = null;
         twoFingerSpread = twoFingerSlideX = twoFingerSlideY = 0;
+
+        pinchAngle = Math.atan2(b.y - a.y, b.x - a.x);
 
     }
 
@@ -182,6 +196,22 @@ function moveGesture(e){
 
         }
 
+        // Twisting the two fingers turns the map with them.
+        const angle = Math.atan2(values[1].y - values[0].y, values[1].x - values[0].x);
+
+        if(pinchAngle !== null && twoFingerMode === "pinch"){
+
+            let turn = angle - pinchAngle;
+
+            if(turn > Math.PI) turn -= Math.PI * 2;
+            if(turn < -Math.PI) turn += Math.PI * 2;
+
+            camera.targetSpin = clampSpin(camera.targetSpin + turn);
+
+        }
+
+        pinchAngle = angle;
+
         if(pinchDistance && twoFingerMode === "pinch"){
 
             const factor =
@@ -222,6 +252,8 @@ function moveGesture(e){
 
         camera.targetPitch = clampPitch(camera.targetPitch + dy * TILT_PER_PX);
 
+        camera.targetSpin = clampSpin(camera.targetSpin + dx * SPIN_PER_PX);
+
         return;
 
     }
@@ -236,8 +268,14 @@ function moveGesture(e){
     // the finger.
     const squash = Math.max(0.4, Math.cos(camera.pitch));
 
-    camera.targetX -= dx / camera.zoom;
-    camera.targetY -= dy / (camera.zoom * squash);
+    // Turned on the spot, the map's own axes no longer line
+    // up with the screen's: turn the drag back to match.
+    const sx = dx, sy = dy / squash;
+
+    const cs = Math.cos(camera.spin || 0), ss = Math.sin(camera.spin || 0);
+
+    camera.targetX -= (sx * cs + sy * ss) / camera.zoom;
+    camera.targetY -= (-sx * ss + sy * cs) / camera.zoom;
 
 }
 
@@ -498,6 +536,8 @@ function endGesture(e){
 
         pinchDistance = 0;
 
+        pinchAngle = null;
+
         twoFingerMode = null;
 
     }
@@ -609,6 +649,8 @@ viewport.addEventListener(
 
         pinchDistance = 0;
 
+        pinchAngle = null;
+
         twoFingerMode = null;
 
         tilting = false;
@@ -643,6 +685,9 @@ window.addEventListener("keydown", e => {
 
     if(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
 
+    // (And turned back square, either way.)
+    camera.targetSpin = 0;
+
     camera.targetPitch = camera.targetPitch > 0.05 ? 0 : REST_PITCH;
 
 });
@@ -653,6 +698,8 @@ window.addEventListener("keydown", e => {
 window.addEventListener("mcu:go-to-landing", () => {
 
     camera.pitch = camera.targetPitch = 0;
+
+    camera.spin = camera.targetSpin = 0;
 
 });
 

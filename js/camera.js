@@ -25,9 +25,12 @@ export const camera = {
     // looking straight down at it). See js/depth.js.
     pitch: 0,
     targetPitch: 0,
+    pitchSmoothing: 0.12,
 
-    pitchSmoothing: 0.12
-
+    // How far the map is turned on the spot, like a
+    // turntable, in radians (0 = as laid out). See js/depth.js.
+    spin: 0,
+    targetSpin: 0
 };
 
 export function updateCamera(){
@@ -55,5 +58,11 @@ export function updateCamera(){
         camera.pitchSmoothing;
 
     if(Math.abs(camera.targetPitch - camera.pitch) < 1e-4) camera.pitch = camera.targetPitch;
+
+    camera.spin +=
+        (camera.targetSpin - camera.spin) *
+        camera.pitchSmoothing;
+
+    if(Math.abs(camera.targetSpin - camera.spin) < 1e-4) camera.spin = camera.targetSpin;
 
 }
