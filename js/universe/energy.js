@@ -51,7 +51,7 @@ function haloFor(colour){
 
 // Most glowing specks on screen at once, for a 1400 x 860
 // screen (see MAX_STARS_ON_SCREEN in stars.js).
-const MAX_SPECKS_ON_SCREEN = 14;
+const MAX_SPECKS_ON_SCREEN = 10;
 
 export function drawEnergy(camera) {
 

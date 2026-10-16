@@ -85,7 +85,7 @@ export function captureStars(){
 // (scaled to the real one). Zoomed out, the starfield
 // repeats like tiles to fill the screen, so without a cap
 // the further out you go the more stars pile up.
-const MAX_STARS_ON_SCREEN = 75;
+const MAX_STARS_ON_SCREEN = 50;
 
 export function drawStars(camera) {
 
