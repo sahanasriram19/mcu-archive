@@ -31,7 +31,7 @@ overlay.innerHTML = `
             <div id="movie-details-meta"></div>
             <div id="movie-details-actions">
                 <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
-                <button type="button" id="movie-details-share">Copy link</button>
+                <button type="button" id="movie-details-share" title="Copy link" aria-label="Copy link"></button>
             </div>
             <p id="movie-details-overview"></p>
             <div id="movie-details-characters"></div>
@@ -54,6 +54,23 @@ const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
 const watchedBtn = overlay.querySelector("#movie-details-watched");
 const shareBtn = overlay.querySelector("#movie-details-share");
+
+// Two overlapping squares; a tick for a moment once copied.
+const COPY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>`;
+const COPIED_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.6 3.6 7.4-8.2"/></svg>`;
+
+function resetShareBtn(){
+
+    clearTimeout(shareBtn.resetTimer);
+
+    shareBtn.innerHTML = COPY_ICON;
+    shareBtn.classList.remove("copied");
+    shareBtn.title = "Copy link";
+    shareBtn.setAttribute("aria-label", "Copy link");
+
+}
+
+resetShareBtn();
 
 //--------------------------------------------------
 // Watched (js/watched.js): a toggle on the card. Not
@@ -98,11 +115,21 @@ shareBtn.addEventListener("click", async () => {
 
     const ok = await copyLink();
 
-    shareBtn.textContent = ok ? "Link copied" : "Copy the address bar";
-
     clearTimeout(shareBtn.resetTimer);
 
-    shareBtn.resetTimer = setTimeout(() => { shareBtn.textContent = "Copy link"; }, 1800);
+    if(ok){
+
+        shareBtn.innerHTML = COPIED_ICON;
+        shareBtn.classList.add("copied");
+
+    }
+
+    const label = ok ? "Link copied" : "Couldn't copy: copy the address bar";
+
+    shareBtn.title = label;
+    shareBtn.setAttribute("aria-label", label);
+
+    shareBtn.resetTimer = setTimeout(resetShareBtn, 1600);
 
 });
 
@@ -384,7 +411,7 @@ export async function showMovieDetails(node, opts = {}) {
 
     setLinkTitle(node.id);
 
-    shareBtn.textContent = "Copy link";
+    resetShareBtn();
 
     const startRect = opts.from && canFlip() ? rectOf(opts.from) : null;
 
