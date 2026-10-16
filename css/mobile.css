@@ -149,6 +149,13 @@
         -webkit-overflow-scrolling:touch;
     }
 
+    /* Stacked under the poster here, so the buttons above
+       are out of the way: no extra room needed. */
+    #movie-details-kicker{
+        margin-bottom:8px;
+        padding-right:0;
+    }
+
     #movie-details-title{
         font-size:19px !important;
     }

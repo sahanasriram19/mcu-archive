@@ -97,7 +97,9 @@
     letter-spacing:.14em;
     text-transform:uppercase;
     color:var(--accent);
-    margin-bottom:8px;
+    margin-bottom:18px;
+    /* Kept clear of the watched and close buttons. */
+    padding-right:84px;
 }
 
 #movie-details-title{
