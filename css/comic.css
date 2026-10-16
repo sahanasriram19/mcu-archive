@@ -58,6 +58,11 @@
     -webkit-backdrop-filter:none;
 }
 
+/* The details card: no red stripe along the top. */
+#movie-details-card{
+    border-top:1px solid var(--edge);
+}
+
 /* The details card's backdrop: a plain dark wash, no blur. */
 #movie-details-overlay{
     background:rgba(5,7,12,.78);
