@@ -81,6 +81,12 @@ export function captureStars(){
 
 }
 
+// Most stars on screen at once, for a 1400 x 860 screen
+// (scaled to the real one). Zoomed out, the starfield
+// repeats like tiles to fill the screen, so without a cap
+// the further out you go the more stars pile up.
+const MAX_STARS_ON_SCREEN = 75;
+
 export function drawStars(camera) {
 
     if (hidden) return;
@@ -106,9 +112,17 @@ export function drawStars(camera) {
 
     // (The divisor was 1.6; 0.6 draws about a third as
     // many when zoomed out, e.g. on the Complete MCU map.)
-    const skip = camera.zoom >= 0.9
+    const thin = camera.zoom >= 0.9
         ? 1
         : Math.max(1, Math.round(1 / (camera.zoom * 0.6)));
+
+    // ...and never more than the cap, counting every repeat
+    // of the field that's on screen.
+    const period = CONFIG.WORLD_SIZE * 2;
+    const tiles = (width / camera.zoom) * (height / camera.zoom) / (period * period);
+    const cap = MAX_STARS_ON_SCREEN * (width * height) / (1400 * 860);
+
+    const skip = Math.max(thin, Math.ceil(universe.stars.length * tiles / cap));
 
     // How much bigger the drift is when zoomed further out
     // than the landing page (see driftAmount below).

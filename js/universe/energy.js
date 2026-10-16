@@ -49,6 +49,10 @@ function haloFor(colour){
 
 }
 
+// Most glowing specks on screen at once, for a 1400 x 860
+// screen (see MAX_STARS_ON_SCREEN in stars.js).
+const MAX_SPECKS_ON_SCREEN = 14;
+
 export function drawEnergy(camera) {
 
     ctx.save();
@@ -67,7 +71,13 @@ export function drawEnergy(camera) {
     // half as many again, and fainter.
     const calm = universe.calm || 0;
 
-    const step = (camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1) * (calm > 0.5 ? 2 : 1);
+    const thin = (camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1) * (calm > 0.5 ? 2 : 1);
+
+    const period = CONFIG.WORLD_SIZE * 2;
+    const tiles = (width / camera.zoom) * (height / camera.zoom) / (period * period);
+    const cap = MAX_SPECKS_ON_SCREEN * (width * height) / (1400 * 860);
+
+    const step = Math.max(thin, Math.ceil(universe.energy.length * tiles / cap));
 
     // Their circling is in world units, so zoomed out (the
     // archive) it shrank to nothing: scaled up to look the
