@@ -21,6 +21,9 @@ overlay.id = "movie-details-overlay";
 overlay.innerHTML = `
     <div id="movie-details-card">
         <button id="movie-details-close" aria-label="Close">&times;</button>
+        <button type="button" id="movie-details-watched" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.6 3.6 7.4-8.2"/></svg>
+        </button>
         <div id="movie-details-poster"></div>
         <div id="movie-details-body">
             <div id="movie-details-kicker"></div>
@@ -28,7 +31,6 @@ overlay.innerHTML = `
             <div id="movie-details-meta"></div>
             <div id="movie-details-actions">
                 <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
-                <button type="button" id="movie-details-watched" aria-pressed="false"></button>
                 <button type="button" id="movie-details-share">Copy link</button>
             </div>
             <p id="movie-details-overview"></p>
@@ -68,7 +70,10 @@ function renderWatchedButton(node){
 
     watchedBtn.classList.toggle("on", on);
     watchedBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    watchedBtn.textContent = on ? "✓ Watched" : "Mark as watched";
+    const label = on ? "Watched (click to undo)" : "Mark as watched";
+
+    watchedBtn.title = label;
+    watchedBtn.setAttribute("aria-label", label);
 
 }
 

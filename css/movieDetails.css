@@ -38,8 +38,8 @@
 
 #movie-details-close{
     position:absolute;
-    top:14px;
-    right:14px;
+    top:20px;
+    right:22px;
     width:32px;
     height:32px;
     border:none;
@@ -148,7 +148,6 @@
     margin-bottom:0;
 }
 
-#movie-details-watched,
 #movie-details-share{
     padding:8px 16px;
     border-radius:4px;
@@ -163,15 +162,54 @@
     transition:border-color var(--transition), background var(--transition), color var(--transition);
 }
 
-#movie-details-watched:hover,
 #movie-details-share:hover{
     border-color:rgba(255,255,255,.45);
 }
 
+/* Watched: a tick in a circle, beside the close button.
+   Outlined until you've watched it, then filled red. */
+#movie-details-watched{
+    position:absolute;
+    top:20px;
+    right:64px;
+    width:32px;
+    height:32px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.45);
+    background:rgba(0,0,0,.45);
+    color:rgba(255,255,255,.75);
+    cursor:pointer;
+    z-index:2;
+    transition:background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+#movie-details-watched svg{
+    width:18px;
+    height:18px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.6;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+#movie-details-watched:hover{
+    border-color:#fff;
+    color:#fff;
+}
+
 #movie-details-watched.on{
-    background:#F4F4F4;
-    border-color:#F4F4F4;
-    color:#0B0D12;
+    background:#E62429;
+    border-color:#E62429;
+    color:#fff;
+}
+
+#movie-details-watched.on:hover{
+    background:#ff3338;
+    border-color:#ff3338;
 }
 
 #movie-details-overview{
@@ -396,11 +434,18 @@
     }
 
     #movie-details-close{
-        top:10px;
-        right:10px;
+        top:16px;
+        right:16px;
         width:40px;
         height:40px;
         font-size:24px;
+    }
+
+    #movie-details-watched{
+        top:16px;
+        right:66px;
+        width:40px;
+        height:40px;
     }
 
     #movie-details-overlay #movie-details-cast-list{
