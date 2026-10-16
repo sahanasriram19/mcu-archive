@@ -59,13 +59,9 @@
     position:relative;
 }
 
+/* (No drift: the poster is shown whole, at its own size.) */
 #movie-details-poster img{
-    transform:scale(1.05) translate(var(--px, 0px), var(--py, 0px));
-    transition:transform .6s cubic-bezier(.2,.8,.2,1);
-}
-
-#movie-details-poster.tilting img{
-    transition:transform .15s linear;
+    transform:none;
 }
 
 /*--------------------------------------------------

@@ -605,3 +605,18 @@
     flex:0 0 40%;
     background:#000;
 }
+
+/* On a computer the poster column takes the poster's own
+   2:3 shape, so the whole poster shows uncropped. (Phones
+   keep the banner across the top, css/mobile.css.) The
+   flipping copy matches it so the swap stays seamless. */
+@media (min-width: 769px) and (min-height: 501px){
+
+    #movie-details-poster,
+    #card-flipper .flip-back-poster{
+        flex:0 0 auto;
+        height:100%;
+        aspect-ratio:2 / 3;
+    }
+
+}
