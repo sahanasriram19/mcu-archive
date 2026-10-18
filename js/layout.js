@@ -1084,11 +1084,16 @@ export function layoutScatter(nodes) {
 
     });
 
-    setBranchNodes([]);
 
-    resolveOverlaps(shown, 30);
+    setBranchNodes(labels);
+
+    // Keep timeline posters on their exact alternating rows.
+    // The timeline spacing already leaves enough room between
+    // poster boxes, so overlap resolution must not nudge them
+    // away from the ends of their branch sticks.
 
 }
+
 
 //==================================================
 // REGISTRY
