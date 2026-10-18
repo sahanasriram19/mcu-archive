@@ -844,13 +844,17 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
             node.targetY = verticalTimelineY(i);
 
+
         } else {
 
             node.targetX = i * TIMELINE_SPACING_X;
 
-            node.targetY = side * (TIMELINE_STEM + 80);
+            // Move posters farther from the centre timeline
+            // so the top and bottom rows stay clearly separated.
+            node.targetY = side * (TIMELINE_STEM + 180);
 
         }
+
 
     });
 
