@@ -82,10 +82,8 @@
     border-radius:var(--radius);
 }
 
-/* Cards: the hover is a lift, not a glow. */
 .countdown-card:hover{
     border-color:var(--edge);
-    border-top-color:var(--accent);
     box-shadow:7px 7px 0 var(--ink);
 }
 

@@ -175,10 +175,14 @@ export function renderUniverse(camera, entered){
 
         ctx.translate(mapShift.x, mapShift.y);
 
+
         // The faint grid the map lies on (js/ground.js).
         renderGround(ctx, camera);
 
-        renderConnections(ctx, camera, graph);
+        // All Posters should show posters without connection lines.
+        if (archive.view !== "scatter") {
+            renderConnections(ctx, camera, graph);
+        }
 
         if (archive.view === "complete") {
 
