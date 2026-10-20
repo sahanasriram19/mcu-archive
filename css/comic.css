@@ -51,7 +51,6 @@
     background-image:var(--halftone);
     background-size:6px 6px;
     border:1px solid var(--edge);
-    border-top:3px solid var(--accent);
     border-radius:var(--radius);
     box-shadow:5px 5px 0 var(--ink);
     backdrop-filter:none;
