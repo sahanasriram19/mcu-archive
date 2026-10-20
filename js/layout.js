@@ -318,9 +318,15 @@ export function layoutComplete(nodes) {
     // The combined "Complete MCU" map: every world at once.
     if (getWorld() === ALL_WORLDS) return layoutMultiverse(nodes);
 
-    const { sx, sy } = worldShape(getWorld(), mindmapStretch());
+
+    const currentWorld = getWorld();
+
+    const { sx, sy } = currentWorld === "animated"
+        ? mindmapStretch()
+        : worldShape(currentWorld, mindmapStretch());
 
     const branches = mindmapTargets(nodes, sx, sy);
+
 
     setHubs([{ world: getWorld(), x: 0, y: 0 }]);
 
