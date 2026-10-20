@@ -420,7 +420,15 @@
     color:var(--muted);
     font-variant-numeric:tabular-nums;
 }
+
 /* A little room between the title and the search bar. */
 .view-panel-content-inner > .search-container:first-child{
     margin-top:12px;
+}
+
+/* Remove the red accent line from the top of the panel */
+#view-panel::before,
+#view-panel::after {
+    background-image: none !important;
+    border-top-color: transparent !important;
 }
