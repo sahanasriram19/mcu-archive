@@ -144,10 +144,8 @@ const MINDMAP_WEDGE_PAD = 4;        // extra "weight" per phase so small phases 
 // down on an upright phone), `short` along the other.
 // 1 = the usual shape.
 const WORLD_SHAPES = {
-
     animated: { long: 1.5, short: 1.12 },
-    spider: { long: 1.3, short: 1.06 }
-
+    spider: { long: 1.0, short: 1.0 }
 };
 
 function worldShape(world, { sx, sy }) {
