@@ -22,8 +22,6 @@ import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 // the actual data, not hardcoded.
 //--------------------------------------------------
 
-
-
 function phaseSubtitle(members) {
 
     const years = members.map(m => new Date(m.release).getFullYear());
@@ -37,21 +35,13 @@ function phaseSubtitle(members) {
 
 //--------------------------------------------------
 // OVERLAP RESOLUTION
-// This is the fix: a deterministic pairwise separation
-// pass, run once per layout call, that nudges any two
-// overlapping poster boxes apart along whichever axis
-// needs the smaller push. It only ever reads/writes the
-// targetX/targetY values the layout just set — never
-// Math.random(), never a node's current on-screen x/y —
-// so it's still a pure function of the data and always
-// resolves to the exact same result.
 //--------------------------------------------------
 
 const POSTER_W = 320;
 const POSTER_H = POSTER_W * 1.5;
 
-const OVERLAP_MARGIN = 0;      // clear air kept between poster edges
-const OVERLAP_ITERATIONS = 200; // converges in well under this for 80 nodes
+const OVERLAP_MARGIN = 0;
+const OVERLAP_ITERATIONS = 200;
 
 function resolveOverlaps(nodes, margin = OVERLAP_MARGIN) {
 
@@ -78,10 +68,6 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN) {
 
                     moved = true;
 
-                    // Push apart along whichever axis is
-                    // closest to clear — keeps the nudge as
-                    // small (and as true to the original
-                    // layout) as possible.
                     if (overlapX < overlapY) {
 
                         const push = overlapX / 2 + 0.5;
@@ -113,36 +99,17 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN) {
 }
 
 //--------------------------------------------------
-// COMPLETE MCU — a real mind map: hub in the centre,
-// one branch per phase, evenly spaced around it
-// (equal wedges, so a big phase never crowds a small
-// one out), and that phase's movies ringing outward
-// from their branch, several to a ring, far enough
-// apart that full-size posters never overlap.
+// COMPLETE MCU — a real mind map
 //--------------------------------------------------
 
-// Order the phase branches go round the hub, clockwise
-// from the top. Phase 0 (the Defenders-saga shows) sits
-// last so it lands next to Phase 1, closing the loop.
 const MINDMAP_PHASE_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
-const MINDMAP_PHASE_RADIUS = 1500;  // hub -> phase node
-const MINDMAP_FIRST_TIER = 2500;    // hub -> first row of titles
-const MINDMAP_TIER_STEP = 950;      // gap between rows of titles
-const MINDMAP_SLOT = 470;           // arc length each poster needs
-const MINDMAP_WEDGE_PAD = 4;        // extra "weight" per phase so small phases still get room
+const MINDMAP_PHASE_RADIUS = 1500;
+const MINDMAP_FIRST_TIER = 2500;
+const MINDMAP_TIER_STEP = 950;
+const MINDMAP_SLOT = 470;
+const MINDMAP_WEDGE_PAD = 4;
 
-// Stretch factors that turn the circle into an ellipse
-// matching the screen's shape — wide on a laptop, tall on
-// a phone — so the map fills the screen instead of sitting
-// in a circle with empty space either side. Area stays
-// roughly the same, it's just redistributed.
-// Some worlds' maps are pulled out further than the
-// plain screen-shaped oval, so a big map reads as a wide
-// spread rather than a tight circle. `long` stretches
-// along the screen's long side (across on a computer,
-// down on an upright phone), `short` along the other.
-// 1 = the usual shape.
 const WORLD_SHAPES = {
     animated: { long: 1.5, short: 1.12 },
     spider: { long: 1.0, short: 1.0 }
@@ -174,10 +141,6 @@ function mindmapStretch() {
 
 }
 
-// Splits a phase's titles (already in timeline order)
-// into rows radiating out from its branch: a few "lead"
-// titles first, then progressively wider rows — that's
-// what gives each branch its fanned-out, tree-like look.
 function mindmapTiers(members, wedge) {
 
     const tiers = [];
@@ -195,8 +158,6 @@ function mindmapTiers(members, wedge) {
 
         let count = Math.min(capacity, wanted, members.length - index);
 
-        // Don't leave a lonely one- or two-title row at the
-        // end if it can fit on the row before it.
         const left = members.length - index - count;
 
         if (left > 0 && left <= 2 && count + left <= capacity) count += left;
@@ -214,8 +175,6 @@ function mindmapTiers(members, wedge) {
 
 }
 
-// One world's mind map round (0, 0): sets each title's
-// target and returns the phase/era junctions (not the hub).
 function mindmapTargets(nodes, sx, sy) {
 
     const groups = {};
@@ -232,9 +191,6 @@ function mindmapTargets(nodes, sx, sy) {
         ...Object.keys(groups).map(Number).filter(p => !MINDMAP_PHASE_ORDER.includes(p)).sort((a, b) => a - b)
     ];
 
-    // Wedge size grows with phase size, so Phase 4's 17
-    // titles get more of the circle than Phase 0's 6 —
-    // the padding keeps small phases from being squeezed.
     const weights = phaseKeys.map(p => groups[p].length + MINDMAP_WEDGE_PAD);
     const totalWeight = weights.reduce((a, b) => a + b, 0);
 
@@ -250,19 +206,12 @@ function mindmapTargets(nodes, sx, sy) {
 
         cursor += wedge;
 
-        // No label on the homepage — the Phases view already
-        // names each phase. The branch node itself stays (just
-        // its small coloured glow): it's the junction the lines
-        // split from, and sharing the "phaseN" key with the
-        // Phases view is what makes switching views glide
-        // instead of rebuilding from the centre.
         branches.push({
 
             phase,
             key: "phase" + phase,
             label: "",
             subtitle: "",
-            // Shown only while that branch is hovered.
             hint: groupName(phase),
             hintSubtitle: phaseSubtitle(groups[phase]),
             x: Math.cos(centre) * MINDMAP_PHASE_RADIUS * sx,
@@ -272,8 +221,6 @@ function mindmapTargets(nodes, sx, sy) {
 
         const members = [...groups[phase]].sort((a, b) => a.timeline - b.timeline);
 
-        // Leave a little clear air at each wedge edge so
-        // neighbouring phases read as separate branches.
         const usable = wedge * 0.86;
 
         mindmapTiers(members, usable).forEach((tier, ti) => {
@@ -282,9 +229,6 @@ function mindmapTargets(nodes, sx, sy) {
 
             const step = Math.min(usable / n, MINDMAP_SLOT * 1.4 / tier.radius);
 
-            // Every other row is nudged half a slot sideways
-            // so rows interleave like leaves rather than
-            // lining up in rigid columns.
             const stagger = (ti % 2 === 1 && n > 1) ? step * 0.18 : 0;
 
             tier.members.forEach((node, i) => {
@@ -313,18 +257,18 @@ function mindmapTargets(nodes, sx, sy) {
 
 export function layoutComplete(nodes) {
 
-    // The combined "Complete MCU" map: every world at once.
     if (getWorld() === ALL_WORLDS) return layoutMultiverse(nodes);
 
     const currentWorld = getWorld();
 
-    const { sx, sy } =
-        currentWorld === "animated" || currentWorld === "spider"
-            ? mindmapStretch()
-            : worldShape(currentWorld, mindmapStretch());
+    const stretch = mindmapStretch();
+    const shape = currentWorld === "mcu"
+        ? stretch
+        : isPortraitPhone()
+            ? { sx: 1, sy: 1 }
+            : worldShape(currentWorld, { sx: 1, sy: 1 });
 
-    const branches = mindmapTargets(nodes, sx, sy);
-
+    const branches = mindmapTargets(nodes, shape.sx, shape.sy);
 
     setHubs([{ world: getWorld(), x: 0, y: 0 }]);
 
@@ -336,34 +280,14 @@ export function layoutComplete(nodes) {
 }
 
 //--------------------------------------------------
-// COMPLETE MCU (all worlds) — the Avengers mind map exactly
-// in the middle, as on its own, with the other four maps on
-// the four corners round it: X-Men top left, Marvel
-// Unscripted top right, Marvel Animation bottom left,
-// Spider-Man bottom right — and the Fantastic Four straight above it,
-// in the middle of the top. Each is its own map round its own
-// logo — not joined to the Avengers branches.
-//
-// The corners are mirror images: every corner logo sits the
-// same distance across and the same distance up or down from
-// the Avengers logo. That distance starts small and grows
-// (keeping the screen's shape) until no two maps' posters
-// come near each other.
+// COMPLETE MCU — ALL WORLDS
 //--------------------------------------------------
 
 const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff", "unscripted"];
-const MULTIVERSE_GAP = 700;     // clear space kept between two maps' posters, world units
-const MULTIVERSE_STEP = 150;    // how far the corners move out per try
-
-// How much further apart the maps are spread than the
-// tightest fit above (1 = just clearing each other). Every
-// map keeps its place — X-Men top left, Fantastic Four
-// straight up and so on — they're just pushed further out
-// from the Avengers logo, leaving more open universe to
-// drift through between them.
+const MULTIVERSE_GAP = 700;
+const MULTIVERSE_STEP = 150;
 const MULTIVERSE_SPREAD = 1.8;
 
-// Which corner each map sits in: [across, up/down].
 const MULTIVERSE_CORNERS = {
     xmen: [-1, -1],
     unscripted: [1, -1],
@@ -371,10 +295,8 @@ const MULTIVERSE_CORNERS = {
     spider: [1, 1]
 };
 
-// The one map that sits straight above the Avengers map.
 const MULTIVERSE_TOP = "ff";
 
-// Poster boxes (plus the logo) of one map, round its own hub.
 function boxesOf(nodes, hubX = 0, hubY = 0) {
 
     const halfW = POSTER_W / 2, halfH = POSTER_H / 2;
@@ -409,7 +331,6 @@ function boxesClash(a, b, dx, dy, gap) {
 
 }
 
-// Do any two maps overlap with the corners this far out?
 function cornersClash(maps, worlds, cx, cy) {
 
     const at = w => w === "mcu"
@@ -441,16 +362,12 @@ export function layoutMultiverse(nodes) {
 
     const worlds = MULTIVERSE_ORDER.filter(w => byWorld[w] && byWorld[w].length);
 
-    // The Avengers map keeps its usual screen-shaped spread.
     const stretch = mindmapStretch();
 
     const maps = {};
 
     worlds.forEach(w => {
 
-        // The X-Men and Fantastic Four maps stay round; the
-        // Spider-Man and Animated maps keep their wider oval
-        // (round on an upright phone, where it's all narrow).
         const shape = w === "mcu"
             ? stretch
             : isPortraitPhone() ? { sx: 1, sy: 1 } : worldShape(w, { sx: 1, sy: 1 });
@@ -461,9 +378,6 @@ export function layoutMultiverse(nodes) {
 
     });
 
-    // How far out the corners sit, across vs up/down, follows
-    // the screen's shape (wider on a computer, taller on an
-    // upright phone).
     const aspect = Math.min(2.2, Math.max(0.5, window.innerWidth / Math.max(1, window.innerHeight)));
 
     const ax = Math.sqrt(aspect), ay = 1 / Math.sqrt(aspect);
@@ -481,9 +395,6 @@ export function layoutMultiverse(nodes) {
 
     });
 
-    // The top map: straight up from the Avengers logo (so
-    // left and right stay mirror images), just far enough to
-    // clear every map already placed.
     const top = maps[MULTIVERSE_TOP];
 
     if (top) {
@@ -503,8 +414,6 @@ export function layoutMultiverse(nodes) {
 
     }
 
-    // Push every map out from the Avengers logo, all by the
-    // same amount, so the layout keeps its shape.
     worlds.forEach(w => {
 
         maps[w].dx *= MULTIVERSE_SPREAD;
@@ -532,47 +441,20 @@ export function layoutMultiverse(nodes) {
     setBranchNodes(allBranches);
 
 }
-
 //--------------------------------------------------
-// PHASES — a compact grid, four phases across the
-// top and three across the bottom, all centred on
-// the screen so nothing needs zooming out to see.
-// Each phase is one full circle of its own movies —
-// no nested rings — with the circle's radius scaled
-// to how many titles it holds, so Phase 4's 17 titles
-// get a bigger circle than Phase 0's 6 without either
-// one overlapping its neighbours.
+// PHASES — a compact grid
 //--------------------------------------------------
 
-// (Were 2800 x 2800: the rings are bigger now, so their
-// posters have room between them.)
 const PHASE_GRID_X = 3200;
 const PHASE_GRID_Y = 3500;
 
-// Ring size: a base radius plus a little per title, so
-// busy phases get bigger rings. (Were 620 + 55 per title.)
 const PHASE_RING_BASE = 860;
 const PHASE_RING_PER_TITLE = 62;
 
-// How round the rings are: 1 = a circle; less squashes
-// them flatter. (Was 0.88.)
 const PHASE_RING_ROUND = 1;
 
-// Top row takes the larger half: 7 MCU phases -> 4 + 3,
-// 5 X-Men eras -> 3 + 2.
 const topRowCount = n => Math.ceil(n / 2);
 
-// Radius large enough that arc-spacing comfortably clears
-// a poster width even at n=17 (Phase 4) — this is the same
-// fix that made Complete MCU's switch fast: give
-// resolveOverlaps very little correcting to do in the first
-// place, rather than relying on many iterations to untangle
-// a tightly-packed starting position.
-// Also wide enough to clear the group's own label in the
-// middle: X-Men era names ("FIRST CLASS SAGA") are much
-// longer than "PHASE 1", and with only 3-4 titles the ring
-// was small enough for posters to sit on the label. Short
-// MCU labels come out under 620, so MCU rings are unchanged.
 function phaseRingRadius(n, label = "") {
 
     return Math.max(
@@ -593,20 +475,11 @@ export function layoutPhases(nodes) {
 
     });
 
-    // Drop any phase group with no movies — no orphan
-    // island for a category nothing belongs to.
     const phaseKeys = Object.keys(groups)
         .map(Number)
         .filter(phase => groups[phase].length > 0)
         .sort((a, b) => a - b);
 
-    // Upright phone: one phase per row, top to bottom, so
-    // each ring is big enough to read and you scroll down
-    // through the phases like a feed. (The 4 + 3 grid below
-    // is far too wide for a phone held upright.)
-    // Phone held sideways: the same idea turned on its side —
-    // one row, left to right, that you swipe through. (Two
-    // rows are too tall for a ~340px-high screen.)
     if (isCompact()) {
 
         const portrait = isPortraitPhone();
@@ -659,13 +532,10 @@ export function layoutPhases(nodes) {
 
     placePhaseRings(branchTargets, groups);
 
-    // Guarantees zero overlap island-to-island as well as
-    // within a single crowded ring.
     resolveOverlaps(nodes);
 
 }
 
-// Rings each phase's titles around its branch position.
 function placePhaseRings(branches, groups) {
 
     branches.forEach(branch => {
@@ -689,27 +559,8 @@ function placePhaseRings(branches, groups) {
 
 }
 
-
-
 //--------------------------------------------------
-// RELEASE ORDER / CHRONOLOGICAL ORDER — a single
-// strict left-to-right zigzag, like a timeline chart:
-// oldest/first on the left, each next title alternating
-// above and below a shared centre line, connected to its
-// neighbour by a nearly-straight line (see graph.js
-// edgesChain + connections.js's "straight" edge style).
-//
-// The chunk/ring version this replaced grouped movies
-// into little circular clusters — visually tidy, but it
-// meant reading order required following a line around
-// a ring, which wasn't obviously left-to-right. Putting
-// every title in strict x order the way a real timeline
-// does makes the order unambiguous: it's just left to
-// right, full stop.
-//
-// Small era labels sit directly on the centre line every
-// few titles for date-range reference, purely decorative
-// — they're not part of the chain.
+// RELEASE ORDER / CHRONOLOGICAL ORDER
 //--------------------------------------------------
 
 const TIMELINE_SPACING_X = 420;
@@ -720,18 +571,9 @@ const TIMELINE_LABEL_EVERY = 5;
 
 const TIMELINE_BRANCH_OFFSET = 120;
 
-// Upright phones: the timeline runs top to bottom instead,
-// titles alternating left and right of a vertical spine.
-// Same-side neighbours are 2 x spacing apart, which must
-// clear a poster's height (480) — hence 290.
 const TIMELINE_SPACING_Y = 290;
 const TIMELINE_SIDE_X = 330;
 
-// Upright phones: each labelled group of titles starts
-// after a gap, and its label sits in that gap like a
-// section header. A phone is too narrow to fit a long
-// label ("ORIGINAL TRILOGY") BETWEEN the left and right
-// posters, which is where it goes on wider screens.
 const TIMELINE_GROUP_GAP_Y = 520;
 
 function verticalTimelineY(i) {
@@ -740,9 +582,6 @@ function verticalTimelineY(i) {
 
 }
 
-// "2008–2011": the span of real-world release years in a
-// group of titles — shown under each timeline marker in
-// both Release Order and Chronological Order.
 function releaseYears(members) {
 
     const years = members.map(m => new Date(m.release).getFullYear());
@@ -779,12 +618,6 @@ export function layoutChronology(nodes) {
 
 }
 
-// Shared by both — a chunk's headline label is the single
-// MCU phase most of its movies belong to. This used to show
-// a range ("PHASE 2–4") whenever a chunk straddled a phase
-// boundary, which for chunks touching Phase 0 (Defenders)
-// could read as an odd "PHASE 0–3" — a single representative
-// number reads more cleanly on the timeline.
 function phaseLabel(members) {
 
     const counts = {};
@@ -809,8 +642,6 @@ function phaseLabel(members) {
 
 }
 
-// Which way the current timeline runs ("horizontal" or
-// "vertical"); read by connections.js.
 let timelineOrientation = "horizontal";
 
 export function getTimelineOrientation() {
@@ -830,14 +661,8 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
     const vertical = isPortraitPhone();
 
-    // connections.js draws the spine along whichever axis
-    // this says.
     timelineOrientation = vertical ? "vertical" : "horizontal";
 
-    // Starts at x:0 and runs rightward — deliberately not
-    // centred, so the camera (see views.js) lands right on
-    // the beginning of the timeline instead of somewhere in
-    // the middle of it.
     sorted.forEach((node, i) => {
 
         const side = i % 2 === 0 ? -1 : 1;
@@ -848,23 +673,16 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
             node.targetY = verticalTimelineY(i);
 
-
         } else {
 
             node.targetX = i * TIMELINE_SPACING_X;
 
-            // Move posters farther from the centre timeline
-            // so the top and bottom rows stay clearly separated.
             node.targetY = side * (TIMELINE_STEM + 180);
 
         }
 
-
     });
 
-    // Small floating date-range labels sitting right on the
-    // centre line, just for reference — no edges connect to
-    // these, they're not part of the chain.
     const labels = [];
 
     for (let i = 0; i < sorted.length; i += TIMELINE_LABEL_EVERY) {
@@ -885,7 +703,6 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
             x: vertical ? 0 : midIndex * TIMELINE_SPACING_X,
 
-            // Vertical: centred in the gap above the group.
             y: vertical ? verticalTimelineY(i) - (TIMELINE_SPACING_Y + TIMELINE_GROUP_GAP_Y) / 2 : 0,
 
             memberIds: chunk.map(movie => movie.id)
@@ -896,15 +713,12 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
     setBranchNodes(labels);
 
-    // Guarantees no two posters overlap even where the
-    // zigzag runs tight.
     resolveOverlaps(nodes);
 
 }
 
 //--------------------------------------------------
-// CHARACTER JOURNEYS — one constellation per lead
-// character, in the order they first appear.
+// CHARACTER JOURNEYS
 //--------------------------------------------------
 
 export function layoutCharacters(nodes) {
@@ -940,15 +754,10 @@ export function layoutCharacters(nodes) {
 
         const side = i % 2 === 0 ? -1 : 1;
 
-        // Order along the journey — graph.js chains the
-        // titles by this, whichever way the layout runs.
         node.journeyIndex = i;
 
         if (vertical) {
 
-            // Top to bottom, alternating left/right. Same-side
-            // neighbours sit 2 x 270 apart, clearing a 450-tall
-            // poster.
             node.targetX = side * 230;
 
             node.targetY = i * 270;
@@ -997,27 +806,14 @@ export function layoutCharacterJourney(nodes) {
     });
 
 }
-
-
 //--------------------------------------------------
-// ALL POSTERS (MCU) — every title from every world once,
-// no hub, no branches, no lines: just posters scattered far
-// apart across a wide stretch of space (several screens
-// across), to drift around and discover. The order and the
-// scatter are shuffled the same way every time — from each
-// title's id, never Math.random() — so the worlds mix.
+// ALL POSTERS (MCU)
 //--------------------------------------------------
 
-// Room per poster, world units (a poster is 320 x 480): each
-// gets a patch of space about seven posters wide and sits
-// anywhere inside it, so the gaps between them vary.
-// (Were 1400 x 1750: spread further apart to use more of
-// the universe.)
 const SCATTER_CELL_W = 2300;
 const SCATTER_CELL_H = 2900;
-const SCATTER_WANDER = 0.72;    // how much of its patch a poster can wander over (0-1)
+const SCATTER_WANDER = 0.72;
 
-// A steady 0..1 number from a string / index.
 function hashOf(text) {
 
     let h = 2166136261;
@@ -1040,8 +836,6 @@ export function layoutScatter(nodes) {
 
     nodes.forEach(node => {
 
-        // A title on two maps (Deadpool & Wolverine…) is
-        // shown once; its second copy steps out of view.
         if (seen.has(node.id)) {
 
             node.targetX = 100000;
@@ -1063,7 +857,6 @@ export function layoutScatter(nodes) {
 
     const N = order.length;
 
-    // Rows and columns shaped like the screen.
     const aspect = Math.min(2.6, Math.max(0.45, window.innerWidth / Math.max(1, window.innerHeight)));
 
     const cols = Math.max(1, Math.min(N, Math.round(Math.sqrt(N * aspect * SCATTER_CELL_H / SCATTER_CELL_W))));
@@ -1074,12 +867,8 @@ export function layoutScatter(nodes) {
         const r = Math.floor(i / cols);
         const c = i % cols;
 
-        // The last row may be short: centre it.
         const inRow = r === rows - 1 ? N - r * cols : cols;
 
-        // Each poster sits anywhere in its own patch (clear of
-        // the patch edges), and every other row shifts half a
-        // patch, so there's no grid to see.
         const shift = (r % 2 ? 0.25 : -0.25) * SCATTER_CELL_W;
 
         const jx = (hashOf(node.id + "x") - 0.5) * (SCATTER_CELL_W - POSTER_W) * SCATTER_WANDER;
@@ -1092,16 +881,11 @@ export function layoutScatter(nodes) {
 
     });
 
-
-    setBranchNodes(labels);
-
-    // Keep timeline posters on their exact alternating rows.
-    // The timeline spacing already leaves enough room between
-    // poster boxes, so overlap resolution must not nudge them
-    // away from the ends of their branch sticks.
+    // Scatter has no branch nodes, hub, or connecting lines.
+    setHubs([]);
+    setBranchNodes([]);
 
 }
-
 
 //==================================================
 // REGISTRY
