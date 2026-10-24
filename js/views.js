@@ -35,9 +35,8 @@ export const VIEWS = [
             // needs room to step back far enough that the top
             // corner maps clear the panel and countdown cards.)
             all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 0.7 } },
-            // The Animated and Spider-Man maps are spread wider
-            // (WORLD_SHAPES in layout.js), so they need to zoom
-            // out further to fit on screen.
+            // Each standalone world uses the same layout shape as
+            // its map in Complete MCU, and fits that layout to screen.
             animated: { camera: { x: 0, y: 0, zoom: 0.06, fit: 0.92, minZoom: 0.035, maxZoom: 0.4, userMinZoom: 0.035 } },
             spider: { camera: { x: 0, y: 0, zoom: 0.08, fit: 0.92, minZoom: 0.045, maxZoom: 0.4, userMinZoom: 0.045 } }
         }
