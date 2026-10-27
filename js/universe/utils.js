@@ -102,3 +102,66 @@ export function screenCopies(x, y, camera, depth, width, height, margin, size){
     return out;
 
 }
+//==================================================
+// STEADY THINNING
+//
+// Zoomed out, far more of the sky is on screen, so only some
+// of the stars (and energy specks) are drawn. That used to be
+// "every 2nd one", "every 3rd one"…, and each time the zoom
+// crossed from one to the next a completely different set
+// was picked — thousands of stars blinking out and others
+// appearing at once, which is what made the sky flicker while
+// zooming.
+//
+// Instead each list gets one fixed, shuffled order (the same
+// on every visit), and zooming just keeps more or fewer from
+// the front of it: the ones that go are always the last few,
+// and they fade out rather than vanish. Zooming back in
+// brings exactly the same ones back.
+//==================================================
+
+const orders = new WeakMap();
+
+// A fixed shuffle of `list`'s indexes (seeded, so it's the
+// same every time).
+export function steadyOrder(list){
+
+    let order = orders.get(list);
+
+    if(order && order.length === list.length) return order;
+
+    order = Array.from({ length: list.length }, (_, i) => i);
+
+    let seed = 1234567;
+
+    const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+
+    for(let i = order.length - 1; i > 0; i--){
+
+        const j = Math.floor(rand() * (i + 1));
+
+        [order[i], order[j]] = [order[j], order[i]];
+
+    }
+
+    orders.set(list, order);
+
+    return order;
+
+}
+
+// How strongly the i-th item in that order shows when
+// `keep` of them are being kept (a fractional number): fully
+// for most, fading over the last fifth, so a zoom changes it
+// smoothly.
+const KEEP_FADE = 0.2;
+
+export function keepFade(i, keep){
+
+    const fadeFrom = keep * (1 - KEEP_FADE);
+
+    if(i < fadeFrom) return 1;
+
+    return Math.max(0, Math.min(1, (keep - i) / Math.max(1e-6, keep - fadeFrom)));
+
+}

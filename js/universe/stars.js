@@ -9,7 +9,9 @@ import { universe } from "./state.js";
 import {
 
     screenCopies,
-    clamp
+    clamp,
+    steadyOrder,
+    keepFade
 
 } from "./utils.js";
 import { CONFIG } from "./config.js";
@@ -112,9 +114,13 @@ export function drawStars(camera) {
 
     // (The divisor was 1.6; 0.6 draws about a third as
     // many when zoomed out, e.g. on the Complete MCU map.)
+    // Worked out smoothly from the zoom (not rounded to every
+    // 2nd / 3rd… star), and the stars kept are always the
+    // same ones — see STEADY THINNING in utils.js — so the sky
+    // doesn't flicker as you zoom.
     const thin = camera.zoom >= 0.9
         ? 1
-        : Math.max(1, Math.round(1 / (camera.zoom * 0.6)));
+        : Math.max(1, 1 / (camera.zoom * 0.6));
 
     // ...and never more than the cap, counting every repeat
     // of the field that's on screen.
@@ -122,7 +128,9 @@ export function drawStars(camera) {
     const tiles = (width / camera.zoom) * (height / camera.zoom) / (period * period);
     const cap = MAX_STARS_ON_SCREEN * (width * height) / (1400 * 860);
 
-    const skip = Math.max(thin, Math.ceil(universe.stars.length * tiles / cap));
+    const keep = Math.min(universe.stars.length / thin, cap / Math.max(tiles, 1e-6));
+
+    const order = steadyOrder(universe.stars);
 
     // How much bigger the drift is when zoomed further out
     // than the landing page (see driftAmount below).
@@ -130,9 +138,17 @@ export function drawStars(camera) {
 
     const stars = universe.stars;
 
-    for (let idx = 0; idx < stars.length; idx += skip) {
+    const count = Math.min(order.length, Math.ceil(keep));
 
-        const star = stars[idx];
+    for (let k = 0; k < count; k++) {
+
+        const star = stars[order[k]];
+
+        // The last few kept fade out as you zoom out (and back
+        // in as you zoom in), instead of popping.
+        const shown = keepFade(k, keep);
+
+        if (shown <= 0) continue;
 
         //------------------------------------------
         // Twinkle
@@ -202,13 +218,13 @@ export function drawStars(camera) {
             const size = radius * 20;
 
             // (Softer halos when calm.)
-            ctx.globalAlpha = pulse * (1 - 0.5 * calm);
+            ctx.globalAlpha = pulse * (1 - 0.5 * calm) * shown;
 
             ctx.drawImage(glowSprite(), screen.x - size / 2, screen.y - size / 2, size, size);
 
-            ctx.globalAlpha = 1;
-
         }
+
+        ctx.globalAlpha = shown;
 
         //------------------------------------------
         // Star Types

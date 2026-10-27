@@ -9,7 +9,9 @@ import { universe } from "./state.js";
 
 import {
 
-    screenCopies
+    screenCopies,
+    steadyOrder,
+    keepFade
 
 } from "./utils.js";
 import { CONFIG } from "./config.js";
@@ -71,22 +73,38 @@ export function drawEnergy(camera) {
     // half as many again, and fainter.
     const calm = universe.calm || 0;
 
-    const thin = (camera.zoom < 0.5 ? Math.max(2, Math.round(0.1 / camera.zoom)) : 1) * (calm > 0.5 ? 2 : 1);
+    // (Worked out smoothly, and always keeping the same
+    // specks — STEADY THINNING in utils.js — so they don't
+    // flicker as you zoom.)
+    const zoomThin = camera.zoom < 0.5 ? Math.max(2, 0.1 / camera.zoom) : 1;
+
+    // (Eased in between: at 0.5 zoom the thinning used to jump
+    // straight from 1 to 2.)
+    const thin = (camera.zoom < 0.5 ? zoomThin : 1 + Math.max(0, Math.min(1, (0.6 - camera.zoom) / 0.1)))
+        * (1 + calm);
 
     const period = CONFIG.WORLD_SIZE * 2;
     const tiles = (width / camera.zoom) * (height / camera.zoom) / (period * period);
     const cap = MAX_SPECKS_ON_SCREEN * (width * height) / (1400 * 860);
 
-    const step = Math.max(thin, Math.ceil(universe.energy.length * tiles / cap));
+    const keep = Math.min(universe.energy.length / thin, cap / Math.max(tiles, 1e-6));
+
+    const order = steadyOrder(universe.energy);
+
+    const count = Math.min(order.length, Math.ceil(keep));
 
     // Their circling is in world units, so zoomed out (the
     // archive) it shrank to nothing: scaled up to look the
     // same as on the landing page (see stars.js).
     const orbitScale = Math.max(1, 0.28 / Math.max(camera.zoom, 0.001));
 
-    for (let i = 0; i < universe.energy.length; i += step) {
+    for (let k = 0; k < count; k++) {
 
-        const e = universe.energy[i];
+        const e = universe.energy[order[k]];
+
+        const shown = keepFade(k, keep);
+
+        if (shown <= 0) continue;
 
         e.angle += e.speed;
 
@@ -118,11 +136,11 @@ export function drawEnergy(camera) {
         // new gradient per speck per frame.
         const size = e.radius * 28;
 
-        ctx.globalAlpha = e.alpha * pulse * (1 - 0.5 * calm);
+        ctx.globalAlpha = e.alpha * pulse * (1 - 0.5 * calm) * shown;
 
         ctx.drawImage(haloFor(e.colour), screen.x - size / 2, screen.y - size / 2, size, size);
 
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = shown;
 
         //----------------------------------
         // Core
