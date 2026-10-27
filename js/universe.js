@@ -52,15 +52,17 @@ import { takeMapDirty, markMapDirty } from "./redraw.js";
 //     a picture or logo arriving, a title ticked as watched,
 //     fonts loading, the window resizing
 //
-// The map layer is its own canvas, stacked straight on top
-// of the sky's (css/world.css #universe-map), so on every
-// other frame there's nothing to do for it at all: the
-// browser simply keeps showing it over the fresh sky. (Not
-// copied onto the sky canvas each frame — at full screen
-// size, on a sharp screen, that copy alone cost more than
-// drawing the map.) A redraw also happens at least once a
-// second, as a safety net. While still, the posters' gentle
-// float pauses too, and carries on where it left off.
+// While any of that is happening, the map is drawn straight
+// onto the sky's canvas, exactly as it always was. Once it
+// has all settled, it's drawn one last time into its own
+// canvas, stacked on top of the sky's (css/world.css
+// #universe-map), and that is simply left showing — nothing
+// to do for the map at all until something changes again.
+// (The extra layer is only shown while still: blended over
+// the sky on every frame of a zoom, it cost frames.) A
+// redraw also happens at least once a second, as a safety
+// net. While still, the posters' gentle float pauses too,
+// and carries on where it left off.
 //==================================================
 
 const mapCanvas = document.createElement("canvas");
@@ -85,7 +87,13 @@ function clearMap(){
 
     mapHasContent = false;
 
+    // Hidden while empty, so the browser has no extra layer
+    // to blend over the sky.
+    mapCanvas.style.visibility = "hidden";
+
 }
+
+mapCanvas.style.visibility = "hidden";
 
 // Like the main canvas (js/universe/renderer.js), glows are
 // measured in real pixels: scaled here so they look the same
@@ -162,9 +170,9 @@ if(document.fonts && document.fonts.addEventListener){
 
 }
 
-// Draws the map into its layer (posters a little above the
-// map with the mouse sway, as before).
-function drawMap(camera){
+// Draws the map into its own layer, to be left showing over
+// the sky while nothing on it changes.
+function drawMapLayer(camera){
 
     const W = ctx.canvas.width, H = ctx.canvas.height;
 
@@ -199,7 +207,18 @@ function drawMap(camera){
 
     mapCtx.setTransform(mapScale, 0, 0, mapScale, 0, 0);
 
-    const c = mapCtx;
+    paintMap(mapCtx, camera);
+
+    mapCanvas.style.visibility = "";
+
+    lastMapDraw = performance.now();
+
+}
+
+// The map's drawing itself, onto either canvas (posters a
+// little above the map with the mouse sway, as before).
+function paintMap(c, camera){
+
 
     // The map follows the mouse a little, the posters
     // (floating above it) a little more. Clicks allow for
@@ -241,14 +260,14 @@ function drawMap(camera){
 
     c.restore();
 
-    lastMapDraw = performance.now();
-
 }
 
 let generated = false;
 
-// Whether the map was drawn last frame (see drawMap below).
+// Whether the map was drawn last frame, and whether its
+// settled picture is up in its own layer (see paintMap below).
 let mapWasShown = false;
+let mapSettledDrawn = false;
 
 let shown = false;
 
@@ -338,8 +357,17 @@ export function renderUniverse(camera, entered){
 
     if (entered) {
 
-        const NEBULA_FULL_ZOOM = 0.11;
-        const NEBULA_START_ZOOM = 0.19;
+        // The sky's soft blue haze. Each view opens on the deep
+        // navy sky; zoom out past where it opened and the haze
+        // fades in, to the lighter blue by the time you're
+        // about half as close (camera.openZoom, set by
+        // viewManager.js for every view). It used to come in
+        // at fixed zooms, which put most views' opening
+        // framing in the lighter blue.
+        const openZoom = camera.openZoom || 0.19;
+
+        const NEBULA_START_ZOOM = openZoom * 0.97;
+        const NEBULA_FULL_ZOOM = openZoom * 0.55;
 
         let nebulaAlpha =
             (NEBULA_START_ZOOM - camera.zoom) /
@@ -379,10 +407,34 @@ export function renderUniverse(camera, entered){
 
     if(entered){
 
-        // Redraw the map only if something on it changed
-        // (see THE MAP LAYER above); otherwise its canvas just
-        // stays as it is, over the sky.
-        if(!mapWasShown || mapNeedsDrawing(camera)) drawMap(camera);
+        // While anything on the map is changing, it's drawn
+        // straight onto this canvas with the sky, exactly as it
+        // always was — no second layer for the browser to blend
+        // in while you zoom or a view lays itself out. Once it
+        // has all settled, it's drawn once into its own layer
+        // (see THE MAP LAYER above), which is then left showing
+        // over the sky until something changes again.
+        if(!mapWasShown || mapNeedsDrawing(camera)){
+
+            ctx.save();
+
+            paintMap(ctx, camera);
+
+            ctx.restore();
+
+            clearMap();
+
+            mapSettledDrawn = false;
+
+            lastMapDraw = performance.now();
+
+        } else if(!mapSettledDrawn){
+
+            drawMapLayer(camera);
+
+            mapSettledDrawn = true;
+
+        }
 
         mapWasShown = true;
 
@@ -393,6 +445,7 @@ export function renderUniverse(camera, entered){
         clearMap();
 
         mapWasShown = false;
+        mapSettledDrawn = false;
 
     }
 

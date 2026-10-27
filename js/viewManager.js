@@ -548,6 +548,11 @@ export function setView(key){
 
     }
 
+    // Where this view opens, zoom-wise: the sky is its deep
+    // navy from here in, and turns a lighter blue as you zoom
+    // out further (js/universe.js).
+    camera.openZoom = camera.targetZoom;
+
     // Lets the panel keep its active button / phone label in
     // step, however the view was changed.
     window.dispatchEvent(new CustomEvent("mcu:view-changed"));
