@@ -257,7 +257,11 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.textBaseline = "middle";
         // Bebas Neue, the heading font (css/comic.css); it's
         // narrow, so it's set a little bigger.
-        const labelSize = Math.max(24, 34 * z);
+        // (The Phases view — node.wrap — keeps its names a
+        // little smaller when zoomed right out, so they sit
+        // inside their rings; LABEL_PX_PER_CHAR in layout.js
+        // matches.)
+        const labelSize = Math.max(node.wrap ? 20 : 24, 34 * z);
 
         ctx.font = `400 ${labelSize}px "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
 
@@ -286,11 +290,13 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         if(subtitle){
 
             // Clear of the name above it, however big that is.
-            const subtitleGap = Math.max(radius + 8, Math.max(24, 34 * z) * 0.62 + Math.max(16, 22 * z) * 0.55);
+            const subtitleGap = Math.max(radius + 8, labelSize * 0.62 + Math.max(node.wrap ? 13 : 16, 22 * z) * 0.55);
 
             ctx.fillStyle = "rgba(255,255,255,.8)";
             ctx.textAlign = "center";
-            ctx.font = `${Math.max(16, 22 * z)}px Inter, Arial, sans-serif`;
+            const subtitleSize = Math.max(node.wrap ? 13 : 16, 22 * z);
+
+            ctx.font = `${subtitleSize}px Inter, Arial, sans-serif`;
 
             ctx.lineWidth = 3;
 

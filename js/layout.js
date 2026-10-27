@@ -443,29 +443,29 @@ export function layoutMultiverse(nodes) {
 
 }
 //--------------------------------------------------
-// PHASES — a compact grid
+// PHASES — rows of rings
 //--------------------------------------------------
 
-// Every phase is a ring of posters round its name, and
-// all the rings are the same size — the size the biggest
-// phase needs — so the grid reads as neat rows of equal
-// circles rather than a jumble of big and small ones.
+// Every phase is a ring of posters round its name. Each
+// ring is just big enough for its own titles — every
+// poster gets the same room round its ring (SLOT), and
+// every ring the same gap to its neighbours — so the rows
+// stay even and orderly without a few small phases
+// spreading the whole grid out to the size of the biggest
+// one (which is what made the posters tiny on screen).
 //
 // PHASE_RING_MIN keeps even a small phase's posters well
 // clear of the name and years in the middle (the map is
 // tipped back, which lifts the bottom posters towards
-// them). PHASE_RING_SLOT is the room each poster gets
-// round the ring.
-// (Sized for the Phases view's bigger posters —
-// PHASES_POSTER in js/posterSize.js — so they show at the
-// usual size on screen without touching.)
-const PHASE_RING_MIN = 1200;
+// them). Sized for the Phases view's bigger posters
+// (PHASES_POSTER in js/posterSize.js), so they never touch.
+const PHASE_RING_MIN = 1300;
 const PHASE_RING_SLOT = 680;
 
-// Space between neighbouring rings (centre-line to
-// centre-line of their outermost posters).
-const PHASE_GAP_X = 900;
-const PHASE_GAP_Y = 1000;
+// Air between neighbouring rings: from the outermost
+// posters' centres of one ring to the next.
+const PHASE_GAP_X = 1150;
+const PHASE_GAP_Y = 1100;
 
 // Rings are laid out a little taller than wide: tipped back
 // (js/depth.js REST_PITCH, cos ≈ 0.79) they're squashed top
@@ -474,14 +474,23 @@ const PHASE_GAP_Y = 1000;
 // top of one another.
 const PHASE_RING_ROUND = 1.25;
 
+function phaseRingRadius(n) {
 
-function phaseRingRadius(n, label = "") {
+    return Math.max(PHASE_RING_MIN, (n * PHASE_RING_SLOT) / (Math.PI * 2));
 
-    return Math.max(
-        PHASE_RING_MIN,
-        (n * PHASE_RING_SLOT) / (Math.PI * 2),
-        300 + label.length * 38
-    );
+}
+
+function phaseBranch(phase, groups, x, y, R) {
+
+    return {
+        phase,
+        key: "phase" + phase,
+        label: groupName(phase),
+        wrap: true,
+        subtitle: phaseSubtitle(groups[phase]),
+        x, y,
+        ringRadius: R
+    };
 
 }
 
@@ -501,78 +510,108 @@ export function layoutPhases(nodes) {
         .filter(phase => groups[phase].length > 0)
         .sort((a, b) => a - b);
 
-    // One radius for every ring, and the grid spaced to fit.
-    const radius = Math.max(...phaseKeys.map(p => phaseRingRadius(groups[p].length, groupName(p))));
+    const radii = phaseKeys.map(p => phaseRingRadius(groups[p].length));
 
-    const PHASE_GRID_X = radius * 2 + PHASE_GAP_X;
-    const PHASE_GRID_Y = radius * 2 * PHASE_RING_ROUND + PHASE_GAP_Y;
+    let branches;
 
     if (isCompact()) {
 
+        // Phones: one column upright, one row sideways, each
+        // ring its own size with the same gap between them.
         const portrait = isPortraitPhone();
 
-        const column = phaseKeys.map((phase, pi) => ({
+        let at = 0;
 
-            phase,
-            key: "phase" + phase,
-            label: groupName(phase),
-            wrap: true,
-            subtitle: phaseSubtitle(groups[phase]),
-            x: portrait ? 0 : pi * PHASE_GRID_X,
-            y: portrait ? pi * PHASE_GRID_Y : 0
+        branches = phaseKeys.map((phase, i) => {
 
-        }));
+            const R = radii[i];
 
-        setBranchNodes(column);
+            const half = portrait ? R * PHASE_RING_ROUND : R;
 
-        placePhaseRings(column, groups, radius);
+            if (i > 0) at += half;
 
-        return;
+            const b = phaseBranch(phase, groups, portrait ? 0 : at, portrait ? at : 0, R);
+
+            at += half + (portrait ? PHASE_GAP_Y : PHASE_GAP_X);
+
+            return b;
+
+        });
+
+    } else {
+
+        // Computers: rows shaped like the screen (e.g. 4 + 3
+        // for the MCU's seven phases, 3 + 3 + 3 for
+        // Spider-Man's nine eras), each row centred.
+        const rowSizes = phaseRows(phaseKeys.length);
+
+        // A touch bigger all round where a long name needs the
+        // room (see labelScale).
+        const k = labelScale(phaseKeys, groups, radii, rowSizes);
+
+        branches = phaseGrid(phaseKeys, groups, radii.map(R => R * k), rowSizes).branches;
 
     }
 
-    // Computers: a grid shaped like the screen (e.g. 4 + 3
-    // for the MCU's seven phases, 3 + 3 + 3 for Spider-Man's
-    // nine eras), each row centred, with the titles spread
-    // evenly over the rows.
-    const rowSizes = phaseRows(phaseKeys.length);
+    setBranchNodes(branches);
 
-    // Bigger rings where a long name needs the room (see
-    // ringForLabels).
-    const R = ringForLabels(radius, rowSizes, phaseKeys);
+    placePhaseRings(branches, groups);
 
-    const gridX = R * 2 + PHASE_GAP_X;
-    const gridY = R * 2 * PHASE_RING_ROUND + PHASE_GAP_Y;
+}
 
-    const branchTargets = [];
+// Lays the rings out in centred rows. Returns the branch
+// targets and the grid's overall size.
+function phaseGrid(phaseKeys, groups, radii, rowSizes) {
 
-    let pi = 0;
+    const rows = [];
 
-    rowSizes.forEach((count, row) => {
+    let i = 0;
 
-        for (let col = 0; col < count; col++, pi++) {
+    rowSizes.forEach(count => {
 
-            const phase = phaseKeys[pi];
+        const ids = [];
 
-            branchTargets.push({
+        for (let c = 0; c < count; c++) ids.push(i++);
 
-                phase,
-                key: "phase" + phase,
-                label: groupName(phase),
-                wrap: true,
-                subtitle: phaseSubtitle(groups[phase]),
-                x: (col - (count - 1) / 2) * gridX,
-                y: (row - (rowSizes.length - 1) / 2) * gridY
+        const width = ids.reduce((sum, j) => sum + radii[j] * 2, 0) + (count - 1) * PHASE_GAP_X;
 
-            });
+        const half = Math.max(...ids.map(j => radii[j])) * PHASE_RING_ROUND;
 
-        }
+        rows.push({ ids, width, half });
 
     });
 
-    setBranchNodes(branchTargets);
+    const height = rows.reduce((sum, r) => sum + r.half * 2, 0) + (rows.length - 1) * PHASE_GAP_Y;
 
-    placePhaseRings(branchTargets, groups, R);
+    const branches = [];
+
+    let y = -height / 2;
+
+    rows.forEach(row => {
+
+        y += row.half;
+
+        let x = -row.width / 2;
+
+        row.ids.forEach(j => {
+
+            x += radii[j];
+
+            branches.push(phaseBranch(phaseKeys[j], groups, x, y, radii[j]));
+
+            x += radii[j] + PHASE_GAP_X;
+
+        });
+
+        y += row.half + PHASE_GAP_Y;
+
+    });
+
+    return {
+        branches,
+        width: Math.max(...rows.map(r => r.width)) + PHASES_POSTER,
+        height: height + PHASES_POSTER * 1.5
+    };
 
 }
 
@@ -601,11 +640,11 @@ function phaseRows(n) {
 // screen however far out the map is (js/branchNodes.js),
 // so a long one ("Sony's Spider-Man Universe") can be wider
 // than its ring once the grid is fitted to the screen.
-// Grows the rings until each name (and its years) fits
-// between the posters either side of it.
-const LABEL_PX_PER_CHAR = 10.5;   // Bebas Neue at its 24px minimum
-const YEARS_PX = 84;              // "2016–2019" at its 16px minimum
-const LABEL_CLEAR_PX = 14;        // air between the name and a poster
+// Scales every ring up a little until each name (and its
+// years) fits between the posters either side of it.
+const LABEL_PX_PER_CHAR = 8.8;    // Bebas Neue at its 20px minimum here
+const YEARS_PX = 70;              // "2016–2019" at its 13px minimum here
+const LABEL_CLEAR_PX = 22;        // air between the name and a poster
 
 // Names longer than this go on two lines in the Phases
 // view (js/branchNodes.js wraps them), so they only need
@@ -631,56 +670,54 @@ function labelLineLength(name) {
 
 }
 
-function ringForLabels(radius, rowSizes, phaseKeys) {
+function labelScale(phaseKeys, groups, radii, rowSizes) {
 
-    const widest = Math.max(...phaseKeys.map(p => Math.max(
-        labelLineLength(groupName(p)) * LABEL_PX_PER_CHAR, YEARS_PX
-    )));
-
-    const cols = Math.max(...rowSizes);
-    const rows = rowSizes.length;
+    const need = phaseKeys.map(p => Math.max(labelLineLength(groupName(p)) * LABEL_PX_PER_CHAR, YEARS_PX) / 2);
 
     // The space the view fits itself into (clear of the
     // panel down the left), as viewManager.js does.
     const freeW = Math.max(300, window.innerWidth - 300);
     const freeH = Math.max(300, window.innerHeight - 60);
 
-    let R = radius;
+    let k = 1;
 
     // (Growing the rings shrinks the whole grid to fit the
     // screen, so past a point it stops helping: at most a
     // third bigger. Long names wrap onto two lines instead.)
-    for (let i = 0; i < 3; i++) {
+    for (let step = 0; step < 3; step++) {
 
-        const gridW = (cols - 1) * (R * 2 + PHASE_GAP_X) + R * 2 + PHASES_POSTER;
-        const gridH = (rows - 1) * (R * 2 * PHASE_RING_ROUND + PHASE_GAP_Y) + R * 2 * PHASE_RING_ROUND + PHASES_POSTER * 1.5;
+        const grid = phaseGrid(phaseKeys, groups, radii.map(R => R * k), rowSizes);
 
-        const zoom = Math.min(freeW / gridW, freeH / gridH) * 0.92;
+        const zoom = Math.min(freeW / grid.width, freeH / grid.height);
 
-        const room = R * zoom - (PHASES_POSTER / 2) * zoom - LABEL_CLEAR_PX;
+        const fits = radii.every((R, i) =>
+            (R * k - PHASES_POSTER / 2) * zoom - LABEL_CLEAR_PX >= need[i]
+        );
 
-        if (room >= widest / 2) break;
+        if (fits) break;
 
-        R *= 1.1;
+        k *= 1.1;
 
     }
 
-    return R;
+    return k;
 
 }
 
-// Each phase's titles evenly round its ring, in story
+// Each phase's titles evenly round its own ring, in story
 // order, starting at the top and going clockwise. (No
 // overlap pass afterwards: the rings are sized and spaced
 // so nothing touches, and nudging posters about is what
 // made the rings look ragged.)
-function placePhaseRings(branches, groups, radius) {
+function placePhaseRings(branches, groups) {
 
     branches.forEach(branch => {
 
         const members = [...groups[branch.phase]].sort((a, b) => a.timeline - b.timeline);
 
         const n = members.length;
+
+        const radius = branch.ringRadius;
 
         members.forEach((node, i) => {
 

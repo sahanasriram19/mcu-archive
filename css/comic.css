@@ -324,6 +324,20 @@
     animation:none;
 }
 
+/* Phones: a smaller button, to match the smaller logo at
+   the end of the trail. */
+@media (max-width: 600px), (max-height: 500px){
+
+    #enterButton,
+    #intro-end-enter{
+        padding:9px 20px 8px;
+        font-size:1.25rem;
+        gap:8px;
+        box-shadow:4px 4px 0 var(--ink);
+    }
+
+}
+
 #enterButton:hover,
 #intro-end-enter:hover{
     transform:translate(-2px, -2px);

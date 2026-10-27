@@ -75,7 +75,9 @@ export const VIEWS = [
         // Eras alike). zoom is the fallback.
         // (minZoom / userMinZoom: low enough for worlds with
         // many eras — Spider-Man, Animated — to fit whole.)
-        camera: { x: 0, y: 0, zoom: 0.16, fit: 0.92, minZoom: 0.025, maxZoom: 0.3, userMinZoom: 0.025 },
+        // (fit 1: it fills the space between the panel and the
+        // countdown cards, which it's always kept clear of.)
+        camera: { x: 0, y: 0, zoom: 0.16, fit: 1, minZoom: 0.025, maxZoom: 0.3, userMinZoom: 0.025 },
         // Phones (see viewManager.js phoneCamera): upright,
         // the phases stack in one column — fill the width and
         // start at the top. Sideways, they sit in one row —

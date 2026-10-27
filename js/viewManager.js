@@ -26,6 +26,7 @@ import { LAYOUTS } from "./layout.js";
 import { VIEWS } from "./views.js";
 import { camera } from "./camera.js";
 import { REST_PITCH } from "./depth.js";
+import { PHASES_POSTER } from "./posterSize.js";
 import { archive } from "./archiveCore.js";
 import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
@@ -66,8 +67,19 @@ function buildEdges(recipe){
 // would push posters off the other edge.
 //----------------------------------
 
-const POSTER_HALF_W = 160;
-const POSTER_HALF_H = 240;
+let POSTER_HALF_W = 160;
+let POSTER_HALF_H = 240;
+
+// Half a poster's size for the view being framed: the
+// Phases view draws its posters bigger (js/posterSize.js).
+function setPosterHalf(key){
+
+    const w = key === "phases" ? PHASES_POSTER : 320;
+
+    POSTER_HALF_W = w / 2;
+    POSTER_HALF_H = w * 0.75;
+
+}
 
 const PANEL_GAP = 16;      // clear air kept between posters and the panel, px
 
@@ -446,6 +458,8 @@ export function setView(key){
 
     archive.view = key;
     currentView = key;
+
+    setPosterHalf(key);
 
     // A hover highlight belongs to the view it was made in.
     graph.hover.nodeIndex = null;
