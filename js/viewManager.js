@@ -493,6 +493,15 @@ export function setView(key){
 
     const phoneCam = phoneCfg ? phoneCamera(phoneCfg) : null;
 
+    // How the map is tipped and turned: the view's own
+    // angle on a computer (the order timelines open turned
+    // and tipped further back — views.js), otherwise the
+    // usual tilt, square on.
+    const angle = !phoneCam ? cameraFor(view) : {};
+
+    camera.targetPitch = angle.pitch ?? REST_PITCH;
+    camera.targetSpin = angle.spin ?? 0;
+
     if(phoneCam){
 
         camera.targetX = phoneCam.x;
@@ -706,16 +715,13 @@ export function refitView(){
 //----------------------------------
 // DEFAULT VIEW
 //
-// The panel's reset button (ui/panel.js): tips the map
-// back to its usual angle (REST_PITCH in depth.js), turns
-// it square again, and frames the current view the way it
-// opens — undoing any tilting, turning, panning or zooming.
+// The panel's reset button (ui/panel.js): frames the
+// current view the way it opens, at its own default angle
+// (setView above) — undoing any tilting, turning, panning
+// or zooming.
 //----------------------------------
 
 export function resetView(){
-
-    camera.targetPitch = REST_PITCH;
-    camera.targetSpin = 0;
 
     setView(currentView);
 

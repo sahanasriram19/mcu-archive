@@ -29,7 +29,7 @@ import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
 import { captureStars, setStarsHidden } from "./universe/stars.js";
 import { updateSway, swayOffset } from "./sway.js";
-import { updateDepth, REST_PITCH } from "./depth.js";
+import { updateDepth } from "./depth.js";
 import { readLink, onLinkChange, applyingLink } from "./links.js";
 import { showMovieDetails, hideMovieDetails, openDetailsId } from "./movieDetails.js";
 import { setSelectedCharacter } from "./characters/characterJourney.js";
@@ -280,10 +280,10 @@ async function enter(viewKey, opts = {}){
 
     mapShown = true;
 
-    // The map opens tipped back a little (js/depth.js). It
-    // starts flat — so the jump's logo lines up exactly with
-    // the map's — and eases back as the camera pulls out.
-    camera.targetPitch = REST_PITCH;
+    // The map opens tipped back (js/depth.js) — setView()
+    // above sets each view's own angle. It starts flat, so
+    // the jump's logo lines up exactly with the map's, and
+    // eases back as the camera pulls out.
 
 }
 

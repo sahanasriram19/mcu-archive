@@ -94,9 +94,11 @@ export const VIEWS = [
         // so landing the camera there opens on the very
         // start of the timeline, not partway through it.
         edges: { mode: "timelineTrail" },
-        // (y: the row below the spine sits a little further
-        // out than the row above — see layout.js.)
-        camera: { x: 0, y: 80, zoom: 0.40 },
+        // Opens at an angle: the timeline turned to rise to
+        // the right (spin, radians) and tipped well back
+        // (pitch), with its start on the left, clear of the
+        // panel. (Phones keep the flat-on framing below.)
+        camera: { x: 700, y: -40, zoom: 0.34, pitch: 0.8, spin: -0.56 },
         // Phones: the timeline runs top to bottom when upright
         // (fill the width, start at the first title) and left
         // to right when sideways (fill the height, start at
@@ -112,9 +114,11 @@ export const VIEWS = [
         label: "Chronological Order",
         layout: "chronology",
         edges: { mode: "timelineTrail" },
-        // (y: the row below the spine sits a little further
-        // out than the row above — see layout.js.)
-        camera: { x: 0, y: 80, zoom: 0.40 },
+        // Opens at an angle: the timeline turned to rise to
+        // the right (spin, radians) and tipped well back
+        // (pitch), with its start on the left, clear of the
+        // panel. (Phones keep the flat-on framing below.)
+        camera: { x: 700, y: -40, zoom: 0.34, pitch: 0.8, spin: -0.56 },
         phone: {
             portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
             landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }
