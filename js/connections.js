@@ -1,7 +1,7 @@
 import { getCurrentView } from "./viewManager.js";
 import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 import { getTimelineOrientation } from "./layout.js";
-import { project, nodeHeight } from "./depth.js";
+import { project, nodeHeight, shadowPoint } from "./depth.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -93,9 +93,78 @@ function depthOf(anchor){
 
 }
 
-// (No shadows under the lines: the archive has none at
-// all now — posters included — so the map reads as clean,
-// glowing lines and posters on the sky.)
+//--------------------------------------------------
+// LINE SHADOWS
+//
+// The lines start on the map's surface (at the logo, or the
+// timeline's spine) and climb to their floating posters
+// (js/depth.js), so each casts a soft shadow onto the
+// surface that peels away from it the higher it gets — the
+// same light as the posters' shadows (nodes.js).
+//--------------------------------------------------
+
+const LINE_SHADOW_ALPHA = 0.22;   // the darker core
+const LINE_SHADOW_SOFT = 0.1;     // the wider, softer edge
+
+// Adds one line's shadow to `path`. For a curve, its control
+// points are shadowed at heights a third and two thirds of
+// the way along.
+function addShadow(path, from, to, edge){
+
+    const h0 = nodeHeight(from), h3 = nodeHeight(to);
+
+    if(h0 <= 1 && h3 <= 1) return;
+
+    const a = shadowPoint(from.x, from.y, h0).at;
+    const b = shadowPoint(to.x, to.y, h3).at;
+
+    const w = window.innerWidth, h = window.innerHeight;
+
+    if(
+        (a.x < 0 && b.x < 0) || (a.x > w && b.x > w) ||
+        (a.y < 0 && b.y < 0) || (a.y > h && b.y > h)
+    ) return;
+
+    path.moveTo(a.x, a.y);
+
+    if(edge && edge.style === "curve"){
+
+        const [c1x, c1y, c2x, c2y] = curveControls(from, to, edge.center);
+
+        const c1 = shadowPoint(c1x, c1y, h0 + (h3 - h0) / 3).at;
+        const c2 = shadowPoint(c2x, c2y, h0 + (h3 - h0) * 2 / 3).at;
+
+        path.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y);
+
+    } else {
+
+        path.lineTo(b.x, b.y);
+
+    }
+
+}
+
+function strokeShadows(ctx, camera, path){
+
+    const z = camera.zoom;
+
+    ctx.save();
+
+    ctx.globalCompositeOperation = "source-over";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.strokeStyle = `rgba(0,0,0,${LINE_SHADOW_SOFT})`;
+    ctx.lineWidth = Math.max(5, 24 * z);
+    ctx.stroke(path);
+
+    ctx.strokeStyle = `rgba(0,0,0,${LINE_SHADOW_ALPHA})`;
+    ctx.lineWidth = Math.max(2, 8 * z);
+    ctx.stroke(path);
+
+    ctx.restore();
+
+}
 
 function projectEdge(from, to, edge){
 
@@ -266,6 +335,20 @@ export function renderConnections(ctx, camera, graph){
 
     };
 
+    // Shadows first, under every line.
+    const shadows = new Path2D();
+
+    graph.edges.forEach(edge=>{
+
+        const from = resolveAnchor(edge.from, graph);
+        const to = resolveAnchor(edge.to, graph);
+
+        if(from && to) addShadow(shadows, from, to, edge);
+
+    });
+
+    strokeShadows(ctx, camera, shadows);
+
     const phaseOf = ref => {
 
         if(typeof ref === "number") return graph.nodes[ref] ? graph.nodes[ref].phase : null;
@@ -367,7 +450,8 @@ export function renderConnections(ctx, camera, graph){
 
 }
 
-// Plain solid lines, no glow.
+// Plain solid lines, no glow: the shadows underneath
+// (strokeShadows) already lift them off the background.
 
 // White lines (Character Journeys).
 function drawWhite(ctx, camera, path){
@@ -430,6 +514,20 @@ function renderTimeline(ctx, camera, graph){
     const end = vertical ? project(0, last.targetY, 0) : project(last.targetX, 0, 0);
 
     const x1 = start.x, y1 = start.y, x2 = end.x, y2 = end.y;
+
+    // The branches' shadows, under everything. (The spine
+    // lies on the surface, so it has none.)
+    const shadows = new Path2D();
+
+    movies.forEach(node=>{
+
+        const foot = vertical ? { x: 0, y: node.y } : { x: node.x, y: 0 };
+
+        addShadow(shadows, foot, node, null);
+
+    });
+
+    strokeShadows(ctx, camera, shadows);
 
     const spine = new Path2D();
 
