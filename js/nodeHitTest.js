@@ -9,34 +9,8 @@
 
 import { swayOffset } from "./sway.js";
 import { projectNode } from "./depth.js";
-
-const BASE_POSTER_SIZE = 320;
-
-function posterSizeFor(node, currentView){
-
-    let size = BASE_POSTER_SIZE;
-
-    if(
-
-        currentView === "release" ||
-        currentView === "chronology" ||
-        currentView === "characters"
-
-    ){
-
-        size = 300;
-
-    } else if(currentView === "complete"){
-
-        const ring = Math.min(node.ring || 0, 4);
-
-        size += ring * 35;
-
-    }
-
-    return size;
-
-}
+// The same per-view poster sizes nodes.js draws with.
+import { posterSizeFor } from "./posterSize.js";
 
 //--------------------------------------------------
 // Returns the topmost (last-drawn) movie node whose

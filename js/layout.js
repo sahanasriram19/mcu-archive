@@ -15,6 +15,7 @@ import { setBranchNodes, setHubs } from "./graph.js";
 import { getSelectedCharacter } from "./characters/characterJourney.js";
 import { isCompact, isPortraitPhone } from "./responsive.js";
 import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
+import { PHASES_POSTER } from "./posterSize.js";
 
 //--------------------------------------------------
 // Short era name per phase, used as the branch node's
@@ -455,12 +456,16 @@ export function layoutMultiverse(nodes) {
 // tipped back, which lifts the bottom posters towards
 // them). PHASE_RING_SLOT is the room each poster gets
 // round the ring.
-const PHASE_RING_MIN = 1150;
-const PHASE_RING_SLOT = 600;
+// (Sized for the Phases view's bigger posters —
+// PHASES_POSTER in js/posterSize.js — so they show at the
+// usual size on screen without touching.)
+const PHASE_RING_MIN = 1200;
+const PHASE_RING_SLOT = 680;
 
-// Space between neighbouring rings (edge to edge).
-const PHASE_GAP_X = 1000;
-const PHASE_GAP_Y = 1100;
+// Space between neighbouring rings (centre-line to
+// centre-line of their outermost posters).
+const PHASE_GAP_X = 900;
+const PHASE_GAP_Y = 1000;
 
 // Rings are laid out a little taller than wide: tipped back
 // (js/depth.js REST_PITCH, cos ≈ 0.79) they're squashed top
@@ -647,12 +652,12 @@ function ringForLabels(radius, rowSizes, phaseKeys) {
     // third bigger. Long names wrap onto two lines instead.)
     for (let i = 0; i < 3; i++) {
 
-        const gridW = (cols - 1) * (R * 2 + PHASE_GAP_X) + R * 2 + POSTER_W;
-        const gridH = (rows - 1) * (R * 2 * PHASE_RING_ROUND + PHASE_GAP_Y) + R * 2 * PHASE_RING_ROUND + POSTER_H;
+        const gridW = (cols - 1) * (R * 2 + PHASE_GAP_X) + R * 2 + PHASES_POSTER;
+        const gridH = (rows - 1) * (R * 2 * PHASE_RING_ROUND + PHASE_GAP_Y) + R * 2 * PHASE_RING_ROUND + PHASES_POSTER * 1.5;
 
         const zoom = Math.min(freeW / gridW, freeH / gridH) * 0.92;
 
-        const room = R * zoom - (POSTER_W / 2) * zoom - LABEL_CLEAR_PX;
+        const room = R * zoom - (PHASES_POSTER / 2) * zoom - LABEL_CLEAR_PX;
 
         if (room >= widest / 2) break;
 

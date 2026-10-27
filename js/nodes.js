@@ -14,6 +14,7 @@ import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
 import { projectNode, shadowPoint, posterShadow, viewAngles } from "./depth.js";
+import { posterSizeFor } from "./posterSize.js";
 
 // Where the mouse is (for the hovered poster's lean).
 let mouseX = -1, mouseY = -1;
@@ -429,12 +430,7 @@ export function renderNodes(ctx, camera, nodes){
         // the plain star as a fallback.
         //----------------------------------
 
-        const BASE_POSTER_SIZE = 320;
-
-        const onScreenWidth =
-            (currentView === "release" || currentView === "chronology" || currentView === "characters" ? 300 :
-             currentView === "complete" ? BASE_POSTER_SIZE + Math.min(node.ring || 0, 4) * 35 :
-             BASE_POSTER_SIZE) * camera.zoom * depthScale;
+        const onScreenWidth = posterSizeFor(node, currentView) * camera.zoom * depthScale;
 
         const poster = getPoster(node.poster, onScreenWidth);
         let posterReady = !!(poster && poster.loaded && !poster.failed);
@@ -464,28 +460,8 @@ export function renderNodes(ctx, camera, nodes){
 
         if (posterReady && fade >= 1) {
 
-        let POSTER_SIZE = BASE_POSTER_SIZE;
-
-        // Timeline layouts always use one size
-        if (
-            currentView === "release" ||
-            currentView === "chronology" ||
-            currentView === "characters"
-        ) {
-
-            POSTER_SIZE = 300;
-
-        }
-        // Complete Universe grows by ring
-        else if (currentView === "complete") {
-
-            const posterRing = Math.min(node.ring || 0, 4);
-
-            POSTER_SIZE += posterRing * 35;
-
-        }
-
-        const posterWidth = POSTER_SIZE * camera.zoom * scale;
+        // (Per view — js/posterSize.js.)
+        const posterWidth = posterSizeFor(node, currentView) * camera.zoom * scale;
         const posterHeight = posterWidth * 1.5;
 
     const left = x + floatX - posterWidth / 2;
@@ -544,28 +520,8 @@ export function renderNodes(ctx, camera, nodes){
             // as a mystery blank node.
             //----------------------------------
 
-           const BASE_POSTER_SIZE = 320;
-
-            let POSTER_SIZE = BASE_POSTER_SIZE;
-
-            if (
-                currentView === "release" ||
-                currentView === "chronology" ||
-                currentView === "characters"
-            ) {
-
-                POSTER_SIZE = 300;
-
-            }
-            else if (currentView === "complete") {
-
-                const posterRing = Math.min(node.ring || 0, 4);
-
-                POSTER_SIZE += posterRing * 35;
-
-            }
-
-            const posterWidth = POSTER_SIZE * camera.zoom * scale;
+            // (Per view — js/posterSize.js.)
+            const posterWidth = posterSizeFor(node, currentView) * camera.zoom * scale;
             const posterHeight = posterWidth * 1.5;
 
             const left = x + floatX - posterWidth / 2;
@@ -760,11 +716,7 @@ const SHADOW_FADE = 0.004;      // ...and this much fainter
 
 function posterBaseSize(node){
 
-    if(currentView === "release" || currentView === "chronology" || currentView === "characters") return 300;
-
-    if(currentView === "complete") return 320 + Math.min(node.ring || 0, 4) * 35;
-
-    return 320;
+    return posterSizeFor(node, currentView);
 
 }
 
@@ -1102,17 +1054,7 @@ function roundedRect(ctx, x, y, w, h, r){
 
 export function nodeScreenRect(node, camera){
 
-    let size = 320;
-
-    if(currentView === "release" || currentView === "chronology" || currentView === "characters"){
-
-        size = 300;
-
-    } else if(currentView === "complete"){
-
-        size += Math.min(node.ring || 0, 4) * 35;
-
-    }
+    const size = posterSizeFor(node, currentView);
 
     const at = projectNode(node);
 
