@@ -13,7 +13,7 @@ import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
-import { projectNode, shadowPoint, posterShadow, viewAngles } from "./depth.js";
+import { projectNode } from "./depth.js";
 import { posterSizeFor } from "./posterSize.js";
 import { markMapDirty } from "./redraw.js";
 
@@ -738,10 +738,21 @@ function drawWatchedBadge(ctx, cornerX, cornerY, posterWidth){
 // it.
 //--------------------------------------------------
 
-const SHADOW_ALPHA = 0.36;      // darkness right under a low poster
-const SHADOW_SPREAD = 0.0025;   // grows this much wider per px of height
-const SHADOW_FADE = 0.004;      // ...and this much fainter
+// Each poster's shadow sits just below and to the right of
+// it, tight and soft, sized with the poster — so it stays
+// close at every zoom and in every layout. (It used to be
+// cast down onto the map from the poster's height, which
+// put it far away whenever you zoomed out: the posters
+// shrink faster than their height does.) A hovered poster
+// rises, and its shadow drops a little further and softer.
+const SHADOW_ALPHA = 0.6;       // darkness of the shadow
+const SHADOW_DROP_X = 0.08;     // how far right, as a share of the poster's width
+const SHADOW_DROP_Y = 0.13;     // how far down
+const SHADOW_GROW = 1.07;       // a touch bigger than the poster, so it shows round it
+const SHADOW_LIFT_DROP = 0.12;  // extra drop at full hover rise
+const SHADOW_LIFT_FADE = 0.3;   // ...and this much fainter
 
+// How wide a poster is in this view (js/posterSize.js).
 function posterBaseSize(node){
 
     return posterSizeFor(node, currentView);
@@ -750,34 +761,30 @@ function posterBaseSize(node){
 
 function drawShadow(ctx, node, focus){
 
-    const { height, floor } = posterShadow(node);
+    // Exactly where (and how big) the poster itself is drawn:
+    // same depth, tilt and hover growth.
+    const at = projectNode(node);
 
-    if(height <= 1) return;
+    const lift = node.lift || 0;
 
-    // Where it lands on the surface, and the poster's height
-    // in screen px (js/depth.js).
-    const { at, H } = shadowPoint(node.x, node.y, height, floor);
+    const pw = posterBaseSize(node) * camera.zoom * at.s * (1 + LIFT_SCALE * lift);
 
-    const w = posterBaseSize(node) * camera.zoom * at.s * (1 + H * SHADOW_SPREAD);
+    if(pw < 2) return;
 
-    if(w < 2) return;
+    const w = pw * SHADOW_GROW;
+    const h = pw * 1.5 * SHADOW_GROW;
 
-    // Lying flat on the tilted map: squashed top to bottom.
-    const h = w * 1.5 * Math.max(0.25, Math.cos(viewAngles().pitch));
+    // (Drawn in the posters' own layer, so it moves with its
+    // poster exactly, mouse sway and all.)
+    const drop = 1 + lift * SHADOW_LIFT_DROP / SHADOW_DROP_Y;
 
-    // The posters are drawn shifted with the mouse a little
-    // more than the map is (js/sway.js); the shadow belongs
-    // to the map.
-    const mapShift = swayOffset("map");
-    const posterShift = swayOffset("posters");
-
-    const x = at.x + mapShift.x - posterShift.x;
-    const y = at.y + mapShift.y - posterShift.y;
+    const x = at.x + pw * SHADOW_DROP_X * drop;
+    const y = at.y + pw * SHADOW_DROP_Y * drop;
 
     // Off screen: skip.
     if(x + w < 0 || x - w > window.innerWidth || y + h < 0 || y - h > window.innerHeight) return;
 
-    let alpha = SHADOW_ALPHA / (1 + H * SHADOW_FADE);
+    let alpha = SHADOW_ALPHA * (1 - lift * SHADOW_LIFT_FADE);
 
     if(focus && !focus.ids.has(node.id)) alpha *= FOCUS_DIM_ALPHA;
 

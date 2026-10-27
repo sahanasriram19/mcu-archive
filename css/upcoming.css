@@ -307,6 +307,9 @@
 .watch-row {
     display: flex;
     flex-wrap: nowrap;
+    /* Every item starts at the top, so the posters line up
+       along the top however many lines their titles take. */
+    align-items: flex-start;
     gap: 12px;
     overflow-x: auto;
     overflow-y: hidden;
@@ -329,6 +332,14 @@
     font: inherit;
     text-align: center;
     cursor: pointer;
+    /* A button centres its contents top to bottom, so a
+       one-line title used to push its poster lower than a
+       two-line one's: stack poster, title and year from the
+       top instead. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .watch-poster {

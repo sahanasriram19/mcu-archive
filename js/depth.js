@@ -309,7 +309,8 @@ export function nodeHeight(node){
 
 }
 
-// Shadows (posters in nodes.js, lines in connections.js):
+// Shadows of the lines (connections.js; posters draw their
+// own, just under each poster, in nodes.js):
 // lit from the top left, so a shadow lands a little down and
 // to the right of whatever casts it, further the higher it is.
 const SHADOW_FALL_X = 0.35;     // per px of height
@@ -319,7 +320,7 @@ const SHADOW_FALL_Y = 0.55;
 // lands on it. Returns the projected point and the height in
 // screen px (for how soft/faint to make it). `floor` (world
 // units, default 0 = the map's surface) lifts the surface the
-// shadow lands on — see posterShadow() below.
+// shadow lands on.
 export function shadowPoint(x, y, height, floor = 0){
 
     const H = Math.max(0,
@@ -338,32 +339,6 @@ export function shadowPoint(x, y, height, floor = 0){
     const fy = -SHADOW_FALL_X * ss + SHADOW_FALL_Y * cs;
 
     return { at: project(x + fall * fx, y + fall * fy, -floor), H };
-
-}
-
-// All Posters floats its titles through a deep volume (up to
-// ~900 units high), which threw their shadows far away from
-// them. There's no ground in that view to keep them on, so
-// each shadow lands on its own patch of "floor" just under
-// its poster instead, cast from the same heights the other
-// views use. Everywhere else: the real height, on the map.
-const SCATTER_SHADOW = { base: 110, spread: 260 };
-
-export function posterShadow(node){
-
-    const height = nodeHeight(node);
-
-    if(currentView !== "scatter") return { height, floor: 0 };
-
-    const lift = (node.lift || 0) * LIFT_RISE;
-
-    const v = VIEW_HEIGHT.scatter;
-
-    const t = Math.max(0, Math.min(1, (height - lift - v.base) / v.spread));
-
-    const cast = SCATTER_SHADOW.base + t * SCATTER_SHADOW.spread + lift;
-
-    return { height, floor: Math.max(0, height - cast) };
 
 }
 
