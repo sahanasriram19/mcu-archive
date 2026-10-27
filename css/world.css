@@ -13,6 +13,16 @@
     opacity:1;
 }
 
+/* The map (posters, lines, logos, names): its own layer on
+   top of the sky, only redrawn when something on it changes
+   (js/universe.js). Clicks go through to the archive. */
+#universe-map{
+    position:fixed;
+    inset:0;
+    z-index:3;
+    pointer-events:none;
+}
+
 #viewport{
     position:fixed;
     inset:0;

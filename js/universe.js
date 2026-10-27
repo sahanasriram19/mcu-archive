@@ -52,15 +52,40 @@ import { takeMapDirty, markMapDirty } from "./redraw.js";
 //     a picture or logo arriving, a title ticked as watched,
 //     fonts loading, the window resizing
 //
-// Every other frame just lays the last picture of the map
-// over the fresh sky. A redraw also happens at least once a
-// second, as a safety net. (While still, the posters'
-// gentle float pauses too, and carries on where it left
-// off.)
+// The map layer is its own canvas, stacked straight on top
+// of the sky's (css/world.css #universe-map), so on every
+// other frame there's nothing to do for it at all: the
+// browser simply keeps showing it over the fresh sky. (Not
+// copied onto the sky canvas each frame — at full screen
+// size, on a sharp screen, that copy alone cost more than
+// drawing the map.) A redraw also happens at least once a
+// second, as a safety net. While still, the posters' gentle
+// float pauses too, and carries on where it left off.
 //==================================================
 
 const mapCanvas = document.createElement("canvas");
+
+mapCanvas.id = "universe-map";
+mapCanvas.setAttribute("aria-hidden", "true");
+
+ctx.canvas.after(mapCanvas);
+
 const mapCtx = mapCanvas.getContext("2d");
+
+// Whether the map layer has anything on it (cleared once
+// when the map stops showing: landing page, the jump).
+let mapHasContent = false;
+
+function clearMap(){
+
+    if(!mapHasContent) return;
+
+    mapCtx.setTransform(1, 0, 0, 1, 0, 0);
+    mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+    mapHasContent = false;
+
+}
 
 // Like the main canvas (js/universe/renderer.js), glows are
 // measured in real pixels: scaled here so they look the same
@@ -143,12 +168,22 @@ function drawMap(camera){
 
     const W = ctx.canvas.width, H = ctx.canvas.height;
 
+    // Same pixel size as the sky's canvas (which follows the
+    // screen and its sharpness, js/universe/renderer.js), and
+    // laid over it at the same CSS size.
     if(mapCanvas.width !== W || mapCanvas.height !== H){
 
         mapCanvas.width = W;
         mapCanvas.height = H;
 
     }
+
+    const cssW = window.innerWidth + "px", cssH = window.innerHeight + "px";
+
+    if(mapCanvas.style.width !== cssW) mapCanvas.style.width = cssW;
+    if(mapCanvas.style.height !== cssH) mapCanvas.style.height = cssH;
+
+    mapHasContent = true;
 
     mapScale = W / Math.max(1, window.innerWidth);
 
@@ -345,23 +380,18 @@ export function renderUniverse(camera, entered){
     if(entered){
 
         // Redraw the map only if something on it changed
-        // (see THE MAP LAYER above), then lay it over the sky.
+        // (see THE MAP LAYER above); otherwise its canvas just
+        // stays as it is, over the sky.
         if(!mapWasShown || mapNeedsDrawing(camera)) drawMap(camera);
 
         mapWasShown = true;
 
-        ctx.save();
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-        ctx.drawImage(mapCanvas, 0, 0);
-
-        ctx.restore();
-
     } else {
 
-        // Not drawn (landing page, the hyperspace jump): draw
-        // it fresh the next time it shows.
+        // Not showing (landing page, the hyperspace jump):
+        // empty it, and draw it fresh the next time it shows.
+        clearMap();
+
         mapWasShown = false;
 
     }

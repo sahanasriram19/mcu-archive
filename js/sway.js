@@ -208,10 +208,11 @@ export function updateSway(){
     if(Math.abs(x) < 1e-4 && targetX === 0) x = 0;
     if(Math.abs(y) < 1e-4 && targetY === 0) y = 0;
 
-    // Settled within a hair of the mouse: arrive, so the map
-    // can count as still (universe.js).
-    if(Math.abs(targetX - x) < 2e-4) x = targetX;
-    if(Math.abs(targetY - y) < 2e-4) y = targetY;
+    // Close enough that what's left can't be seen (under
+    // about a fifth of a pixel anywhere): arrive, so the map
+    // can count as still sooner (universe.js).
+    if(Math.abs(targetX - x) < 0.002) x = targetX;
+    if(Math.abs(targetY - y) < 0.002) y = targetY;
 
     swayMoving = x !== px || y !== py;
 
