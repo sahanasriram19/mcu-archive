@@ -20,9 +20,14 @@
 
 }
 
+/* Tucked away past the right edge — fully out of sight, so
+   its red stripe (css/comic.css) can't peek in at the edge
+   of the screen. */
 .character-panel.hidden{
 
-    transform:translateX(100%);
+    transform:translateX(calc(100% + 16px));
+    visibility:hidden;
+    pointer-events:none;
 
 }
 

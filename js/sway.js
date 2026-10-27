@@ -194,7 +194,6 @@ export function updateSway(){
 const LAYERS = [
     ["#view-panel", 12, 12, "translate"],
     ["#countdown", 12, 12, "translate"],
-    [".character-panel", 12, 12, "translate"],
     ["#watch-banner", 8, 8, "translate"]
 ];
 

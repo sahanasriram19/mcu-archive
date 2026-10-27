@@ -34,7 +34,10 @@ export const VIEWS = [
             // MULTIVERSE_SPREAD in layout.js — the opening view
             // needs room to step back far enough that the top
             // corner maps clear the panel and countdown cards.)
-            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 0.7 } },
+            // (phoneFit / phoneMinZoom: on a phone the whole
+            // combined map fits between the countdown bar and
+            // the panel, with a margin round it.)
+            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 0.7, phoneFit: 0.88, phoneMinZoom: 0.005 } },
             // Each standalone world uses the same layout shape as
             // its map in Complete MCU, and fits that layout to screen.
             animated: { camera: { x: 0, y: 0, zoom: 0.06, fit: 0.92, minZoom: 0.035, maxZoom: 0.4, userMinZoom: 0.035 } },

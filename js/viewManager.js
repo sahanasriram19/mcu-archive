@@ -273,8 +273,10 @@ function fitCamera(cam){
         const reachX = Math.max(...nodes.map(n => Math.abs(n.targetX))) + POSTER_HALF_W;
         const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY))) + POSTER_HALF_H;
 
-        const zoom = Math.max(cam.minZoom || 0.02, Math.min(cam.maxZoom || 0.5,
-            Math.min(W / (reachX * 2), (bottom - top) / (reachY * 2)) * cam.fit));
+        // (phoneFit / phoneMinZoom in views.js: further out
+        // on a phone, so every world is on screen at once.)
+        const zoom = Math.max(cam.phoneMinZoom || cam.minZoom || 0.02, Math.min(cam.maxZoom || 0.5,
+            Math.min(W / (reachX * 2), (bottom - top) / (reachY * 2)) * (cam.phoneFit || cam.fit)));
 
         const freeCy = (top + bottom) / 2 - H / 2;
 
@@ -484,6 +486,10 @@ export function setView(key){
     camera.minZoom = cameraFor(view).fillMinZoom
         ? fillZoom(cameraFor(view).fillMinZoom, !!cameraFor(view).centre)
         : (cameraFor(view).userMinZoom || DEFAULT_MIN_ZOOM);
+
+    // Phones open the combined map further out (phoneFit,
+    // views.js), so let them zoom out that far by hand too.
+    if(isCompact() && cameraFor(view).phoneFit) camera.minZoom *= cameraFor(view).phoneFit * 0.85;
 
     // ...and how far in (userMaxZoom in views.js; the usual
     // limit where a view doesn't set one).
