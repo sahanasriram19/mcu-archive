@@ -8,9 +8,8 @@
 //
 //   1. Every node has a height above the map's surface.
 //      The lines, logos and floor grid (js/ground.js) lie on
-//      the surface; the posters float above it, each casting
-//      a soft shadow down onto it (nodes.js), so you can see
-//      how high it is. On the mind map the outer rings float
+//      the surface; the posters float above it. On the mind
+//      map the outer rings float
 //      a little higher than the inner ones; the other views
 //      give each title its own steady height. A hovered
 //      poster rises further.
@@ -28,18 +27,6 @@
 //      ones. It rides on the same eased mouse position as
 //      the rest of the site's sway (js/sway.js), so it's off
 //      on touch screens and with "reduce motion".
-//
-// Heights shrink as you zoom out (like a real camera pulling
-// away), but more gently than the map itself, so they still
-// show on the full view without pulling the posters away
-// from their own logos. Posters stay facing
-// you (like cards standing on a table), they just get
-// smaller and drift with distance.
-//
-// Everything that draws or hit-tests the map (nodes.js,
-// connections.js, hub.js, branchNodes.js, nodeHitTest.js,
-// input.js) goes through project() below, so what you
-// click is always what you see.
 //==================================================
 
 import { camera } from "./camera.js";
@@ -175,7 +162,7 @@ export function updateDepth(){
 
     depthMoving = false;
 
-    const ease = list => {
+    const settle = list => {
 
         for(const node of list){
 
@@ -195,8 +182,8 @@ export function updateDepth(){
 
     };
 
-    ease(graph.nodes);
-    ease(graph.branchNodes);
+    settle(graph.nodes);
+    settle(graph.branchNodes);
 
 }
 
@@ -306,39 +293,6 @@ export function viewAngles(){
 export function nodeHeight(node){
 
     return -(node.depth || 0) + (node.lift || 0) * LIFT_RISE;
-
-}
-
-// Shadows of the lines (connections.js; posters draw their
-// own, just under each poster, in nodes.js):
-// lit from the top left, so a shadow lands a little down and
-// to the right of whatever casts it, further the higher it is.
-const SHADOW_FALL_X = 0.35;     // per px of height
-const SHADOW_FALL_Y = 0.55;
-
-// Where the shadow of a point `height` above the surface
-// lands on it. Returns the projected point and the height in
-// screen px (for how soft/faint to make it). `floor` (world
-// units, default 0 = the map's surface) lifts the surface the
-// shadow lands on.
-export function shadowPoint(x, y, height, floor = 0){
-
-    const H = Math.max(0,
-        Math.abs(screenDepth(-Math.max(0, height))) -
-        Math.abs(screenDepth(-Math.max(0, floor)))
-    );
-
-    const fall = H / camera.zoom;
-
-    // The light stays put on screen while the map turns, so
-    // the fall direction turns back the other way.
-    const spin = camera.spin || 0;
-    const cs = Math.cos(spin), ss = Math.sin(spin);
-
-    const fx = SHADOW_FALL_X * cs + SHADOW_FALL_Y * ss;
-    const fy = -SHADOW_FALL_X * ss + SHADOW_FALL_Y * cs;
-
-    return { at: project(x + fall * fx, y + fall * fy, -floor), H };
 
 }
 
