@@ -14,7 +14,7 @@ import {
 } from "./graph.js";
 
 import { updateArchive } from "./archive.js";
-import { setView, setWorldView, getCurrentView } from "./viewManager.js";
+import { setView, setWorldView, getCurrentView, getWorld } from "./viewManager.js";
 import { ALL_WORLDS } from "./worlds.js";
 
 import "./input.js";
@@ -29,8 +29,8 @@ import { canWarp, playWarp } from "./warp.js";
 import { captureStars, setStarsHidden } from "./universe/stars.js";
 import { updateSway, swayOffset } from "./sway.js";
 import { updateDepth, REST_PITCH } from "./depth.js";
-import { readLink, onLinkChange } from "./links.js";
-import { showMovieDetails } from "./movieDetails.js";
+import { readLink, onLinkChange, applyingLink } from "./links.js";
+import { showMovieDetails, hideMovieDetails, openDetailsId } from "./movieDetails.js";
 import { setSelectedCharacter } from "./characters/characterJourney.js";
 
 //==========================================
@@ -304,21 +304,30 @@ window.addEventListener("mcu:go-to-landing", () => {
 });
 
 //==========================================
-// SHARED LINKS (js/links.js)
+// SHARED LINKS + TAB HISTORY (js/links.js)
 //
 // Opened with a link like #/xmen/release?title=x2: skip the
 // landing page, go straight to that view, and open the
 // title's card once the map has settled.
+//
+// Back / Forward step through the views and cards you've
+// opened (and back out to the landing page).
 //==========================================
 
 const TITLE_OPEN_DELAY = 900;   // ms, after the view has framed itself
+
+function findTitle(id){
+
+    return graph.nodes.find(n => n.id === id && !n.isBranch) ||
+        allNodes().find(n => n.id === id);
+
+}
 
 function openLinkedTitle(id){
 
     if(!id) return;
 
-    const node = graph.nodes.find(n => n.id === id && !n.isBranch) ||
-        allNodes().find(n => n.id === id);
+    const node = findTitle(id);
 
     if(node) setTimeout(() => showMovieDetails(node), TITLE_OPEN_DELAY);
 
@@ -342,6 +351,77 @@ async function followLink(link){
 
 }
 
+// Back / Forward (or an edited address) while the site is
+// already open: go there without adding history entries.
+async function followHistory(link){
+
+    await graphReady;
+
+    // The landing page's own entry.
+    if(!link){
+
+        if(entered && !onLanding){
+
+            applyingLink(() => {
+
+                hideMovieDetails();
+
+                window.dispatchEvent(new Event("mcu:go-to-landing"));
+
+            });
+
+        }
+
+        return;
+
+    }
+
+    // First time in, or back in from the landing page.
+    if(link.character) setSelectedCharacter(link.character);
+
+    if(!entered){
+
+        await enter(link.view, { world: link.world, instant: true });
+
+    } else if(onLanding){
+
+        // (Runs straight through when already entered, so
+        // its view change doesn't add an entry either.)
+        applyingLink(() => enter(link.view, { world: link.world, instant: true }));
+
+    }
+
+    applyingLink(() => {
+
+        if(link.character) setSelectedCharacter(link.character);
+
+        // Only re-frame the map if the view itself changed
+        // (not when just a card opened or closed).
+        const sameView = getWorld() === link.world && getCurrentView() === link.view &&
+            (link.view !== "characters" || !link.character);
+
+        if(!sameView) setWorldView(link.world, link.view);
+
+        if(link.title){
+
+            if(openDetailsId() !== link.title){
+
+                const node = findTitle(link.title);
+
+                if(node) showMovieDetails(node);
+
+            }
+
+        } else {
+
+            hideMovieDetails();
+
+        }
+
+    });
+
+}
+
 const startLink = readLink();
 
 if(startLink){
@@ -354,7 +434,7 @@ if(startLink){
 
 }
 
-onLinkChange(link => graphReady.then(() => followLink(link)));
+onLinkChange(followHistory);
 
 //==========================================
 // INITIALISE

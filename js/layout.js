@@ -445,8 +445,8 @@ export function layoutMultiverse(nodes) {
 // PHASES — a compact grid
 //--------------------------------------------------
 
-const PHASE_GRID_X = 3200;
-const PHASE_GRID_Y = 3500;
+const PHASE_GRID_X = 4300;
+const PHASE_GRID_Y = 4500;
 
 const PHASE_RING_BASE = 860;
 const PHASE_RING_PER_TITLE = 62;
@@ -565,16 +565,24 @@ function placePhaseRings(branches, groups) {
 
 const TIMELINE_SPACING_X = 420;
 
-const TIMELINE_STEM = 260;
-
 const TIMELINE_LABEL_EVERY = 5;
 
 const TIMELINE_BRANCH_OFFSET = 120;
 
-const TIMELINE_SPACING_Y = 290;
+// (Room enough that two posters on the same side don't
+// touch once the map is tipped back — js/depth.js.)
+const TIMELINE_SPACING_Y = 345;
 const TIMELINE_SIDE_X = 330;
 
 const TIMELINE_GROUP_GAP_Y = 520;
+
+// Left-to-right timelines: how far the posters sit from the
+// spine. Posters float above the tilted map (js/depth.js),
+// which lifts them up the screen — towards the spine for the
+// row below it — so that row sits further out, keeping the
+// phase name and years on the spine clear.
+const TIMELINE_ABOVE_Y = 470;
+const TIMELINE_BELOW_Y = 640;
 
 function verticalTimelineY(i) {
 
@@ -677,7 +685,7 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
             node.targetX = i * TIMELINE_SPACING_X;
 
-            node.targetY = side * (TIMELINE_STEM + 180);
+            node.targetY = side < 0 ? -TIMELINE_ABOVE_Y : TIMELINE_BELOW_Y;
 
         }
 
@@ -689,7 +697,11 @@ function layoutTimeline(nodes, compareFn, labelFn, subtitleFn) {
 
         const chunk = sorted.slice(i, i + TIMELINE_LABEL_EVERY);
 
-        const midIndex = i + (chunk.length - 1) / 2;
+        // Half a step along when the middle of the group is a
+        // poster, so the label sits in the gap between two
+        // posters instead of on top of one's stem.
+        const midIndex = i + (chunk.length - 1) / 2 +
+            (chunk.length > 1 && chunk.length % 2 === 1 ? 0.5 : 0);
 
         labels.push({
 
@@ -760,7 +772,7 @@ export function layoutCharacters(nodes) {
 
             node.targetX = side * 230;
 
-            node.targetY = i * 270;
+            node.targetY = i * 320;
 
         } else {
 

@@ -92,7 +92,9 @@ export const VIEWS = [
         // so landing the camera there opens on the very
         // start of the timeline, not partway through it.
         edges: { mode: "timelineTrail" },
-        camera: { x: 0, y: 0, zoom: 0.40 },
+        // (y: the row below the spine sits a little further
+        // out than the row above — see layout.js.)
+        camera: { x: 0, y: 80, zoom: 0.40 },
         // Phones: the timeline runs top to bottom when upright
         // (fill the width, start at the first title) and left
         // to right when sideways (fill the height, start at
@@ -108,7 +110,9 @@ export const VIEWS = [
         label: "Chronological Order",
         layout: "chronology",
         edges: { mode: "timelineTrail" },
-        camera: { x: 0, y: 0, zoom: 0.40 },
+        // (y: the row below the spine sits a little further
+        // out than the row above — see layout.js.)
+        camera: { x: 0, y: 80, zoom: 0.40 },
         phone: {
             portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
             landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }

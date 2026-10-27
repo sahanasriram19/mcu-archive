@@ -20,8 +20,7 @@
        inside rather than run off the bottom. */
     max-height:calc(100vh - 56px);
     overflow-y:auto;
-    scrollbar-width:thin;
-    scrollbar-color:rgba(255,255,255,.2) transparent;
+    scrollbar-width:none;
 }
 
 /* Title + (phones only) current-view toggle. */
@@ -61,6 +60,55 @@
 /* Phones only (see the compact media query below). */
 .view-panel-toggle{
     display:none;
+}
+
+/* Never wraps onto two lines beside the buttons. */
+.view-panel-title{
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+
+/* Back to the default view (ui/panel.js): a small round
+   button beside the title. */
+.view-panel-reset{
+    flex:0 0 auto;
+    margin-left:auto;
+    width:30px;
+    height:30px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.04);
+    color:rgba(255,255,255,.75);
+    cursor:pointer;
+    transition:border-color var(--transition), color var(--transition), background var(--transition);
+}
+
+.view-panel-reset svg{
+    width:16px;
+    height:16px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.view-panel-reset:hover{
+    border-color:rgba(230,36,41,.7);
+    background:rgba(230,36,41,.2);
+    color:#fff;
+}
+
+.view-panel-reset:active svg{
+    transform:rotate(-40deg);
+}
+
+.view-panel-reset:focus-visible{
+    outline:2px solid rgba(255,255,255,.7);
+    outline-offset:3px;
 }
 
 .view-panel-subtitle{
@@ -294,7 +342,22 @@
         display:none;
     }
 
+    /* A comfortable fingertip size on phones. */
+    .view-panel-reset{
+        width:40px;
+        height:40px;
+    }
+
+    .view-panel-reset svg{
+        width:18px;
+        height:18px;
+    }
+
     .view-panel-toggle{
+        /* Shrinks (its label ends in …) rather than run past
+           the panel's edge beside the reset button. */
+        flex:0 1 auto;
+        min-width:0;
         display:inline-flex;
         align-items:center;
         gap:8px;

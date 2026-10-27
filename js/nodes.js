@@ -13,7 +13,7 @@ import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
-import { projectNode, nodeHeight, shadowPoint, viewAngles } from "./depth.js";
+import { projectNode, shadowPoint, posterShadow, viewAngles } from "./depth.js";
 
 // Where the mouse is (for the hovered poster's lean).
 let mouseX = -1, mouseY = -1;
@@ -320,6 +320,20 @@ export function renderNodes(ctx, camera, nodes){
         // Hovering a phase on the mind map: the other phases
         // step back (eased in graph.js, see hoverFade).
         ctx.globalAlpha *= hoverDim(node.phase);
+
+        // Its details card is open: the poster has lifted off
+        // the map into the card (js/movieDetails.js).
+        const opened = node.openFade || 0;
+
+        if(opened >= 0.99){
+
+            ctx.restore();
+
+            return;
+
+        }
+
+        ctx.globalAlpha *= 1 - opened;
 
         //----------------------------------
         // Lean: the hovered poster tips a few
@@ -756,13 +770,13 @@ function posterBaseSize(node){
 
 function drawShadow(ctx, node, focus){
 
-    const height = nodeHeight(node);
+    const { height, floor } = posterShadow(node);
 
     if(height <= 1) return;
 
     // Where it lands on the surface, and the poster's height
     // in screen px (js/depth.js).
-    const { at, H } = shadowPoint(node.x, node.y, height);
+    const { at, H } = shadowPoint(node.x, node.y, height, floor);
 
     const w = posterBaseSize(node) * camera.zoom * at.s * (1 + H * SHADOW_SPREAD);
 
@@ -788,6 +802,11 @@ function drawShadow(ctx, node, focus){
     if(focus && !focus.ids.has(node.id)) alpha *= FOCUS_DIM_ALPHA;
 
     alpha *= hoverDim(node.phase);
+
+    // (Gone with its poster while its card is open.)
+    alpha *= 1 - (node.openFade || 0);
+
+    if(alpha <= 0.005) return;
 
     const sprite = shadowSprite();
 
@@ -936,7 +955,8 @@ const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
 
 const POSTER_FADE_STEP = 0.07;  // per frame: a poster fades in over ~1/4 s
 
-const HOVER_DIM = 0.7;          // how far other phases fade while one is hovered
+const HOVER_DIM = 0;            // other phases no longer fade while one is hovered
+                                // (the hovered phase still shows its name)
 
 // 1 for everything normally; less for titles outside the
 // hovered phase while a phase is hovered on the mind map.

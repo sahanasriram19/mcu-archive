@@ -638,6 +638,17 @@ export function updateGraph(){
 
         if(node.lift < 0.002) node.lift = 0;
 
+        // Its details card is open (js/movieDetails.js): the
+        // poster has "become" the card, so it fades off the
+        // map, and back once the card closes.
+        const openTarget = node.detailsOpen ? 1 : 0;
+
+        const open = node.openFade || 0;
+
+        node.openFade = open + (openTarget - open) * 0.2;
+
+        if(Math.abs(node.openFade - openTarget) < 0.01) node.openFade = openTarget;
+
     });
 
     graph.branchNodes.forEach(node=>{

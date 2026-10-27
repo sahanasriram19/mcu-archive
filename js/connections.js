@@ -9,7 +9,7 @@ import { project, nodeHeight, shadowPoint } from "./depth.js";
 
 // How far the other phases' branches fade while one phase
 // is hovered on the mind map.
-const HOVER_LINE_DIM = 0.7;
+const HOVER_LINE_DIM = 0;   // other branches stay fully lit while one is hovered
 
 function resolveAnchor(ref, graph){
 

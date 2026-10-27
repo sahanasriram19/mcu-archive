@@ -25,6 +25,7 @@ import { getWorld } from "./worlds.js";
 import { LAYOUTS } from "./layout.js";
 import { VIEWS } from "./views.js";
 import { camera } from "./camera.js";
+import { REST_PITCH } from "./depth.js";
 import { archive } from "./archiveCore.js";
 import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
@@ -700,5 +701,22 @@ export function refitView(){
     camera.targetX = fit.x;
     camera.targetY = fit.y;
     camera.targetZoom = Math.max(fit.zoom, camera.minZoom);
+
+}
+//----------------------------------
+// DEFAULT VIEW
+//
+// The panel's reset button (ui/panel.js): tips the map
+// back to its usual angle (REST_PITCH in depth.js), turns
+// it square again, and frames the current view the way it
+// opens — undoing any tilting, turning, panning or zooming.
+//----------------------------------
+
+export function resetView(){
+
+    camera.targetPitch = REST_PITCH;
+    camera.targetSpin = 0;
+
+    setView(currentView);
 
 }

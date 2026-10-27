@@ -6,7 +6,7 @@
 // Spider-Man, Fantastic Four, Unscripted and Marvel
 // Animation — opens with a chapter
 // title in its colour; its titles then float past in small
-// waves (four at a time on a computer, two on a phone),
+// waves (four at a time, on a computer and a phone alike),
 // angled towards you, phase by phase or era by era (each
 // caption names it). A final "Coming soon" chapter holds
 // the titles not out yet. A title that belongs to two
@@ -60,22 +60,29 @@ const END_GAP = 900;          // after the last poster
 // time, which keeps the trail short now that it holds
 // every world. Each slot is [xFrac, yFrac]: how far out
 // from the middle (share of the screen width; minus is
-// left) and how far up or down (share of the height).
-// Computers get waves of four, phones waves of two.
-// The two sides mirror each other: on each side an outer
-// row up high and an inner row down low. Slots come in
-// left/right pairs, and both posters of a pair sit at the
-// same depth.
+// left) and how far up or down (share of the height),
+// plus the closest to the middle it may come on a narrow
+// screen, in poster widths.
+// Both computers and phones get waves of four: the two
+// sides mirror each other, and on each side there are two
+// trails — an outer row up high and an inner row down low.
+// Slots come in left/right pairs, and both posters of a
+// pair sit at the same depth.
 const WAVE_SLOTS_WIDE = [
-    [-0.4,  -0.27],
-    [ 0.4,  -0.27],
-    [-0.22,  0.17],
-    [ 0.22,  0.17]
+    [-0.4,  -0.27, 0.85],
+    [ 0.4,  -0.27, 0.85],
+    [-0.22,  0.17, 0.85],
+    [ 0.22,  0.17, 0.85]
 ];
 
+// Phones: the same two trails a side, closer together
+// (the outer row kept further out than the inner one, so
+// the two read as separate trails).
 const WAVE_SLOTS_NARROW = [
-    [-0.2, 0],
-    [ 0.2, 0]
+    [-0.36, -0.2,  1.2],
+    [ 0.36, -0.2,  1.2],
+    [-0.2,   0.17, 0.7],
+    [ 0.2,   0.17, 0.7]
 ];
 
 // One chapter card per world, in this order.
@@ -211,7 +218,9 @@ function makePoster(node){
             ? "Coming " + node.release.slice(0, 4)
             : node.release.slice(0, 4) + " · " + groupName(node.phase, { upper: false });
 
-    poster.addEventListener("click", () => showMovieDetails(node, { from: poster }));
+    // The poster flips out into its card and leaves the
+    // trail until the card closes (hideSource).
+    poster.addEventListener("click", () => showMovieDetails(node, { from: poster, hideSource: true }));
 
     return { el, poster };
 
@@ -219,7 +228,8 @@ function makePoster(node){
 
 function posterWidth(){
 
-    return window.innerWidth >= 900 ? 220 : 140;
+    // (Phones: a touch smaller, to fit two trails a side.)
+    return window.innerWidth >= 900 ? 220 : window.innerWidth >= 600 ? 140 : 118;
 
 }
 
@@ -357,7 +367,7 @@ export function initIntro(nodes, onEnter){
 
             stage.appendChild(el);
 
-            const [sx, sy] = slots[slot];
+            const [sx, sy, minOut] = slots[slot];
 
             // Exactly mirrored left and right: same distance
             // out, same height, same angle.
@@ -367,7 +377,7 @@ export function initIntro(nodes, onEnter){
 
             items.push({
                 el, poster, node, depth: depth + Math.floor(slot / 2) * WAVE_STAGGER,
-                xFrac, yFrac, rot, kind: "poster", imgSet: false
+                xFrac, yFrac, minOut, rot, kind: "poster", imgSet: false
             });
 
         });
@@ -618,10 +628,11 @@ function frame(){
         it.el.style.opacity = String(Math.min(fadeIn, fadeOut) * heroT);
 
         // On narrow screens keep posters clear of the middle
-        // (at least most of a poster's width out).
+        // (at least most of a poster's width out; the outer
+        // trail a little further).
         const x = it.kind === "chapter"
             ? 0
-            : Math.sign(it.xFrac) * Math.max(Math.abs(it.xFrac) * vw, pw * 0.85);
+            : Math.sign(it.xFrac) * Math.max(Math.abs(it.xFrac) * vw, pw * (it.minOut || 0.85));
         const y = it.kind === "chapter" ? it.y : it.yFrac * vh;
 
         it.el.style.transform =

@@ -14,6 +14,7 @@ import { groupName, WORLDS } from "./worlds.js";
 import { canFlip, flipOpen, flipClose, hideFlipper, goodRect } from "./flip.js";
 import { isWatched, toggleWatched } from "./watched.js";
 import { setLinkTitle, copyLink } from "./links.js";
+import { watchScroll } from "./scrollHints.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -34,7 +35,6 @@ overlay.innerHTML = `
                 <button type="button" id="movie-details-share" title="Copy link" aria-label="Copy link"></button>
             </div>
             <p id="movie-details-overview"></p>
-            <div id="movie-details-characters"></div>
             <div id="movie-details-cast"></div>
             <div id="movie-details-watch"></div>
         </div>
@@ -49,11 +49,15 @@ const titleEl = overlay.querySelector("#movie-details-title");
 const metaEl = overlay.querySelector("#movie-details-meta");
 const overviewEl = overlay.querySelector("#movie-details-overview");
 const trailerEl = overlay.querySelector("#movie-details-trailer");
-const charactersEl = overlay.querySelector("#movie-details-characters");
 const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
 const watchedBtn = overlay.querySelector("#movie-details-watched");
 const shareBtn = overlay.querySelector("#movie-details-share");
+const bodyEl = overlay.querySelector("#movie-details-body");
+
+// No scrollbars (css/main.css): the card's text and its
+// sideways rows fade at the edge while there's more to see.
+watchScroll(bodyEl);
 
 // Two overlapping squares; a tick for a moment once copied.
 const COPY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>`;
@@ -221,6 +225,8 @@ function renderWatchBefore(node){
         </div>
     `;
 
+    watchScroll(watchEl.querySelector(".watch-row"), "x");
+
     watchEl.querySelectorAll(".watch-item").forEach(item => {
 
         item.addEventListener("click", () => showMovieDetails(nodes[+item.dataset.i]));
@@ -273,7 +279,44 @@ function flipPosterUrl(node){
 
 const card = overlay.querySelector("#movie-details-card");
 
-function hideMovieDetails() {
+//--------------------------------------------------
+// The poster a card was opened from lifts off the page
+// while its card is open — it has "become" the card —
+// and drops back into place when the card closes (after
+// the flip back, so the flipping copy lands in the gap).
+// A poster on the map fades via node.detailsOpen
+// (graph.js / nodes.js); one on the landing page's
+// fly-through via the .details-source class
+// (css/landing.css).
+//--------------------------------------------------
+
+let source = null;   // { node, el }
+
+function hideSource(node, from){
+
+    showSource();
+
+    const el = from instanceof Element ? (from.closest(".intro-item") || from) : null;
+
+    if(el) el.classList.add("details-source");
+    else node.detailsOpen = true;
+
+    source = { node, el };
+
+}
+
+function showSource(){
+
+    if(!source) return;
+
+    if(source.el) source.el.classList.remove("details-source");
+    else source.node.detailsOpen = false;
+
+    source = null;
+
+}
+
+export function hideMovieDetails() {
 
     if(!overlay.classList.contains("open") && !overlay.classList.contains("dim")) return;
 
@@ -292,7 +335,18 @@ function hideMovieDetails() {
         overlay.classList.add("flipping");
         overlay.classList.remove("open", "dim");
 
-        flipClose(back, card).then(() => overlay.classList.remove("flipping"));
+        const returning = source;
+
+        flipClose(back, card).then(() => {
+
+            overlay.classList.remove("flipping");
+
+            // The copy has landed where the poster was: the
+            // poster itself takes over again. (Unless another
+            // card has opened from it in the meantime.)
+            if(source === returning) showSource();
+
+        });
 
         return;
 
@@ -300,7 +354,16 @@ function hideMovieDetails() {
 
     hideFlipper();
 
+    showSource();
+
     overlay.classList.remove("open", "dim", "flipping");
+
+}
+
+// The id of the title whose card is open, or null.
+export function openDetailsId(){
+
+    return openNode ? openNode.id : null;
 
 }
 
@@ -393,6 +456,8 @@ function renderExtras(node) {
             }).join("") +
             `</div>`;
 
+        watchScroll(castEl.querySelector("#movie-details-cast-list"), "x");
+
     } else {
 
         castEl.innerHTML = "";
@@ -416,6 +481,11 @@ export async function showMovieDetails(node, opts = {}) {
     const startRect = opts.from && canFlip() ? rectOf(opts.from) : null;
 
     const flipping = goodRect(startRect);
+
+    // The poster it came from leaves the page while its card
+    // is open (only posters ask for this — opts.hideSource).
+    if(opts.hideSource && opts.from) hideSource(node, opts.from);
+    else showSource();
 
     let landed = null;
 
@@ -490,21 +560,9 @@ export async function showMovieDetails(node, opts = {}) {
     overviewEl.textContent = node.overview ||
         "No synopsis yet.";
 
-    if (node.characters && node.characters.length) {
-
-        charactersEl.innerHTML =
-            `<div id="movie-details-characters-label">Featuring</div>` +
-            node.characters
-                .map(c => `<span class="character-chip">${c}</span>`)
-                .join("");
-
-    } else {
-
-        charactersEl.innerHTML = "";
-
-    }
-
     renderWatchBefore(node);
+
+    bodyEl.scrollTop = 0;
 
     // fetchDetails() call as soon as the poster is hovered,
     // so by the time a click actually lands it has usually

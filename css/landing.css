@@ -58,7 +58,8 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    width: min(1120px, 140vw);
+    /* Scales with the logo it grows out of (--lw). */
+    width: min(1120px, calc(var(--lw, 360px) * 3.1));
     height: auto;
     transform: translate(-50%, -50%);
     pointer-events: none;
@@ -596,7 +597,10 @@
    branches drawing, and .show (at the very end) brings in
    the caption, stats and Enter button under the logo. */
 #intro-end {
-    --lw: min(360px, 70vw);        /* logo width up close */
+    /* Logo width up close: full size on a computer, scaling
+       down with the screen (width and height) on smaller
+       ones. */
+    --lw: min(360px, 30vw + 50px, 45vh);
 
     position: absolute;
     left: 50%;
@@ -780,6 +784,9 @@
 
 @media (max-width: 600px) {
 
+    /* Phones: a smaller logo at the end of the trail. */
+    #intro-end { --lw: min(170px, 30vw + 50px, 30vh); }
+
     .intro-chapter { width: 92vw; margin-left: -46vw; }
 
     .intro-chapter-title { font-size: 64px; }
@@ -839,4 +846,21 @@
 
 #landing.leaving.from-logo {
     transform: none;
+}
+/*--------------------------------------------------
+  A poster whose details card is open has flipped out
+  into the card (js/movieDetails.js): it leaves the trail,
+  and drops back in once the card has flipped back.
+--------------------------------------------------*/
+
+.intro-item .intro-poster,
+.intro-item .intro-caption {
+    transition: opacity .25s ease;
+}
+
+.intro-item.details-source .intro-poster,
+.intro-item.details-source .intro-caption {
+    opacity: 0;
+    transition: none;
+    pointer-events: none;
 }

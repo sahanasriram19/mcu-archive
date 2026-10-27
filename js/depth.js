@@ -77,8 +77,11 @@ const MAP_JITTER = 150;       // a little per-title variety
 // Other views: base + up to `spread` per title.
 const VIEW_HEIGHT = {
     phases:     { base: 120, spread: 240 },
-    release:    { base: 110, spread: 260 },
-    chronology: { base: 110, spread: 260 },
+    // Timelines: every poster at the same height, so the two
+    // rows stay level instead of bobbing up and down into
+    // the spine and its labels.
+    release:    { base: 150, spread: 0 },
+    chronology: { base: 150, spread: 0 },
     characters: { base: 110, spread: 240 },
     scatter:    { base: 120, spread: 800 }    // All Posters: a real volume
 };
@@ -92,7 +95,7 @@ export const MAX_PITCH = 0.9;   // radians (~52°)
 
 // How far the map is tipped back when the archive opens
 // (and where T returns it to). 0 = flat.
-export const REST_PITCH = 0.5;  // radians (~29°)
+export const REST_PITCH = 0.66; // radians (~38°)
 
 // How far the map can be turned on the spot, either way
 // (drag with the right mouse button / Shift, or twist two
@@ -298,10 +301,15 @@ const SHADOW_FALL_Y = 0.55;
 
 // Where the shadow of a point `height` above the surface
 // lands on it. Returns the projected point and the height in
-// screen px (for how soft/faint to make it).
-export function shadowPoint(x, y, height){
+// screen px (for how soft/faint to make it). `floor` (world
+// units, default 0 = the map's surface) lifts the surface the
+// shadow lands on — see posterShadow() below.
+export function shadowPoint(x, y, height, floor = 0){
 
-    const H = Math.abs(screenDepth(-Math.max(0, height)));
+    const H = Math.max(0,
+        Math.abs(screenDepth(-Math.max(0, height))) -
+        Math.abs(screenDepth(-Math.max(0, floor)))
+    );
 
     const fall = H / camera.zoom;
 
@@ -313,7 +321,33 @@ export function shadowPoint(x, y, height){
     const fx = SHADOW_FALL_X * cs + SHADOW_FALL_Y * ss;
     const fy = -SHADOW_FALL_X * ss + SHADOW_FALL_Y * cs;
 
-    return { at: project(x + fall * fx, y + fall * fy, 0), H };
+    return { at: project(x + fall * fx, y + fall * fy, -floor), H };
+
+}
+
+// All Posters floats its titles through a deep volume (up to
+// ~900 units high), which threw their shadows far away from
+// them. There's no ground in that view to keep them on, so
+// each shadow lands on its own patch of "floor" just under
+// its poster instead, cast from the same heights the other
+// views use. Everywhere else: the real height, on the map.
+const SCATTER_SHADOW = { base: 110, spread: 260 };
+
+export function posterShadow(node){
+
+    const height = nodeHeight(node);
+
+    if(currentView !== "scatter") return { height, floor: 0 };
+
+    const lift = (node.lift || 0) * LIFT_RISE;
+
+    const v = VIEW_HEIGHT.scatter;
+
+    const t = Math.max(0, Math.min(1, (height - lift - v.base) / v.spread));
+
+    const cast = SCATTER_SHADOW.base + t * SCATTER_SHADOW.spread + lift;
+
+    return { height, floor: Math.max(0, height - cast) };
 
 }
 

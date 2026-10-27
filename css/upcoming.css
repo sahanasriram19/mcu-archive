@@ -312,17 +312,11 @@
     overflow-y: hidden;
     padding: 4px 2px 8px;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, .25) transparent;
+    scrollbar-width: none;
 }
 
 .watch-row::-webkit-scrollbar {
-    height: 6px;
-}
-
-.watch-row::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, .2);
-    border-radius: 99px;
+    display: none;
 }
 
 .watch-item {

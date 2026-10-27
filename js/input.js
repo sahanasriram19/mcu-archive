@@ -567,7 +567,9 @@ function endGesture(e){
 
             // The card flips out of this poster (js/flip.js),
             // and back onto wherever it is when it closes.
-            showMovieDetails(node, { from: () => nodeScreenRect(node, camera) });
+            // The poster itself leaves the map while its card
+            // is open (hideSource).
+            showMovieDetails(node, { from: () => nodeScreenRect(node, camera), hideSource: true });
 
         } else {
 
