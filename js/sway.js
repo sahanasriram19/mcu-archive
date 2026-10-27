@@ -22,11 +22,12 @@ const EASE = 0.06;
 
 // How far each layer moves (CSS px) with the mouse at the
 // edge of the screen.
+// (About half what it used to be: it was a bit strong.)
 export const SWAY = {
-    stars: 45,        // opposite way, times each star's depth
-    map: 12,          // lines, logos, phase names
-    posters: 18,      // posters float above the map
-    ui: 6             // panel, countdown cards (css)
+    stars: 22,        // opposite way, times each star's depth
+    map: 6,           // lines, logos, phase names
+    posters: 9,       // posters float above the map
+    ui: 3             // panel, countdown cards (css)
 };
 
 const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -54,9 +55,51 @@ function enabled(){
 
 }
 
+// The panel, countdown cards, details card and the other
+// controls: while the mouse is over one of them, the map
+// stays square on instead of leaning towards the edge of
+// the screen where they sit.
+const UI_SELECTOR =
+    "#view-panel, #countdown, #watch-banner, #movie-details-overlay, " +
+    ".character-panel, #movie-search-results, #card-flipper";
+
+// After switching view (usually by clicking in the panel, at
+// the far left), the map opens square on, and only starts
+// following the mouse again once it has moved this far.
+const RESUME_AFTER_PX = 40;
+
+let paused = null;      // { x, y } where the mouse was when paused
+
+window.addEventListener("mcu:view-changed", () => {
+
+    targetX = targetY = 0;
+
+    paused = { x: lastMouseX, y: lastMouseY };
+
+});
+
+let lastMouseX = -1, lastMouseY = -1;
+
 window.addEventListener("pointermove", e => {
 
-    if(e.pointerType !== "mouse" || !enabled()) return;
+    if(e.pointerType !== "mouse") return;
+
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+
+    if(!enabled()) return;
+
+    const overUi = e.target instanceof Element && e.target.closest(UI_SELECTOR);
+
+    if(paused && !overUi && Math.hypot(e.clientX - paused.x, e.clientY - paused.y) > RESUME_AFTER_PX) paused = null;
+
+    if(overUi || paused){
+
+        targetX = targetY = 0;
+
+        return;
+
+    }
 
     targetX = e.clientX / window.innerWidth - 0.5;
     targetY = e.clientY / window.innerHeight - 0.5;
@@ -201,9 +244,9 @@ export function updateSway(){
 //--------------------------------------------------
 
 const LAYERS = [
-    ["#view-panel", 12, 12, "translate"],
-    ["#countdown", 12, 12, "translate"],
-    ["#watch-banner", 8, 8, "translate"]
+    ["#view-panel", 6, 6, "translate"],
+    ["#countdown", 6, 6, "translate"],
+    ["#watch-banner", 4, 4, "translate"]
 ];
 
 const found = new Map();

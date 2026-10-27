@@ -460,7 +460,7 @@ export function layoutMultiverse(nodes) {
 // them). Sized for the Phases view's bigger posters
 // (PHASES_POSTER in js/posterSize.js), so they never touch.
 const PHASE_RING_MIN = 1300;
-const PHASE_RING_SLOT = 680;
+const PHASE_RING_SLOT = 740;
 
 // Air between neighbouring rings: from the outermost
 // posters' centres of one ring to the next.
@@ -468,11 +468,12 @@ const PHASE_GAP_X = 1150;
 const PHASE_GAP_Y = 1100;
 
 // Rings are laid out a little taller than wide: tipped back
-// (js/depth.js REST_PITCH, cos ≈ 0.79) they're squashed top
+// (js/depth.js REST_PITCH, cos ≈ 0.79, and a bit more for
+// the row further away) they're squashed top
 // to bottom, so this brings them back to round on screen —
 // and keeps the posters down each side from stacking on
 // top of one another.
-const PHASE_RING_ROUND = 1.25;
+const PHASE_RING_ROUND = 1.38;
 
 function phaseRingRadius(n) {
 

@@ -106,8 +106,9 @@ export const MAX_SPIN = 0.6;    // radians (~35°)
 
 // Look-around: how far the map turns with the mouse at the
 // edge of the screen.
-const LOOK_YAW = 0.08;          // left/right, radians (~4.5°)
-const LOOK_PITCH = 0.045;       // up/down, radians (~2.5°)
+// (About half what it used to be: it was a bit strong.)
+const LOOK_YAW = 0.035;         // left/right, radians (~2°)
+const LOOK_PITCH = 0.02;        // up/down, radians (~1.1°)
 
 //--------------------------------------------------
 // Per-title variety: a steady 0..1 number from its id,

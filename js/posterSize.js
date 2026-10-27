@@ -11,7 +11,7 @@
 //   Journeys)                          300
 //   Complete mind maps                 320, a little bigger
 //                                      on each outer ring
-//   Phases                             430: its rings are
+//   Phases                             360: its rings are
 //                                      spread wide to stay
 //                                      neat, so its posters
 //                                      are drawn bigger to
@@ -22,7 +22,7 @@
 
 export const POSTER_BASE = 320;
 export const TIMELINE_POSTER = 300;
-export const PHASES_POSTER = 430;
+export const PHASES_POSTER = 360;
 
 export function posterSizeFor(node, view){
 
