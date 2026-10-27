@@ -445,20 +445,36 @@ export function layoutMultiverse(nodes) {
 // PHASES — a compact grid
 //--------------------------------------------------
 
-const PHASE_GRID_X = 4300;
-const PHASE_GRID_Y = 4500;
+// Every phase is a ring of posters round its name, and
+// all the rings are the same size — the size the biggest
+// phase needs — so the grid reads as neat rows of equal
+// circles rather than a jumble of big and small ones.
+//
+// PHASE_RING_MIN keeps even a small phase's posters well
+// clear of the name and years in the middle (the map is
+// tipped back, which lifts the bottom posters towards
+// them). PHASE_RING_SLOT is the room each poster gets
+// round the ring.
+const PHASE_RING_MIN = 1150;
+const PHASE_RING_SLOT = 600;
 
-const PHASE_RING_BASE = 860;
-const PHASE_RING_PER_TITLE = 62;
+// Space between neighbouring rings (edge to edge).
+const PHASE_GAP_X = 1000;
+const PHASE_GAP_Y = 1100;
 
-const PHASE_RING_ROUND = 1;
+// Rings are laid out a little taller than wide: tipped back
+// (js/depth.js REST_PITCH, cos ≈ 0.79) they're squashed top
+// to bottom, so this brings them back to round on screen —
+// and keeps the posters down each side from stacking on
+// top of one another.
+const PHASE_RING_ROUND = 1.25;
 
-const topRowCount = n => Math.ceil(n / 2);
 
 function phaseRingRadius(n, label = "") {
 
     return Math.max(
-        PHASE_RING_BASE + Math.max(0, n - 6) * PHASE_RING_PER_TITLE,
+        PHASE_RING_MIN,
+        (n * PHASE_RING_SLOT) / (Math.PI * 2),
         300 + label.length * 38
     );
 
@@ -480,6 +496,12 @@ export function layoutPhases(nodes) {
         .filter(phase => groups[phase].length > 0)
         .sort((a, b) => a - b);
 
+    // One radius for every ring, and the grid spaced to fit.
+    const radius = Math.max(...phaseKeys.map(p => phaseRingRadius(groups[p].length, groupName(p))));
+
+    const PHASE_GRID_X = radius * 2 + PHASE_GAP_X;
+    const PHASE_GRID_Y = radius * 2 * PHASE_RING_ROUND + PHASE_GAP_Y;
+
     if (isCompact()) {
 
         const portrait = isPortraitPhone();
@@ -489,6 +511,7 @@ export function layoutPhases(nodes) {
             phase,
             key: "phase" + phase,
             label: groupName(phase),
+            wrap: true,
             subtitle: phaseSubtitle(groups[phase]),
             x: portrait ? 0 : pi * PHASE_GRID_X,
             y: portrait ? pi * PHASE_GRID_Y : 0
@@ -497,46 +520,156 @@ export function layoutPhases(nodes) {
 
         setBranchNodes(column);
 
-        placePhaseRings(column, groups);
-
-        resolveOverlaps(nodes);
+        placePhaseRings(column, groups, radius);
 
         return;
 
     }
 
-    const branchTargets = phaseKeys.map((phase, pi) => {
+    // Computers: a grid shaped like the screen (e.g. 4 + 3
+    // for the MCU's seven phases, 3 + 3 + 3 for Spider-Man's
+    // nine eras), each row centred, with the titles spread
+    // evenly over the rows.
+    const rowSizes = phaseRows(phaseKeys.length);
 
-        const row = pi < topRowCount(phaseKeys.length) ? 0 : 1;
+    // Bigger rings where a long name needs the room (see
+    // ringForLabels).
+    const R = ringForLabels(radius, rowSizes, phaseKeys);
 
-        const col = row === 0 ? pi : pi - topRowCount(phaseKeys.length);
+    const gridX = R * 2 + PHASE_GAP_X;
+    const gridY = R * 2 * PHASE_RING_ROUND + PHASE_GAP_Y;
 
-        const rowCount = row === 0 ?
-            Math.min(topRowCount(phaseKeys.length), phaseKeys.length) :
-            phaseKeys.length - topRowCount(phaseKeys.length);
+    const branchTargets = [];
 
-        return {
+    let pi = 0;
 
-            phase,
-            key: "phase" + phase,
-            label: groupName(phase),
-            subtitle: phaseSubtitle(groups[phase]),
-            x: (col - (rowCount - 1) / 2) * PHASE_GRID_X,
-            y: (row - 0.5) * PHASE_GRID_Y
+    rowSizes.forEach((count, row) => {
 
-        };
+        for (let col = 0; col < count; col++, pi++) {
+
+            const phase = phaseKeys[pi];
+
+            branchTargets.push({
+
+                phase,
+                key: "phase" + phase,
+                label: groupName(phase),
+                wrap: true,
+                subtitle: phaseSubtitle(groups[phase]),
+                x: (col - (count - 1) / 2) * gridX,
+                y: (row - (rowSizes.length - 1) / 2) * gridY
+
+            });
+
+        }
 
     });
 
     setBranchNodes(branchTargets);
 
-    placePhaseRings(branchTargets, groups);
-
-    resolveOverlaps(nodes);
+    placePhaseRings(branchTargets, groups, R);
 
 }
 
-function placePhaseRings(branches, groups) {
+// How many rings go in each row: about as many columns as
+// suit the screen's shape, with the rings shared out evenly
+// (the first rows take any extra one).
+function phaseRows(n) {
+
+    if (n <= 4) return [n];
+
+    const aspect = Math.max(0.8, Math.min(2.2,
+        (window.innerWidth - 300) / Math.max(1, window.innerHeight - 60)
+    ));
+
+    const cols = Math.max(2, Math.round(Math.sqrt(n * aspect * 1.4)));
+
+    const rows = Math.ceil(n / cols);
+
+    const base = Math.floor(n / rows), extra = n % rows;
+
+    return Array.from({ length: rows }, (_, r) => base + (r < extra ? 1 : 0));
+
+}
+
+// The phase names are drawn at a readable minimum size on
+// screen however far out the map is (js/branchNodes.js),
+// so a long one ("Sony's Spider-Man Universe") can be wider
+// than its ring once the grid is fitted to the screen.
+// Grows the rings until each name (and its years) fits
+// between the posters either side of it.
+const LABEL_PX_PER_CHAR = 10.5;   // Bebas Neue at its 24px minimum
+const YEARS_PX = 84;              // "2016–2019" at its 16px minimum
+const LABEL_CLEAR_PX = 14;        // air between the name and a poster
+
+// Names longer than this go on two lines in the Phases
+// view (js/branchNodes.js wraps them), so they only need
+// half the width.
+export const PHASE_LABEL_WRAP = 14;
+
+// The longer line of a name once wrapped.
+function labelLineLength(name) {
+
+    if (name.length <= PHASE_LABEL_WRAP || !name.includes(" ")) return name.length;
+
+    const words = name.split(" ");
+
+    let best = name.length;
+
+    for (let i = 1; i < words.length; i++) {
+
+        best = Math.min(best, Math.max(words.slice(0, i).join(" ").length, words.slice(i).join(" ").length));
+
+    }
+
+    return best;
+
+}
+
+function ringForLabels(radius, rowSizes, phaseKeys) {
+
+    const widest = Math.max(...phaseKeys.map(p => Math.max(
+        labelLineLength(groupName(p)) * LABEL_PX_PER_CHAR, YEARS_PX
+    )));
+
+    const cols = Math.max(...rowSizes);
+    const rows = rowSizes.length;
+
+    // The space the view fits itself into (clear of the
+    // panel down the left), as viewManager.js does.
+    const freeW = Math.max(300, window.innerWidth - 300);
+    const freeH = Math.max(300, window.innerHeight - 60);
+
+    let R = radius;
+
+    // (Growing the rings shrinks the whole grid to fit the
+    // screen, so past a point it stops helping: at most a
+    // third bigger. Long names wrap onto two lines instead.)
+    for (let i = 0; i < 3; i++) {
+
+        const gridW = (cols - 1) * (R * 2 + PHASE_GAP_X) + R * 2 + POSTER_W;
+        const gridH = (rows - 1) * (R * 2 * PHASE_RING_ROUND + PHASE_GAP_Y) + R * 2 * PHASE_RING_ROUND + POSTER_H;
+
+        const zoom = Math.min(freeW / gridW, freeH / gridH) * 0.92;
+
+        const room = R * zoom - (POSTER_W / 2) * zoom - LABEL_CLEAR_PX;
+
+        if (room >= widest / 2) break;
+
+        R *= 1.1;
+
+    }
+
+    return R;
+
+}
+
+// Each phase's titles evenly round its ring, in story
+// order, starting at the top and going clockwise. (No
+// overlap pass afterwards: the rings are sized and spaced
+// so nothing touches, and nudging posters about is what
+// made the rings look ragged.)
+function placePhaseRings(branches, groups, radius) {
 
     branches.forEach(branch => {
 
@@ -544,11 +677,11 @@ function placePhaseRings(branches, groups) {
 
         const n = members.length;
 
-        const radius = phaseRingRadius(n, groupName(branch.phase));
-
         members.forEach((node, i) => {
 
             const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+
+            node.layout = "phases";
 
             node.targetX = branch.x + Math.cos(angle) * radius;
             node.targetY = branch.y + Math.sin(angle) * radius * PHASE_RING_ROUND;

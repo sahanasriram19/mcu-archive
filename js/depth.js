@@ -76,7 +76,9 @@ const MAP_JITTER = 150;       // a little per-title variety
 
 // Other views: base + up to `spread` per title.
 const VIEW_HEIGHT = {
-    phases:     { base: 120, spread: 240 },
+    // Phases: every poster level, so each ring stays a clean
+    // circle on the tilted map.
+    phases:     { base: 150, spread: 0 },
     // Timelines: every poster at the same height, so the two
     // rows stay level instead of bobbing up and down into
     // the spine and its labels.

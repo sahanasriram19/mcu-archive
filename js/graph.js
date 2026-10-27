@@ -261,6 +261,7 @@ export function setBranchNodes(targets){
             prev.targetX = t.x;
             prev.targetY = t.y;
             prev.label = t.label;
+            prev.wrap = !!t.wrap;
             prev.phase = t.phase;
             prev.hint = t.hint || "";
             prev.hintSubtitle = t.hintSubtitle || "";
@@ -283,6 +284,7 @@ export function setBranchNodes(targets){
         const node = createBranchNode(t.key, t.label, t.subtitle, startX, startY, t.x, t.y);
 
         node.memberIds = t.memberIds || [];
+        node.wrap = !!t.wrap;
         node.hidden = !!t.hidden;
         node.phase = t.phase;
         node.hint = t.hint || "";
@@ -668,5 +670,42 @@ export function updateGraph(){
         node.pulse += 0.02;
 
     });
+
+}
+//==================================================
+// BACK TO THE START
+//
+// Entering the archive again from the landing page plays
+// the same opening as the first visit (app.js): every title
+// stacked back at the centre, no branches, lines or logos,
+// so the next layout flies them all out from the hub again.
+//==================================================
+
+export function resetToStart(){
+
+    allNodes().forEach(node => {
+
+        node.x = node.y = node.targetX = node.targetY = 0;
+
+        node.depth = undefined;
+        node.lift = 0;
+        node.openFade = 0;
+        node.detailsOpen = false;
+
+    });
+
+    branchMemory.clear();
+
+    graph.nodes = worldNodes.mcu || [];
+    graph.edges = [];
+    graph.branchNodes = [];
+    graph.hubs = [];
+
+    graph.hover.nodeIndex = null;
+    graph.hover.phase = null;
+    graph.hoverPoster = null;
+    graph.focus = null;
+
+    setCurrentWorld("mcu");
 
 }

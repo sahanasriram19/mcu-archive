@@ -16,6 +16,31 @@ const PULSE = false;        // set true to bring back the gentle breathing effec
 
 import { graph } from "./graph.js";
 import { projectNode } from "./depth.js";
+import { PHASE_LABEL_WRAP } from "./layout.js";
+
+// A long name split onto two lines, as evenly as the words
+// allow ("Sony's Spider-Man" / "Universe").
+function wrapLabel(text){
+
+    if(text.length <= PHASE_LABEL_WRAP || !text.includes(" ")) return [text];
+
+    const words = text.split(" ");
+
+    let best = null;
+
+    for(let i = 1; i < words.length; i++){
+
+        const a = words.slice(0, i).join(" "), b = words.slice(i).join(" ");
+
+        const longest = Math.max(a.length, b.length);
+
+        if(!best || longest < best.longest) best = { lines: [a, b], longest };
+
+    }
+
+    return best.lines;
+
+}
 
 export const PHASE_COLOURS = {
 
@@ -232,14 +257,27 @@ export function renderBranchNodes(ctx, camera, branchNodes){
         ctx.textBaseline = "middle";
         // Bebas Neue, the heading font (css/comic.css); it's
         // narrow, so it's set a little bigger.
-        ctx.font = `400 ${Math.max(24, 34 * z)}px "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
+        const labelSize = Math.max(24, 34 * z);
 
-        if(label){
+        ctx.font = `400 ${labelSize}px "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
 
-            ctx.strokeText(label, x, y);
-            ctx.fillText(label, x, y);
+        // The Phases view wraps a long name onto two lines
+        // (node.wrap, set in layout.js), centred on the spot.
+        const lines = label ? (node.wrap ? wrapLabel(label) : [label]) : [];
 
-        }
+        const lineHeight = labelSize * 0.92;
+
+        // How far the name's extra lines push the years down.
+        const extraDown = (lines.length - 1) * lineHeight / 2;
+
+        lines.forEach((line, i) => {
+
+            const ly = y + (i - (lines.length - 1) / 2) * lineHeight;
+
+            ctx.strokeText(line, x, ly);
+            ctx.fillText(line, x, ly);
+
+        });
 
         //----------------------------------
         // Subtitle (era + year range + count)
@@ -256,12 +294,12 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
             ctx.lineWidth = 3;
 
-            ctx.strokeText(subtitle, x, y + subtitleGap);
+            ctx.strokeText(subtitle, x, y + subtitleGap + extraDown);
 
             ctx.fillText(
                 subtitle,
                 x,
-                y + subtitleGap
+                y + subtitleGap + extraDown
             );
 
         }

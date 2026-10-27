@@ -688,6 +688,37 @@ function loadPosterArt(it){
 // Entering / coming back (app.js)
 //--------------------------------------------------
 
+// Back on the landing page: the logo at the end of the
+// trail goes back to how it started — far away, branches
+// not drawn yet, no Enter button — so the next flight ends
+// exactly like the first one.
+function resetEnd(){
+
+    endEl.classList.remove("arrived", "show");
+
+    setStyle(endEl, "opacity", "0");
+
+    // Restart the branches' draw-out animation from the
+    // beginning (it stays paused until .arrived again).
+    endEl.querySelectorAll("#landing-branches .lb path, #landing-branches .lb circle").forEach(el => {
+
+        el.style.animation = "none";
+
+    });
+
+    void endEl.offsetWidth;
+
+    endEl.querySelectorAll("#landing-branches .lb path, #landing-branches .lb circle").forEach(el => {
+
+        el.style.animation = "";
+
+    });
+
+    // No poster left lifted out of the trail.
+    stage.querySelectorAll(".details-source").forEach(el => el.classList.remove("details-source"));
+
+}
+
 export function setIntroActive(on){
 
     if(reduceMotion || !items.length) return;
@@ -697,6 +728,8 @@ export function setIntroActive(on){
         landing.scrollTop = 0;
 
         smooth = 0;
+
+        resetEnd();
 
         if(!active){
 

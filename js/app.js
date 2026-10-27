@@ -9,7 +9,9 @@ import {
 
     initialiseGraph,
 
-    updateGraph
+    updateGraph,
+
+    resetToStart
 
 } from "./graph.js";
 
@@ -50,6 +52,14 @@ let onLanding = false;
 
 // Hide archive until Enter
 viewport.style.display = "none";
+
+// The map is only drawn once it has been set up for this
+// entry — never during the hyperspace jump, where the map
+// left from last time would show through behind the jump's
+// logo.
+let mapShown = false;
+
+let panelReady = false;
 
 //----------------------------------
 
@@ -157,6 +167,15 @@ async function enter(viewKey, opts = {}){
 
     onLanding = false;
 
+    // Entering from the landing page (the Enter button, Skip,
+    // or the end of the trail) is the same every time: the
+    // jump, then the map opening out of the logo onto
+    // Complete MCU. Only following a link or Back / Forward
+    // (instant) goes straight to a view instead.
+    const opening = !entered || !opts.instant;
+
+    mapShown = false;
+
     // The fly-through stops steering the camera.
     setIntroActive(false);
 
@@ -178,7 +197,7 @@ async function enter(viewKey, opts = {}){
 
         if(endLogo) landing.classList.add("from-logo");
 
-        const nextView = entered ? getCurrentView() : viewKey;
+        const nextView = opening ? viewKey : getCurrentView();
 
         // The stars on screen become the jump's first streaks:
         // find where they all are, then hide the starfield's
@@ -226,11 +245,15 @@ async function enter(viewKey, opts = {}){
 
     viewport.style.display = "block";
 
-    if (!entered) {
-
-        entered = true;
+    if (opening) {
 
         await graphReady;
+
+        // Been in before: put every title back at the centre,
+        // so they fly out from the hub just like the first time.
+        if(entered) resetToStart();
+
+        entered = true;
 
         // Let the view choose its own camera. The default,
         // "MCU", is every world's mind map together.
@@ -238,15 +261,24 @@ async function enter(viewKey, opts = {}){
         else if(viewKey === "complete") setWorldView(ALL_WORLDS, "complete");
         else setView(viewKey);
 
-        initialisePanel();
+        if(!panelReady){
+
+            panelReady = true;
+
+            initialisePanel();
+
+        }
 
     } else {
 
-        // Back from the landing page: the fly-through moved
-        // the camera, so frame the current view again.
+        // Back / Forward into the archive from the landing
+        // page: frame the current view again (the fly-through
+        // moved the camera).
         setView(getCurrentView());
 
     }
+
+    mapShown = true;
 
     // The map opens tipped back a little (js/depth.js). It
     // starts flat — so the jump's logo lines up exactly with
@@ -462,7 +494,7 @@ function loop(){
 
     updateArchive();
 
-    renderUniverse(camera, entered && !onLanding);
+    renderUniverse(camera, entered && !onLanding && mapShown);
 
 }
 
