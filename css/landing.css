@@ -837,16 +837,70 @@
 
 /* ...but jumping from the end of the trail, the Marvel logo
    stays where it is (js/warp.js draws it over the streaks),
-   so the landing just fades underneath it instead of
-   rushing at you. */
+   so the landing doesn't rush at you. Everything else on it
+   fades away underneath — except the branches round the
+   logo, which launch the jump (below). */
 #landing.warping.from-logo .intro-sticky {
     transform: none;
-    transition: opacity .75s ease;
+    opacity: 1;
+    transition: none;
 }
 
 #landing.leaving.from-logo {
     transform: none;
 }
+
+/* (The whole landing would otherwise fade out at once,
+   branches and all; it's taken away at the flash instead,
+   js/app.js.) */
+#landing.leaving.warping.from-logo {
+    opacity: 1;
+}
+
+#landing.warping.from-logo #intro-stage,
+#landing.warping.from-logo #landing-card,
+#landing.warping.from-logo #intro-skip,
+#landing.warping.from-logo .portal-beacon,
+#landing.warping.from-logo .portal-cta,
+#landing.warping.from-logo .end-logo-img {
+    opacity: 0 !important;
+    pointer-events: none;
+    transition: opacity .75s ease;
+}
+
+/* The branches launch the jump: they stretch outward from
+   the logo as the streaks speed up — the mind map's preview
+   turning into the lanes of light you rush down — burning
+   brighter as they go, and fade into the flash. When the
+   light clears, the map's real branches grow out of the
+   same logo, in the same phase colours (js/warp.js,
+   js/app.js). */
+#landing.warping.from-logo #landing-branches {
+    transform: translate(-50%, -50%) scale(3.4);
+    opacity: 0;
+    will-change: transform, opacity;
+    transition:
+        transform 1.6s cubic-bezier(.55, 0, .85, .35),
+        opacity .85s ease-in .8s;
+}
+
+#landing.warping.from-logo #landing-branches .lb path:not(.halo) {
+    opacity: .95;
+    transition: opacity .5s ease;
+}
+
+#landing.warping.from-logo #landing-branches .lb path.halo {
+    opacity: .3;
+    transition: opacity .5s ease;
+}
+
+/* The dots at the branch tips go first, so what's left
+   reads as lines of light. */
+#landing.warping.from-logo #landing-branches .lb circle {
+    animation: branch-dot-out .35s ease forwards;
+}
+
+@keyframes branch-dot-out { to { opacity: 0; } }
 /*--------------------------------------------------
   A poster whose details card is open has flipped out
   into the card (js/movieDetails.js): it leaves the trail,
