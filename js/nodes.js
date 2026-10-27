@@ -10,7 +10,7 @@
 //--------------------------------------------------
 import { currentView } from "./viewManager.js";
 import { graph } from "./graph.js";
-import { camera } from "./camera.js";
+import { camera, frameFactor } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
 import { projectNode } from "./depth.js";
@@ -479,7 +479,7 @@ export function renderNodes(ctx, camera, nodes){
 
         // Fade in: a poster cross-fades in over its title card
         // when its picture arrives, instead of popping in.
-        if(posterReady) node.posterFade = Math.min(1, (node.posterFade || 0) + POSTER_FADE_STEP);
+        if(posterReady) node.posterFade = Math.min(1, (node.posterFade || 0) + POSTER_FADE_STEP * frameFactor());
         else node.posterFade = 0;
 
         if(posterReady && node.posterFade < 1) settling = true;
@@ -675,12 +675,6 @@ export function renderNodes(ctx, camera, nodes){
 
     order.sort((a, b) => b.at.z - a.at.z);
 
-    // Shadows first, all of them, so no shadow ever lands on
-    // top of a poster.
-    order.forEach(o => drawShadow(ctx, o.node, focus));
-
-    if(hovered) drawShadow(ctx, hovered, focus);
-
     order.forEach(o => drawNode(o.node, o.at));
 
     if(hovered) drawNode(hovered, projectNode(hovered));
@@ -725,132 +719,10 @@ function drawWatchedBadge(ctx, cornerX, cornerY, posterWidth){
 
 }
 
-//--------------------------------------------------
-// Poster shadows
-//
-// Each poster floats above the map (js/depth.js) and casts
-// a soft shadow straight down onto it, nudged a little down
-// and to the right as if lit from the top left. The higher
-// a poster is, the further its shadow falls from it and the
-// softer and fainter the shadow gets — that gap is what
-// makes the height readable. With the map tilted, the
-// shadow lies flat on the surface, so it's squashed with
-// it.
-//--------------------------------------------------
-
-// Each poster's shadow sits just below and to the right of
-// it, tight and soft, sized with the poster — so it stays
-// close at every zoom and in every layout. (It used to be
-// cast down onto the map from the poster's height, which
-// put it far away whenever you zoomed out: the posters
-// shrink faster than their height does.) A hovered poster
-// rises, and its shadow drops a little further and softer.
-const SHADOW_ALPHA = 0.6;       // darkness of the shadow
-const SHADOW_DROP_X = 0.08;     // how far right, as a share of the poster's width
-const SHADOW_DROP_Y = 0.13;     // how far down
-const SHADOW_GROW = 1.07;       // a touch bigger than the poster, so it shows round it
-const SHADOW_LIFT_DROP = 0.12;  // extra drop at full hover rise
-const SHADOW_LIFT_FADE = 0.3;   // ...and this much fainter
-
 // How wide a poster is in this view (js/posterSize.js).
 function posterBaseSize(node){
 
     return posterSizeFor(node, currentView);
-
-}
-
-function drawShadow(ctx, node, focus){
-
-    // Exactly where (and how big) the poster itself is drawn:
-    // same depth, tilt and hover growth.
-    const at = projectNode(node);
-
-    const lift = node.lift || 0;
-
-    const pw = posterBaseSize(node) * camera.zoom * at.s * (1 + LIFT_SCALE * lift);
-
-    if(pw < 2) return;
-
-    const w = pw * SHADOW_GROW;
-    const h = pw * 1.5 * SHADOW_GROW;
-
-    // (Drawn in the posters' own layer, so it moves with its
-    // poster exactly, mouse sway and all.)
-    const drop = 1 + lift * SHADOW_LIFT_DROP / SHADOW_DROP_Y;
-
-    const x = at.x + pw * SHADOW_DROP_X * drop;
-    const y = at.y + pw * SHADOW_DROP_Y * drop;
-
-    // Off screen: skip.
-    if(x + w < 0 || x - w > window.innerWidth || y + h < 0 || y - h > window.innerHeight) return;
-
-    let alpha = SHADOW_ALPHA * (1 - lift * SHADOW_LIFT_FADE);
-
-    if(focus && !focus.ids.has(node.id)) alpha *= FOCUS_DIM_ALPHA;
-
-    alpha *= hoverDim(node.phase);
-
-    // (Gone with its poster while its card is open.)
-    alpha *= 1 - (node.openFade || 0);
-
-    if(alpha <= 0.005) return;
-
-    const sprite = shadowSprite();
-
-    // The sprite has soft padding round the card shape.
-    const sw = w * sprite.scaleW;
-    const sh = h * sprite.scaleH;
-
-    ctx.save();
-
-    ctx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = alpha;
-
-    ctx.drawImage(sprite.canvas, x - sw / 2, y - sh / 2, sw, sh);
-
-    ctx.restore();
-
-}
-
-// One soft, dark card-shaped blur, drawn once and stretched
-// to fit every shadow.
-let shadowCache = null;
-
-function shadowSprite(){
-
-    if(shadowCache) return shadowCache;
-
-    const cw = 100, ch = 150;       // the card
-    const pad = 46;                 // room for the blur
-
-    const canvas = document.createElement("canvas");
-
-    canvas.width = cw + pad * 2;
-    canvas.height = ch + pad * 2;
-
-    const c = canvas.getContext("2d");
-
-    // Drawn off to one side so only its blurred shadow lands
-    // on the canvas (canvas shadows work in every browser;
-    // filter: blur() doesn't in Safari).
-    const away = 2000;
-
-    c.shadowColor = "rgba(0,0,0,1)";
-    c.shadowBlur = 26;
-    c.shadowOffsetX = away;
-
-    c.fillStyle = "#000";
-    c.beginPath();
-    roundedRect(c, pad - away, pad, cw, ch, 8);
-    c.fill();
-
-    shadowCache = {
-        canvas,
-        scaleW: canvas.width / cw,
-        scaleH: canvas.height / ch
-    };
-
-    return shadowCache;
 
 }
 
