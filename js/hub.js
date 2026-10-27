@@ -1,8 +1,12 @@
 import { getWorld } from "./worlds.js";
 import { graph } from "./graph.js";
 import { project } from "./depth.js";
+import { markMapDirty } from "./redraw.js";
 
+// (Each logo redraws the map once it has arrived — the map
+// otherwise only redraws while something moves, js/universe.js.)
 const img = new Image();
+img.onload = markMapDirty;
 img.src = "assets/marvel-logo.jpg";
 
 // Draws each mind map's logo (graph.hubs): one in the middle
@@ -107,7 +111,9 @@ function plateImage(plate){
 
         plate.img = new Image();
 
-        plate.img.onerror = () => { plate.imgFailed = true; };
+        plate.img.onload = markMapDirty;
+
+        plate.img.onerror = () => { plate.imgFailed = true; markMapDirty(); };
 
         plate.img.src = plate.image;
 

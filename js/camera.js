@@ -35,6 +35,14 @@ export const camera = {
 
 export function updateCamera(){
 
+    // Moving at all this frame? (Read by universe.js: once the
+    // camera and everything else has settled, the map isn't
+    // redrawn until something changes.)
+    camera.moving =
+        camera.x !== camera.targetX || camera.y !== camera.targetY ||
+        camera.zoom !== camera.targetZoom ||
+        camera.pitch !== camera.targetPitch || camera.spin !== camera.targetSpin;
+
     camera.x +=
         (camera.targetX - camera.x) *
         camera.positionSmoothing;
@@ -64,5 +72,11 @@ export function updateCamera(){
         camera.pitchSmoothing;
 
     if(Math.abs(camera.targetSpin - camera.spin) < 1e-4) camera.spin = camera.targetSpin;
+
+    // Close enough to see no difference (under a hundredth
+    // of a pixel): arrive, so the camera can count as still.
+    if(Math.abs(camera.targetX - camera.x) * camera.zoom < 0.01) camera.x = camera.targetX;
+    if(Math.abs(camera.targetY - camera.y) * camera.zoom < 0.01) camera.y = camera.targetY;
+    if(Math.abs(camera.targetZoom - camera.zoom) < camera.zoom * 1e-5) camera.zoom = camera.targetZoom;
 
 }

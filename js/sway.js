@@ -157,11 +157,20 @@ export function updateSway(){
 
     }
 
+    const px = x, py = y;
+
     x += (targetX - x) * EASE;
     y += (targetY - y) * EASE;
 
     if(Math.abs(x) < 1e-4 && targetX === 0) x = 0;
     if(Math.abs(y) < 1e-4 && targetY === 0) y = 0;
+
+    // Settled within a hair of the mouse: arrive, so the map
+    // can count as still (universe.js).
+    if(Math.abs(targetX - x) < 2e-4) x = targetX;
+    if(Math.abs(targetY - y) < 2e-4) y = targetY;
+
+    swayMoving = x !== px || y !== py;
 
     // The page's own layers. Only written when they've
     // visibly moved.
@@ -237,6 +246,15 @@ function moveLayers(){
         }
 
     }
+
+}
+
+// Whether the sway moved this frame (read by universe.js).
+let swayMoving = false;
+
+export function isSwayMoving(){
+
+    return swayMoving;
 
 }
 

@@ -25,10 +25,195 @@ import { renderHub } from "./hub.js";
 import { renderGround } from "./ground.js";
 import { graph } from "./graph.js";
 import { archive } from "./archiveCore.js";
-import { getSway, swayOffset, SWAY } from "./sway.js";
+import { getSway, swayOffset, SWAY, isSwayMoving } from "./sway.js";
 import { heroShowing } from "./parallax.js";
+import { postersSettling } from "./nodes.js";
+import { depthMoving } from "./depth.js";
+import { getWorld } from "./worlds.js";
+import { takeMapDirty, markMapDirty } from "./redraw.js";
+
+//==================================================
+// THE MAP LAYER: ONLY REDRAWN WHEN SOMETHING CHANGES
+//
+// The sky (stars, twinkles, shooting stars) is animated, so
+// it's drawn every frame. The map on top of it — every
+// poster, shadow, line, logo and label — is by far the most
+// work, and most of the time it's sitting perfectly still.
+// So it's drawn into its own layer (mapCanvas), and that
+// layer is only redrawn while something on it is changing:
+//
+//   • the camera moving (dragging, zooming, tilting, easing)
+//   • posters gliding to a new layout, rising on hover,
+//     fading in as their pictures arrive, or lifting out
+//     into a details card
+//   • the mouse sway settling
+//   • a different view, world, highlight or watch list
+//   • anything that calls markMapDirty() (js/redraw.js):
+//     a picture or logo arriving, a title ticked as watched,
+//     fonts loading, the window resizing
+//
+// Every other frame just lays the last picture of the map
+// over the fresh sky. A redraw also happens at least once a
+// second, as a safety net. (While still, the posters'
+// gentle float pauses too, and carries on where it left
+// off.)
+//==================================================
+
+const mapCanvas = document.createElement("canvas");
+const mapCtx = mapCanvas.getContext("2d");
+
+// Like the main canvas (js/universe/renderer.js), glows are
+// measured in real pixels: scaled here so they look the same
+// on high-DPI screens.
+let mapScale = 1;
+
+const shadowBlurDesc = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, "shadowBlur");
+
+Object.defineProperty(mapCtx, "shadowBlur", {
+    get(){ return shadowBlurDesc.get.call(this) / mapScale; },
+    set(v){ shadowBlurDesc.set.call(this, v * mapScale); }
+});
+
+const SAFETY_REDRAW_MS = 1000;
+
+let lastMapKey = "";
+let lastMapDraw = 0;
+
+// A short id per object, so a different list (another
+// world's titles, a new set of lines) counts as a change.
+const ids = new WeakMap();
+let nextId = 1;
+
+function idOf(obj){
+
+    if(!obj || typeof obj !== "object") return String(obj);
+
+    if(!ids.has(obj)) ids.set(obj, nextId++);
+
+    return ids.get(obj);
+
+}
+
+// Everything about the map that can change without any of
+// it moving.
+function mapKey(){
+
+    return [
+        ctx.canvas.width, ctx.canvas.height,
+        archive.view, getWorld(),
+        idOf(graph.nodes), idOf(graph.edges), idOf(graph.branchNodes), idOf(graph.hubs), idOf(graph.focus),
+        graph.hover.nodeIndex, graph.hover.phase, graph.hoverPoster
+    ].join("|");
+
+}
+
+function mapNeedsDrawing(camera){
+
+    // (Taken first, every frame, so a change is never lost.)
+    const flagged = takeMapDirty();
+
+    const key = mapKey();
+
+    const changed = key !== lastMapKey;
+
+    lastMapKey = key;
+
+    return flagged || changed ||
+        camera.moving || graph.moving || depthMoving || isSwayMoving() ||
+        postersSettling() ||
+        // A hovered poster leans towards the mouse.
+        graph.hoverPoster !== null ||
+        performance.now() - lastMapDraw > SAFETY_REDRAW_MS;
+
+}
+
+window.addEventListener("mcu:watched-changed", markMapDirty);
+window.addEventListener("mcu:view-changed", markMapDirty);
+window.addEventListener("resize", markMapDirty);
+
+if(document.fonts && document.fonts.addEventListener){
+
+    document.fonts.addEventListener("loadingdone", markMapDirty);
+
+}
+
+// Draws the map into its layer (posters a little above the
+// map with the mouse sway, as before).
+function drawMap(camera){
+
+    const W = ctx.canvas.width, H = ctx.canvas.height;
+
+    if(mapCanvas.width !== W || mapCanvas.height !== H){
+
+        mapCanvas.width = W;
+        mapCanvas.height = H;
+
+    }
+
+    mapScale = W / Math.max(1, window.innerWidth);
+
+    if(typeof mapCtx.reset === "function") mapCtx.reset();
+    else {
+
+        mapCtx.setTransform(1, 0, 0, 1, 0, 0);
+        mapCtx.globalAlpha = 1;
+        mapCtx.globalCompositeOperation = "source-over";
+        mapCtx.clearRect(0, 0, W, H);
+
+    }
+
+    mapCtx.setTransform(mapScale, 0, 0, mapScale, 0, 0);
+
+    const c = mapCtx;
+
+    // The map follows the mouse a little, the posters
+    // (floating above it) a little more. Clicks allow for
+    // this (see swayOffset in nodeHitTest.js / input.js).
+    const mapShift = swayOffset("map");
+    const posterShift = swayOffset("posters");
+
+    c.save();
+
+    c.translate(mapShift.x, mapShift.y);
+
+    // The faint grid the map lies on (js/ground.js).
+    renderGround(c, camera);
+
+    // All Posters should show posters without connection lines.
+    if (archive.view !== "scatter") {
+        renderConnections(c, camera, graph);
+    }
+
+    if (archive.view === "complete") {
+
+        // (The soft glow behind the logo, renderArchive in
+        // archive.js, is switched off: the map keeps its glow
+        // for the branches. Put the call back to restore it.)
+        // renderArchive(c, camera);
+        renderHub(c, camera);       // Marvel image
+
+    }
+
+    renderBranchNodes(c, camera, graph.branchNodes);
+
+    c.restore();
+
+    c.save();
+
+    c.translate(posterShift.x, posterShift.y);
+
+    renderNodes(c, camera, graph.nodes);
+
+    c.restore();
+
+    lastMapDraw = performance.now();
+
+}
 
 let generated = false;
+
+// Whether the map was drawn last frame (see drawMap below).
+let mapWasShown = false;
 
 let shown = false;
 
@@ -159,52 +344,25 @@ export function renderUniverse(camera, entered){
 
     if(entered){
 
-        // Only Complete MCU has one shared hub in the
-        // centre — Phases, the timeline trails, and
-        // Character Journeys don't use it at all, so
-        // drawing it unconditionally left a stray white
-        // circle sitting at world origin in every other
-        // view.
-        // The map follows the mouse a little, the posters
-        // (floating above it) a little more. Clicks allow for
-        // this (see swayOffset in nodeHitTest.js / input.js).
-        const mapShift = swayOffset("map");
-        const posterShift = swayOffset("posters");
+        // Redraw the map only if something on it changed
+        // (see THE MAP LAYER above), then lay it over the sky.
+        if(!mapWasShown || mapNeedsDrawing(camera)) drawMap(camera);
+
+        mapWasShown = true;
 
         ctx.save();
 
-        ctx.translate(mapShift.x, mapShift.y);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-
-        // The faint grid the map lies on (js/ground.js).
-        renderGround(ctx, camera);
-
-        // All Posters should show posters without connection lines.
-        if (archive.view !== "scatter") {
-            renderConnections(ctx, camera, graph);
-        }
-
-        if (archive.view === "complete") {
-
-            // (The soft glow behind the logo, renderArchive in
-            // archive.js, is switched off: the map keeps its glow
-            // for the branches. Put the call back to restore it.)
-            // renderArchive(ctx, camera);
-            renderHub(ctx, camera);       // Marvel image
-
-        }
-
-        renderBranchNodes(ctx, camera, graph.branchNodes);
+        ctx.drawImage(mapCanvas, 0, 0);
 
         ctx.restore();
 
-        ctx.save();
+    } else {
 
-        ctx.translate(posterShift.x, posterShift.y);
-
-        renderNodes(ctx, camera, graph.nodes);
-
-        ctx.restore();
+        // Not drawn (landing page, the hyperspace jump): draw
+        // it fresh the next time it shows.
+        mapWasShown = false;
 
     }
 

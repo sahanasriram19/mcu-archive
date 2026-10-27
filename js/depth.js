@@ -166,7 +166,13 @@ function targetDepth(node){
 // than popping.
 //--------------------------------------------------
 
+// Whether any node was still easing to its depth this frame
+// (read by universe.js, like graph.moving).
+export let depthMoving = false;
+
 export function updateDepth(){
+
+    depthMoving = false;
 
     const ease = list => {
 
@@ -175,7 +181,14 @@ export function updateDepth(){
             const t = targetDepth(node);
 
             if(node.depth === undefined) node.depth = t;
-            else node.depth += (t - node.depth) * DEPTH_EASE;
+            else if(Math.abs(t - node.depth) < 0.05) node.depth = t;
+            else {
+
+                node.depth += (t - node.depth) * DEPTH_EASE;
+
+                depthMoving = true;
+
+            }
 
         }
 

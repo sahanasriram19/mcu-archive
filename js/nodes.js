@@ -15,6 +15,7 @@ import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
 import { projectNode, shadowPoint, posterShadow, viewAngles } from "./depth.js";
 import { posterSizeFor } from "./posterSize.js";
+import { markMapDirty } from "./redraw.js";
 
 // Where the mouse is (for the hovered poster's lean).
 let mouseX = -1, mouseY = -1;
@@ -84,19 +85,21 @@ function loadEntry(url, size = ""){
             if(img.decode){
 
                 img.decode()
-                    .then(()=> { entry.loaded = true; entry.loadedAt = performance.now(); })
-                    .catch(()=> { entry.loaded = true; entry.loadedAt = performance.now(); });
+                    .then(()=> { entry.loaded = true; entry.loadedAt = performance.now(); markMapDirty(); })
+                    .catch(()=> { entry.loaded = true; entry.loadedAt = performance.now(); markMapDirty(); });
 
             } else {
 
                 entry.loaded = true;
                 entry.loadedAt = performance.now();
 
+                markMapDirty();
+
             }
 
         };
 
-        img.onerror = ()=> entry.failed = true;
+        img.onerror = ()=> { entry.failed = true; markMapDirty(); };
 
         img.src = url;
 
@@ -250,9 +253,30 @@ function sweepPosters(){
 
 }
 
+// Still to finish last frame: a poster fading in, or one
+// held back to the next frame (NEW_POSTERS_PER_FRAME). While
+// true, the map keeps being redrawn (js/universe.js).
+let settling = false;
+
+export function postersSettling(){
+
+    return settling;
+
+}
+
+// The posters' gentle float. Advances only on frames the map
+// is actually drawn, so while it sits still (nothing moving,
+// js/universe.js) the float pauses, and carries on smoothly
+// from the same spot instead of jumping.
+let floatClock = 0;
+
 export function renderNodes(ctx, camera, nodes){
 
     newPosterBudget = NEW_POSTERS_PER_FRAME;
+
+    settling = false;
+
+    floatClock += 0.02;
 
     frameNow = performance.now();
 
@@ -379,10 +403,10 @@ export function renderNodes(ctx, camera, nodes){
         //----------------------------------
 
         const floatX =
-            Math.sin(node.pulse*0.7)*2;
+            Math.sin((node.pulse + floatClock)*0.7)*2;
 
         const floatY =
-            Math.cos(node.pulse*0.5)*2;
+            Math.cos((node.pulse + floatClock)*0.5)*2;
 
         //----------------------------------
         // Pulsing
@@ -447,6 +471,8 @@ export function renderNodes(ctx, camera, nodes){
 
                 posterReady = false;
 
+                settling = true;
+
             }
 
         }
@@ -455,6 +481,8 @@ export function renderNodes(ctx, camera, nodes){
         // when its picture arrives, instead of popping in.
         if(posterReady) node.posterFade = Math.min(1, (node.posterFade || 0) + POSTER_FADE_STEP);
         else node.posterFade = 0;
+
+        if(posterReady && node.posterFade < 1) settling = true;
 
         const fade = node.posterFade;
 

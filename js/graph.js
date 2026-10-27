@@ -610,9 +610,17 @@ export function updateGraph(){
 
     if(hf.amount < 0.002 && hfTarget === 0){ hf.amount = 0; hf.phase = null; }
 
+    if(hf.amount > 0.998 && hfTarget === 1) hf.amount = 1;
+
+    // Whether anything on the map is still on its way
+    // somewhere this frame (see graph.moving below).
+    let moving = hf.amount !== hfTarget;
+
     const NODE_EASE = 0.16;
 
     graph.nodes.forEach(node=>{
+
+        if(node.x !== node.targetX || node.y !== node.targetY) moving = true;
 
        if (Math.abs(node.targetX - node.x) < 0.5)
             node.x = node.targetX;
@@ -623,9 +631,6 @@ export function updateGraph(){
             node.y = node.targetY;
         else
             node.y += (node.targetY - node.y) * NODE_EASE;
-
-        node.pulse += 0.02;
-        node.glow = 0.5 + Math.sin(node.pulse)*0.5;
 
         // Hover lift (nodes.js): ease towards 1 on the hovered
         // poster and back to 0 everywhere else — quick in,
@@ -640,12 +645,18 @@ export function updateGraph(){
 
         if(node.lift < 0.002) node.lift = 0;
 
+        if(node.lift > 0.998) node.lift = 1;
+
+        if(node.lift !== liftTarget) moving = true;
+
         // Its details card is open (js/movieDetails.js): the
         // poster has "become" the card, so it fades off the
         // map, and back once the card closes.
         const openTarget = node.detailsOpen ? 1 : 0;
 
         const open = node.openFade || 0;
+
+        if(open !== openTarget) moving = true;
 
         node.openFade = open + (openTarget - open) * 0.2;
 
@@ -661,15 +672,19 @@ export function updateGraph(){
         // felt noticeably slower than switching into the
         // Order views (which have little to no branch nodes
         // to wait on).
+        if(node.x !== node.targetX || node.y !== node.targetY) moving = true;
+
         if(Math.abs(node.targetX-node.x) < 0.5) node.x = node.targetX;
         else node.x += (node.targetX-node.x) * NODE_EASE;
 
         if(Math.abs(node.targetY-node.y) < 0.5) node.y = node.targetY;
         else node.y += (node.targetY-node.y) * NODE_EASE;
 
-        node.pulse += 0.02;
-
     });
+
+    // Read by universe.js: once nothing is moving, the map
+    // isn't redrawn until something changes.
+    graph.moving = moving;
 
 }
 //==================================================
