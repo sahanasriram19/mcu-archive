@@ -171,41 +171,20 @@
 }
 
 /*==================================================
-  LANDING PARALLAX (js/parallax.js sets --px / --py)
-==================================================*/
-
-.hero-portal{
-    transform:translate3d(calc(var(--px, 0) * 26px), calc(var(--py, 0) * 20px), 0);
-}
-
-#landing-card .landing-title,
-#landing-card .landing-tagline{
-    transform:translate3d(calc(var(--px, 0) * 9px), calc(var(--py, 0) * 7px), 0);
-}
-
-#landing-card .intro-scroll-hint{
-    transform:translate3d(calc(var(--px, 0) * 6px), calc(var(--py, 0) * 4px), 0);
-}
-
-/*==================================================
   Reduced motion: none of the above moves
 ==================================================*/
 
 @media (prefers-reduced-motion: reduce){
 
     .view-panel-section-body.collapse > .collapse-inner,
-    .character-dropdown.collapse > .collapse-inner,
-    .hero-portal,
-    #landing-card .landing-title,
-    #landing-card .landing-tagline,
-    #landing-card .intro-scroll-hint{
+    .character-dropdown.collapse > .collapse-inner{
         transform:none !important;
     }
 
 }
 /*==================================================
-  MOUSE SWAY: the panel, countdown cards, watch-list
-  banner, and the trail's stage and end logo are moved by
+  MOUSE SWAY (archive only): the panel, countdown
+  cards and watch-list banner are moved by
   js/sway.js directly (see LAYERS there); the canvas
   layers (stars, map, posters) in js/universe.js.
 ==================================================*/

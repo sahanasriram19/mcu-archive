@@ -1,5 +1,5 @@
 import { VIEWS } from "../js/views.js";
-import { setWorldView, getCurrentView, getWorld, refitView } from "../js/viewManager.js";
+import { setWorldView, getCurrentView, getWorld, refitView, resetView } from "../js/viewManager.js";
 import { ALL_WORLDS } from "../js/worlds.js";
 
 import {
@@ -13,6 +13,7 @@ import { isCompact } from "../js/responsive.js";
 import { worldNodes, allNodes } from "../js/graph.js";
 import { progress } from "../js/watched.js";
 import { isUpcoming } from "../js/upcoming.js";
+import { watchScroll } from "../js/scrollHints.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -26,6 +27,12 @@ panel.innerHTML = `
     <div class="view-panel-header">
 
         <button class="view-panel-title" type="button" title="Back to the start page">MCU Archive</button>
+
+        <!-- Back to the default view: the map's usual tilt,
+             turned square, and the whole view framed again. -->
+        <button class="view-panel-reset" type="button" title="Back to the default view" aria-label="Back to the default view">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 3.5v4.6h4.6"/><circle cx="12" cy="12" r="2.2"/></svg>
+        </button>
 
         <button class="view-panel-toggle" type="button" aria-expanded="false" aria-controls="view-panel-content">
             <span class="view-panel-current"></span>
@@ -115,6 +122,15 @@ document.addEventListener("keydown", e => {
 
 });
 
+// Back to the default view (js/viewManager.js resetView).
+panel.querySelector(".view-panel-reset").addEventListener("click", () => {
+
+    collapseIfCompact();
+
+    resetView();
+
+});
+
 // Back to the landing page (app.js listens for this).
 titleBtn.addEventListener("click", () => {
 
@@ -163,10 +179,10 @@ if(window.visualViewport){
 // VIEW SECTIONS — one per world (js/worlds.js)
 //
 // Each world gets its own section: a heading and that
-// world's views. Each heading opens/closes its own
-// section, and several can be open together. Picking a
-// view in another world's section switches worlds on the
-// same page.
+// world's views. Only one section is open at a time —
+// opening one closes the rest, so the panel never grows
+// longer than one world's list. Picking a view in another
+// world's section switches worlds on the same page.
 //--------------------------------------------------
 
 const SECTIONS = [
@@ -337,10 +353,48 @@ const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spide
 
 const sectionEls = [];
 
-// Sections open and close independently — any number can
-// be open at once. (They used to work as an accordion,
-// where opening one closed the others.)
+// The Character Journeys dropdowns work the same way: one
+// open at a time across the whole panel.
+function setDropdownOpen(entry, open){
+
+    if(open){
+
+        sectionEls.forEach(other => {
+
+            if(other !== entry) setDropdownOpen(other, false);
+
+        });
+
+    }
+
+    entry.dropdown.classList.toggle("open", open);
+
+    if(entry.journeyBtn){
+
+        entry.journeyBtn.classList.toggle("expanded", open);
+        entry.journeyBtn.setAttribute("aria-expanded", open ? "true" : "false");
+
+    }
+
+}
+
+// An accordion: opening a section closes whichever other
+// one was open (and any dropdown inside it).
 function setSectionOpen(entry, open){
+
+    if(open){
+
+        sectionEls.forEach(other => {
+
+            if(other !== entry && other.el.classList.contains("open")) setSectionOpen(other, false);
+
+        });
+
+    } else {
+
+        setDropdownOpen(entry, false);
+
+    }
 
     entry.el.classList.toggle("open", open);
 
@@ -350,8 +404,7 @@ function setSectionOpen(entry, open){
 
 }
 
-// Make sure a world's section is open, leaving the others
-// exactly as they are.
+// Make sure a world's section is open (closing the others).
 function openSection(world){
 
     const entry = sectionEls.find(s => s.world === world);
@@ -429,8 +482,10 @@ SECTIONS.forEach(section => {
 
             if(view.key === "characters"){
 
-                dropdown.classList.toggle("open");
-                btn.classList.toggle("expanded");
+                const entry = sectionEls.find(s => s.el === el);
+
+                setDropdownOpen(entry, !dropdown.classList.contains("open"));
+
                 return;
 
             }
@@ -475,7 +530,7 @@ SECTIONS.forEach(section => {
 
             setSelectedCharacter(hero.character);
 
-            dropdown.classList.remove("open");
+            setDropdownOpen(sectionEls.find(s => s.el === el), false);
 
             selectedHeroLabel = hero.journey || hero.label + "'s Journey";
 
@@ -491,12 +546,14 @@ SECTIONS.forEach(section => {
 
     bodyInner.appendChild(views);
 
+    const journeyBtn = views.querySelector('.view-panel-btn[data-view="characters"]');
+
     el.appendChild(head);
     el.appendChild(body);
 
     list.appendChild(el);
 
-    sectionEls.push({ world: section.world, el, head, body });
+    sectionEls.push({ world: section.world, el, head, body, dropdown, journeyBtn });
 
 });
 
@@ -531,8 +588,8 @@ function refreshActive(){
 
     });
 
-    // The current world's section is always open (others
-    // stay however you left them).
+    // The current world's section opens with it (and the
+    // others close).
     openSection(world);
 
 }
@@ -571,6 +628,13 @@ function refreshProgress(){
 window.addEventListener("mcu:watched-changed", refreshProgress);
 
 export function initialisePanel(){
+
+    // No scrollbars: a panel too long for the screen fades
+    // out at the bottom instead (js/scrollHints.js). The
+    // whole panel scrolls on a computer; on a phone, the
+    // open panel's inside does.
+    watchScroll(panel);
+    watchScroll(panel.querySelector(".view-panel-content-inner"));
 
     initMovieSearch();
     refreshActive();

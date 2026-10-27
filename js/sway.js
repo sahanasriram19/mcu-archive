@@ -1,11 +1,10 @@
 //==================================================
-// MOUSE SWAY (the whole site)
+// MOUSE SWAY (the archive)
 //
-// The landing page's hero already shifts in layers with the
-// mouse (js/parallax.js). This carries the same feel
-// through the rest of the site: as the mouse moves, things
-// at different depths shift by different amounts, so the
-// page reads as a scene you're looking into.
+// Inside the archive, as the mouse moves, things at
+// different depths shift by different amounts, so the page
+// reads as a scene you're looking into. The landing page
+// stays still (see landingShowing below).
 //
 //   - Archive: the starfield drifts the opposite way to
 //     the mouse (near stars more than far ones), the map
@@ -13,8 +12,6 @@
 //     posters, floating "above" the map, a little more.
 //   - The panel, countdown cards and banners follow it
 //     slightly (LAYERS below).
-//   - Landing fly-through: the 3D trail's viewpoint shifts
-//     with the mouse, so near posters slide past far ones.
 //
 // The mouse on a computer; tilting the phone on a touch
 // screen (PHONE TILT below). Off with the OS "reduce
@@ -41,9 +38,19 @@ let x = 0, y = 0;
 
 let lastCssX = 99, lastCssY = 99;   // (forces the first write)
 
+const landing = document.getElementById("landing");
+
+// The landing page (hero and fly-through) doesn't move with
+// the mouse or the phone's tilt — only the archive does.
+function landingShowing(){
+
+    return !!landing && landing.style.display !== "none" && !landing.classList.contains("leaving");
+
+}
+
 function enabled(){
 
-    return (fine.matches || tiltActive) && !reduceMotion.matches;
+    return (fine.matches || tiltActive) && !reduceMotion.matches && !landingShowing();
 
 }
 
@@ -180,21 +187,15 @@ export function updateSway(){
 //
 //   [selector, x px, y px, how]
 //   `translate` adds to an element's own transform rather
-//   than replacing it; the trail's stage shifts its 3D
-//   viewpoint instead (against the mouse), so far
-//   chapters and posters slide one way and the ones
-//   rushing past you the other.
+//   than replacing it; "origin" shifts a 3D stage's
+//   viewpoint instead.
 //--------------------------------------------------
 
 const LAYERS = [
     ["#view-panel", 12, 12, "translate"],
     ["#countdown", 12, 12, "translate"],
     [".character-panel", 12, 12, "translate"],
-    ["#watch-banner", 8, 8, "translate"],
-    ["#intro-end", 14, 10, "translate"],
-    // (Was -120, -80: with the mouse near the top, the trail's
-    // upper posters and their captions slid off the screen.)
-    ["#intro-stage", -60, -36, "origin"]
+    ["#watch-banner", 8, 8, "translate"]
 ];
 
 const found = new Map();
