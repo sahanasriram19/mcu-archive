@@ -155,8 +155,7 @@ export const UNSCRIPTED_ERAS = {
 // (The Netflix shows are the same titles as the MCU's
 // "Defenders" group, under the same ids.)
 export const TV_ERAS = {
-    71: "Agents of S.H.I.E.L.D.",
-    72: "ABC Originals",
+    71: "ABC",
     73: "Netflix",
     74: "Hulu & Freeform",
     75: "Fox X-Men Shows"

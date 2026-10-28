@@ -292,15 +292,16 @@ const MULTIVERSE_SPREAD = 1.8;
 const MULTIVERSE_CORNERS = {
     xmen: [-1, -1],
     unscripted: [1, -1],
-    animated: [-1, 1],
+    tv: [-1, 1],
     spider: [1, 1]
 };
 
 const MULTIVERSE_TOP = "ff";
 
-// Marvel Television sits straight below the Avengers,
-// mirroring the Fantastic Four above.
-const MULTIVERSE_BOTTOM = "tv";
+// Marvel Animation sits straight below the Avengers,
+// mirroring the Fantastic Four above (Marvel TV takes the
+// bottom-left corner).
+const MULTIVERSE_BOTTOM = "animated";
 
 function boxesOf(nodes, hubX = 0, hubY = 0) {
 
@@ -373,9 +374,13 @@ export function layoutMultiverse(nodes) {
 
     worlds.forEach(w => {
 
+        // (The world in the middle-bottom slot is laid out
+        // round rather than wide, so it fits between the two
+        // bottom corners instead of being pushed far below
+        // them.)
         const shape = w === "mcu"
             ? stretch
-            : isPortraitPhone() ? { sx: 1, sy: 1 } : worldShape(w, { sx: 1, sy: 1 });
+            : isPortraitPhone() || w === MULTIVERSE_BOTTOM ? { sx: 1, sy: 1 } : worldShape(w, { sx: 1, sy: 1 });
 
         const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy);
 

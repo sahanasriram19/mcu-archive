@@ -101,7 +101,9 @@ function fillZoom(factor, centred = false){
     if(centred){
 
         const reachX = Math.max(...nodes.map(n => Math.abs(n.targetX))) * 2 + 400;
-        const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY))) * 2 + 560;
+        const my = midY(nodes);
+
+        const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY - my))) * 2 + 560;
 
         return Math.min(window.innerWidth / reachX, window.innerHeight / reachY) * factor;
 
@@ -202,15 +204,109 @@ function hitsPanel(b, r){
 
 }
 
+// The combined map on a computer: the fit above treats the
+// map as flat, but it's tipped back (js/depth.js), which
+// draws its near (bottom) side bigger and lower and its far
+// side smaller and higher — so it sat low, with the bottom
+// world cut off. This measures where every poster really
+// lands on screen at the view's tilt, then shifts the camera
+// until that's centred top to bottom, zooming out a touch if
+// it doesn't fit.
+const TILT_PAD = 24;          // px kept clear above and below
+
+function settleForTilt(cam, fit){
+
+    if(!cam.centre || isCompact()) return fit;
+
+    const nodes = visibleNodes();
+
+    if(!nodes.length) return fit;
+
+    // Each poster's top and bottom (posters float above the
+    // map, roughly this high).
+    const pts = [];
+
+    nodes.forEach(n => {
+
+        pts.push([n.targetX, n.targetY - POSTER_HALF_H]);
+        pts.push([n.targetX, n.targetY + POSTER_HALF_H]);
+
+    });
+
+    const saved = { x: camera.x, y: camera.y, zoom: camera.zoom, pitch: camera.pitch, spin: camera.spin };
+
+    let { x, y, zoom } = fit;
+
+    const H = window.innerHeight;
+
+    const avail = H - TILT_PAD * 2;
+
+    try {
+
+        for(let i = 0; i < 8; i++){
+
+            camera.x = x;
+            camera.y = y;
+            camera.zoom = zoom;
+            camera.pitch = camera.targetPitch;
+            camera.spin = camera.targetSpin || 0;
+
+            let top = Infinity, bottom = -Infinity;
+
+            pts.forEach(([px, py]) => {
+
+                const at = project(px, py, -200);
+
+                top = Math.min(top, at.y);
+                bottom = Math.max(bottom, at.y);
+
+            });
+
+            const span = bottom - top;
+
+            if(span > avail) zoom *= (avail / span) * 0.99;
+
+            // Centre it top to bottom (a screen px is about
+            // 1 / zoom world units, a bit more when tipped).
+            const off = (top + bottom) / 2 - H / 2;
+
+            y += off / zoom / Math.max(0.5, Math.cos(camera.pitch));
+
+        }
+
+    } finally {
+
+        Object.assign(camera, saved);
+
+    }
+
+    // Let you zoom out at least as far as it opens.
+    camera.minZoom = Math.min(camera.minZoom, zoom);
+
+    return { x, y, zoom };
+
+}
+
+// Halfway between the highest and lowest titles.
+function midY(nodes){
+
+    if(!nodes.length) return 0;
+
+    const ys = nodes.map(n => n.targetY);
+
+    return (Math.min(...ys) + Math.max(...ys)) / 2;
+
+}
+
 function fitCamera(cam){
 
     const nodes = visibleNodes();
 
-    // The combined map: the Avengers logo stays exactly in
-    // the middle of the screen, with the four corner maps
-    // round it (the zoom is fitted to whichever reaches
-    // furthest, the same on every side).
-    if(cam.centre) cam = { ...cam, x: 0, y: 0 };
+    // The combined map: centred across on the Avengers logo,
+    // and up and down on the middle of all the maps (the ones
+    // below reach further than the one above, so centring on
+    // the logo left the whole map sitting low).
+    if(cam.centre) cam = { ...cam, x: 0, y: midY(nodes) };
 
     const zoom0 = baseFitZoom(cam, nodes);
 
@@ -242,12 +338,12 @@ function fitCamera(cam){
 
         const obstacles = cd ? [r, cd] : [r];
 
-        // Zoom out 3% at a time (up to ~35%) until nothing is
-        // covered. If that's impossible (small laptop screens),
-        // use whichever zoom covered the fewest posters.
+        // Zoom out 3% at a time (up to about half) until
+        // nothing is covered. If that's impossible (small laptop
+        // screens), use whichever zoom covered the fewest posters.
         let best = fallback, bestHits = Infinity;
 
-        for(let step = 0; step < 15; step++){
+        for(let step = 0; step < 24; step++){
 
             const zoom = zoom0 * Math.pow(0.97, step);
 
@@ -282,10 +378,13 @@ function fitCamera(cam){
         const top = cd && cd.bottom < H * 0.3 ? cd.bottom + PANEL_GAP : 0;
         const bottom = r.top - PANEL_GAP;
 
-        // Centred on the Avengers logo, fitted to whichever
-        // map reaches furthest from it.
+        // Centred across on the Avengers logo and up and down
+        // on the middle of all the maps, fitted to whichever
+        // reaches furthest.
+        const my = midY(nodes);
+
         const reachX = Math.max(...nodes.map(n => Math.abs(n.targetX))) + POSTER_HALF_W;
-        const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY))) + POSTER_HALF_H;
+        const reachY = Math.max(...nodes.map(n => Math.abs(n.targetY - my))) + POSTER_HALF_H;
 
         // (phoneFit / phoneMinZoom in views.js: further out
         // on a phone, so every world is on screen at once.)
@@ -294,7 +393,7 @@ function fitCamera(cam){
 
         const freeCy = (top + bottom) / 2 - H / 2;
 
-        return { x: 0, y: -freeCy / zoom, zoom };
+        return { x: 0, y: my - freeCy / zoom, zoom };
 
     }
 
@@ -532,7 +631,7 @@ export function setView(key){
 
     } else if(cameraFor(view).fit){
 
-        const fit = fitCamera(cameraFor(view));
+        const fit = settleForTilt(cameraFor(view), fitCamera(cameraFor(view)));
 
         camera.targetX = fit.x;
         camera.targetY = fit.y;
@@ -1208,7 +1307,7 @@ export function refitView(){
 
     if(!view || !cameraFor(view).fit) return;
 
-    const fit = fitCamera(cameraFor(view));
+    const fit = settleForTilt(cameraFor(view), fitCamera(cameraFor(view)));
 
     camera.targetX = fit.x;
     camera.targetY = fit.y;

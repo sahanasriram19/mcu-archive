@@ -1,45 +1,28 @@
 [
     {
-        "id": "aos1",
-        "title": "Agents of S.H.I.E.L.D. (Season 1)",
+        "id": "aos",
+        "title": "Agents of S.H.I.E.L.D.",
         "type": "show",
         "phase": 71,
         "saga": "marvel-tv",
         "release": "2013-09-24",
-        "timeline": 3,
-        "colour": "60,90,170",
-        "characters": [
-            "Phil Coulson",
-            "Daisy Johnson",
-            "Melinda May",
-            "Leo Fitz",
-            "Jemma Simmons"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "aos2",
-        "title": "Agents of S.H.I.E.L.D. (Season 2)",
-        "type": "show",
-        "phase": 71,
-        "saga": "marvel-tv",
-        "release": "2014-09-23",
-        "timeline": 4,
+        "timeline": 2,
         "colour": "70,110,190",
         "characters": [
             "Phil Coulson",
             "Daisy Johnson",
             "Melinda May",
             "Leo Fitz",
-            "Jemma Simmons"
+            "Jemma Simmons",
+            "Robbie Reyes"
         ],
         "poster": ""
     },
     {
-        "id": "agentcarter1",
-        "title": "Agent Carter (Season 1)",
+        "id": "agentcarter",
+        "title": "Agent Carter",
         "type": "show",
-        "phase": 72,
+        "phase": 71,
         "saga": "marvel-tv",
         "release": "2015-01-06",
         "timeline": 1,
@@ -57,28 +40,10 @@
         "phase": 73,
         "saga": "defenders",
         "release": "2015-04-10",
-        "timeline": 11,
+        "timeline": 4,
         "colour": "180,20,20",
         "characters": [
             "Matt Murdock"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "aos3",
-        "title": "Agents of S.H.I.E.L.D. (Season 3)",
-        "type": "show",
-        "phase": 71,
-        "saga": "marvel-tv",
-        "release": "2015-09-29",
-        "timeline": 5,
-        "colour": "80,120,200",
-        "characters": [
-            "Phil Coulson",
-            "Daisy Johnson",
-            "Melinda May",
-            "Leo Fitz",
-            "Jemma Simmons"
         ],
         "poster": ""
     },
@@ -89,44 +54,10 @@
         "phase": 73,
         "saga": "defenders",
         "release": "2015-11-20",
-        "timeline": 12,
+        "timeline": 5,
         "colour": "90,100,150",
         "characters": [
             "Jessica Jones"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "agentcarter2",
-        "title": "Agent Carter (Season 2)",
-        "type": "show",
-        "phase": 72,
-        "saga": "marvel-tv",
-        "release": "2016-01-19",
-        "timeline": 2,
-        "colour": "190,90,60",
-        "characters": [
-            "Peggy Carter",
-            "Edwin Jarvis"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "aos4",
-        "title": "Agents of S.H.I.E.L.D. (Season 4)",
-        "type": "show",
-        "phase": 71,
-        "saga": "marvel-tv",
-        "release": "2016-09-20",
-        "timeline": 6,
-        "colour": "90,100,180",
-        "characters": [
-            "Phil Coulson",
-            "Daisy Johnson",
-            "Melinda May",
-            "Leo Fitz",
-            "Jemma Simmons",
-            "Robbie Reyes"
         ],
         "poster": ""
     },
@@ -137,7 +68,7 @@
         "phase": 73,
         "saga": "defenders",
         "release": "2016-09-30",
-        "timeline": 13,
+        "timeline": 6,
         "colour": "210,170,60",
         "characters": [
             "Luke Cage"
@@ -151,7 +82,7 @@
         "phase": 71,
         "saga": "marvel-tv",
         "release": "2016-12-13",
-        "timeline": 7,
+        "timeline": 3,
         "colour": "120,80,170",
         "characters": [
             "Elena Rodriguez",
@@ -160,16 +91,17 @@
         "poster": ""
     },
     {
-        "id": "legion1",
-        "title": "Legion (Season 1)",
+        "id": "legion",
+        "title": "Legion",
         "type": "show",
         "phase": 75,
         "saga": "marvel-tv",
         "release": "2017-02-08",
-        "timeline": 24,
+        "timeline": 14,
         "colour": "230,190,60",
         "characters": [
-            "David Haller"
+            "David Haller",
+            "Charles Xavier"
         ],
         "poster": ""
     },
@@ -180,7 +112,7 @@
         "phase": 73,
         "saga": "defenders",
         "release": "2017-03-17",
-        "timeline": 14,
+        "timeline": 7,
         "colour": "60,180,120",
         "characters": [
             "Danny Rand"
@@ -194,7 +126,7 @@
         "phase": 73,
         "saga": "defenders",
         "release": "2017-08-18",
-        "timeline": 15,
+        "timeline": 8,
         "colour": "200,200,200",
         "characters": [
             "Matt Murdock",
@@ -208,10 +140,10 @@
         "id": "inhumans",
         "title": "Inhumans",
         "type": "show",
-        "phase": 72,
+        "phase": 71,
         "saga": "marvel-tv",
         "release": "2017-09-29",
-        "timeline": 17,
+        "timeline": 10,
         "colour": "90,70,150",
         "characters": [
             "Black Bolt",
@@ -221,13 +153,13 @@
         "poster": ""
     },
     {
-        "id": "gifted1",
-        "title": "The Gifted (Season 1)",
+        "id": "gifted",
+        "title": "The Gifted",
         "type": "show",
         "phase": 75,
         "saga": "marvel-tv",
         "release": "2017-10-02",
-        "timeline": 27,
+        "timeline": 15,
         "colour": "60,150,200",
         "characters": [
             "Lorna Dane",
@@ -243,7 +175,7 @@
         "phase": 73,
         "saga": "defenders",
         "release": "2017-11-17",
-        "timeline": 16,
+        "timeline": 9,
         "colour": "60,60,60",
         "characters": [
             "Frank Castle"
@@ -251,13 +183,13 @@
         "poster": ""
     },
     {
-        "id": "runaways1",
-        "title": "Runaways (Season 1)",
+        "id": "runaways",
+        "title": "Runaways",
         "type": "show",
         "phase": 74,
         "saga": "marvel-tv",
         "release": "2017-11-21",
-        "timeline": 18,
+        "timeline": 11,
         "colour": "200,80,140",
         "characters": [
             "Nico Minoru",
@@ -267,164 +199,17 @@
         "poster": ""
     },
     {
-        "id": "aos5",
-        "title": "Agents of S.H.I.E.L.D. (Season 5)",
-        "type": "show",
-        "phase": 71,
-        "saga": "marvel-tv",
-        "release": "2017-12-01",
-        "timeline": 8,
-        "colour": "60,130,180",
-        "characters": [
-            "Phil Coulson",
-            "Daisy Johnson",
-            "Melinda May",
-            "Leo Fitz",
-            "Jemma Simmons"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "legion2",
-        "title": "Legion (Season 2)",
-        "type": "show",
-        "phase": 75,
-        "saga": "marvel-tv",
-        "release": "2018-04-03",
-        "timeline": 25,
-        "colour": "220,150,50",
-        "characters": [
-            "David Haller"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "cloakdagger1",
-        "title": "Cloak & Dagger (Season 1)",
+        "id": "cloakdagger",
+        "title": "Cloak & Dagger",
         "type": "show",
         "phase": 74,
         "saga": "marvel-tv",
         "release": "2018-06-07",
-        "timeline": 19,
+        "timeline": 12,
         "colour": "80,80,120",
         "characters": [
             "Tyrone Johnson",
             "Tandy Bowen"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "gifted2",
-        "title": "The Gifted (Season 2)",
-        "type": "show",
-        "phase": 75,
-        "saga": "marvel-tv",
-        "release": "2018-09-25",
-        "timeline": 28,
-        "colour": "70,170,180",
-        "characters": [
-            "Lorna Dane",
-            "Andy Strucker",
-            "Lauren Strucker"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "runaways2",
-        "title": "Runaways (Season 2)",
-        "type": "show",
-        "phase": 74,
-        "saga": "marvel-tv",
-        "release": "2018-12-21",
-        "timeline": 20,
-        "colour": "210,100,150",
-        "characters": [
-            "Nico Minoru",
-            "Alex Wilder",
-            "Gert Yorkes"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "cloakdagger2",
-        "title": "Cloak & Dagger (Season 2)",
-        "type": "show",
-        "phase": 74,
-        "saga": "marvel-tv",
-        "release": "2019-04-04",
-        "timeline": 21,
-        "colour": "100,100,150",
-        "characters": [
-            "Tyrone Johnson",
-            "Tandy Bowen"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "aos6",
-        "title": "Agents of S.H.I.E.L.D. (Season 6)",
-        "type": "show",
-        "phase": 71,
-        "saga": "marvel-tv",
-        "release": "2019-05-10",
-        "timeline": 9,
-        "colour": "50,110,160",
-        "characters": [
-            "Phil Coulson",
-            "Daisy Johnson",
-            "Melinda May",
-            "Leo Fitz",
-            "Jemma Simmons"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "legion3",
-        "title": "Legion (Season 3)",
-        "type": "show",
-        "phase": 75,
-        "saga": "marvel-tv",
-        "release": "2019-06-24",
-        "timeline": 26,
-        "colour": "200,120,60",
-        "characters": [
-            "David Haller",
-            "Charles Xavier"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "runaways3",
-        "title": "Runaways (Season 3)",
-        "type": "show",
-        "phase": 74,
-        "saga": "marvel-tv",
-        "release": "2019-12-13",
-        "timeline": 22,
-        "colour": "220,120,160",
-        "characters": [
-            "Nico Minoru",
-            "Alex Wilder",
-            "Tyrone Johnson",
-            "Tandy Bowen"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "aos7",
-        "title": "Agents of S.H.I.E.L.D. (Season 7)",
-        "type": "show",
-        "phase": 71,
-        "saga": "marvel-tv",
-        "release": "2020-05-27",
-        "timeline": 10,
-        "colour": "100,130,200",
-        "characters": [
-            "Phil Coulson",
-            "Daisy Johnson",
-            "Melinda May",
-            "Leo Fitz",
-            "Jemma Simmons"
         ],
         "poster": ""
     },
@@ -435,7 +220,7 @@
         "phase": 74,
         "saga": "marvel-tv",
         "release": "2020-10-16",
-        "timeline": 23,
+        "timeline": 13,
         "colour": "150,40,40",
         "characters": [
             "Daimon Helstrom",

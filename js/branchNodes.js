@@ -97,8 +97,7 @@ export const PHASE_COLOURS = {
     66: "240,120,50",   // Assembled 2024 — orange
 
     // Marvel Television eras (js/worlds.js)
-    71: "70,110,200",   // Agents of S.H.I.E.L.D. — S.H.I.E.L.D. blue
-    72: "190,80,70",    // ABC Originals — Carter red
+    71: "70,110,200",   // ABC — S.H.I.E.L.D. blue
     73: "150,150,160",  // Netflix — Defenders steel grey
     74: "190,90,190",   // Hulu & Freeform — magenta
     75: "230,180,60"    // Fox X-Men Shows — gold
@@ -165,8 +164,7 @@ export const HIGHLIGHT_COLOURS = {
     65: "60,225,170",   // Assembled 2023
     66: "255,135,50",   // Assembled 2024
 
-    71: "90,150,255",   // Agents of S.H.I.E.L.D.
-    72: "255,90,80",    // ABC Originals
+    71: "90,150,255",   // ABC
     73: "45,212,191",   // Netflix (teal, as the MCU's Defenders)
     74: "230,100,240",  // Hulu & Freeform
     75: "255,200,60"    // Fox X-Men Shows
