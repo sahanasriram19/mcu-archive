@@ -738,3 +738,32 @@ export function resetToStart(){
     setCurrentWorld("mcu");
 
 }
+
+//==================================================
+// A WORLD OPENED AGAIN
+//
+// Switching to a world (viewManager.setWorldView) puts its
+// titles back at its logo, with no branches or lines yet,
+// so its map grows out afresh every time it's opened, not
+// only the first time.
+//==================================================
+
+export function restartCurrentWorld(){
+
+    graph.nodes.forEach(node => {
+
+        node.x = node.y = 0;
+
+        node.depth = undefined;
+        node.lift = 0;
+        node.growHidden = false;
+        node.growStart = 0;
+
+    });
+
+    branchMemory.clear();
+
+    graph.edges = [];
+    graph.branchNodes = [];
+
+}

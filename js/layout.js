@@ -284,7 +284,7 @@ export function layoutComplete(nodes) {
 // COMPLETE MCU — ALL WORLDS
 //--------------------------------------------------
 
-const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff", "unscripted"];
+const MULTIVERSE_ORDER = ["mcu", "xmen", "spider", "animated", "ff", "unscripted", "tv"];
 const MULTIVERSE_GAP = 700;
 const MULTIVERSE_STEP = 150;
 const MULTIVERSE_SPREAD = 1.8;
@@ -297,6 +297,10 @@ const MULTIVERSE_CORNERS = {
 };
 
 const MULTIVERSE_TOP = "ff";
+
+// Marvel Television sits straight below the Avengers,
+// mirroring the Fantastic Four above.
+const MULTIVERSE_BOTTOM = "tv";
 
 function boxesOf(nodes, hubX = 0, hubY = 0) {
 
@@ -412,6 +416,27 @@ export function layoutMultiverse(nodes) {
         while (d < 60000 && boxesClash(top.boxes, placed, 0, -d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
 
         top.dy = -d;
+
+    }
+
+    const bottom = maps[MULTIVERSE_BOTTOM];
+
+    if (bottom) {
+
+        const placed = [];
+
+        cornerWorlds.forEach(w => maps[w].boxes.forEach(b => placed.push({
+            minX: b.minX + maps[w].dx, maxX: b.maxX + maps[w].dx,
+            minY: b.minY + maps[w].dy, maxY: b.maxY + maps[w].dy
+        })));
+
+        let d = 0;
+
+        while (d < 60000 && boxesClash(bottom.boxes, placed, 0, d, MULTIVERSE_GAP)) d += MULTIVERSE_STEP;
+
+        // As far below as the top world is above, so the map
+        // stays balanced round the Avengers in the middle.
+        bottom.dy = Math.max(d, top ? -top.dy : 0);
 
     }
 

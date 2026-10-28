@@ -94,7 +94,14 @@ export const PHASE_COLOURS = {
     63: "230,60,80",    // Assembled 2021 — red
     64: "90,150,240",   // Assembled 2022 — blue
     65: "60,190,150",   // Assembled 2023 — teal
-    66: "240,120,50"    // Assembled 2024 — orange
+    66: "240,120,50",   // Assembled 2024 — orange
+
+    // Marvel Television eras (js/worlds.js)
+    71: "70,110,200",   // Agents of S.H.I.E.L.D. — S.H.I.E.L.D. blue
+    72: "190,80,70",    // ABC Originals — Carter red
+    73: "150,150,160",  // Netflix — Defenders steel grey
+    74: "190,90,190",   // Hulu & Freeform — magenta
+    75: "230,180,60"    // Fox X-Men Shows — gold
 
 };
 
@@ -156,7 +163,13 @@ export const HIGHLIGHT_COLOURS = {
     63: "255,70,90",    // Assembled 2021
     64: "90,160,255",   // Assembled 2022
     65: "60,225,170",   // Assembled 2023
-    66: "255,135,50"    // Assembled 2024
+    66: "255,135,50",   // Assembled 2024
+
+    71: "90,150,255",   // Agents of S.H.I.E.L.D.
+    72: "255,90,80",    // ABC Originals
+    73: "45,212,191",   // Netflix (teal, as the MCU's Defenders)
+    74: "230,100,240",  // Hulu & Freeform
+    75: "255,200,60"    // Fox X-Men Shows
 
 };
 

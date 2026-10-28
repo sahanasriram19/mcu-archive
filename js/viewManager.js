@@ -16,7 +16,8 @@ import {
     edgesPhaseSpokes,
     edgesTimelineTrail,
     setEdges,
-    useWorld
+    useWorld,
+    restartCurrentWorld
 
 } from "./graph.js";
 
@@ -1038,7 +1039,10 @@ function watchWorlds(waiting, schedule, pullEndsAt){
 // fly out from the centre, like the first time you enter.
 export function setWorldView(world, key){
 
-    useWorld(world);
+    // A different world: it grows out afresh from its logo
+    // (GROWING above), every time it's opened. (Views within
+    // the same world still glide between each other.)
+    if(useWorld(world)) restartCurrentWorld();
 
     setView(key);
 

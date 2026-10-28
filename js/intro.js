@@ -92,6 +92,7 @@ const WORLD_CHAPTERS = [
     { world: "spider",   title: "Spider-Man",   colour: "70,150,255" },
     { world: "ff",       title: "Fantastic Four", colour: "235,240,255" },
     { world: "unscripted", title: "Unscripted",   colour: "255,190,60" },
+    { world: "tv",       title: "Marvel TV",    colour: "110,160,255" },
     { world: "animated", title: "Animation",    colour: "70,225,240" }
 ];
 
@@ -163,6 +164,7 @@ const WORLD_KICKERS = {
     spider: "Spider-Man",
     ff: "The Fantastic Four",
     unscripted: "Marvel Unscripted",
+    tv: "Marvel Television",
     animated: "Marvel Animation"
 
 };

@@ -301,6 +301,30 @@ const SECTIONS = [
     },
 
     {
+        world: "tv",
+        title: "Marvel TV World",
+        labels: {
+            complete: "Complete Marvel TV",
+            phases: "Eras",
+            release: "Release Order",
+            chronology: "Chronological Order",
+            characters: "Character Journeys"
+        },
+        heroes: [
+            { label: "Phil Coulson", character: "Phil Coulson" },
+            { label: "Daisy Johnson", character: "Daisy Johnson" },
+            { label: "Melinda May", character: "Melinda May" },
+            { label: "Peggy Carter", character: "Peggy Carter" },
+            { label: "Daredevil", character: "Matt Murdock" },
+            { label: "Jessica Jones", character: "Jessica Jones" },
+            { label: "The Punisher", character: "Frank Castle" },
+            { label: "Cloak & Dagger", character: "Tandy Bowen", journey: "Cloak & Dagger's Journey" },
+            { label: "Nico Minoru", character: "Nico Minoru" },
+            { label: "Legion", character: "David Haller" }
+        ]
+    },
+
+    {
         world: "unscripted",
         title: "Unscripted World",
         labels: {
@@ -349,7 +373,7 @@ const SECTIONS = [
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
-const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", ff: "Fantastic Four", unscripted: "Unscripted", animated: "Animated" };
+const WORLD_SHORT = { [ALL_WORLDS]: "MCU", mcu: "Avengers", xmen: "X-Men", spider: "Spider-Man", ff: "Fantastic Four", unscripted: "Unscripted", animated: "Animated", tv: "Marvel TV" };
 
 const sectionEls = [];
 

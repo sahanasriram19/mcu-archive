@@ -12,13 +12,13 @@ Built as a portfolio project combining a custom canvas rendering engine, a real 
 
 The landing page opens on a glowing ring around the Marvel logo. Scroll to fly through the MCU in 3D: each world — the Avengers, X-Men, Spider-Man, Fantastic Four, Marvel Unscripted and Marvel Animation — opens with a title card, and its films and series float past in small waves of four, on a computer and a phone alike: two trails on each side (an outer row up high and an inner row down low), each poster captioned with its year and phase or era. A "Coming Soon" chapter closes it out. Click any poster on the way to open its details card.
 
-From about 60% of the way along, the Marvel logo appears at the far end of the trail and grows as you approach (smaller on phones and small screens); when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Entering the archive is a hyperspace jump, and then the map grows out of the logo like a mind map being drawn: each phase's branch reaches out in turn round the circle, and its titles sprout off it, inner ring first (on the combined map, the Avengers first, then each other world out of its own logo). The same growth plays the first time you open a world. Coming back to the landing page later — with the "MCU Archive" title or the browser's Back button — and entering again plays exactly the same opening.
+From about 60% of the way along, the Marvel logo appears at the far end of the trail and grows as you approach (smaller on phones and small screens); when you arrive, the mind-map branches draw out from it and the way into the archive appears beneath (or skip straight in). Entering the archive is a hyperspace jump, and then the map grows out of the logo like a mind map being drawn: each phase's branch reaches out in turn round the circle, and its titles sprout off it, inner ring first (on the combined map, the Avengers first, then each other world out of its own logo). The same growth plays every time you switch to a world (switching between views within a world still glides). Coming back to the landing page later — with the "MCU Archive" title or the browser's Back button — and entering again plays exactly the same opening.
 
 The landing page itself stays still under the mouse; the layered mouse movement is kept for the archive.
 
 ### The archive
 
-- **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map exactly in the middle, with the other four on the corners round it at mirrored distances — X-Men top left, Marvel Unscripted top right, Marvel Animation bottom left, Spider-Man bottom right — and the Fantastic Four straight above it, in the middle of the top. Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out. On a phone it opens far enough out to show every world at once.
+- **MCU → Complete MCU** (the default view) — every world on one canvas: the Avengers mind map exactly in the middle, with the other four on the corners round it at mirrored distances — X-Men top left, Marvel Unscripted top right, Marvel Animation bottom left, Spider-Man bottom right — the Fantastic Four straight above it, in the middle of the top, and Marvel TV straight below it. Each keeps its own logo at its centre; click a logo to zoom into that world's map, and again to zoom back out. On a phone it opens far enough out to show every world at once.
 - **MCU → All Posters** — every title from every world once, with no hub, branches or lines: just posters scattered far apart across a wide stretch of space (several screens across) to drag around and discover, worlds mixed together.
 - **Avengers World → Complete Avengers** — the MCU's own titles, organized as a mind map: a central hub branching into each Phase, each Phase branching into its own titles.
 - **Phases** — one ring of posters per phase (plus one for the Netflix *Defenders* shows), laid out in neat, evenly spaced rows shaped to the screen. Each ring is sized to its own titles, every poster sits level and evenly spaced round it, and the phase name and years sit clear in the middle (long era names wrap onto two lines).
@@ -29,6 +29,7 @@ The landing page itself stays still under the mouse; the layered mouse movement 
 - **Fantastic Four World** — the FF cartoons (1967, 1978, 1994 and *World's Greatest Heroes*), the three Fox films (2005, *Rise of the Silver Surfer*, 2015) and Marvel Studios' *First Steps*, with *Avengers: Doomsday* and *Secret Wars* shared with the Avengers map. Same five views, grouped into eras.
 - **Unscripted World** — Marvel's unscripted documentaries and specials on Disney+: *Marvel's Hero Project*, *Marvel's 616*, *Marvel Studios: Legends*, *Marvel's Behind the Mask*, the specials (*Expanding the Universe*, the 2021 Disney+ Day special, *A Fan's Guide to Ms. Marvel*, *Voices Rising*, *Stan Lee*) and all 23 *Marvel Studios: Assembled* making-of specials, grouped into Docuseries, Specials and Assembled by year.
 - **Animated World** — every Marvel Animation series, short and special on Disney+: the classic cartoons, the Spider-Man cartoons, the 2000s and Disney XD shows, the shorts, *Marvel Rising*, Disney Junior, LEGO Marvel, *M.O.D.O.K.* and *Hit-Monkey*, and Marvel Studios Animation (*What If…?*, *X-Men '97*, *Eyes of Wakanda*, *Marvel Zombies*…). Same five views, grouped into eras. Cartoons that belong to the X-Men or Spider-Man worlds appear there too, under the same id.
+- **Marvel TV World** — Marvel's live-action television: all seven seasons of *Agents of S.H.I.E.L.D.* (plus the *Slingshot* digital series), *Agent Carter*, *Inhumans*, the Netflix *Defenders* shows (shared with the Avengers map), *Runaways*, *Cloak & Dagger*, *Helstrom*, *Legion* and *The Gifted* — 28 titles grouped by network. Same five views. It sits straight below the Avengers on the combined map.
 - **Character Journeys** — pick a character from the dropdown under a world's views and watch the graph reorganize into just their arc.
 
 The panel on the left (a slim bar along the bottom on phones) lists the worlds as sections that open one at a time — opening one closes the others, and so does each world's Character Journeys dropdown — so the panel never grows longer than one world's list. Beside the title is a **default view** button: it undoes any tilting, turning, panning or zooming and frames the current view the way it opens.
@@ -93,7 +94,8 @@ mcu-archive/
 │   ├── spiderman.json        # the Spider-Man world: Raimi, Amazing, Spider-Verse, Tom Holland, Sony's Spider-Man Universe and the cartoons
 │   ├── animated.json         # the Animated world: every Marvel Animation title on Disney+
 │   ├── fantasticfour.json    # the Fantastic Four world: cartoons, Fox films, Marvel Studios
-│   └── unscripted.json       # the Unscripted world: Marvel's documentaries and specials on Disney+
+│   ├── unscripted.json       # the Unscripted world: Marvel's documentaries and specials on Disney+
+│   └── tv.json               # the Marvel TV world: Marvel's live-action television
 ├── css/
 │   ├── main.css               # base styles, no scrollbars, the scroll-edge fades
 │   ├── background.css
@@ -123,7 +125,7 @@ mcu-archive/
     ├── views.js               # view registry (labels, default camera and angle, phone framing)
     ├── posterSize.js          # how big a poster is in each view (shared by drawing, clicking and layout)
     ├── responsive.js          # decides phone vs desktop layouts (portrait / landscape)
-    ├── worlds.js              # the six worlds plus "all" for the combined map, era names, current world
+    ├── worlds.js              # the seven worlds plus "all" for the combined map, era names, current world
     ├── universe.js            # draws every layer each frame, background first; the map's cached layer
     ├── redraw.js              # tells the map layer when it needs redrawing
     ├── connections.js         # renders the glowing connection lines (curved branches on the mind map)
