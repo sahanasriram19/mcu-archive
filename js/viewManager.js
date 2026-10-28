@@ -578,7 +578,10 @@ export function setView(key){
 //      turn, round the circle
 //   2. then that phase's titles sprout off it, the inner
 //      ring first and the outer ones after (fading in as
-//      they go, js/nodes.js)
+//      they go, js/nodes.js) — each one starting from what
+//      it hangs off (its branch point, or the inner title its
+//      line comes from), so the map grows out branch by
+//      branch rather than everything flying from the logo
 //   3. on the combined map, the Avengers grow first, then
 //      each other world in turn
 //
@@ -693,6 +696,44 @@ function startGrowth(){
 
     }
 
+    // What each thing hangs off, from the lines just laid out
+    // (a branch point off its logo, a title off its branch
+    // point or the inner title before it): it grows out
+    // from there when its turn comes.
+    const parentOf = new Map();
+
+    const anchor = ref => {
+
+        if(typeof ref === "number") return graph.nodes[ref] || null;
+
+        if(typeof ref !== "string") return null;
+
+        if(ref.startsWith("branch:")) return graph.branchNodes.find(b => "branch:" + b.key === ref) || null;
+
+        if(ref.startsWith("hub")){
+
+            const world = ref.split(":")[1];
+
+            return (world && (graph.hubs || []).find(h => h.world === world)) || (graph.hubs || [])[0] || null;
+
+        }
+
+        return null;
+
+    };
+
+    graph.edges.forEach(edge => {
+
+        const child = anchor(edge.to);
+
+        if(!child || !when.has(child) || parentOf.has(child)) return;
+
+        const parent = anchor(edge.from);
+
+        if(parent && parent !== child) parentOf.set(child, parent);
+
+    });
+
     // Hold everything at the logo, hidden, until its turn
     // (graph.js doesn't move a title while it's growHidden;
     // where it's going stays as laid out).
@@ -721,6 +762,16 @@ function startGrowth(){
             list.forEach(n => {
 
                 if(!n.growHidden) return;
+
+                // Start from where its parent is right now.
+                const parent = parentOf.get(n);
+
+                if(parent && typeof parent.x === "number"){
+
+                    n.x = parent.x;
+                    n.y = parent.y;
+
+                }
 
                 n.growHidden = false;
                 n.growStart = n.isBranch ? 0 : now;
