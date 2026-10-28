@@ -360,6 +360,28 @@ export function renderNodes(ctx, camera, nodes){
 
         ctx.globalAlpha *= 1 - opened;
 
+        // Growing out as the map opens (GROWING in
+        // viewManager.js): not there until its turn, then
+        // fading in as it flies out along its branch.
+        if(node.growHidden){
+
+            ctx.restore();
+
+            return;
+
+        }
+
+        if(node.growStart){
+
+            const grown = Math.min(1, (frameNow - node.growStart) / GROW_FADE_MS);
+
+            ctx.globalAlpha *= grown;
+
+            if(grown >= 1) node.growStart = 0;
+            else settling = true;
+
+        }
+
         //----------------------------------
         // Lean: the hovered poster tips a few
         // degrees, the side under the mouse
@@ -813,6 +835,8 @@ function roundedPoster(entry){
 const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
 
 const POSTER_FADE_STEP = 0.07;  // per frame: a poster fades in over ~1/4 s
+
+const GROW_FADE_MS = 280;       // a poster growing out fades in over this long
 
 const HOVER_DIM = 0;            // other phases no longer fade while one is hovered
                                 // (the hovered phase still shows its name)

@@ -27,6 +27,7 @@ import { VIEWS } from "./views.js";
 import { camera } from "./camera.js";
 import { REST_PITCH } from "./depth.js";
 import { PHASES_POSTER } from "./posterSize.js";
+import { markMapDirty } from "./redraw.js";
 import { archive } from "./archiveCore.js";
 import { isCompact, isPortraitPhone, layoutModeKey } from "./responsive.js";
 export let currentView = "complete";
@@ -548,6 +549,11 @@ export function setView(key){
 
     }
 
+    // Laid out from scratch (entering the archive, or a world
+    // seen for the first time)? Then it grows out branch by
+    // branch rather than all at once (GROWING below).
+    startGrowth();
+
     // Where this view opens, zoom-wise: the sky is its deep
     // navy from here in, and turns a lighter blue as you zoom
     // out further (js/universe.js).
@@ -556,6 +562,176 @@ export function setView(key){
     // Lets the panel keep its active button / phone label in
     // step, however the view was changed.
     window.dispatchEvent(new CustomEvent("mcu:view-changed"));
+
+}
+
+//----------------------------------
+// GROWING
+//
+// When a map is laid out from scratch — entering the
+// archive, entering it again from the landing page, or
+// opening a world for the first time — every title starts
+// stacked at the logo. Rather than all flying out at once,
+// the map grows like a mind map being drawn:
+//
+//   1. each phase's branch reaches out from the logo in
+//      turn, round the circle
+//   2. then that phase's titles sprout off it, the inner
+//      ring first and the outer ones after (fading in as
+//      they go, js/nodes.js)
+//   3. on the combined map, the Avengers grow first, then
+//      each other world in turn
+//
+// Anything not grown yet stays hidden at the logo (its
+// lines, labels and clicks too: connections.js,
+// branchNodes.js, nodeHitTest.js). Views that just
+// rearrange titles already on screen move as they always
+// did. Switching view mid-growth simply lets everything
+// carry on to the new layout.
+//----------------------------------
+
+const GROW_WORLD_STEP = 260;   // ms between worlds (combined map)
+const GROW_PHASE_STEP = 110;   // ms between phases round the circle
+const GROW_LEAD = 240;         // ms from a branch starting to its first titles
+const GROW_TIER_STEP = 190;    // ms between rings of titles
+const GROW_SPREAD = 1300;      // ms across the whole map, for other views
+
+let growTimers = [];
+let growing = [];
+
+function stopGrowth(){
+
+    growTimers.forEach(clearTimeout);
+
+    growTimers = [];
+
+    growing.forEach(n => { n.growHidden = false; n.growStart = 0; });
+
+    growing = [];
+
+}
+
+function startGrowth(){
+
+    stopGrowth();
+
+    const atLogo = n => n.x === 0 && n.y === 0 && (n.targetX !== 0 || n.targetY !== 0);
+
+    const titles = graph.nodes.filter(n => Math.abs(n.targetX) < 50000);
+
+    const fresh = titles.filter(atLogo);
+
+    // Only when most of the map is starting from scratch.
+    if(!fresh.length || fresh.length < titles.length * 0.5) return;
+
+    const branches = graph.branchNodes.filter(atLogo);
+
+    const mindmap = currentView === "complete";
+
+    // When each thing starts (ms from now).
+    const when = new Map();
+
+    if(mindmap){
+
+        // Worlds in the order of their logos (the Avengers
+        // first), phases in their order round each map.
+        const worlds = (graph.hubs || []).map(h => h.world);
+
+        const worldIndex = w => Math.max(0, worlds.indexOf(w));
+
+        const phaseIndex = new Map();
+
+        graph.branchNodes.forEach(b => {
+
+            if(b.phase === null || b.phase === undefined) return;
+
+            const key = (b.world || "") + "|" + b.phase;
+
+            if(!phaseIndex.has(key)) phaseIndex.set(key, [...phaseIndex.keys()].filter(k => k.startsWith((b.world || "") + "|")).length);
+
+        });
+
+        const branchStart = (world, phase) => {
+
+            const key = ((worlds.length > 1 ? world : "") || "") + "|" + phase;
+
+            return (worlds.length > 1 ? worldIndex(world) * GROW_WORLD_STEP : 0) +
+                (phaseIndex.get(key) || 0) * GROW_PHASE_STEP;
+
+        };
+
+        // On the combined map, each world grows out of its own
+        // logo (not all from the Avengers one in the middle).
+        if(worlds.length > 1){
+
+            const hubAt = new Map((graph.hubs || []).map(h => [h.world, h]));
+
+            [...fresh, ...branches].forEach(n => {
+
+                const h = hubAt.get(n.world);
+
+                if(h){ n.x = h.x; n.y = h.y; }
+
+            });
+
+        }
+
+        branches.forEach(b => when.set(b, b.phase === null || b.phase === undefined ? 0 : branchStart(b.world, b.phase)));
+
+        fresh.forEach(n => when.set(n,
+            branchStart(n.world, n.phase) + GROW_LEAD + (n.tier || 0) * GROW_TIER_STEP
+        ));
+
+    } else {
+
+        // Other views: from the middle outwards.
+        const far = Math.max(1, ...fresh.map(n => Math.hypot(n.targetX, n.targetY)));
+
+        fresh.forEach(n => when.set(n, Math.hypot(n.targetX, n.targetY) / far * GROW_SPREAD));
+
+        branches.forEach(b => when.set(b, Math.max(0, Math.hypot(b.targetX, b.targetY) / far * GROW_SPREAD - 150)));
+
+    }
+
+    // Hold everything at the logo, hidden, until its turn
+    // (graph.js doesn't move a title while it's growHidden;
+    // where it's going stays as laid out).
+    const waves = new Map();
+
+    when.forEach((ms, n) => {
+
+        n.growHidden = true;
+
+        growing.push(n);
+
+        const at = Math.round(ms / 16) * 16;
+
+        if(!waves.has(at)) waves.set(at, []);
+
+        waves.get(at).push(n);
+
+    });
+
+    waves.forEach((list, at) => {
+
+        growTimers.push(setTimeout(() => {
+
+            const now = performance.now();
+
+            list.forEach(n => {
+
+                if(!n.growHidden) return;
+
+                n.growHidden = false;
+                n.growStart = n.isBranch ? 0 : now;
+
+            });
+
+            markMapDirty();
+
+        }, at));
+
+    });
 
 }
 

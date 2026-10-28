@@ -170,6 +170,9 @@ export function renderBranchNodes(ctx, camera, branchNodes){
 
     branchNodes.forEach(node=>{
 
+        // (Not grown out yet — see GROWING in viewManager.js.)
+        if(node.growHidden) return;
+
         // With depth and tilt (js/depth.js).
         const at = projectNode(node);
 

@@ -151,7 +151,8 @@ export function edgeAtScreenPoint(px, py, camera, graph, tolerance = 7){
         const from = resolveAnchor(edge.from, graph);
         const to = resolveAnchor(edge.to, graph);
 
-        if(!from || !to) return;
+        // (Not grown out yet — see GROWING in viewManager.js.)
+        if(!from || !to || from.growHidden || to.growHidden) return;
 
         const pts = projectEdge(from, to, edge);
 
@@ -281,7 +282,8 @@ export function renderConnections(ctx, camera, graph){
         const from = resolveAnchor(edge.from, graph);
         const to = resolveAnchor(edge.to, graph);
 
-        if(!from || !to) return;
+        // (Not grown out yet — see GROWING in viewManager.js.)
+        if(!from || !to || from.growHidden || to.growHidden) return;
 
         const pts = projectEdge(from, to, edge);
 
@@ -455,6 +457,9 @@ function renderTimeline(ctx, camera, graph){
     const branchPath = new Path2D();
 
     movies.forEach(node=>{
+
+        // (Not grown out yet — see GROWING in viewManager.js.)
+        if(node.growHidden) return;
 
         // From the spine, straight back to the poster at
         // its own depth.

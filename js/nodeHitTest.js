@@ -43,7 +43,9 @@ export function getNodeAtScreenPoint(screenX, screenY, camera, nodes, currentVie
 
         const node = nodes[i];
 
-        if(node.isBranch) continue;
+        // (Branches, and posters not grown out yet.)
+
+        if(node.isBranch || node.growHidden) continue;
 
         const at = projectNode(node);
 

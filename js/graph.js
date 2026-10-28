@@ -3,6 +3,12 @@
 //==================================================
 
 import { loadPosters } from "./posters.js";
+// The speed-keeping ease from camera.js, when that version
+// of camera.js is in place (otherwise steps are as they
+// always were).
+import * as cameraModule from "./camera.js";
+
+const ease = cameraModule.ease || (k => k);
 import { WORLDS, ALL_WORLDS, setCurrentWorld } from "./worlds.js";
 
 export const graph = {
@@ -606,7 +612,7 @@ export function updateGraph(){
 
     const hfTarget = graph.hover.phase !== null ? 1 : 0;
 
-    hf.amount += (hfTarget - hf.amount) * 0.14;
+    hf.amount += (hfTarget - hf.amount) * ease(0.14);
 
     if(hf.amount < 0.002 && hfTarget === 0){ hf.amount = 0; hf.phase = null; }
 
@@ -616,11 +622,17 @@ export function updateGraph(){
     // somewhere this frame (see graph.moving below).
     let moving = hf.amount !== hfTarget;
 
-    const NODE_EASE = 0.16;
+    // (Per full-speed frame — ease() in js/camera.js makes up for
+    // late ones.)
+    const NODE_EASE = ease(0.16);
 
     graph.nodes.forEach(node=>{
 
         if(node.x !== node.targetX || node.y !== node.targetY) moving = true;
+
+        // Waiting at the logo for its turn to grow out
+        // (GROWING in viewManager.js).
+        if(node.growHidden) return;
 
        if (Math.abs(node.targetX - node.x) < 0.5)
             node.x = node.targetX;
@@ -641,7 +653,7 @@ export function updateGraph(){
 
         const lift = node.lift || 0;
 
-        node.lift = lift + (liftTarget - lift) * (hovered ? 0.25 : 0.18);
+        node.lift = lift + (liftTarget - lift) * ease(hovered ? 0.25 : 0.18);
 
         if(node.lift < 0.002) node.lift = 0;
 
@@ -658,7 +670,7 @@ export function updateGraph(){
 
         if(open !== openTarget) moving = true;
 
-        node.openFade = open + (openTarget - open) * 0.2;
+        node.openFade = open + (openTarget - open) * ease(0.2);
 
         if(Math.abs(node.openFade - openTarget) < 0.01) node.openFade = openTarget;
 
@@ -673,6 +685,8 @@ export function updateGraph(){
         // Order views (which have little to no branch nodes
         // to wait on).
         if(node.x !== node.targetX || node.y !== node.targetY) moving = true;
+
+        if(node.growHidden) return;
 
         if(Math.abs(node.targetX-node.x) < 0.5) node.x = node.targetX;
         else node.x += (node.targetX-node.x) * NODE_EASE;
