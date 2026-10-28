@@ -784,10 +784,31 @@ function startGrowth(){
 
             const hub = (graph.hubs || []).find(h => h.world === middleWorld);
 
-            frameNodes(
-                graph.nodes.filter(n => n.world === middleWorld && Math.abs(n.targetX) < 50000),
-                hub ? [{ targetX: hub.x, targetY: hub.y }] : []
-            );
+            // Centred on its logo (in the middle of the screen,
+            // where the jump's logo was), zoomed so the whole
+            // map fits either side of it, clear of the panel
+            // and the cards along the top.
+            const members = graph.nodes.filter(n => n.world === middleWorld && Math.abs(n.targetX) < 50000);
+
+            const cx = hub ? hub.x : 0, cy = hub ? hub.y : 0;
+
+            const reachX = Math.max(1, ...members.map(n => Math.abs(n.targetX - cx))) + POSTER_HALF_W;
+            const reachY = Math.max(1, ...members.map(n => Math.abs(n.targetY - cy))) + POSTER_HALF_H;
+
+            const W = window.innerWidth, H = window.innerHeight;
+
+            const r = panelRect();
+
+            let halfW = W / 2, halfH = H / 2 - TOP_UI_RESERVE;
+
+            if(r && r.left < W * 0.25 && r.right < W * 0.6) halfW = W / 2 - (r.right + PANEL_GAP);
+            else if(r && r.bottom > H * 0.75) halfH = Math.min(halfH, r.top - PANEL_GAP - H / 2);
+
+            const zoom = Math.min(halfW / reachX, Math.max(1, halfH) / reachY) * 0.95;
+
+            camera.targetX = cx;
+            camera.targetY = cy;
+            camera.targetZoom = Math.max(camera.minZoom, Math.min(0.6, zoom));
 
             tweenCamera(full, PULLBACK_MS, pullStart);
 
