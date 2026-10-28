@@ -25,7 +25,7 @@ import { getWorld } from "./worlds.js";
 import { LAYOUTS } from "./layout.js";
 import { VIEWS } from "./views.js";
 import { camera } from "./camera.js";
-import { REST_PITCH } from "./depth.js";
+import { REST_PITCH, project } from "./depth.js";
 import { PHASES_POSTER } from "./posterSize.js";
 import { markMapDirty } from "./redraw.js";
 import { archive } from "./archiveCore.js";
@@ -584,10 +584,13 @@ export function setView(key){
 //      branch rather than everything flying from the logo
 //   3. on the combined map, the camera starts close in on
 //      the Avengers map in the middle while it grows, then
-//      slowly pulls back to the whole universe (PULLBACK),
-//      each other world growing in turn as it comes into
-//      view. Scrolling or dragging during the pull-back
-//      leaves the camera to you.
+//      slowly pulls back to the whole universe (PULLBACK).
+//      Each other world waits, hidden, until the whole of it
+//      is on screen, and only then grows (watchWorlds), so
+//      none of it happens out of sight. Scrolling or
+//      dragging during the pull-back leaves the camera to
+//      you; worlds still waiting grow once they're in view
+//      (or shortly after the pull-back would have ended).
 //
 // Anything not grown yet stays hidden at the logo (its
 // lines, labels and clicks too: connections.js,
@@ -700,8 +703,13 @@ function startGrowth(){
 
     const mindmap = currentView === "complete";
 
-    // When each thing starts (ms from now).
+    // When each thing starts (ms from now, or — for a world
+    // waiting to come into view — from when it does).
     const when = new Map();
+
+    const deferredWorld = new Map();   // item -> its world, if waiting to be seen
+
+    let pullEndsAt = 0;                // when the pull-back should be done (ms from now)
 
     if(mindmap){
 
@@ -730,9 +738,10 @@ function startGrowth(){
         // pull-back (set below), then follow one by one.
         let pullStart = 0;
 
-        const worldStart = w => !combined || worldIndex(w) === 0
-            ? 0
-            : pullStart + (worldIndex(w) - 1) * GROW_WORLD_STEP;
+        // (On the combined map the other worlds' times are
+        // counted from when each comes into view: see
+        // watchWorlds below.)
+        const worldStart = () => 0;
 
         const branchStart = (world, phase) => {
 
@@ -751,6 +760,14 @@ function startGrowth(){
             const middle = fresh.filter(n => worldIndex(n.world) === 0);
 
             pullStart = Math.max(0, Math.max(0, ...middle.map(titleStart)) - PULLBACK_EARLY);
+
+            // Everything in the other worlds waits until its
+            // world is on screen.
+            [...fresh, ...branches].forEach(n => {
+
+                if(worldIndex(n.world) > 0) deferredWorld.set(n, n.world);
+
+            });
 
         }
 
@@ -812,6 +829,8 @@ function startGrowth(){
 
             tweenCamera(full, PULLBACK_MS, pullStart);
 
+            pullEndsAt = pullStart + PULLBACK_MS;
+
         }
 
     } else {
@@ -863,10 +882,58 @@ function startGrowth(){
 
     });
 
+    // Lets a group go: each starts from where its parent is
+    // right now, and flies out from there.
+    const release = list => {
+
+        const now = performance.now();
+
+        list.forEach(n => {
+
+            if(!n.growHidden) return;
+
+            const parent = parentOf.get(n);
+
+            if(parent && typeof parent.x === "number"){
+
+                n.x = parent.x;
+                n.y = parent.y;
+
+            }
+
+            n.growHidden = false;
+            n.growStart = n.isBranch ? 0 : now;
+
+        });
+
+        markMapDirty();
+
+    };
+
+    // Lets a set of items go in waves, `ms` from now.
+    const schedule = items => {
+
+        const waves = new Map();
+
+        items.forEach(([n, ms]) => {
+
+            const at = Math.round(ms / 16) * 16;
+
+            if(!waves.has(at)) waves.set(at, []);
+
+            waves.get(at).push(n);
+
+        });
+
+        waves.forEach((list, at) => growTimers.push(setTimeout(() => release(list), at)));
+
+    };
+
     // Hold everything at the logo, hidden, until its turn
     // (graph.js doesn't move a title while it's growHidden;
     // where it's going stays as laid out).
-    const waves = new Map();
+    const now = [];
+    const waiting = new Map();    // world -> [[item, ms]]
 
     when.forEach((ms, n) => {
 
@@ -874,44 +941,95 @@ function startGrowth(){
 
         growing.push(n);
 
-        const at = Math.round(ms / 16) * 16;
+        const w = deferredWorld.get(n);
 
-        if(!waves.has(at)) waves.set(at, []);
+        if(w === undefined){ now.push([n, ms]); return; }
 
-        waves.get(at).push(n);
+        if(!waiting.has(w)) waiting.set(w, []);
+
+        waiting.get(w).push([n, ms]);
 
     });
 
-    waves.forEach((list, at) => {
+    schedule(now);
 
-        growTimers.push(setTimeout(() => {
+    if(waiting.size) watchWorlds(waiting, schedule, pullEndsAt);
 
-            const now = performance.now();
+}
 
-            list.forEach(n => {
+// The combined map's other worlds: each one grows only once
+// the whole of it is on screen (as the camera pulls back),
+// one at a time, a little apart. Anything still waiting
+// shortly after the pull-back should have finished (you took
+// the camera, say) grows then.
+function watchWorlds(waiting, schedule, pullEndsAt){
 
-                if(!n.growHidden) return;
+    const token = growTimers;      // replaced when growth stops or restarts
 
-                // Start from where its parent is right now.
-                const parent = parentOf.get(n);
+    const startedAt = performance.now();
 
-                if(parent && typeof parent.x === "number"){
+    const deadline = startedAt + pullEndsAt + 800;
 
-                    n.x = parent.x;
-                    n.y = parent.y;
+    let lastStart = -Infinity;
+
+    // The world's map on screen? (Its laid-out extent, as
+    // the camera is right now, tilt and all.)
+    const onScreen = items => {
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+        items.forEach(([n]) => {
+
+            const hx = n.isBranch ? 0 : POSTER_HALF_W, hy = n.isBranch ? 0 : POSTER_HALF_H;
+
+            minX = Math.min(minX, n.targetX - hx); maxX = Math.max(maxX, n.targetX + hx);
+            minY = Math.min(minY, n.targetY - hy); maxY = Math.max(maxY, n.targetY + hy);
+
+        });
+
+        const W = window.innerWidth, H = window.innerHeight;
+
+        return [[minX, minY], [maxX, minY], [minX, maxY], [maxX, maxY]].every(([x, y]) => {
+
+            const at = project(x, y, 0);
+
+            return at.x >= 0 && at.x <= W && at.y >= 0 && at.y <= H;
+
+        });
+
+    };
+
+    const tick = () => {
+
+        if(growTimers !== token || !waiting.size) return;
+
+        const now = performance.now();
+
+        if(now - lastStart >= GROW_WORLD_STEP){
+
+            for(const [world, items] of waiting){
+
+                if(onScreen(items) || now > deadline){
+
+                    waiting.delete(world);
+
+                    schedule(items);
+
+                    lastStart = now;
+
+                    break;
 
                 }
 
-                n.growHidden = false;
-                n.growStart = n.isBranch ? 0 : now;
+            }
 
-            });
+        }
 
-            markMapDirty();
+        requestAnimationFrame(tick);
 
-        }, at));
+    };
 
-    });
+    requestAnimationFrame(tick);
 
 }
 
