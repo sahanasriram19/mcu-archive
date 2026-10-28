@@ -836,7 +836,7 @@ const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
 
 const POSTER_FADE_STEP = 0.07;  // per frame: a poster fades in over ~1/4 s
 
-const GROW_FADE_MS = 280;       // a poster growing out fades in over this long
+const GROW_FADE_MS = 380;       // a poster growing out fades in over this long
 
 const HOVER_DIM = 0;            // other phases no longer fade while one is hovered
                                 // (the hovered phase still shows its name)

@@ -590,11 +590,11 @@ export function setView(key){
 // carry on to the new layout.
 //----------------------------------
 
-const GROW_WORLD_STEP = 260;   // ms between worlds (combined map)
-const GROW_PHASE_STEP = 110;   // ms between phases round the circle
-const GROW_LEAD = 240;         // ms from a branch starting to its first titles
-const GROW_TIER_STEP = 190;    // ms between rings of titles
-const GROW_SPREAD = 1300;      // ms across the whole map, for other views
+const GROW_WORLD_STEP = 350;   // ms between worlds (combined map)
+const GROW_PHASE_STEP = 150;   // ms between phases round the circle
+const GROW_LEAD = 320;         // ms from a branch starting to its first titles
+const GROW_TIER_STEP = 260;    // ms between rings of titles
+const GROW_SPREAD = 1750;      // ms across the whole map, for other views
 
 let growTimers = [];
 let growing = [];
