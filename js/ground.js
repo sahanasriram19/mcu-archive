@@ -24,7 +24,8 @@ const SHOW_GROUND = true;
 
 const POOL_COLOUR = "70,100,175";   // a deep, slightly lifted navy
 const POOL_ALPHA = 0.22;            // brightness at the centre
-const POOL_MARGIN = 1.2;            // how far past the posters it reaches
+const POOL_MARGIN = 1.6;            // how far past the posters it reaches (its
+                                    // outer part is so faint it just blends away)
 
 // Room for a poster round each title (world units).
 const POSTER_HALF_W = 220;
@@ -145,7 +146,7 @@ function poolSprite(){
 
     if(sprite) return sprite;
 
-    const size = 256;
+    const size = 512;
 
     sprite = document.createElement("canvas");
 
@@ -155,10 +156,24 @@ function poolSprite(){
 
     const g = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
 
-    g.addColorStop(0, `rgba(${POOL_COLOUR},1)`);
-    g.addColorStop(0.45, `rgba(${POOL_COLOUR},0.7)`);
-    g.addColorStop(0.8, `rgba(${POOL_COLOUR},0.22)`);
-    g.addColorStop(1, `rgba(${POOL_COLOUR},0)`);
+    // A smooth bell-shaped falloff, easing all the way down
+    // to nothing at the rim with no step anywhere — a sharper
+    // drop near the edge used to show as an oval outline
+    // round each map.
+    const STOPS = 24;
+
+    for(let i = 0; i <= STOPS; i++){
+
+        const t = i / STOPS;
+
+        const bell = Math.exp(-4.2 * t * t);
+
+        // (Pulled to exactly 0 at the rim.)
+        const a = (bell - Math.exp(-4.2)) / (1 - Math.exp(-4.2));
+
+        g.addColorStop(t, `rgba(${POOL_COLOUR},${a.toFixed(4)})`);
+
+    }
 
     c.fillStyle = g;
     c.fillRect(0, 0, size, size);
