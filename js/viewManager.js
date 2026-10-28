@@ -549,15 +549,15 @@ export function setView(key){
 
     }
 
-    // Laid out from scratch (entering the archive, or a world
-    // seen for the first time)? Then it grows out branch by
-    // branch rather than all at once (GROWING below).
-    startGrowth();
-
     // Where this view opens, zoom-wise: the sky is its deep
     // navy from here in, and turns a lighter blue as you zoom
     // out further (js/universe.js).
     camera.openZoom = camera.targetZoom;
+
+    // Laid out from scratch (entering the archive, or a world
+    // seen for the first time)? Then it grows out branch by
+    // branch rather than all at once (GROWING below).
+    startGrowth();
 
     // Lets the panel keep its active button / phone label in
     // step, however the view was changed.
@@ -582,8 +582,12 @@ export function setView(key){
 //      it hangs off (its branch point, or the inner title its
 //      line comes from), so the map grows out branch by
 //      branch rather than everything flying from the logo
-//   3. on the combined map, the Avengers grow first, then
-//      each other world in turn
+//   3. on the combined map, the camera starts close in on
+//      the Avengers map in the middle while it grows, then
+//      slowly pulls back to the whole universe (PULLBACK),
+//      each other world growing in turn as it comes into
+//      view. Scrolling or dragging during the pull-back
+//      leaves the camera to you.
 //
 // Anything not grown yet stays hidden at the logo (its
 // lines, labels and clicks too: connections.js,
@@ -599,10 +603,16 @@ const GROW_LEAD = 320;         // ms from a branch starting to its first titles
 const GROW_TIER_STEP = 260;    // ms between rings of titles
 const GROW_SPREAD = 1750;      // ms across the whole map, for other views
 
+// The combined map's opening pull-back (see 3. above).
+const PULLBACK_MS = 3200;      // how long the pull-back takes
+const PULLBACK_EARLY = 450;    // starts this long before the middle map's last titles sprout
+
 let growTimers = [];
 let growing = [];
 
 function stopGrowth(){
+
+    cameraTween = null;
 
     growTimers.forEach(clearTimeout);
 
@@ -611,6 +621,65 @@ function stopGrowth(){
     growing.forEach(n => { n.growHidden = false; n.growStart = 0; });
 
     growing = [];
+
+}
+
+//----------------------------------
+// PULLBACK
+//
+// Moves the camera slowly (easing in and out) to `to` —
+// zooming evenly, so pulling back from one map to the whole
+// universe reads as one steady move — starting after
+// `delay` ms. If anything else moves the camera meanwhile
+// (you scroll, drag, pick a view, or click a logo), it
+// stops and leaves the camera be.
+//----------------------------------
+
+let cameraTween = null;
+
+function tweenCamera(to, duration, delay){
+
+    const token = {};
+
+    cameraTween = token;
+
+    // What it last set (or found), to notice anything else
+    // moving the camera.
+    let mine = { x: camera.targetX, y: camera.targetY, zoom: camera.targetZoom };
+
+    const startAt = performance.now() + delay;
+
+    let from = null;
+
+    const moved = () =>
+        camera.targetX !== mine.x || camera.targetY !== mine.y || camera.targetZoom !== mine.zoom;
+
+    const step = now => {
+
+        if(cameraTween !== token) return;
+
+        if(moved()){ cameraTween = null; return; }
+
+        if(now < startAt){ requestAnimationFrame(step); return; }
+
+        if(!from) from = { ...mine };
+
+        const t = Math.min(1, (now - startAt) / duration);
+
+        const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+        camera.targetZoom = from.zoom * Math.pow(to.zoom / from.zoom, e);
+        camera.targetX = from.x + (to.x - from.x) * e;
+        camera.targetY = from.y + (to.y - from.y) * e;
+
+        mine = { x: camera.targetX, y: camera.targetY, zoom: camera.targetZoom };
+
+        if(t < 1) requestAnimationFrame(step);
+        else cameraTween = null;
+
+    };
+
+    requestAnimationFrame(step);
 
 }
 
@@ -654,14 +723,36 @@ function startGrowth(){
 
         });
 
+        const combined = worlds.length > 1;
+
+        // When each world starts: the one in the middle at
+        // once; on the combined map the others wait for the
+        // pull-back (set below), then follow one by one.
+        let pullStart = 0;
+
+        const worldStart = w => !combined || worldIndex(w) === 0
+            ? 0
+            : pullStart + (worldIndex(w) - 1) * GROW_WORLD_STEP;
+
         const branchStart = (world, phase) => {
 
-            const key = ((worlds.length > 1 ? world : "") || "") + "|" + phase;
+            const key = (combined ? world || "" : "") + "|" + phase;
 
-            return (worlds.length > 1 ? worldIndex(world) * GROW_WORLD_STEP : 0) +
-                (phaseIndex.get(key) || 0) * GROW_PHASE_STEP;
+            return worldStart(world) + (phaseIndex.get(key) || 0) * GROW_PHASE_STEP;
 
         };
+
+        const titleStart = n => branchStart(n.world, n.phase) + GROW_LEAD + (n.tier || 0) * GROW_TIER_STEP;
+
+        // The pull-back starts as the middle map's last ring
+        // begins to sprout.
+        if(combined){
+
+            const middle = fresh.filter(n => worldIndex(n.world) === 0);
+
+            pullStart = Math.max(0, Math.max(0, ...middle.map(titleStart)) - PULLBACK_EARLY);
+
+        }
 
         // On the combined map, each world grows out of its own
         // logo (not all from the Avengers one in the middle).
@@ -681,9 +772,26 @@ function startGrowth(){
 
         branches.forEach(b => when.set(b, b.phase === null || b.phase === undefined ? 0 : branchStart(b.world, b.phase)));
 
-        fresh.forEach(n => when.set(n,
-            branchStart(n.world, n.phase) + GROW_LEAD + (n.tier || 0) * GROW_TIER_STEP
-        ));
+        fresh.forEach(n => when.set(n, titleStart(n)));
+
+        // The camera: close in on the middle map first, then
+        // slowly back out to the whole universe.
+        if(combined){
+
+            const full = { x: camera.targetX, y: camera.targetY, zoom: camera.targetZoom };
+
+            const middleWorld = worlds[0];
+
+            const hub = (graph.hubs || []).find(h => h.world === middleWorld);
+
+            frameNodes(
+                graph.nodes.filter(n => n.world === middleWorld && Math.abs(n.targetX) < 50000),
+                hub ? [{ targetX: hub.x, targetY: hub.y }] : []
+            );
+
+            tweenCamera(full, PULLBACK_MS, pullStart);
+
+        }
 
     } else {
 
