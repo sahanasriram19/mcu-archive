@@ -100,8 +100,7 @@ const WORLD_PLATES = {
     // "UNSCRIPTED" plate shows instead.
     unscripted: { image: "assets/unscripted-logo.png", text: "UNSCRIPTED", top: "#2a2a2e", bottom: "#111114", rim: "230,170,60", ink: "#ffffff" },
     // Marvel Television: the plain "MARVEL TV" plate until
-    // assets/tv-logo.png exists.
-    tv: { image: "assets/tv-logo.png", text: "MARVEL TV", top: "#1b2f5c", bottom: "#0a1430", rim: "120,170,255", ink: "#ffffff" }
+    tv: { image: "assets/marvel-television.jpg", text: "MARVEL TV", top: "#1b2f5c", bottom: "#0a1430", rim: "120,170,255", ink: "#ffffff" }
 
 };
 
