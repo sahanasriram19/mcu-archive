@@ -16,6 +16,9 @@ import { getSelectedCharacter } from "./characters/characterJourney.js";
 import { isCompact, isPortraitPhone } from "./responsive.js";
 import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 import { PHASES_POSTER } from "./posterSize.js";
+// (Only called while laying out, never as the module loads,
+// so importing back from depth.js is safe.)
+import { REST_PITCH, mindmapPosterHeight, heightToMapScale } from "./depth.js";
 
 //--------------------------------------------------
 // Short era name per phase, used as the branch node's
@@ -86,6 +89,121 @@ function resolveOverlaps(nodes, margin = OVERLAP_MARGIN) {
                         b.targetY += sign * push;
 
                     }
+
+                }
+
+            }
+
+        }
+
+        if (!moved) break;
+
+    }
+
+}
+
+//--------------------------------------------------
+// MIND MAP OVERLAP RESOLUTION
+//
+// resolveOverlaps() above checks the posters on the flat
+// map, but the mind map is drawn tipped back (REST_PITCH in
+// js/depth.js, which squashes it top to bottom by about a
+// fifth) with every poster floating at its own height
+// (higher ones are drawn further up the screen). So two
+// posters that were clear of each other on the flat map
+// could still be drawn on top of one another.
+//
+// This does the same job, but measures the gap top to bottom
+// the way it's actually drawn: tipped back, with each
+// poster's height, at both ends of the zoom range (heights
+// count for more the further out you are). Posters are
+// pushed apart mostly up and down, so the maps grow a little
+// taller rather than wider.
+//--------------------------------------------------
+
+// The zooms to keep posters apart between (the range you
+// look at a mind map in; past the far end posters are only
+// a few pixels big).
+const MAP_CHECK_ZOOMS = [0.07, 0.4];
+
+// A little more tilt than the map opens with, for headroom
+// (the look-around tips it a degree or so with the mouse).
+const MAP_CHECK_PITCH_EXTRA = 0.05;
+
+const MAP_OVERLAP_ITERATIONS = 600;
+
+function resolveMindmapOverlaps(nodes, margin = 40) {
+
+    const pitch = REST_PITCH + MAP_CHECK_PITCH_EXTRA;
+
+    const c = Math.cos(pitch), sn = Math.sin(pitch);
+
+    const kLo = heightToMapScale(MAP_CHECK_ZOOMS[1]) * sn;
+    const kHi = heightToMapScale(MAP_CHECK_ZOOMS[0]) * sn;
+
+    const minW = POSTER_W + margin;
+    const minH = POSTER_H + margin;
+
+    const heights = nodes.map(mindmapPosterHeight);
+
+    for (let iter = 0; iter < MAP_OVERLAP_ITERATIONS; iter++) {
+
+        let moved = false;
+
+        for (let i = 0; i < nodes.length; i++) {
+
+            for (let j = i + 1; j < nodes.length; j++) {
+
+                const a = nodes[i], b = nodes[j];
+
+                const dx = b.targetX - a.targetX;
+
+                const overlapX = minW - Math.abs(dx);
+
+                if (overlapX <= 0) continue;
+
+                const dy = b.targetY - a.targetY;
+                const dh = heights[j] - heights[i];
+
+                // How far apart they're drawn top to bottom
+                // (in map units), at each end of the zoom range.
+                const near = dy * c - dh * kLo;
+                const far = dy * c - dh * kHi;
+
+                // Which one is drawn lower: the one lower on the
+                // map, unless its height carries it right past.
+                const down = (near + far) !== 0
+                    ? Math.sign(near + far)
+                    : (dy !== 0 ? Math.sign(dy) : (j % 2 === 0 ? 1 : -1));
+
+                const gap = Math.min(near * down, far * down);
+
+                const short = minH - gap;
+
+                if (short <= 0) continue;
+
+                moved = true;
+
+                // Back to flat map units: the tilt squashes
+                // vertical distances by c.
+                const pushY = short / c;
+
+                // Mostly up and down (taller maps); sideways only
+                // when that's a much smaller move.
+                if (overlapX < pushY * 0.35) {
+
+                    const push = overlapX / 2 + 0.5;
+                    const sign = dx !== 0 ? Math.sign(dx) : (j % 2 === 0 ? 1 : -1);
+
+                    a.targetX -= sign * push;
+                    b.targetX += sign * push;
+
+                } else {
+
+                    const push = pushY / 2 + 0.5;
+
+                    a.targetY -= down * push;
+                    b.targetY += down * push;
 
                 }
 
@@ -250,7 +368,7 @@ function mindmapTargets(nodes, sx, sy) {
 
     });
 
-    resolveOverlaps(nodes, 40);
+    resolveMindmapOverlaps(nodes, 40);
 
     return branches;
 
@@ -289,18 +407,19 @@ const MULTIVERSE_GAP = 700;
 const MULTIVERSE_STEP = 150;
 const MULTIVERSE_SPREAD = 1.8;
 
+// Marvel TV top right, Marvel Unscripted bottom left.
 const MULTIVERSE_CORNERS = {
     xmen: [-1, -1],
-    unscripted: [1, -1],
-    tv: [-1, 1],
+    tv: [1, -1],
+    unscripted: [-1, 1],
     spider: [1, 1]
 };
 
 const MULTIVERSE_TOP = "ff";
 
 // Marvel Animation sits straight below the Avengers,
-// mirroring the Fantastic Four above (Marvel TV takes the
-// bottom-left corner).
+// mirroring the Fantastic Four above (Marvel Unscripted
+// takes the bottom-left corner).
 const MULTIVERSE_BOTTOM = "animated";
 
 function boxesOf(nodes, hubX = 0, hubY = 0) {

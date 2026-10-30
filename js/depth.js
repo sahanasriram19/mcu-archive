@@ -128,7 +128,7 @@ function targetHeight(node){
 
         if(node.isBranch) return MAP_JUNCTION;
 
-        return MAP_FLOAT + (node.tier || 0) * MAP_PER_TIER + (r - 0.5) * MAP_JITTER;
+        return mindmapPosterHeight(node);
 
     }
 
@@ -139,6 +139,29 @@ function targetHeight(node){
     const v = VIEW_HEIGHT[currentView] || VIEW_HEIGHT.phases;
 
     return v.base + r * v.spread;
+
+}
+
+// How high a poster floats on the mind map ("complete").
+// Exported so layout.js can space the mind map for it: a
+// higher poster is drawn further up the screen, so two
+// posters that are clear of each other on the flat map can
+// still land on top of one another once it's tipped back.
+export function mindmapPosterHeight(node){
+
+    const r = node.depthSeed ?? (node.depthSeed = steady(String(node.id || node.key || "")));
+
+    return MAP_FLOAT + (node.tier || 0) * MAP_PER_TIER + (r - 0.5) * MAP_JITTER;
+
+}
+
+// How far up the screen one world unit of height moves a
+// poster, compared with one world unit across the map, at a
+// given zoom (heights shrink more gently than the map:
+// HEIGHT_POWER above).
+export function heightToMapScale(zoom){
+
+    return HEIGHT_SCALE * Math.pow(zoom, HEIGHT_POWER - 1);
 
 }
 

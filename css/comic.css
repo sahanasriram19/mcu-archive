@@ -211,13 +211,19 @@
     border-radius:4px;
 }
 
-#movie-details-trailer{
+#movie-details-trailer,
+#movie-details-disney{
     box-shadow:3px 3px 0 var(--ink);
 }
 
-#movie-details-trailer:hover{
+#movie-details-trailer:hover,
+#movie-details-disney:hover{
     transform:translate(-1px, -1px);
     box-shadow:4px 4px 0 var(--ink);
+}
+
+#movie-details-disney{
+    border-radius:4px;
 }
 
 #movie-details-close{

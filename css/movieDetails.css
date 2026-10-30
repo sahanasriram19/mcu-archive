@@ -137,6 +137,27 @@
     transform:translateY(-1px);
 }
 
+/* Watch on Disney+: Disney+ blue, beside the trailer. */
+#movie-details-disney{
+    display:none;
+    align-items:center;
+    gap:8px;
+    padding:9px 18px;
+    border-radius:999px;
+    background:linear-gradient(135deg, #0b2ea8, #1a6dd8);
+    color:white;
+    font-size:13px;
+    font-weight:600;
+    text-decoration:none;
+    letter-spacing:.02em;
+    transition:filter var(--transition), transform var(--transition);
+}
+
+#movie-details-disney:hover{
+    filter:brightness(1.15);
+    transform:translateY(-1px);
+}
+
 /* Trailer, Watched and Copy link sit in one row. */
 #movie-details-actions{
     display:flex;

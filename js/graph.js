@@ -184,13 +184,55 @@ export function allNodes(){
 // The combined map's titles: every world's own node objects
 // in one list (MCU first), so a title glides between its
 // place on the combined map and its own world's map.
+//
+// A title shared by two worlds (same id — e.g. the Netflix
+// shows, or the cartoons that are in Animated and in X-Men /
+// Spider-Man) is only shown ONCE on the combined map, in the
+// first world in COMBINED_HOME_ORDER that has it, unless
+// COMBINED_HOME names its world outright. Each world's own
+// map still shows all of its titles.
+const COMBINED_HOME_ORDER = ["mcu", "xmen", "spider", "ff", "tv", "unscripted", "animated"];
+
+const COMBINED_HOME = {
+    // Marvel Television's Netflix shows sit with the rest of
+    // Marvel TV.
+    daredevil1: "tv",
+    jessicajones1: "tv",
+    lukecage1: "tv",
+    ironfist1: "tv",
+    defenders1: "tv",
+    punisher1: "tv",
+    // The Fantastic Four's own film stays with the FF.
+    fantasticfour: "ff"
+};
+
 let combinedNodes = null;
 
 function nodesFor(key){
 
     if(key !== ALL_WORLDS) return worldNodes[key];
 
-    if(!combinedNodes) combinedNodes = Object.keys(WORLDS).flatMap(k => worldNodes[k] || []);
+    if(!combinedNodes){
+
+        const home = new Map();
+
+        COMBINED_HOME_ORDER.forEach(k => (worldNodes[k] || []).forEach(n => {
+
+            if(!home.has(n.id)) home.set(n.id, k);
+
+        }));
+
+        Object.entries(COMBINED_HOME).forEach(([id, k]) => {
+
+            if((worldNodes[k] || []).some(n => n.id === id)) home.set(id, k);
+
+        });
+
+        combinedNodes = Object.keys(WORLDS).flatMap(k =>
+            (worldNodes[k] || []).filter(n => (home.get(n.id) || k) === k)
+        );
+
+    }
 
     return combinedNodes;
 

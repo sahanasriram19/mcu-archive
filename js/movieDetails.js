@@ -32,6 +32,7 @@ overlay.innerHTML = `
             <div id="movie-details-meta"></div>
             <div id="movie-details-actions">
                 <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
+                <a id="movie-details-disney" target="_blank" rel="noopener">Watch on Disney+</a>
                 <button type="button" id="movie-details-share" title="Copy link" aria-label="Copy link"></button>
             </div>
             <p id="movie-details-overview"></p>
@@ -49,6 +50,7 @@ const titleEl = overlay.querySelector("#movie-details-title");
 const metaEl = overlay.querySelector("#movie-details-meta");
 const overviewEl = overlay.querySelector("#movie-details-overview");
 const trailerEl = overlay.querySelector("#movie-details-trailer");
+const disneyEl = overlay.querySelector("#movie-details-disney");
 const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
 const watchedBtn = overlay.querySelector("#movie-details-watched");
@@ -413,6 +415,43 @@ function formatDate(release) {
 
 let openNode = null;
 
+//--------------------------------------------------
+// Watch on Disney+
+//
+// Disney+ has no public link per title, so this opens a
+// Disney+ search for the title (sign-in and what's on offer
+// depend on the viewer's country). Hidden for titles that
+// aren't out yet or were cancelled.
+//--------------------------------------------------
+
+const DISNEY_SEARCH = "https://www.disneyplus.com/search?q=";
+
+function disneyQuery(title) {
+
+    // "Spider-Man (1967)" → "Spider-Man"
+    return (title || "").replace(/\s*\([^)]*\)\s*/g, " ").trim();
+
+}
+
+function renderDisneyLink(node) {
+
+    const available = node.status !== "cancelled" && !isUpcoming(node);
+
+    if (available) {
+
+        disneyEl.href = DISNEY_SEARCH + encodeURIComponent(disneyQuery(node.title));
+        disneyEl.title = `Find ${node.title} on Disney+`;
+        disneyEl.style.display = "inline-flex";
+
+    } else {
+
+        disneyEl.removeAttribute("href");
+        disneyEl.style.display = "none";
+
+    }
+
+}
+
 function renderExtras(node) {
 
     if (node.trailerUrl) {
@@ -522,6 +561,8 @@ export async function showMovieDetails(node, opts = {}) {
                 "Feature Film";
 
     titleEl.textContent = node.title;
+
+    renderDisneyLink(node);
 
     const metaParts = [];
 
