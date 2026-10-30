@@ -102,7 +102,17 @@ const GRID_REACH = 0.7;           // how far out it goes, as a share of the pool
 const GRID_SEGMENTS = 14;         // pieces per line (each its own fade)
 const GRID_MIN_PX = 7;            // too dense on screen below this: skip
 
+// The grid fades in as you zoom in, like the posters' pins
+// (js/nodes.js): gone when you're looking at a whole map,
+// full strength from GRID_ZOOM_FULL in.
+const GRID_ZOOM_GONE = 0.05;
+const GRID_ZOOM_FULL = 0.13;
+
 function renderGrid(ctx, camera, pool){
+
+    const zoomFade = Math.min(1, Math.max(0, (camera.zoom - GRID_ZOOM_GONE) / (GRID_ZOOM_FULL - GRID_ZOOM_GONE)));
+
+    if(zoomFade < 0.02) return;
 
     const rx = pool.rx * GRID_REACH, ry = pool.ry * GRID_REACH;
 
@@ -147,7 +157,7 @@ function renderGrid(ctx, camera, pool){
 
             const p = project(ax, ay, 0), q = project(bx, by, 0);
 
-            ctx.globalAlpha = GRID_ALPHA * a;
+            ctx.globalAlpha = GRID_ALPHA * a * zoomFade;
 
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
