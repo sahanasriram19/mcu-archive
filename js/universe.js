@@ -23,6 +23,7 @@ import { renderBranchNodes } from "./branchNodes.js";
 import { renderNodes } from "./nodes.js";
 import { renderHub } from "./hub.js";
 import { renderGround } from "./ground.js";
+import { REST_PITCH } from "./depth.js";
 import { graph } from "./graph.js";
 import { archive } from "./archiveCore.js";
 import { getSway, swayOffset, SWAY, isSwayMoving } from "./sway.js";
@@ -257,6 +258,39 @@ function paintMap(c, camera){
     c.translate(posterShift.x, posterShift.y);
 
     renderNodes(c, camera, graph.nodes);
+
+    c.restore();
+
+    renderHorizon(c, camera);
+
+}
+
+// The far side of the tipped-back map fading into the dark
+// of space, like a horizon: a soft shade down from the top
+// of the screen, deeper the further the map is tipped (none
+// when it's laid flat).
+const HORIZON_SHARE = 0.38;      // how far down the screen it reaches
+const HORIZON_ALPHA = 0.55;      // how dark at the very top, at the usual tilt
+
+function renderHorizon(c, camera){
+
+    const tilt = Math.max(0, Math.min(1.4, (camera.pitch || 0) / REST_PITCH));
+
+    if(tilt < 0.02) return;
+
+    const H = window.innerHeight * HORIZON_SHARE;
+
+    const g = c.createLinearGradient(0, 0, 0, H);
+
+    g.addColorStop(0, `rgba(6,10,28,${HORIZON_ALPHA * Math.min(1, tilt)})`);
+    g.addColorStop(0.55, `rgba(6,10,28,${HORIZON_ALPHA * 0.3 * Math.min(1, tilt)})`);
+    g.addColorStop(1, "rgba(6,10,28,0)");
+
+    c.save();
+
+    c.globalCompositeOperation = "source-over";
+    c.fillStyle = g;
+    c.fillRect(0, 0, window.innerWidth, H);
 
     c.restore();
 

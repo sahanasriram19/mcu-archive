@@ -13,7 +13,7 @@ import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
-import { projectNode } from "./depth.js";
+import { projectNode, project, viewAngles, focalLength } from "./depth.js";
 import { posterSizeFor } from "./posterSize.js";
 import { markMapDirty } from "./redraw.js";
 
@@ -439,6 +439,102 @@ export function renderNodes(ctx, camera, nodes){
         const scaledRadius = node.radius * camera.zoom * depthScale;
 
         //----------------------------------
+        // Pin to the ground (see "3D touches")
+        //----------------------------------
+
+        const ground = project(node.x, node.y, 0);
+
+        const pinTop = y + floatY + (posterSizeFor(node, currentView) * camera.zoom * scale * 1.5) / 2;
+
+        // How far back this poster is: 0 near the middle of the
+        // screen, 1 at the far end (feeds the haze below).
+        const haze = Math.min(1, Math.max(0,
+            (at.z / focalLength() - HAZE_START) / (HAZE_FULL - HAZE_START)
+        )) * HAZE_MAX;
+
+        if(ground.y - pinTop > PIN_MIN_PX){
+
+            ctx.save();
+
+            const fadeBy = 1 - haze;
+
+            const line = ctx.createLinearGradient(0, pinTop, 0, ground.y);
+
+            line.addColorStop(0, `rgba(${node.colour},${PIN_ALPHA * fadeBy})`);
+            line.addColorStop(1, `rgba(${node.colour},${PIN_ALPHA * 0.45 * fadeBy})`);
+
+            ctx.strokeStyle = line;
+            ctx.lineWidth = Math.max(1, 9 * camera.zoom * depthScale);
+
+            ctx.beginPath();
+            ctx.moveTo(x + floatX, pinTop);
+            ctx.lineTo(ground.x + floatX, ground.y);
+            ctx.stroke();
+
+            // The dot: a glow squashed flat, lying on the map.
+            const r = Math.max(2, PIN_DOT * camera.zoom * ground.s);
+            const flat = Math.max(0.25, Math.cos(viewAngles().pitch));
+
+            ctx.globalCompositeOperation = "lighter";
+            ctx.globalAlpha *= PIN_DOT_ALPHA * fadeBy;
+
+            ctx.drawImage(glowSprite(node.colour), ground.x + floatX - r, ground.y - r * flat, r * 2, r * 2 * flat);
+
+            ctx.restore();
+
+        }
+
+        // The card's edge: towards whichever side you're
+        // looking from the least (it turns a little with the
+        // look-around, js/depth.js).
+        const yaw = viewAngles().yaw;
+
+        const drawEdge = (left, top, w, h) => {
+
+            const t = Math.max(1, w * EDGE_DEPTH);
+
+            const dx = t * Math.max(-1, Math.min(1, 0.55 - yaw * 25));
+
+            ctx.save();
+
+            ctx.globalCompositeOperation = "source-over";
+
+            const [cr, cg, cb] = node.colour.split(",").map(Number);
+
+            ctx.fillStyle = `rgb(${Math.round(cr * EDGE_SHADE)},${Math.round(cg * EDGE_SHADE)},${Math.round(cb * EDGE_SHADE)})`;
+
+            ctx.beginPath();
+
+            roundedRect(ctx, left + dx, top + t, w, h, Math.min(12, w * 0.07));
+
+            ctx.fill();
+
+            ctx.restore();
+
+        };
+
+        // A veil of distance over the poster, once drawn.
+        const drawHaze = (left, top, w, h) => {
+
+            if(haze < 0.01) return;
+
+            ctx.save();
+
+            ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha *= haze;
+            ctx.fillStyle = `rgb(${HAZE_COLOUR})`;
+
+            ctx.beginPath();
+
+            roundedRect(ctx, left, top, w, h, Math.min(12, w * 0.07));
+
+            ctx.fill();
+
+            ctx.restore();
+
+        };
+
+        //----------------------------------
         // Glow (tinted per-node colour)
         //----------------------------------
 
@@ -517,6 +613,8 @@ export function renderNodes(ctx, camera, nodes){
     const left = x + floatX - posterWidth / 2;
     const top = y + floatY - posterHeight / 2;
 
+    drawEdge(left, top, posterWidth, posterHeight);
+
     ctx.save();
 
     // Posters need to be fully opaque, not additively
@@ -551,6 +649,8 @@ export function renderNodes(ctx, camera, nodes){
 
     ctx.restore();
 
+    drawHaze(left, top, posterWidth, posterHeight);
+
 } else {
 
             //----------------------------------
@@ -576,6 +676,8 @@ export function renderNodes(ctx, camera, nodes){
 
             const left = x + floatX - posterWidth / 2;
             const top = y + floatY - posterHeight / 2;
+
+            drawEdge(left, top, posterWidth, posterHeight);
 
             ctx.save();
 
@@ -607,6 +709,8 @@ export function renderNodes(ctx, camera, nodes){
                 ctx.restore();
 
             }
+
+            drawHaze(left, top, posterWidth, posterHeight);
 
         }
 
@@ -833,6 +937,35 @@ function roundedPoster(entry){
 //--------------------------------------------------
 
 const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
+
+//--------------------------------------------------
+// 3D touches (all on the same 2D canvas):
+//
+//   Pins     — a faint line from each poster straight
+//              down to the map's surface, ending in a
+//              small glowing dot, so you can see how high
+//              it floats.
+//   Haze     — posters further back are veiled a little in
+//              the deep blue of space, the way distance
+//              fades things.
+//   Edge     — a thin darker side under each poster, so it
+//              reads as a card with some thickness, not a
+//              flat sticker. It sits on the side away from
+//              where you're looking from.
+//--------------------------------------------------
+
+const PIN_ALPHA = 0.7;           // the line
+const PIN_DOT = 55;              // dot radius, world units (shrinks with zoom)
+const PIN_DOT_ALPHA = 1;
+const PIN_MIN_PX = 4;            // no pin when the poster's barely off the ground
+
+const HAZE_COLOUR = "8,13,34";   // deep space blue
+const HAZE_START = 0.0;          // from about the middle of the screen back…
+const HAZE_FULL = 0.45;          // …to this far back (shares of the focal length)
+const HAZE_MAX = 0.5;            // at most this much veil
+
+const EDGE_DEPTH = 0.045;        // card thickness, as a share of its width
+const EDGE_SHADE = 0.42;         // how dark the edge is (share of its colour)
 
 const POSTER_FADE_STEP = 0.07;  // per frame: a poster fades in over ~1/4 s
 

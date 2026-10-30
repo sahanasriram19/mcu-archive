@@ -57,7 +57,9 @@ const HEIGHT_SCALE = Math.pow(0.3, 1 - HEIGHT_POWER);
 
 // Mind map ("complete"): how high above the surface.
 const MAP_JUNCTION = 20;     // phase junctions
-const MAP_FLOAT = 170;       // the first ring of posters
+const MAP_FLOAT = 600;       // the first ring of posters (high enough that
+                             // the pin down to the map shows beneath it,
+                             // js/nodes.js)
 const MAP_PER_TIER = 70;     // each ring after that, a little higher
 const MAP_JITTER = 150;       // a little per-title variety
 
