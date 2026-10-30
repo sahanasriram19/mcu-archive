@@ -15,6 +15,7 @@ import {
 
 } from "./utils.js";
 import { CONFIG } from "./config.js";
+import { starsHidden, captureExtra } from "./stars.js";
 
 //==================================================
 
@@ -56,6 +57,9 @@ function haloFor(colour){
 const MAX_SPECKS_ON_SCREEN = 10;
 
 export function drawEnergy(camera) {
+
+    // (The jump into the archive is drawing them, js/warp.js.)
+    if (starsHidden()) return;
 
     ctx.save();
 
@@ -135,6 +139,10 @@ export function drawEnergy(camera) {
         // From one pre-drawn halo per colour, instead of a
         // new gradient per speck per frame.
         const size = e.radius * 28;
+
+        // The jump into the archive turns these into coloured
+        // streaks too (js/warp.js).
+        captureExtra({ x: screen.x, y: screen.y, r: e.radius, rgb: e.colour, glow: size });
 
         ctx.globalAlpha = e.alpha * pulse * (1 - 0.5 * calm) * shown;
 

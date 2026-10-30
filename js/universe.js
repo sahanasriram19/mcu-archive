@@ -10,7 +10,7 @@ import { universe } from "./universe/state.js";
 import { drawBackground } from "./universe/background.js";
 import { drawNebulas } from "./universe/nebulas.js";
 import { drawDust } from "./universe/dust.js";
-import { drawStars } from "./universe/stars.js";
+import { drawStars, finishCapture } from "./universe/stars.js";
 import { drawHeroStars } from "./universe/heroStars.js";
 import { drawEnergy } from "./universe/energy.js";
 import { drawShootingStars } from "./universe/shootingStars.js";
@@ -436,6 +436,9 @@ export function renderUniverse(camera, entered){
     // drawHeroStars(camera);
 
     drawEnergy(skyCamera);
+
+    // (Both layers are in the jump's capture now.)
+    finishCapture();
 
     drawShootingStars();
 

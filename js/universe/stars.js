@@ -73,6 +73,39 @@ export function setStarsHidden(on){
 
 }
 
+// The glowing coloured specks (energy.js) join in too: they
+// add themselves to the same capture, and hide with the
+// stars.
+export function starsHidden(){
+
+    return hidden;
+
+}
+
+export function captureExtra(item){
+
+    if (capture) capture.push(item);
+
+}
+
+// Called once the energy layer has drawn (universe.js), so
+// the capture holds both layers.
+export function finishCapture(){
+
+    if (capture && captureDone) {
+
+        const found = capture;
+
+        capture = null;
+
+        captureDone(found);
+
+        captureDone = null;
+
+    }
+
+}
+
 // Resolves after the next frame with every star drawn on
 // screen: { x, y, r (radius px), colour }.
 export function captureStars(){
@@ -350,18 +383,6 @@ export function drawStars(camera) {
         }
 
         }
-
-    }
-
-    if (capture && captureDone) {
-
-        const found = capture;
-
-        capture = null;
-
-        captureDone(found);
-
-        captureDone = null;
 
     }
 

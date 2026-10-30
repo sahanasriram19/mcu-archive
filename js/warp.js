@@ -66,7 +66,9 @@ export function canWarp(){
 //              once it's there, so this one rides along with
 //              it while it fades (null when there isn't one)
 //   stars    — the stars on screen right now ({x, y, r,
-//              colour}, from captureStars in stars.js): they
+//              colour}, from captureStars in stars.js — and
+//              the coloured glowing specks, {x, y, r, rgb,
+//              glow}, from energy.js): they
 //              become the first streaks, so the real stars
 //              round the logo are what stretch out and rush
 //              past you
@@ -110,9 +112,12 @@ export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
     // this plays) — so the stars round the logo are what
     // stretch out into the jump. The rest join in as it
     // speeds up.
+    // (The coloured glowing specks, energy.js, come first and
+    // keep their colour and glow: they streak as coloured
+    // trails with a soft halo round them.)
     const seeds = stars
         .filter(s => s.x > -20 && s.x < w + 20 && s.y > -20 && s.y < h + 20)
-        .sort((a, b) => b.r - a.r)
+        .sort((a, b) => (b.glow ? 1 : 0) - (a.glow ? 1 : 0) || b.r - a.r)
         .slice(0, MAX_STAR_STREAKS)
         .map(s => {
 
@@ -121,8 +126,9 @@ export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
             return {
                 a: Math.atan2(dy, dx),
                 d: Math.max(0.005, Math.hypot(dx, dy) / reach),
-                hue: hexToRgb(s.colour),
+                hue: s.rgb || hexToRgb(s.colour),
                 r: s.r,
+                glow: s.glow || 0,
                 seed: true
             };
 
@@ -192,6 +198,7 @@ export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
                     s.d = 0.03 + Math.random() * 0.25;
 
                     s.seed = false;
+                    s.glow = 0;
 
                     continue;
 
@@ -211,6 +218,28 @@ export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
                 const alpha = s.seed
                     ? Math.min(1, s.d * 8)
                     : Math.min(1, 0.25 + p * 0.9) * Math.min(1, s.d * 3);
+
+                // A coloured glow: its halo first, a wide soft
+                // trail in its colour, under the bright core.
+                if(s.glow){
+
+                    ctx.strokeStyle = `rgba(${s.hue},${alpha * 0.22})`;
+                    ctx.lineWidth = Math.max(4, s.glow * 0.32);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = `rgba(${s.hue},${alpha * 0.45})`;
+                    ctx.lineWidth = Math.max(2, s.glow * 0.12);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                }
 
                 ctx.strokeStyle = `rgba(${s.hue},${alpha})`;
                 ctx.lineWidth = s.seed
