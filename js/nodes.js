@@ -768,9 +768,6 @@ export function renderNodes(ctx, camera, nodes){
 
     nodes.forEach(node=>{ if(node !== hovered) order.push({ node, at: projectNode(node) }); });
 
-    // Shadows first, all of them, so they lie on the floor
-    // under every poster rather than over a poster behind.
-    renderShadows(ctx, nodes, focus);
 
     order.sort((a, b) => b.at.z - a.at.z);
 
@@ -831,78 +828,6 @@ function posterBaseSize(node){
 
 // The soft coloured glow behind a poster, one image per
 // colour.
-//--------------------------------------------------
-// Soft shadows on the floor (see "3D touches")
-//--------------------------------------------------
-
-function renderShadows(ctx, nodes, focus){
-
-    const flat = Math.max(0.2, Math.cos(viewAngles().pitch));
-
-    const sprite = shadowSprite();
-
-    ctx.save();
-
-    ctx.globalCompositeOperation = "source-over";
-
-    for(const node of nodes){
-
-        if(node.isBranch || node.growHidden || (node.openFade || 0) >= 0.99) continue;
-
-        if(Math.abs(node.x) > 50000) continue;
-
-        const g = project(node.x, node.y, 0);
-
-        const w = posterSizeFor(node, currentView) * camera.zoom * g.s * SHADOW_WIDTH;
-
-        if(w < 3) continue;
-
-        const h = w * SHADOW_DEPTH * flat;
-
-        if(g.x + w < 0 || g.x - w > window.innerWidth || g.y + h < 0 || g.y - h > window.innerHeight) continue;
-
-        let a = SHADOW_ALPHA * (1 - (node.openFade || 0)) * hoverDim(node.phase);
-
-        if(focus && !focus.ids.has(node.id)) a *= FOCUS_DIM_ALPHA;
-
-        if(node.growStart) a *= Math.min(1, (frameNow - node.growStart) / GROW_FADE_MS);
-
-        ctx.globalAlpha = a;
-
-        ctx.drawImage(sprite, g.x - w / 2, g.y - h / 2, w, h);
-
-    }
-
-    ctx.restore();
-
-}
-
-let shadowCanvas = null;
-
-function shadowSprite(){
-
-    if(shadowCanvas) return shadowCanvas;
-
-    const size = 128;
-
-    shadowCanvas = document.createElement("canvas");
-    shadowCanvas.width = shadowCanvas.height = size;
-
-    const c = shadowCanvas.getContext("2d");
-
-    const g = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-
-    g.addColorStop(0, "rgba(0,1,6,0.95)");
-    g.addColorStop(0.5, "rgba(0,1,6,0.55)");
-    g.addColorStop(1, "rgba(0,2,10,0)");
-
-    c.fillStyle = g;
-    c.fillRect(0, 0, size, size);
-
-    return shadowCanvas;
-
-}
-
 const glowSprites = new Map();
 
 function glowSprite(colour){
@@ -990,8 +915,6 @@ const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
 //              down to the map's surface, ending in a
 //              small glowing dot, so you can see how high
 //              it floats. They fade away as you zoom out.
-//   Shadow   — a soft dark oval on the floor beneath each
-//              poster.
 //   Haze     — posters further back are veiled a little in
 //              the deep blue of space, the way distance
 //              fades things.
@@ -1008,10 +931,6 @@ const PIN_MIN_PX = 4;            // no pin when the poster's barely off the grou
 const PIN_ZOOM_GONE = 0.05;
 const PIN_ZOOM_FULL = 0.13;
 
-// Soft shadows on the floor under each poster.
-const SHADOW_ALPHA = 0.9;
-const SHADOW_WIDTH = 1.5;        // as a share of the poster's width
-const SHADOW_DEPTH = 0.5;        // front to back, as a share of its width (before tilt)
 
 const HAZE_COLOUR = "8,13,34";   // deep space blue
 const HAZE_START = 0.0;          // from about the middle of the screen back…

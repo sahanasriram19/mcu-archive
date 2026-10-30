@@ -96,7 +96,7 @@ export function renderGround(ctx, camera){
 const SHOW_GRID = true;
 
 const GRID_COLOUR = "120,155,235";
-const GRID_ALPHA = 0.16;          // at the middle of a pool
+const GRID_ALPHA = 0.09;          // at the middle of a pool
 const GRID_STEP = 700;            // world units between lines
 const GRID_REACH = 0.7;           // how far out it goes, as a share of the pool
 const GRID_SEGMENTS = 14;         // pieces per line (each its own fade)
