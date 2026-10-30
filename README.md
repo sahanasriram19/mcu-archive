@@ -38,7 +38,7 @@ Switching between views never reloads the page — nodes ease smoothly from thei
 
 ### Details cards
 
-Clicking a poster flips it over into its details card (and back again when you close it): synopsis, rating, cast, trailer, a "Watch on Disney+" button (when the title streams on Disney+ in your country, going by the browser's language setting, it opens TMDB's where-to-watch page for it, whose Disney+ logo plays it on Disney+; elsewhere it's a "Where to watch" button), a "watched" tick, and "Watch before this" — the earlier titles worth seeing first, with a button to light them up on the map. While its card is open, the poster itself leaves the map (or the fly-through), as if it has become the card, and drops back into place as the card flips closed. Cast, synopsis and trailer are pulled live from TMDB.
+Clicking a poster flips it over into its details card (and back again when you close it): synopsis, rating, cast, trailer, a "Watch on Disney+" button (opens the title on Disney+, in the browser or in the Disney+ app if it's installed; titles without a Disney+ link in `data/disneyplus.json` open Disney+'s Marvel page, or a "Where to watch" page if TMDB says they're not on Disney+ in your country), a "watched" tick, and "Watch before this" — the earlier titles worth seeing first, with a button to light them up on the map. While its card is open, the poster itself leaves the map (or the fly-through), as if it has become the card, and drops back into place as the card flips closed. Cast, synopsis and trailer are pulled live from TMDB.
 
 There are no scrollbars anywhere on the site: anything that scrolls (a long card, the cast row, the "Watch before this" row, a long panel) fades out at the edge that has more to see, so the content reads as cut off and invites a scroll.
 
@@ -95,7 +95,8 @@ mcu-archive/
 │   ├── animated.json         # the Animated world: every Marvel Animation title on Disney+
 │   ├── fantasticfour.json    # the Fantastic Four world: cartoons, Fox films, Marvel Studios
 │   ├── unscripted.json       # the Unscripted world: Marvel's documentaries and specials on Disney+
-│   └── tv.json               # the Marvel TV world: Marvel's live-action television
+│   ├── tv.json               # the Marvel TV world: Marvel's live-action television
+│   └── disneyplus.json       # each title's Disney+ id, for the "Watch on Disney+" button
 ├── css/
 │   ├── main.css               # base styles, no scrollbars, the scroll-edge fades
 │   ├── background.css

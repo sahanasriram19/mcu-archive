@@ -418,44 +418,78 @@ let openNode = null;
 //--------------------------------------------------
 // Watch on Disney+
 //
-// Uses TMDB's "where to watch" data (js/posters.js,
-// fetched with the cast and trailer): if the title streams
-// on Disney+ in the viewer's country, the button opens its
-// TMDB watch page, where the Disney+ logo plays it on
-// Disney+. If it streams elsewhere there instead, the same
-// page is offered as "Where to watch". Nothing to show
-// (not out yet, or no data) → no button.
-//
-// (Disney+ has no public per-title links, and its search
-// page ignores a search put in the address — it just opens
-// the home page — so it can't be linked to directly.)
+// Opens the title itself on Disney+: in the browser, or in
+// the Disney+ app on a phone or tablet that has it (Disney+
+// links open the app there). data/disneyplus.json holds each
+// title's Disney+ id — the same id in every country; Disney+
+// sends each viewer to their own country's page. A title not
+// in it opens Disney+'s Marvel page instead ("Find on
+// Disney+"), unless TMDB's where-to-watch data (js/posters.js)
+// says it isn't on Disney+ where the viewer is, in which case
+// it's a "Where to watch" button to the services that do have
+// it. Hidden for titles not out yet, and cancelled ones.
 //--------------------------------------------------
+
+const DISNEY_TITLE = id => `https://www.disneyplus.com/browse/entity-${id}`;
+const DISNEY_MARVEL = "https://www.disneyplus.com/brand/marvel";
+
+let disneyIds = {};
+
+fetch("./data/disneyplus.json")
+    .then(r => r.ok ? r.json() : {})
+    .then(map => {
+
+        disneyIds = map || {};
+
+        if (openNode) renderDisneyLink(openNode);
+
+    })
+    .catch(() => {});
 
 function renderDisneyLink(node) {
 
-    const w = node.watch;
-
-    const show = w && w.link && node.status !== "cancelled" && !isUpcoming(node);
-
-    if (!show) {
+    const hide = () => {
 
         disneyEl.removeAttribute("href");
         disneyEl.style.display = "none";
 
-        return;
+    };
+
+    if (node.status === "cancelled" || isUpcoming(node)) return hide();
+
+    const id = disneyIds[node.id];
+
+    const w = node.watch;
+
+    let href, label, title, elsewhere = false;
+
+    if (id) {
+
+        href = DISNEY_TITLE(id);
+        label = "Watch on Disney+";
+        title = `Open ${node.title} on Disney+`;
+
+    } else if (w && !w.onDisneyHere && w.link) {
+
+        // Not on Disney+ where the viewer is: where it is.
+        href = w.link;
+        label = "Where to watch";
+        title = `Where to stream, rent or buy ${node.title} (${w.region})`;
+        elsewhere = true;
+
+    } else {
+
+        href = DISNEY_MARVEL;
+        label = "Find on Disney+";
+        title = `Find ${node.title} in Marvel on Disney+`;
 
     }
 
-    disneyEl.href = w.link;
+    disneyEl.href = href;
+    disneyEl.textContent = label;
+    disneyEl.title = title;
+    disneyEl.classList.toggle("elsewhere", elsewhere);
     disneyEl.style.display = "inline-flex";
-
-    disneyEl.classList.toggle("elsewhere", !w.onDisneyHere);
-
-    disneyEl.textContent = w.onDisneyHere ? "Watch on Disney+" : "Where to watch";
-
-    disneyEl.title = w.onDisneyHere
-        ? `${node.title} is on Disney+ (${w.region}) — opens where to watch it`
-        : `Where to stream, rent or buy ${node.title} (${w.region})`;
 
 }
 
