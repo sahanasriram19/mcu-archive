@@ -342,6 +342,90 @@ async function fetchTrailer(endpoint, id) {
 
 
 //--------------------------------------------------
+// Where to watch (Disney+)
+//
+// TMDB's watch providers (data from JustWatch) say which
+// services stream a title in each country, with a link to
+// TMDB's "where to watch" page for it, whose service logos
+// open the title on that service. (Disney+ itself has no
+// public links per title, and its search page ignores a
+// search passed in the address, so it can't be linked to
+// directly.)
+//
+// The country comes from the browser's language setting
+// (en-SG → SG), falling back to the US.
+//--------------------------------------------------
+
+export function watchRegion() {
+
+    const langs = (navigator.languages && navigator.languages.length)
+        ? navigator.languages
+        : [navigator.language || ""];
+
+    for (const lang of langs) {
+
+        const m = /[-_]([A-Za-z]{2})$/.exec(lang || "");
+
+        if (m) return m[1].toUpperCase();
+
+    }
+
+    return "US";
+
+}
+
+async function fetchWatchProviders(endpoint, id) {
+
+    const url =
+        `${TMDB_BASE}/${endpoint}/${id}/watch/providers` +
+        `?api_key=${TMDB_API_KEY}`;
+
+    try {
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+
+            console.warn("Watch providers request failed:", res.status, res.statusText);
+
+            return null;
+
+        }
+
+        const data = await res.json();
+
+        const region = watchRegion();
+
+        const here = (data.results || {})[region];
+
+        // Disney+ goes by a few provider ids round the world,
+        // so match it by name.
+        const isDisney = p => /disney/i.test(p.provider_name || "");
+
+        const onDisneyHere = !!(here && (here.flatrate || []).some(isDisney));
+
+        const onDisneyAnywhere = Object.values(data.results || {})
+            .some(r => (r.flatrate || []).some(isDisney));
+
+        return {
+            region,
+            link: here ? here.link : null,
+            onDisneyHere,
+            onDisneyAnywhere
+        };
+
+    } catch (err) {
+
+        console.warn("Watch providers lookup failed for id", id, err);
+
+        return null;
+
+    }
+
+}
+
+
+//--------------------------------------------------
 // LOOKUP CACHE
 //
 // Every visit used to run a fresh TMDB search for all 77
@@ -580,8 +664,9 @@ async function fetchPoster(node) {
 //--------------------------------------------------
 // Cast + trailer
 //
-// These are fetched when the movie details card is
-// opened instead of upfront for every project.
+// These (and where to watch) are fetched when the movie
+// details card is opened instead of upfront for every
+// project.
 //
 // If the poster/TMDB search is already running,
 // fetchDetails() reuses that existing promise.
@@ -648,7 +733,7 @@ export async function fetchDetails(node) {
         // Fetch cast + trailer simultaneously.
         //--------------------------------------------------
 
-        const [cast, trailer] = await Promise.all([
+        const [cast, trailer, watch] = await Promise.all([
 
             fetchCast(
                 node.tmdbEndpoint,
@@ -656,6 +741,11 @@ export async function fetchDetails(node) {
             ),
 
             fetchTrailer(
+                node.tmdbEndpoint,
+                node.tmdbId
+            ),
+
+            fetchWatchProviders(
                 node.tmdbEndpoint,
                 node.tmdbId
             )
@@ -670,6 +760,8 @@ export async function fetchDetails(node) {
         node.cast = cast;
 
         node.trailerUrl = trailer;
+
+        node.watch = watch;
 
         node.detailsLoaded = true;
 

@@ -158,6 +158,13 @@
     transform:translateY(-1px);
 }
 
+/* Not on Disney+ where the viewer is: a plain "Where to
+   watch" button instead. */
+#movie-details-disney.elsewhere{
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.25);
+}
+
 /* Trailer, Watched and Copy link sit in one row. */
 #movie-details-actions{
     display:flex;

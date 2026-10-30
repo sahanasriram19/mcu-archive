@@ -19,7 +19,10 @@ export const VIEWS = [
         // to zoom in. fit < 1 leaves a margin round the
         // edge; raise it towards (or past) 1 to start closer.
         // zoom is the fallback if nothing has laid out yet.
-        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.92, minZoom: 0.07, maxZoom: 0.4 },
+        // (minZoom / userMinZoom: low enough for the bigger,
+        // star-shaped maps — the Avengers one especially — to
+        // fit whole.)
+        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.92, minZoom: 0.04, maxZoom: 0.4, userMinZoom: 0.04 },
         // The combined "Complete MCU" map (every world side by
         // side) is much bigger, so it starts further out and
         // can be zoomed out further. `centre` frames the middle

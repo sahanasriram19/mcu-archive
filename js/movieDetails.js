@@ -418,41 +418,50 @@ let openNode = null;
 //--------------------------------------------------
 // Watch on Disney+
 //
-// Disney+ has no public link per title, so this opens a
-// Disney+ search for the title (sign-in and what's on offer
-// depend on the viewer's country). Hidden for titles that
-// aren't out yet or were cancelled.
+// Uses TMDB's "where to watch" data (js/posters.js,
+// fetched with the cast and trailer): if the title streams
+// on Disney+ in the viewer's country, the button opens its
+// TMDB watch page, where the Disney+ logo plays it on
+// Disney+. If it streams elsewhere there instead, the same
+// page is offered as "Where to watch". Nothing to show
+// (not out yet, or no data) → no button.
+//
+// (Disney+ has no public per-title links, and its search
+// page ignores a search put in the address — it just opens
+// the home page — so it can't be linked to directly.)
 //--------------------------------------------------
-
-const DISNEY_SEARCH = "https://www.disneyplus.com/search?q=";
-
-function disneyQuery(title) {
-
-    // "Spider-Man (1967)" → "Spider-Man"
-    return (title || "").replace(/\s*\([^)]*\)\s*/g, " ").trim();
-
-}
 
 function renderDisneyLink(node) {
 
-    const available = node.status !== "cancelled" && !isUpcoming(node);
+    const w = node.watch;
 
-    if (available) {
+    const show = w && w.link && node.status !== "cancelled" && !isUpcoming(node);
 
-        disneyEl.href = DISNEY_SEARCH + encodeURIComponent(disneyQuery(node.title));
-        disneyEl.title = `Find ${node.title} on Disney+`;
-        disneyEl.style.display = "inline-flex";
-
-    } else {
+    if (!show) {
 
         disneyEl.removeAttribute("href");
         disneyEl.style.display = "none";
 
+        return;
+
     }
+
+    disneyEl.href = w.link;
+    disneyEl.style.display = "inline-flex";
+
+    disneyEl.classList.toggle("elsewhere", !w.onDisneyHere);
+
+    disneyEl.textContent = w.onDisneyHere ? "Watch on Disney+" : "Where to watch";
+
+    disneyEl.title = w.onDisneyHere
+        ? `${node.title} is on Disney+ (${w.region}) — opens where to watch it`
+        : `Where to stream, rent or buy ${node.title} (${w.region})`;
 
 }
 
 function renderExtras(node) {
+
+    renderDisneyLink(node);
 
     if (node.trailerUrl) {
 
