@@ -225,97 +225,185 @@ const MINDMAP_PHASE_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 const MINDMAP_PHASE_RADIUS = 1500;
 const MINDMAP_FIRST_TIER = 2500;
-const MINDMAP_TIER_STEP = 950;
-const MINDMAP_SLOT = 470;
+const MINDMAP_TIER_STEP = 1050;
 const MINDMAP_WEDGE_PAD = 4;
 
+// Share of each phase's wedge its posters may use (the
+// rest is air between neighbouring phases).
+const MINDMAP_USABLE = 0.86;
+
+// Room a poster needs round its ring, in map units: across,
+// and up and down. Up and down is more, as the map is drawn
+// tipped back (squashed top to bottom) with the posters
+// floating at different heights (see resolveMindmapOverlaps).
+const MINDMAP_ROOM_W = POSTER_W + 120;
+const MINDMAP_ROOM_H_EXTRA = 200;
+
+// A phase with spare room fans its posters out, but never
+// more than this much wider than they need.
+const MINDMAP_MAX_SPREAD = 1.45;
+
+// Each map's shape: how much wider (sx) and taller (sy)
+// than round. Every map is a little taller than round
+// (MINDMAP_TALL); the Animated map, the biggest after the
+// Avengers, is laid out a touch wider on a wide screen.
+const MINDMAP_TALL = 1.12;
+
 const WORLD_SHAPES = {
-    animated: { long: 1.5, short: 1.12 },
-    spider: { long: 1.0, short: 1.0 }
+    animated: { long: 1.12, short: 1.0 }
 };
 
 function worldShape(world, { sx, sy }) {
 
     const shape = WORLD_SHAPES[world];
 
-    if (!shape) return { sx, sy };
+    if (!shape) return { sx, sy: sy * MINDMAP_TALL };
 
     const wide = window.innerWidth >= window.innerHeight;
 
     return wide
-        ? { sx: sx * shape.long, sy: sy * shape.short }
-        : { sx: sx * shape.short, sy: sy * shape.long };
+        ? { sx: sx * shape.long, sy: sy * shape.short * MINDMAP_TALL }
+        : { sx: sx * shape.short, sy: sy * shape.long * MINDMAP_TALL };
 
 }
 
+// The Avengers map: shaped a little towards the screen, but
+// much taller than it used to be (it was over one and a half
+// times as wide as tall on a laptop).
 function mindmapStretch() {
 
     const aspect = Math.min(2.2, Math.max(0.5,
         window.innerWidth / Math.max(1, window.innerHeight)
     ));
 
-    const s = Math.sqrt(aspect);
+    const s = Math.pow(aspect, 0.25);
 
-    return { sx: Math.max(0.8, s * 1.05), sy: Math.max(0.8, 1 / s * 1.05) };
+    return { sx: s, sy: (1 / s) * 1.38 };
 
 }
 
-function mindmapTiers(members, wedge) {
+// The angle (round the ring) one poster needs at angle `a`
+// on a ring of radius r, stretched by sx / sy: the room
+// along the ring there, given which way the ring runs (across
+// at the top and bottom, up and down at the sides).
+function mindmapStep(a, r, sx, sy, roomW, roomH) {
 
-    const tiers = [];
+    const tx = -sx * Math.sin(a), ty = sy * Math.cos(a);
 
-    let index = 0;
-    let tier = 0;
+    const len = Math.hypot(tx, ty) || 1;
 
-    let wanted = Math.max(2, Math.min(4, Math.round(members.length / 4)));
+    const ux = Math.abs(tx / len), uy = Math.abs(ty / len);
 
-    while (index < members.length) {
+    const room = Math.min(
+        ux > 1e-6 ? roomW / ux : Infinity,
+        uy > 1e-6 ? roomH / uy : Infinity
+    );
 
-        const radius = MINDMAP_FIRST_TIER + tier * MINDMAP_TIER_STEP;
+    return room / (r * len);
 
-        const capacity = Math.max(2, Math.floor((wedge * radius) / MINDMAP_SLOT));
+}
 
-        let count = Math.min(capacity, wanted, members.length - index);
+// k posters side by side round a ring, centred on angle
+// `centre`: their angles (relative to the first), and the
+// total angle they take up.
+function mindmapRow(k, centre, r, sx, sy, roomW, roomH) {
 
-        const left = members.length - index - count;
+    // Lay them out from the middle, then centre: walk
+    // outwards half each way so a row is mirror-even round
+    // its phase's line.
+    const offsets = [];
 
-        if (left > 0 && left <= 2 && count + left <= capacity) count += left;
+    let span = 0;
 
-        tiers.push({ radius, members: members.slice(index, index + count) });
+    for (let pass = 0; pass < 2; pass++) {
 
-        index += count;
-        tier++;
+        offsets.length = 0;
 
-        wanted = Math.ceil(wanted * 1.6);
+        let a = centre - span / 2;
+
+        for (let i = 0; i < k; i++) {
+
+            const half = mindmapStep(a, r, sx, sy, roomW, roomH) / 2;
+
+            if (i > 0) a += half;
+
+            offsets.push(a);
+
+            a += mindmapStep(a, r, sx, sy, roomW, roomH) / 2;
+
+        }
+
+        span = k > 1 ? offsets[k - 1] - offsets[0] : 0;
 
     }
 
-    return tiers;
+    return { angles: offsets, span };
 
 }
 
-function mindmapTargets(nodes, sx, sy) {
+// How many posters fit round a ring within an angle.
+function mindmapFit(width, centre, r, sx, sy, roomW, roomH) {
 
-    const groups = {};
+    let k = 1;
 
-    nodes.forEach(node => {
+    while (k < 60 && mindmapRow(k + 1, centre, r, sx, sy, roomW, roomH).span <= width) k++;
 
-        groups[node.phase] = groups[node.phase] || [];
-        groups[node.phase].push(node);
+    return k;
 
-    });
+}
 
-    const phaseKeys = [
-        ...MINDMAP_PHASE_ORDER.filter(p => groups[p] && groups[p].length),
-        ...Object.keys(groups).map(Number).filter(p => !MINDMAP_PHASE_ORDER.includes(p)).sort((a, b) => a - b)
-    ];
+// Shares n posters over a phase's rings: as few rings as
+// they fit in, then evenly by how much each ring holds
+// (outer rings, being longer, take more).
+function mindmapTierCounts(n, caps) {
+
+    let rings = 1, total = caps[0];
+
+    while (total < n && rings < caps.length) total += caps[rings++];
+
+    const used = caps.slice(0, rings);
+
+    const sum = used.reduce((a, b) => a + b, 0);
+
+    const counts = used.map(c => Math.floor(n * c / sum));
+
+    let left = n - counts.reduce((a, b) => a + b, 0);
+
+    const order = used
+        .map((c, i) => ({ i, rem: n * c / sum - counts[i] }))
+        .sort((a, b) => b.rem - a.rem || a.i - b.i);
+
+    for (let j = 0; left > 0; j = (j + 1) % order.length) {
+
+        const i = order[j].i;
+
+        if (counts[i] < used[i]) { counts[i]++; left--; }
+
+        else if (order.every(o => counts[o.i] >= used[o.i])) { counts[counts.length - 1]++; left--; }
+
+    }
+
+    // (No empty inner ring.)
+    while (counts.length > 1 && counts[0] === 0) { counts[0] = counts[1]; counts.splice(1, 1); }
+
+    return counts.filter(c => c > 0);
+
+}
+
+// Places one world's map with its first phase centred on
+// angle `start`. Writes targets onto the nodes; returns the
+// phase branches.
+function mindmapPlace(phaseKeys, groups, start, sx, sy) {
+
+    const roomW = MINDMAP_ROOM_W;
+    const roomH = POSTER_H / Math.cos(REST_PITCH + MAP_CHECK_PITCH_EXTRA) + MINDMAP_ROOM_H_EXTRA;
 
     const weights = phaseKeys.map(p => groups[p].length + MINDMAP_WEDGE_PAD);
     const totalWeight = weights.reduce((a, b) => a + b, 0);
 
     const branches = [];
 
-    let cursor = -Math.PI / 2 - (weights[0] / totalWeight) * Math.PI;
+    let cursor = start - (weights[0] / totalWeight) * Math.PI;
 
     phaseKeys.forEach((phase, pi) => {
 
@@ -340,33 +428,132 @@ function mindmapTargets(nodes, sx, sy) {
 
         const members = [...groups[phase]].sort((a, b) => a.timeline - b.timeline);
 
-        const usable = wedge * 0.86;
+        const usable = wedge * MINDMAP_USABLE;
 
-        mindmapTiers(members, usable).forEach((tier, ti) => {
+        const radii = [], caps = [];
 
-            const n = tier.members.length;
+        for (let t = 0, room = 0; t < 12 && room < members.length; t++) {
 
-            const step = Math.min(usable / n, MINDMAP_SLOT * 1.4 / tier.radius);
+            const r = MINDMAP_FIRST_TIER + t * MINDMAP_TIER_STEP;
 
-            const stagger = (ti % 2 === 1 && n > 1) ? step * 0.18 : 0;
+            radii.push(r);
 
-            tier.members.forEach((node, i) => {
+            caps.push(mindmapFit(usable, centre, r, sx, sy, roomW, roomH));
 
-                const angle = centre + (i - (n - 1) / 2) * step + stagger;
+            room += caps[t];
+
+        }
+
+        let index = 0;
+
+        mindmapTierCounts(members.length, caps).forEach((k, ti) => {
+
+            const r = radii[ti];
+
+            // Fan a row out to use its share of the wedge,
+            // evenly, up to MINDMAP_MAX_SPREAD times the room
+            // it needs.
+            const tight = mindmapRow(k, centre, r, sx, sy, roomW, roomH);
+
+            const spread = k > 1 && tight.span > 0
+                ? Math.min(MINDMAP_MAX_SPREAD, Math.max(1, usable / (tight.span + mindmapStep(centre, r, sx, sy, roomW, roomH))))
+                : 1;
+
+            const row = mindmapRow(k, centre, r, sx, sy, roomW * spread, roomH * spread);
+
+            row.angles.forEach(angle => {
+
+                const node = members[index++];
 
                 node.layout = "complete";
                 node.ring = 0;
                 node.tier = ti;
                 node.mindmapAngle = angle;
 
-                node.targetX = Math.cos(angle) * tier.radius * sx;
-                node.targetY = Math.sin(angle) * tier.radius * sy;
+                node.targetX = Math.cos(angle) * r * sx;
+                node.targetY = Math.sin(angle) * r * sy;
 
             });
 
         });
 
     });
+
+    return branches;
+
+}
+
+// How lopsided a placed map is round its logo (0 = even):
+// how far its posters reach left v right and up v down, and
+// where their middle sits.
+function mindmapImbalance(nodes) {
+
+    let L = 0, R = 0, T = 0, B = 0, cx = 0, cy = 0;
+
+    nodes.forEach(n => {
+
+        L = Math.min(L, n.targetX); R = Math.max(R, n.targetX);
+        T = Math.min(T, n.targetY); B = Math.max(B, n.targetY);
+
+        cx += n.targetX; cy += n.targetY;
+
+    });
+
+    const w = Math.max(1, R - L), h = Math.max(1, B - T);
+
+    cx /= Math.max(1, nodes.length);
+    cy /= Math.max(1, nodes.length);
+
+    return Math.abs(R + L) / w + Math.abs(B + T) / h + 1.5 * (Math.abs(cx) / w + Math.abs(cy) / h);
+
+}
+
+// Every phase keeps its place in order, clockwise from the
+// first; the whole map is turned to whichever angle leaves
+// it most even round its logo (preferring the first phase
+// near the top).
+const MINDMAP_TURN_STEPS = 72;
+const MINDMAP_TURN_PULL = 0.04;
+
+function mindmapTargets(nodes, sx, sy) {
+
+    const groups = {};
+
+    nodes.forEach(node => {
+
+        groups[node.phase] = groups[node.phase] || [];
+        groups[node.phase].push(node);
+
+    });
+
+    const phaseKeys = [
+        ...MINDMAP_PHASE_ORDER.filter(p => groups[p] && groups[p].length),
+        ...Object.keys(groups).map(Number).filter(p => !MINDMAP_PHASE_ORDER.includes(p)).sort((a, b) => a - b)
+    ];
+
+    if (!phaseKeys.length) return [];
+
+    const top = -Math.PI / 2;
+
+    let best = top, bestScore = Infinity;
+
+    for (let s = 0; s < MINDMAP_TURN_STEPS; s++) {
+
+        const turn = (s / MINDMAP_TURN_STEPS) * Math.PI * 2;
+
+        const start = top + turn;
+
+        mindmapPlace(phaseKeys, groups, start, sx, sy);
+
+        const away = Math.min(turn, Math.PI * 2 - turn) / Math.PI;
+
+        const score = mindmapImbalance(nodes) + MINDMAP_TURN_PULL * away;
+
+        if (score < bestScore - 1e-9) { bestScore = score; best = start; }
+
+    }
+
+    const branches = mindmapPlace(phaseKeys, groups, best, sx, sy);
 
     resolveMindmapOverlaps(nodes, 40);
 
@@ -499,7 +686,9 @@ export function layoutMultiverse(nodes) {
         // them.)
         const shape = w === "mcu"
             ? stretch
-            : isPortraitPhone() || w === MULTIVERSE_BOTTOM ? { sx: 1, sy: 1 } : worldShape(w, { sx: 1, sy: 1 });
+            : isPortraitPhone()
+                ? { sx: 1, sy: 1 }
+                : w === MULTIVERSE_BOTTOM ? { sx: 1, sy: MINDMAP_TALL } : worldShape(w, { sx: 1, sy: 1 });
 
         const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy);
 
