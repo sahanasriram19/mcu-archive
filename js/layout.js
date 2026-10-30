@@ -418,8 +418,10 @@ function mindmapRingsNeeded(n, caps) {
 // the logo with the first one straight up — so the map
 // mirrors left to right. Each phase uses as few rings as
 // its titles fit in, so they fan out side by side off the
-// branch (a big phase reaches further out). Each ring of a
-// phase is centred on its branch.
+// branch, and those rings sit at the outer end of its arm,
+// so every arm reaches out the same distance (a small phase
+// just has a longer stem). Each ring of a phase is centred
+// on its branch.
 // Writes targets onto the nodes; returns the phase branches.
 const MINDMAP_MAX_RINGS = 12;
 
@@ -448,6 +450,11 @@ function mindmapPlace(phaseKeys, groups, start, sx, sy) {
 
     });
 
+    // Every arm reaches out as far as the fullest phase's: a
+    // phase with fewer rings has them at the outer end, on a
+    // longer stem from the logo, so the map stays round.
+    const reach = Math.max(...plan.map(p => p.need));
+
     const branches = [];
 
     plan.forEach(({ phase, centre, members, caps, need }) => {
@@ -474,9 +481,11 @@ function mindmapPlace(phaseKeys, groups, start, sx, sy) {
 
         let index = 0;
 
+        const shift = reach - used;
+
         counts.forEach((k, ti) => {
 
-            const r = radii[ti];
+            const r = radii[ti + shift];
 
             // Fan a row out evenly across its share of the
             // wedge, up to MINDMAP_MAX_SPREAD times the room
