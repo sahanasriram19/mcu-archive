@@ -12,7 +12,8 @@
 //
 // On Complete MCU there's one pool per world, centred on
 // its logo and sized to its posters. Other views get one
-// pool round all their titles.
+// pool round all their titles. A faint grid lies on the
+// floor in each pool (renderGrid below).
 //==================================================
 
 import { graph } from "./graph.js";
@@ -73,6 +74,94 @@ export function renderGround(ctx, camera){
         ctx.setTransform(base);
 
     }
+
+    ctx.restore();
+
+    if(SHOW_GRID) for(const pool of pools) renderGrid(ctx, camera, pool);
+
+}
+
+//--------------------------------------------------
+// FLOOR GRID
+//
+// A faint square grid lying on the surface under each
+// world, fading out towards the edge of its pool of light.
+// It's drawn on the surface like everything else here, so
+// it tips back and turns with the map: its lines close up
+// towards the back, which is what makes the floor read as
+// a floor.
+//--------------------------------------------------
+
+// Set to false to switch the grid off.
+const SHOW_GRID = true;
+
+const GRID_COLOUR = "120,155,235";
+const GRID_ALPHA = 0.16;          // at the middle of a pool
+const GRID_STEP = 700;            // world units between lines
+const GRID_REACH = 0.7;           // how far out it goes, as a share of the pool
+const GRID_SEGMENTS = 14;         // pieces per line (each its own fade)
+const GRID_MIN_PX = 7;            // too dense on screen below this: skip
+
+function renderGrid(ctx, camera, pool){
+
+    const rx = pool.rx * GRID_REACH, ry = pool.ry * GRID_REACH;
+
+    // Thin the grid out when zoomed far out.
+    let step = GRID_STEP;
+
+    while(step * camera.zoom < GRID_MIN_PX && step < GRID_STEP * 16) step *= 2;
+
+    const centre = project(pool.x, pool.y, 0);
+
+    const reach = Math.max(rx, ry) * camera.zoom * centre.s * 1.5;
+
+    if(centre.x + reach < 0 || centre.x - reach > window.innerWidth || centre.y + reach < 0 || centre.y - reach > window.innerHeight) return;
+
+    // Fades out smoothly to nothing at the oval's edge.
+    const fade = (x, y) => {
+
+        const d = ((x - pool.x) / rx) ** 2 + ((y - pool.y) / ry) ** 2;
+
+        return d >= 1 ? 0 : (1 - d) * (1 - d);
+
+    };
+
+    ctx.save();
+
+    ctx.globalCompositeOperation = "source-over";
+    ctx.strokeStyle = `rgb(${GRID_COLOUR})`;
+    ctx.lineWidth = 1;
+
+    const line = (x0, y0, x1, y1) => {
+
+        for(let i = 0; i < GRID_SEGMENTS; i++){
+
+            const t0 = i / GRID_SEGMENTS, t1 = (i + 1) / GRID_SEGMENTS;
+
+            const ax = x0 + (x1 - x0) * t0, ay = y0 + (y1 - y0) * t0;
+            const bx = x0 + (x1 - x0) * t1, by = y0 + (y1 - y0) * t1;
+
+            const a = fade((ax + bx) / 2, (ay + by) / 2);
+
+            if(a < 0.02) continue;
+
+            const p = project(ax, ay, 0), q = project(bx, by, 0);
+
+            ctx.globalAlpha = GRID_ALPHA * a;
+
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+
+        }
+
+    };
+
+    const nx = Math.floor(rx / step), ny = Math.floor(ry / step);
+
+    for(let i = -nx; i <= nx; i++) line(pool.x + i * step, pool.y - ry, pool.x + i * step, pool.y + ry);
+    for(let j = -ny; j <= ny; j++) line(pool.x - rx, pool.y + j * step, pool.x + rx, pool.y + j * step);
 
     ctx.restore();
 
