@@ -413,12 +413,31 @@ async function fetchWatchProviders(endpoint, id) {
 
         const onNetflixHere = !!(here && [...(here.flatrate || []), ...(here.ads || [])].some(isNetflix));
 
+        // Every service streaming it where the viewer is (on a
+        // subscription, with ads, or free), once each.
+        const streaming = [];
+
+        if (here) {
+
+            [...(here.flatrate || []), ...(here.ads || []), ...(here.free || [])].forEach(p => {
+
+                if (!streaming.some(q => q.id === p.provider_id)) {
+
+                    streaming.push({ id: p.provider_id, name: p.provider_name || "" });
+
+                }
+
+            });
+
+        }
+
         return {
             region,
             link: here ? here.link : null,
             onDisneyHere,
             onDisneyAnywhere,
-            onNetflixHere
+            onNetflixHere,
+            streaming
         };
 
     } catch (err) {

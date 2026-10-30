@@ -13,7 +13,7 @@ import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
-import { projectNode, project, viewAngles, focalLength } from "./depth.js";
+import { projectNode, project, viewAngles, focalLength, liftOf } from "./depth.js";
 import { posterSizeFor } from "./posterSize.js";
 import { markMapDirty } from "./redraw.js";
 
@@ -442,7 +442,8 @@ export function renderNodes(ctx, camera, nodes){
         // Pin to the ground (see "3D touches")
         //----------------------------------
 
-        const ground = project(node.x, node.y, 0);
+        // (Under where the poster's drawn: see liftOf.)
+        const ground = project(node.x, node.y, 0, liftOf(node));
 
         const pinTop = y + floatY + (posterSizeFor(node, currentView) * camera.zoom * scale * 1.5) / 2;
 

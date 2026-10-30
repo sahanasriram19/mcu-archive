@@ -1,7 +1,7 @@
 import { getCurrentView } from "./viewManager.js";
 import { HIGHLIGHT_COLOURS } from "./branchNodes.js";
 import { getTimelineOrientation } from "./layout.js";
-import { project, nodeHeight } from "./depth.js";
+import { project, nodeHeight, liftOf } from "./depth.js";
 
 //==================================================
 // CONNECTION RENDERER
@@ -118,8 +118,18 @@ function projectEdge(from, to, edge){
 
     const d0 = depthOf(from), d3 = depthOf(to);
 
-    const a = project(from.x, from.y, d0);
-    const b = project(to.x, to.y, d3);
+    // A poster's end is drawn where the poster is (its float
+    // taken back out, js/depth.js liftOf); the line eases into
+    // that along its length.
+    const l0 = from.isBranch === undefined && from.id === undefined ? null : liftOf(from);
+    const l3 = liftOf(to);
+
+    const L0 = l0 || 0, L3 = l3 || 0;
+
+    const blend = t => (l0 === null && l3 === null) ? null : L0 + (L3 - L0) * t;
+
+    const a = project(from.x, from.y, d0, l0);
+    const b = project(to.x, to.y, d3, l3);
 
     if(edge.style !== "curve") return { a, b };
 
@@ -127,8 +137,8 @@ function projectEdge(from, to, edge){
 
     return {
         a, b,
-        c1: project(c1x, c1y, d0 + (d3 - d0) / 3),
-        c2: project(c2x, c2y, d0 + (d3 - d0) * 2 / 3)
+        c1: project(c1x, c1y, d0 + (d3 - d0) / 3, blend(1 / 3)),
+        c2: project(c2x, c2y, d0 + (d3 - d0) * 2 / 3, blend(2 / 3))
     };
 
 }

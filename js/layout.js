@@ -18,7 +18,7 @@ import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 import { PHASES_POSTER } from "./posterSize.js";
 // (Only called while laying out, never as the module loads,
 // so importing back from depth.js is safe.)
-import { REST_PITCH, mindmapPosterHeight, heightToMapScale } from "./depth.js";
+import { REST_PITCH, heightToMapScale } from "./depth.js";
 
 //--------------------------------------------------
 // Short era name per phase, used as the branch node's
@@ -144,7 +144,11 @@ function resolveMindmapOverlaps(nodes, margin = 40) {
     const minW = POSTER_W + margin;
     const minH = POSTER_H + margin;
 
-    const heights = nodes.map(mindmapPosterHeight);
+    // (The mind map's posters are drawn with their float taken
+    // back out of where they sit on screen — js/depth.js
+    // liftOf — so only the tilt matters here, not their
+    // heights.)
+    const heights = nodes.map(() => 0);
 
     for (let iter = 0; iter < MAP_OVERLAP_ITERATIONS; iter++) {
 
@@ -520,31 +524,7 @@ function mindmapPlace(phaseKeys, groups, start, sx, sy) {
 
 }
 
-// Floating lifts a poster up the screen (js/depth.js): on a
-// branch pointing down the screen, towards you, that pushed
-// its posters back up towards the branch's own junction, so
-// they bunched up beside it and the lines doubled back to
-// reach them. So each poster is set down that much further
-// down the map to start with, and floats up to just where
-// the flat layout put it. Worked out at a typical zoom for
-// the view (the lift changes a little with zoom).
-const LIFT_ZOOM = { world: 0.1, combined: 0.06 };
-
-function liftCompensate(nodes, zoom) {
-
-    const pitch = REST_PITCH;
-
-    const k = heightToMapScale(zoom) * Math.tan(pitch);
-
-    nodes.forEach(node => {
-
-        node.targetY += mindmapPosterHeight(node) * k;
-
-    });
-
-}
-
-function mindmapTargets(nodes, sx, sy, liftZoom = LIFT_ZOOM.world) {
+function mindmapTargets(nodes, sx, sy) {
 
     const groups = {};
 
@@ -564,8 +544,6 @@ function mindmapTargets(nodes, sx, sy, liftZoom = LIFT_ZOOM.world) {
 
     // The first phase straight up, the rest clockwise.
     const branches = mindmapPlace(phaseKeys, groups, -Math.PI / 2, sx, sy);
-
-    liftCompensate(nodes, liftZoom);
 
     resolveMindmapOverlaps(nodes, 40);
 
@@ -702,7 +680,7 @@ export function layoutMultiverse(nodes) {
                 ? { sx: 1, sy: 1 }
                 : w === MULTIVERSE_BOTTOM ? { sx: 1, sy: MINDMAP_TALL } : worldShape(w, { sx: 1, sy: 1 });
 
-        const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy, LIFT_ZOOM.combined);
+        const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy);
 
         maps[w] = { branches, boxes: boxesOf(byWorld[w]), dx: 0, dy: 0 };
 

@@ -34,6 +34,7 @@ overlay.innerHTML = `
                 <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
                 <a id="movie-details-disney" target="_blank" rel="noopener">Watch on Disney+</a>
                 <a id="movie-details-netflix" target="_blank" rel="noopener">Watch on Netflix</a>
+                <span id="movie-details-more"></span>
                 <button type="button" id="movie-details-share" title="Copy link" aria-label="Copy link"></button>
             </div>
             <p id="movie-details-overview"></p>
@@ -53,6 +54,7 @@ const overviewEl = overlay.querySelector("#movie-details-overview");
 const trailerEl = overlay.querySelector("#movie-details-trailer");
 const disneyEl = overlay.querySelector("#movie-details-disney");
 const netflixEl = overlay.querySelector("#movie-details-netflix");
+const moreEl = overlay.querySelector("#movie-details-more");
 const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
 const watchedBtn = overlay.querySelector("#movie-details-watched");
@@ -424,13 +426,13 @@ let openNode = null;
 // the Disney+ app on a phone or tablet that has it (Disney+
 // links open the app there). data/disneyplus.json holds each
 // title's Disney+ id — the same id in every country; Disney+
-// sends each viewer to their own country's page. A title not
-// in it opens Disney+'s Marvel page instead (still "Watch on
-// Disney+"), unless TMDB's where-to-watch data (js/posters.js)
-// says it isn't on Disney+ where the viewer is and there's no
-// Disney+ link for it, in which case it's a "Where to watch"
-// button to the services that do have it. Hidden for titles
-// not out yet, and cancelled ones.
+// sends each viewer to their own country's page. Shown only
+// when TMDB's where-to-watch data (js/posters.js) says the
+// title is on Disney+ where the viewer is (a title on Disney+
+// there without a link of its own opens Disney+'s Marvel
+// page). Without that data (no TMDB key, or no match) it's
+// shown for titles that have a Disney+ link. Hidden for
+// titles not out yet, and cancelled ones.
 //--------------------------------------------------
 
 // (A few titles are stored as a full Disney+ link instead.)
@@ -445,12 +447,12 @@ fetch("./data/disneyplus.json")
 
         disneyIds = map || {};
 
-        if (openNode) renderDisneyLink(openNode);
+        if (openNode) renderDisneyLink(openNode, !!openNode.detailsLoaded);
 
     })
     .catch(() => {});
 
-function renderDisneyLink(node) {
+function renderDisneyLink(node, settled = false) {
 
     const hide = () => {
 
@@ -465,41 +467,100 @@ function renderDisneyLink(node) {
 
     const w = node.watch;
 
-    let href, label, title, elsewhere = false;
+    // Still waiting for where-to-watch (it comes with the cast
+    // and trailer): nothing yet, rather than a button that may
+    // be wrong.
+    if (w === undefined && !node.detailsLoaded && !settled) return hide();
 
-    if (id) {
+    // Where-to-watch says it isn't on Disney+ here: no button,
+    // whatever link we have for it (Sony's films, for one, come
+    // and go by country).
+    if (w && !w.onDisneyHere) return hide();
 
-        href = DISNEY_TITLE(id);
-        label = "Watch on Disney+";
-        title = `Open ${node.title} on Disney+`;
+    // On Disney+ here (or no where-to-watch data at all, and we
+    // have its Disney+ link).
+    if (!w && !id) return hide();
 
-    } else if (w && !w.onDisneyHere && w.onNetflixHere) {
+    disneyEl.href = id ? DISNEY_TITLE(id) : DISNEY_MARVEL;
+    disneyEl.textContent = "Watch on Disney+";
+    disneyEl.title = id ? `Open ${node.title} on Disney+` : `Watch ${node.title} in Marvel on Disney+`;
+    disneyEl.classList.remove("elsewhere");
+    disneyEl.style.display = "inline-flex";
 
-        // Not on Disney+ where the viewer is, but on Netflix:
-        // the Netflix button says it all.
-        return hide();
+}
 
-    } else if (w && !w.onDisneyHere && w.link) {
+//--------------------------------------------------
+// Other services
+//
+// A button for each other service streaming the title where
+// the viewer is (from TMDB's where-to-watch, js/posters.js):
+// the ones with a search page open that search; the rest
+// open TMDB's where-to-watch page for the title, which links
+// straight to it on that service. Not streaming anywhere
+// here (only to rent or buy): one "Where to watch" button.
+//--------------------------------------------------
 
-        // Not on Disney+ where the viewer is: where it is.
-        href = w.link;
-        label = "Where to watch";
-        title = `Where to stream, rent or buy ${node.title} (${w.region})`;
-        elsewhere = true;
+const SERVICE_SEARCH = [
+    { match: /amazon prime video|prime video/i, label: "Prime Video", url: q => `https://www.primevideo.com/search?phrase=${q}` },
+    { match: /apple tv/i, label: "Apple TV", url: q => `https://tv.apple.com/search?term=${q}` },
+    { match: /^hulu$/i, label: "Hulu", url: q => `https://www.hulu.com/search?q=${q}` }
+];
 
-    } else {
+// At most this many extra buttons, so the row stays tidy.
+const MAX_OTHER_SERVICES = 2;
 
-        href = DISNEY_MARVEL;
-        label = "Watch on Disney+";
-        title = `Watch ${node.title} in Marvel on Disney+`;
+function renderOtherServices(node) {
+
+    moreEl.innerHTML = "";
+
+    const w = node.watch;
+
+    if (!w || node.status === "cancelled" || isUpcoming(node)) return;
+
+    const q = encodeURIComponent((node.title || "").replace(/\s*\([^)]*\)\s*/g, " ").trim());
+
+    const others = (w.streaming || []).filter(p => !/disney|netflix/i.test(p.name));
+
+    const add = (label, href, title, plain) => {
+
+        const a = document.createElement("a");
+
+        a.className = "watch-service" + (plain ? " plain" : "");
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.href = href;
+        a.textContent = label;
+        a.title = title;
+
+        moreEl.appendChild(a);
+
+    };
+
+    const seen = new Set();
+
+    others.forEach(p => {
+
+        if (moreEl.children.length >= MAX_OTHER_SERVICES) return;
+
+        const known = SERVICE_SEARCH.find(sv => sv.match.test(p.name));
+
+        const label = known ? known.label : p.name.replace(/\s+(with ads|standard with ads|basic with ads)$/i, "");
+
+        if (seen.has(label)) return;
+
+        seen.add(label);
+
+        if (known) add(`Watch on ${label}`, known.url(q), `${node.title} is on ${label} (${w.region})`);
+        else if (w.link) add(`Watch on ${label}`, w.link, `${node.title} is on ${label} (${w.region}) — opens where to watch it`);
+
+    });
+
+    // Not streaming here at all: where to rent or buy it.
+    if (!w.onDisneyHere && !w.onNetflixHere && !others.length && w.link) {
+
+        add("Where to watch", w.link, `Where to rent or buy ${node.title} (${w.region})`, true);
 
     }
-
-    disneyEl.href = href;
-    disneyEl.textContent = label;
-    disneyEl.title = title;
-    disneyEl.classList.toggle("elsewhere", elsewhere);
-    disneyEl.style.display = "inline-flex";
 
 }
 
@@ -539,9 +600,12 @@ function renderNetflixLink(node) {
 
 function renderExtras(node) {
 
-    renderDisneyLink(node);
+    // (Where-to-watch has come back by now, or isn't coming.)
+    renderDisneyLink(node, true);
 
     renderNetflixLink(node);
+
+    renderOtherServices(node);
 
     if (node.trailerUrl) {
 
@@ -654,6 +718,8 @@ export async function showMovieDetails(node, opts = {}) {
     renderDisneyLink(node);
 
     renderNetflixLink(node);
+
+    renderOtherServices(node);
 
     const metaParts = [];
 

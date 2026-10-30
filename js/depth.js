@@ -227,7 +227,17 @@ export function focalLength(){
 
 }
 
-export function project(wx, wy, depth = 0){
+// `liftFrom` (optional): a height (as a depth, like `depth`)
+// whose rise up the screen is taken back out, so a poster
+// floating that high is drawn exactly where the flat layout
+// put it, at any zoom or tilt, and only its depth (size,
+// what's in front) shows the height. On the mind maps the
+// posters are drawn this way (projectNode), and their pins
+// drop to the floor under that spot (js/nodes.js) — so the
+// branches never fold back on themselves because of the
+// float, which a fixed nudge in the layout couldn't manage
+// at every zoom.
+export function project(wx, wy, depth = 0, liftFrom = null){
 
     const zoom = camera.zoom;
 
@@ -259,6 +269,8 @@ export function project(wx, wy, depth = 0){
     // the way a card standing on a table does as you lean
     // over it.
     const c = Math.cos(p), sn = Math.sin(p);
+
+    if(liftFrom !== null && c > 0.05) Y -= screenDepth(liftFrom) * sn / c;
 
     const Yr = Y * c + D * sn;
     const Zp = -Y * sn + D * c;
@@ -324,6 +336,18 @@ export function nodeHeight(node){
 // Shorthand for a node (or a hub / anchor with no depth).
 export function projectNode(node){
 
-    return project(node.x, node.y, -nodeHeight(node));
+    return project(node.x, node.y, -nodeHeight(node), liftOf(node));
+
+}
+
+// On the mind maps ("complete") a poster's float is taken
+// back out of where it's drawn (see project's liftFrom) —
+// just its resting height, so a hovered poster still rises.
+// null elsewhere.
+export function liftOf(node){
+
+    if(currentView !== "complete" || node.isBranch) return null;
+
+    return node.depth || 0;
 
 }

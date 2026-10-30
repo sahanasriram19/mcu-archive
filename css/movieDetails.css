@@ -179,6 +179,37 @@
     transform:translateY(-1px);
 }
 
+/* Other services (Prime Video, Apple TV…), and "Where to
+   watch" (.plain) when it's only to rent or buy. */
+#movie-details-more{
+    display:contents;
+}
+
+.watch-service{
+    display:inline-flex;
+    align-items:center;
+    padding:9px 18px;
+    border-radius:4px;
+    background:#2b3445;
+    border:1px solid rgba(255,255,255,.22);
+    color:white;
+    font-size:13px;
+    font-weight:600;
+    text-decoration:none;
+    letter-spacing:.02em;
+    box-shadow:3px 3px 0 var(--ink, #000);
+    transition:filter var(--transition), transform var(--transition);
+}
+
+.watch-service:hover{
+    filter:brightness(1.2);
+    transform:translate(-1px, -1px);
+}
+
+.watch-service.plain{
+    background:rgba(255,255,255,.1);
+}
+
 /* Not on Disney+ where the viewer is: a plain "Where to
    watch" button instead. */
 #movie-details-disney.elsewhere{
