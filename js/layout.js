@@ -128,7 +128,7 @@ const MAP_CHECK_ZOOMS = [0.07, 0.4];
 
 // A little more tilt than the map opens with, for headroom
 // (the look-around tips it a degree or so with the mouse).
-const MAP_CHECK_PITCH_EXTRA = 0.05;
+const MAP_CHECK_PITCH_EXTRA = 0.09;
 
 const MAP_OVERLAP_ITERATIONS = 600;
 
@@ -416,11 +416,10 @@ function mindmapRingsNeeded(n, caps) {
 // Places one world's map as a star: every phase gets the
 // same share of the circle, its branch evenly spaced round
 // the logo with the first one straight up — so the map
-// mirrors left to right — and every phase is laid out over
-// the same number of rings, so every arm reaches out the
-// same distance (a big phase just has fuller rings). A phase
-// with fewer titles than that only gets one ring per title.
-// Each ring of a phase is centred on its branch.
+// mirrors left to right. Each phase uses as few rings as
+// its titles fit in, so they fan out side by side off the
+// branch (a big phase reaches further out). Each ring of a
+// phase is centred on its branch.
 // Writes targets onto the nodes; returns the phase branches.
 const MINDMAP_MAX_RINGS = 12;
 
@@ -449,13 +448,9 @@ function mindmapPlace(phaseKeys, groups, start, sx, sy) {
 
     });
 
-    // Every arm the same length: as many rings as the
-    // fullest phase needs.
-    const rings = Math.max(...plan.map(p => p.need));
-
     const branches = [];
 
-    plan.forEach(({ phase, centre, members, caps }) => {
+    plan.forEach(({ phase, centre, members, caps, need }) => {
 
         branches.push({
 
@@ -470,7 +465,10 @@ function mindmapPlace(phaseKeys, groups, start, sx, sy) {
 
         });
 
-        const used = Math.min(rings, members.length);
+        // As few rings as the phase needs, so its posters
+        // fan out side by side off the branch rather than
+        // trailing out one behind another.
+        const used = need;
 
         const counts = mindmapRowCounts(members.length, caps.slice(0, used));
 

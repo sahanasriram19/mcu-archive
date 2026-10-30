@@ -484,35 +484,6 @@ export function renderNodes(ctx, camera, nodes){
 
         }
 
-        // The card's edge: towards whichever side you're
-        // looking from the least (it turns a little with the
-        // look-around, js/depth.js).
-        const yaw = viewAngles().yaw;
-
-        const drawEdge = (left, top, w, h) => {
-
-            const t = Math.max(1, w * EDGE_DEPTH);
-
-            const dx = t * Math.max(-1, Math.min(1, 0.55 - yaw * 25));
-
-            ctx.save();
-
-            ctx.globalCompositeOperation = "source-over";
-
-            const [cr, cg, cb] = node.colour.split(",").map(Number);
-
-            ctx.fillStyle = `rgb(${Math.round(cr * EDGE_SHADE)},${Math.round(cg * EDGE_SHADE)},${Math.round(cb * EDGE_SHADE)})`;
-
-            ctx.beginPath();
-
-            roundedRect(ctx, left + dx, top + t, w, h, Math.min(12, w * 0.07));
-
-            ctx.fill();
-
-            ctx.restore();
-
-        };
-
         // A veil of distance over the poster, once drawn.
         const drawHaze = (left, top, w, h) => {
 
@@ -613,8 +584,6 @@ export function renderNodes(ctx, camera, nodes){
     const left = x + floatX - posterWidth / 2;
     const top = y + floatY - posterHeight / 2;
 
-    drawEdge(left, top, posterWidth, posterHeight);
-
     ctx.save();
 
     // Posters need to be fully opaque, not additively
@@ -676,8 +645,6 @@ export function renderNodes(ctx, camera, nodes){
 
             const left = x + floatX - posterWidth / 2;
             const top = y + floatY - posterHeight / 2;
-
-            drawEdge(left, top, posterWidth, posterHeight);
 
             ctx.save();
 
@@ -948,10 +915,6 @@ const LIFT_SCALE = 0.12;        // hovered poster grows by up to 12%
 //   Haze     — posters further back are veiled a little in
 //              the deep blue of space, the way distance
 //              fades things.
-//   Edge     — a thin darker side under each poster, so it
-//              reads as a card with some thickness, not a
-//              flat sticker. It sits on the side away from
-//              where you're looking from.
 //--------------------------------------------------
 
 const PIN_ALPHA = 0.7;           // the line
@@ -963,9 +926,6 @@ const HAZE_COLOUR = "8,13,34";   // deep space blue
 const HAZE_START = 0.0;          // from about the middle of the screen back…
 const HAZE_FULL = 0.45;          // …to this far back (shares of the focal length)
 const HAZE_MAX = 0.5;            // at most this much veil
-
-const EDGE_DEPTH = 0.045;        // card thickness, as a share of its width
-const EDGE_SHADE = 0.42;         // how dark the edge is (share of its colour)
 
 const POSTER_FADE_STEP = 0.07;  // per frame: a poster fades in over ~1/4 s
 
