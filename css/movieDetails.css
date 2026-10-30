@@ -158,6 +158,27 @@
     transform:translateY(-1px);
 }
 
+/* Watch on Netflix: Netflix red, beside the Disney+ one. */
+#movie-details-netflix{
+    display:none;
+    align-items:center;
+    gap:8px;
+    padding:9px 18px;
+    border-radius:999px;
+    background:#e50914;
+    color:white;
+    font-size:13px;
+    font-weight:600;
+    text-decoration:none;
+    letter-spacing:.02em;
+    transition:filter var(--transition), transform var(--transition);
+}
+
+#movie-details-netflix:hover{
+    filter:brightness(1.12);
+    transform:translateY(-1px);
+}
+
 /* Not on Disney+ where the viewer is: a plain "Where to
    watch" button instead. */
 #movie-details-disney.elsewhere{

@@ -33,6 +33,7 @@ overlay.innerHTML = `
             <div id="movie-details-actions">
                 <a id="movie-details-trailer" target="_blank" rel="noopener">▶ Watch Trailer</a>
                 <a id="movie-details-disney" target="_blank" rel="noopener">Watch on Disney+</a>
+                <a id="movie-details-netflix" target="_blank" rel="noopener">Watch on Netflix</a>
                 <button type="button" id="movie-details-share" title="Copy link" aria-label="Copy link"></button>
             </div>
             <p id="movie-details-overview"></p>
@@ -51,6 +52,7 @@ const metaEl = overlay.querySelector("#movie-details-meta");
 const overviewEl = overlay.querySelector("#movie-details-overview");
 const trailerEl = overlay.querySelector("#movie-details-trailer");
 const disneyEl = overlay.querySelector("#movie-details-disney");
+const netflixEl = overlay.querySelector("#movie-details-netflix");
 const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
 const watchedBtn = overlay.querySelector("#movie-details-watched");
@@ -471,6 +473,12 @@ function renderDisneyLink(node) {
         label = "Watch on Disney+";
         title = `Open ${node.title} on Disney+`;
 
+    } else if (w && !w.onDisneyHere && w.onNetflixHere) {
+
+        // Not on Disney+ where the viewer is, but on Netflix:
+        // the Netflix button says it all.
+        return hide();
+
     } else if (w && !w.onDisneyHere && w.link) {
 
         // Not on Disney+ where the viewer is: where it is.
@@ -495,9 +503,45 @@ function renderDisneyLink(node) {
 
 }
 
+//--------------------------------------------------
+// Watch on Netflix
+//
+// Shown only when TMDB's where-to-watch data (js/posters.js)
+// says the title is streaming on Netflix where the viewer is.
+// Netflix has no public way to look up a title's own page,
+// so this opens a Netflix search for the title (the viewer
+// needs to be logged in to Netflix).
+//--------------------------------------------------
+
+const NETFLIX_SEARCH = "https://www.netflix.com/search?q=";
+
+function renderNetflixLink(node) {
+
+    const w = node.watch;
+
+    if (!w || !w.onNetflixHere || node.status === "cancelled" || isUpcoming(node)) {
+
+        netflixEl.removeAttribute("href");
+        netflixEl.style.display = "none";
+
+        return;
+
+    }
+
+    // "Spider-Man (1967)" → "Spider-Man"
+    const q = (node.title || "").replace(/\s*\([^)]*\)\s*/g, " ").trim();
+
+    netflixEl.href = NETFLIX_SEARCH + encodeURIComponent(q);
+    netflixEl.title = `${node.title} is on Netflix (${w.region})`;
+    netflixEl.style.display = "inline-flex";
+
+}
+
 function renderExtras(node) {
 
     renderDisneyLink(node);
+
+    renderNetflixLink(node);
 
     if (node.trailerUrl) {
 
@@ -608,6 +652,8 @@ export async function showMovieDetails(node, opts = {}) {
     titleEl.textContent = node.title;
 
     renderDisneyLink(node);
+
+    renderNetflixLink(node);
 
     const metaParts = [];
 

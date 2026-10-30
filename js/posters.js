@@ -407,11 +407,18 @@ async function fetchWatchProviders(endpoint, id) {
         const onDisneyAnywhere = Object.values(data.results || {})
             .some(r => (r.flatrate || []).some(isDisney));
 
+        // Netflix (also listed as "Netflix basic with Ads" and
+        // the like), streaming where the viewer is.
+        const isNetflix = p => /netflix/i.test(p.provider_name || "");
+
+        const onNetflixHere = !!(here && [...(here.flatrate || []), ...(here.ads || [])].some(isNetflix));
+
         return {
             region,
             link: here ? here.link : null,
             onDisneyHere,
-            onDisneyAnywhere
+            onDisneyAnywhere,
+            onNetflixHere
         };
 
     } catch (err) {

@@ -212,17 +212,20 @@
 }
 
 #movie-details-trailer,
-#movie-details-disney{
+#movie-details-disney,
+#movie-details-netflix{
     box-shadow:3px 3px 0 var(--ink);
 }
 
 #movie-details-trailer:hover,
-#movie-details-disney:hover{
+#movie-details-disney:hover,
+#movie-details-netflix:hover{
     transform:translate(-1px, -1px);
     box-shadow:4px 4px 0 var(--ink);
 }
 
-#movie-details-disney{
+#movie-details-disney,
+#movie-details-netflix{
     border-radius:4px;
 }
 
