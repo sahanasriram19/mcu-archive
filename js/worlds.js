@@ -25,8 +25,8 @@
 //   tv    — data/tv.json, Marvel's live-action television
 //           (Agents of S.H.I.E.L.D., Agent Carter, Inhumans,
 //           the Netflix Defenders shows, Runaways, Cloak &
-//           Dagger, Helstrom, Legion, The Gifted), grouped by
-//           network
+//           Dagger, Helstrom, Legion, The Gifted, and Marvel
+//           Studios' Disney+ shows), grouped by network
 //
 // Those were their own continuities; they're tied to the
 // MCU through the multiverse. Deadpool & Wolverine,
@@ -153,12 +153,14 @@ export const UNSCRIPTED_ERAS = {
 
 // Marvel Television eras, keyed by the number in tv.json.
 // (The Netflix shows are the same titles as the MCU's
-// "Defenders" group, under the same ids.)
+// "Defenders" group, and the Disney+ shows — WandaVision,
+// Loki, Hawkeye… — the same as the MCU's, under the same ids.)
 export const TV_ERAS = {
     71: "ABC",
     73: "Netflix",
     74: "Hulu & Freeform",
-    75: "Fox X-Men Shows"
+    75: "Fox X-Men Shows",
+    76: "Disney+"
 };
 
 // The MCU's "Phase 0" — the Netflix Defenders-saga shows

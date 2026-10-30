@@ -100,7 +100,8 @@ export const PHASE_COLOURS = {
     71: "70,110,200",   // ABC — S.H.I.E.L.D. blue
     73: "150,150,160",  // Netflix — Defenders steel grey
     74: "190,90,190",   // Hulu & Freeform — magenta
-    75: "230,180,60"    // Fox X-Men Shows — gold
+    75: "230,180,60",   // Fox X-Men Shows — gold
+    76: "60,170,220"    // Disney+ — Disney+ blue
 
 };
 
@@ -167,7 +168,8 @@ export const HIGHLIGHT_COLOURS = {
     71: "90,150,255",   // ABC
     73: "45,212,191",   // Netflix (teal, as the MCU's Defenders)
     74: "230,100,240",  // Hulu & Freeform
-    75: "255,200,60"    // Fox X-Men Shows
+    75: "255,200,60",   // Fox X-Men Shows
+    76: "60,200,255"    // Disney+
 
 };
 

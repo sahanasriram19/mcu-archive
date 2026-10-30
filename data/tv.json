@@ -97,7 +97,7 @@
         "phase": 75,
         "saga": "marvel-tv",
         "release": "2017-02-08",
-        "timeline": 14,
+        "timeline": 29,
         "colour": "230,190,60",
         "characters": [
             "David Haller",
@@ -159,7 +159,7 @@
         "phase": 75,
         "saga": "marvel-tv",
         "release": "2017-10-02",
-        "timeline": 15,
+        "timeline": 30,
         "colour": "60,150,200",
         "characters": [
             "Lorna Dane",
@@ -225,6 +225,228 @@
         "characters": [
             "Daimon Helstrom",
             "Ana Helstrom"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "wandavision",
+        "title": "WandaVision",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2021-01-15",
+        "timeline": 15,
+        "colour": "226,89,107",
+        "characters": [
+            "Wanda Maximoff",
+            "Vision",
+            "Agatha Harkness"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "falconwintersoldier",
+        "title": "The Falcon and the Winter Soldier",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2021-03-19",
+        "timeline": 16,
+        "colour": "91,141,239",
+        "characters": [
+            "Sam Wilson",
+            "Bucky Barnes"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "loki1",
+        "title": "Loki (Season 1)",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2021-06-09",
+        "timeline": 14,
+        "colour": "90,190,150",
+        "characters": [
+            "Loki"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "hawkeye",
+        "title": "Hawkeye",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2021-11-24",
+        "timeline": 17,
+        "colour": "150,90,60",
+        "characters": [
+            "Clint Barton",
+            "Kate Bishop",
+            "Yelena Belova",
+            "Wilson Fisk"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "moonknight",
+        "title": "Moon Knight",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2022-03-30",
+        "timeline": 18,
+        "colour": "220,220,220",
+        "characters": [
+            "Marc Spector"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "msmarvel",
+        "title": "Ms. Marvel",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2022-06-08",
+        "timeline": 21,
+        "colour": "230,150,60",
+        "characters": [
+            "Kamala Khan"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "shehulk",
+        "title": "She-Hulk: Attorney at Law",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2022-08-18",
+        "timeline": 20,
+        "colour": "110,190,110",
+        "characters": [
+            "Jennifer Walters"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "secretinvasion",
+        "title": "Secret Invasion",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2023-06-21",
+        "timeline": 23,
+        "colour": "90,110,90",
+        "characters": [
+            "Nick Fury"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "echo",
+        "title": "Echo",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2024-01-09",
+        "timeline": 19,
+        "colour": "170,110,70",
+        "characters": [
+            "Maya Lopez"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "agathaallalong",
+        "title": "Agatha All Along",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2024-09-18",
+        "timeline": 24,
+        "colour": "120,60,140",
+        "characters": [
+            "Agatha Harkness"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "daredevilbornagain1",
+        "title": "Daredevil: Born Again (Season 1)",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2025-03-04",
+        "timeline": 25,
+        "colour": "150,20,20",
+        "characters": [
+            "Matt Murdock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "ironheart",
+        "title": "Ironheart",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2025-06-24",
+        "timeline": 22,
+        "colour": "200,60,60",
+        "characters": [
+            "Riri Williams"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "wonderman",
+        "title": "Wonder Man",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2026-01-27",
+        "timeline": 26,
+        "colour": "210,170,90",
+        "characters": [
+            "Simon Williams"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "daredevilbornagain2",
+        "title": "Daredevil: Born Again (Season 2)",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2026-03-04",
+        "timeline": 27,
+        "colour": "150,20,20",
+        "characters": [
+            "Matt Murdock"
+        ],
+        "poster": ""
+    },
+    {
+        "id": "visionquest",
+        "title": "Vision Quest",
+        "type": "show",
+        "phase": 76,
+        "saga": "disney-plus",
+        "release": "2026-10-14",
+        "timeline": 28,
+        "colour": "170,60,200",
+        "characters": [
+            "Vision"
+        ],
+        "watchBefore": [
+            "avengers2",
+            "infinitywar",
+            "wandavision",
+            "agathaallalong"
         ],
         "poster": ""
     }
