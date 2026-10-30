@@ -352,11 +352,43 @@ async function fetchTrailer(endpoint, id) {
 // search passed in the address, so it can't be linked to
 // directly.)
 //
-// The country comes from the browser's language setting
-// (en-SG → SG), falling back to the US.
+// The country is worked out from the browser's time zone
+// first (Asia/Singapore → SG): a browser's language is often
+// just "English (US)" wherever it is, which used to make it
+// check what's streaming in the US. Then the language's
+// country (en-SG → SG), then the US.
 //--------------------------------------------------
 
+const ZONE_COUNTRY = {
+    "Asia/Singapore": "SG", "Asia/Kuala_Lumpur": "MY", "Asia/Jakarta": "ID", "Asia/Manila": "PH",
+    "Asia/Bangkok": "TH", "Asia/Ho_Chi_Minh": "VN", "Asia/Saigon": "VN", "Asia/Hong_Kong": "HK",
+    "Asia/Taipei": "TW", "Asia/Tokyo": "JP", "Asia/Seoul": "KR", "Asia/Shanghai": "CN",
+    "Asia/Kolkata": "IN", "Asia/Calcutta": "IN", "Asia/Karachi": "PK", "Asia/Dhaka": "BD",
+    "Asia/Dubai": "AE", "Asia/Riyadh": "SA", "Asia/Qatar": "QA", "Asia/Jerusalem": "IL",
+    "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Brisbane": "AU",
+    "Australia/Perth": "AU", "Australia/Adelaide": "AU", "Pacific/Auckland": "NZ",
+    "Europe/London": "GB", "Europe/Dublin": "IE", "Europe/Paris": "FR", "Europe/Berlin": "DE",
+    "Europe/Madrid": "ES", "Europe/Rome": "IT", "Europe/Amsterdam": "NL", "Europe/Brussels": "BE",
+    "Europe/Zurich": "CH", "Europe/Vienna": "AT", "Europe/Stockholm": "SE", "Europe/Oslo": "NO",
+    "Europe/Copenhagen": "DK", "Europe/Helsinki": "FI", "Europe/Warsaw": "PL", "Europe/Prague": "CZ",
+    "Europe/Lisbon": "PT", "Europe/Athens": "GR", "Europe/Istanbul": "TR", "Europe/Bucharest": "RO",
+    "Europe/Budapest": "HU", "Africa/Johannesburg": "ZA", "Africa/Lagos": "NG", "Africa/Cairo": "EG",
+    "America/Toronto": "CA", "America/Vancouver": "CA", "America/Edmonton": "CA", "America/Winnipeg": "CA",
+    "America/Halifax": "CA", "America/Mexico_City": "MX", "America/Sao_Paulo": "BR",
+    "America/Argentina/Buenos_Aires": "AR", "America/Santiago": "CL", "America/Bogota": "CO",
+    "America/Lima": "PE", "America/New_York": "US", "America/Chicago": "US", "America/Denver": "US",
+    "America/Phoenix": "US", "America/Los_Angeles": "US", "America/Anchorage": "US", "Pacific/Honolulu": "US"
+};
+
 export function watchRegion() {
+
+    try {
+
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        if (ZONE_COUNTRY[zone]) return ZONE_COUNTRY[zone];
+
+    } catch (err) { /* no time zone: fall through */ }
 
     const langs = (navigator.languages && navigator.languages.length)
         ? navigator.languages
@@ -396,49 +428,27 @@ async function fetchWatchProviders(endpoint, id) {
 
         const region = watchRegion();
 
-        const here = (data.results || {})[region];
+        const here = (data.results || {})[region] || {};
 
-        // Disney+ goes by a few provider ids round the world,
-        // so match it by name.
-        const isDisney = p => /disney/i.test(p.provider_name || "");
+        // Every service offering it where the viewer is, and how:
+        // "stream" (on a subscription, with ads, or free), "rent"
+        // or "buy". js/movieDetails.js turns the well-known ones
+        // into buttons.
+        const offers = [];
 
-        const onDisneyHere = !!(here && (here.flatrate || []).some(isDisney));
+        const addAll = (list, kind) => (list || []).forEach(p => offers.push({
+            id: p.provider_id,
+            name: p.provider_name || "",
+            kind
+        }));
 
-        const onDisneyAnywhere = Object.values(data.results || {})
-            .some(r => (r.flatrate || []).some(isDisney));
+        addAll(here.flatrate, "stream");
+        addAll(here.ads, "stream");
+        addAll(here.free, "stream");
+        addAll(here.rent, "rent");
+        addAll(here.buy, "buy");
 
-        // Netflix (also listed as "Netflix basic with Ads" and
-        // the like), streaming where the viewer is.
-        const isNetflix = p => /netflix/i.test(p.provider_name || "");
-
-        const onNetflixHere = !!(here && [...(here.flatrate || []), ...(here.ads || [])].some(isNetflix));
-
-        // Every service streaming it where the viewer is (on a
-        // subscription, with ads, or free), once each.
-        const streaming = [];
-
-        if (here) {
-
-            [...(here.flatrate || []), ...(here.ads || []), ...(here.free || [])].forEach(p => {
-
-                if (!streaming.some(q => q.id === p.provider_id)) {
-
-                    streaming.push({ id: p.provider_id, name: p.provider_name || "" });
-
-                }
-
-            });
-
-        }
-
-        return {
-            region,
-            link: here ? here.link : null,
-            onDisneyHere,
-            onDisneyAnywhere,
-            onNetflixHere,
-            streaming
-        };
+        return { region, link: here.link || null, offers };
 
     } catch (err) {
 

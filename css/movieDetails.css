@@ -137,50 +137,9 @@
     transform:translateY(-1px);
 }
 
-/* Watch on Disney+: Disney+ blue, beside the trailer. */
-#movie-details-disney{
-    display:none;
-    align-items:center;
-    gap:8px;
-    padding:9px 18px;
-    border-radius:999px;
-    background:linear-gradient(135deg, #0b2ea8, #1a6dd8);
-    color:white;
-    font-size:13px;
-    font-weight:600;
-    text-decoration:none;
-    letter-spacing:.02em;
-    transition:filter var(--transition), transform var(--transition);
-}
-
-#movie-details-disney:hover{
-    filter:brightness(1.15);
-    transform:translateY(-1px);
-}
-
-/* Watch on Netflix: Netflix red, beside the Disney+ one. */
-#movie-details-netflix{
-    display:none;
-    align-items:center;
-    gap:8px;
-    padding:9px 18px;
-    border-radius:999px;
-    background:#e50914;
-    color:white;
-    font-size:13px;
-    font-weight:600;
-    text-decoration:none;
-    letter-spacing:.02em;
-    transition:filter var(--transition), transform var(--transition);
-}
-
-#movie-details-netflix:hover{
-    filter:brightness(1.12);
-    transform:translateY(-1px);
-}
-
-/* Other services (Prime Video, Apple TV…), and "Where to
-   watch" (.plain) when it's only to rent or buy. */
+/* Where to watch (js/movieDetails.js renderWatchButtons):
+   one button per service that has the title where the viewer
+   is, each in that service's colour. */
 #movie-details-more{
     display:contents;
 }
@@ -191,7 +150,7 @@
     padding:9px 18px;
     border-radius:4px;
     background:#2b3445;
-    border:1px solid rgba(255,255,255,.22);
+    border:1px solid transparent;
     color:white;
     font-size:13px;
     font-weight:600;
@@ -202,20 +161,18 @@
 }
 
 .watch-service:hover{
-    filter:brightness(1.2);
+    filter:brightness(1.15);
     transform:translate(-1px, -1px);
 }
 
-.watch-service.plain{
-    background:rgba(255,255,255,.1);
-}
-
-/* Not on Disney+ where the viewer is: a plain "Where to
-   watch" button instead. */
-#movie-details-disney.elsewhere{
-    background:rgba(255,255,255,.1);
-    border:1px solid rgba(255,255,255,.25);
-}
+.watch-service.disney{ background:linear-gradient(135deg, #0b2ea8, #1a6dd8); }
+.watch-service.netflix{ background:#e50914; }
+.watch-service.prime{ background:#1a98ff; }
+.watch-service.max{ background:#002be7; }
+.watch-service.hulu{ background:#1ce783; color:#06120b; }
+.watch-service.apple{ background:#111; border-color:rgba(255,255,255,.3); }
+.watch-service.youtube{ background:#ff0033; }
+.watch-service.google{ background:#01875f; }
 
 /* Trailer, Watched and Copy link sit in one row. */
 #movie-details-actions{
