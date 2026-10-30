@@ -520,7 +520,31 @@ function mindmapPlace(phaseKeys, groups, start, sx, sy) {
 
 }
 
-function mindmapTargets(nodes, sx, sy) {
+// Floating lifts a poster up the screen (js/depth.js): on a
+// branch pointing down the screen, towards you, that pushed
+// its posters back up towards the branch's own junction, so
+// they bunched up beside it and the lines doubled back to
+// reach them. So each poster is set down that much further
+// down the map to start with, and floats up to just where
+// the flat layout put it. Worked out at a typical zoom for
+// the view (the lift changes a little with zoom).
+const LIFT_ZOOM = { world: 0.1, combined: 0.06 };
+
+function liftCompensate(nodes, zoom) {
+
+    const pitch = REST_PITCH;
+
+    const k = heightToMapScale(zoom) * Math.tan(pitch);
+
+    nodes.forEach(node => {
+
+        node.targetY += mindmapPosterHeight(node) * k;
+
+    });
+
+}
+
+function mindmapTargets(nodes, sx, sy, liftZoom = LIFT_ZOOM.world) {
 
     const groups = {};
 
@@ -540,6 +564,8 @@ function mindmapTargets(nodes, sx, sy) {
 
     // The first phase straight up, the rest clockwise.
     const branches = mindmapPlace(phaseKeys, groups, -Math.PI / 2, sx, sy);
+
+    liftCompensate(nodes, liftZoom);
 
     resolveMindmapOverlaps(nodes, 40);
 
@@ -676,7 +702,7 @@ export function layoutMultiverse(nodes) {
                 ? { sx: 1, sy: 1 }
                 : w === MULTIVERSE_BOTTOM ? { sx: 1, sy: MINDMAP_TALL } : worldShape(w, { sx: 1, sy: 1 });
 
-        const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy);
+        const branches = mindmapTargets(byWorld[w], shape.sx, shape.sy, LIFT_ZOOM.combined);
 
         maps[w] = { branches, boxes: boxesOf(byWorld[w]), dx: 0, dy: 0 };
 
