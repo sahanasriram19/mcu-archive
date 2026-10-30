@@ -67,18 +67,35 @@ function curveControls(from, to, center){
     };
 
     const [fx, fy] = outward(from, to);
-    const [tx, ty] = outward(to, to);
 
-    const k = len * 0.42;
+    // Every line leaving the same point heads out the same
+    // way, the same distance (CURVE_LEAD), before turning
+    // for its own poster — so a branch's lines fan out from
+    // one shared point, like spokes, and never cross. Then
+    // each runs straight in to its poster (the second control
+    // point lies on the way from the first one to the end),
+    // rather than swinging round to arrive from the side.
+    const k = Math.min(len * CURVE_LEAD_SHARE, CURVE_LEAD);
+
+    const c1x = from.x + fx * k, c1y = from.y + fy * k;
+
+    const rx = to.x - c1x, ry = to.y - c1y;
 
     return [
 
-        from.x + fx * k, from.y + fy * k,
-        to.x - tx * k,   to.y - ty * k
+        c1x, c1y,
+        to.x - rx * CURVE_ARRIVE, to.y - ry * CURVE_ARRIVE
 
     ];
 
 }
+
+// How far a line heads straight out before it turns (world
+// units), and how much of the rest of the way it comes in
+// straight.
+const CURVE_LEAD = 280;
+const CURVE_LEAD_SHARE = 0.2;
+const CURVE_ARRIVE = 0.4;
 
 // A line's points on screen, with depth (js/depth.js): its
 // two ends at their own depths, and — for a curve — its

@@ -497,17 +497,17 @@ export function edgesMindmap(){
 
                 }
 
-                const parents = tiers[ti-1] || [];
+                // The ring outside shared out among the ring
+                // inside it in order, round the branch — the
+                // first few children to the first parent, and
+                // so on — so no two lines cross.
+                const parents = [...(tiers[ti-1] || [])].sort((a, b) => a.mindmapAngle - b.mindmapAngle);
 
-                let best = null, bestD = Infinity;
+                const children = [...tier].sort((a, b) => a.mindmapAngle - b.mindmapAngle);
 
-                parents.forEach(parent=>{
+                const j = children.indexOf(node);
 
-                    const d = Math.abs(parent.mindmapAngle - node.mindmapAngle);
-
-                    if(d < bestD){ bestD = d; best = parent; }
-
-                });
+                const best = parents[Math.min(parents.length - 1, Math.floor(j * parents.length / children.length))];
 
                 if(best){
 

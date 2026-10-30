@@ -423,14 +423,16 @@ let openNode = null;
 // links open the app there). data/disneyplus.json holds each
 // title's Disney+ id — the same id in every country; Disney+
 // sends each viewer to their own country's page. A title not
-// in it opens Disney+'s Marvel page instead ("Find on
+// in it opens Disney+'s Marvel page instead (still "Watch on
 // Disney+"), unless TMDB's where-to-watch data (js/posters.js)
-// says it isn't on Disney+ where the viewer is, in which case
-// it's a "Where to watch" button to the services that do have
-// it. Hidden for titles not out yet, and cancelled ones.
+// says it isn't on Disney+ where the viewer is and there's no
+// Disney+ link for it, in which case it's a "Where to watch"
+// button to the services that do have it. Hidden for titles
+// not out yet, and cancelled ones.
 //--------------------------------------------------
 
-const DISNEY_TITLE = id => `https://www.disneyplus.com/browse/entity-${id}`;
+// (A few titles are stored as a full Disney+ link instead.)
+const DISNEY_TITLE = id => id.startsWith("https://") ? id : `https://www.disneyplus.com/browse/entity-${id}`;
 const DISNEY_MARVEL = "https://www.disneyplus.com/brand/marvel";
 
 let disneyIds = {};
@@ -480,8 +482,8 @@ function renderDisneyLink(node) {
     } else {
 
         href = DISNEY_MARVEL;
-        label = "Find on Disney+";
-        title = `Find ${node.title} in Marvel on Disney+`;
+        label = "Watch on Disney+";
+        title = `Watch ${node.title} in Marvel on Disney+`;
 
     }
 
