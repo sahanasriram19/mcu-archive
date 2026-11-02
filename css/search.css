@@ -94,3 +94,38 @@
     margin-top:2px;
 
 }
+
+/*--------------------------------------------------
+  Phones (COMPACT_QUERY in js/responsive.js): a shorter
+  box, and results that show inside the panel's scrolling
+  sheet instead of hanging below it, off the bottom of
+  the screen.
+--------------------------------------------------*/
+
+@media (max-width: 768px), (max-height: 500px){
+
+    /* (Text stays 16px: any smaller and iPhones zoom the
+       whole page in when the box is tapped.) */
+    #movie-search{
+        min-height:0;
+        height:32px;
+        padding:4px 10px;
+        font-size:16px;
+        line-height:1.2;
+    }
+
+    #movie-search-results{
+        position:static;
+        margin-top:8px;
+        max-height:40vh;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .search-result{
+        min-height:38px;
+        padding:8px 12px;
+        font-size:12.5px;
+    }
+
+}

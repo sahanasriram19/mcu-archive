@@ -14,6 +14,7 @@ import { worldNodes, allNodes } from "../js/graph.js";
 import { progress } from "../js/watched.js";
 import { isUpcoming } from "../js/upcoming.js";
 import { watchScroll } from "../js/scrollHints.js";
+import { escapeHtml } from "../js/escape.js";
 
 const viewport = document.getElementById("viewport");
 
@@ -459,7 +460,7 @@ SECTIONS.forEach(section => {
 
     head.type = "button";
     head.className = "view-panel-section-head";
-    head.innerHTML = `<span>${section.title}</span><span class="view-panel-section-progress"></span><span class="view-panel-section-chevron" aria-hidden="true">&#9662;</span>`;
+    head.innerHTML = `<span>${escapeHtml(section.title)}</span><span class="view-panel-section-progress"></span><span class="view-panel-section-chevron" aria-hidden="true">&#9662;</span>`;
 
     head.addEventListener("click", () => {
 

@@ -1,6 +1,7 @@
 import { graph } from "../js/graph.js";
 import { camera } from "../js/camera.js";
 import { isCompact } from "../js/responsive.js";
+import { escapeHtml } from "../js/escape.js";
 
 let selectedIndex = 0;
 let results = [];
@@ -169,8 +170,8 @@ export function initMovieSearch(){
                 button.classList.add("active");
 
             button.innerHTML=`
-                <div class="search-title">${result.node.title}</div>
-                <div class="search-type">${result.node.type}</div>
+                <div class="search-title">${escapeHtml(result.node.title)}</div>
+                <div class="search-type">${escapeHtml(result.node.type)}</div>
             `;
 
             button.onclick=()=>focusNode(result.node);

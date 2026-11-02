@@ -27,6 +27,7 @@ import { graph, worldNodes, allNodes } from "./graph.js";
 import { showMovieDetails } from "./movieDetails.js";
 import { focusNodes, setWorldView, getCurrentView } from "./viewManager.js";
 import { getWorld, ALL_WORLDS } from "./worlds.js";
+import { escapeHtml } from "./escape.js";
 
 //--------------------------------------------------
 // Dates
@@ -204,7 +205,7 @@ export function startWatchFocus(node){
     };
 
     bannerText.innerHTML =
-        `<b>${nodes.length}</b> title${nodes.length === 1 ? "" : "s"} to watch before <b>${node.title}</b>` +
+        `<b>${nodes.length}</b> title${nodes.length === 1 ? "" : "s"} to watch before <b>${escapeHtml(node.title)}</b>` +
         (elsewhere ? ` <span class="watch-banner-more">+ ${elsewhere} from other worlds</span>` : "");
 
     banner.classList.add("show");

@@ -15,6 +15,7 @@ import { canFlip, flipOpen, flipClose, hideFlipper, goodRect } from "./flip.js";
 import { isWatched, toggleWatched } from "./watched.js";
 import { setLinkTitle, copyLink } from "./links.js";
 import { watchScroll } from "./scrollHints.js";
+import { escapeHtml, safeUrl, safeCss } from "./escape.js";
 
 const overlay = document.createElement("div");
 overlay.id = "movie-details-overlay";
@@ -183,9 +184,9 @@ function renderWatchBefore(node){
             ? (typeof n.poster === "string" ? n.poster : (n.poster.small || n.poster.medium))
             : "";
 
-        return url
-            ? `<img src="${url}" alt="" loading="lazy">`
-            : `<div class="watch-poster-fallback" style="--c:${n.colour}">${n.title}</div>`;
+        return url && safeUrl(url)
+            ? `<img src="${safeUrl(url)}" alt="" loading="lazy">`
+            : `<div class="watch-poster-fallback" style="--c:${safeCss(n.colour)}">${escapeHtml(n.title)}</div>`;
 
     };
 
@@ -203,7 +204,7 @@ function renderWatchBefore(node){
         const home = node.world || "mcu";
 
         return n.world && n.world !== home && WORLDS[n.world]
-            ? ` · <span class="watch-world">${WORLDS[n.world].label}</span>`
+            ? ` · <span class="watch-world">${escapeHtml(WORLDS[n.world].label)}</span>`
             : "";
 
     };
@@ -218,10 +219,10 @@ function renderWatchBefore(node){
         </div>
         <div class="watch-row">
             ${nodes.map((n, i) => `
-                <button type="button" class="watch-item${isWatched(n.id) ? " seen" : ""}" data-i="${i}" title="${n.title}">
+                <button type="button" class="watch-item${isWatched(n.id) ? " seen" : ""}" data-i="${i}" title="${escapeHtml(n.title)}">
                     <div class="watch-poster">${thumb(n)}</div>
-                    <div class="watch-title">${n.title}</div>
-                    <div class="watch-year">${(n.release || "").slice(0, 4)}${otherWorld(n)}</div>
+                    <div class="watch-title">${escapeHtml(n.title)}</div>
+                    <div class="watch-year">${escapeHtml((n.release || "").slice(0, 4))}${otherWorld(n)}</div>
                 </button>
             `).join("")}
         </div>
@@ -550,6 +551,47 @@ async function appleIdFromWikidata(endpoint, tmdbId){
 
 const appleCache = new Map();   // "endpoint/id|region" → Promise<url | null>
 
+// Found Apple TV ids are also kept in localStorage, so a
+// title's link is exact straight away on later visits: 30
+// days for an id that was found, 3 for "not on Wikidata" (it
+// may be added). Bump the key's version to clear everyone's.
+const APPLE_KEY = "mcu-archive:apple-tv:v1";
+const APPLE_HIT_TTL = 30 * 24 * 60 * 60 * 1000;
+const APPLE_MISS_TTL = 3 * 24 * 60 * 60 * 1000;
+
+let appleStore = null;
+
+function appleStored(){
+
+    if (appleStore) return appleStore;
+
+    try { appleStore = JSON.parse(localStorage.getItem(APPLE_KEY)) || {}; }
+    catch (err) { appleStore = {}; }
+
+    return appleStore;
+
+}
+
+function readAppleId(tmdbKey){
+
+    const e = appleStored()[tmdbKey];
+
+    if (!e) return undefined;
+
+    const ttl = e.id ? APPLE_HIT_TTL : APPLE_MISS_TTL;
+
+    return Date.now() - e.t < ttl ? (e.id || null) : undefined;
+
+}
+
+function writeAppleId(tmdbKey, id){
+
+    appleStored()[tmdbKey] = { id: id || null, t: Date.now() };
+
+    try { localStorage.setItem(APPLE_KEY, JSON.stringify(appleStore)); } catch (err) {}
+
+}
+
 function appleTitleUrl(node, name, year, region){
 
     const country = (region || "us").toLowerCase();
@@ -564,7 +606,21 @@ function appleTitleUrl(node, name, year, region){
 
     const kind = node.tmdbEndpoint === "tv" ? "show" : "movie";
 
-    const job = appleIdFromWikidata(node.tmdbEndpoint, node.tmdbId)
+    const tmdbKey = `${node.tmdbEndpoint}/${node.tmdbId}`;
+
+    const stored = readAppleId(tmdbKey);
+
+    const lookup = stored !== undefined
+        ? Promise.resolve(stored)
+        : appleIdFromWikidata(node.tmdbEndpoint, node.tmdbId).then(id => {
+
+            writeAppleId(tmdbKey, id);
+
+            return id;
+
+        });
+
+    const job = lookup
         .then(id => {
 
             if (id) {
@@ -736,7 +792,7 @@ function renderWatchMenu(node) {
 
         a.innerHTML = `
             <span class="watch-option-dot" aria-hidden="true"></span>
-            <span class="watch-option-name">${sv.label}</span>
+            <span class="watch-option-name">${escapeHtml(sv.label)}</span>
             <span class="watch-option-kind">${kind === "stream" ? "Stream" : "Rent or buy"}</span>
         `;
 
@@ -855,22 +911,26 @@ function renderExtras(node) {
             `<div id="movie-details-cast-list">` +
             node.cast.map(member => {
 
-                const initials = member.name
+                const name = member.name || "";
+
+                const initials = name
                     .split(" ")
-                    .map(w => w[0])
+                    .map(w => w[0] || "")
                     .join("")
                     .slice(0, 2)
                     .toUpperCase();
 
-                const avatar = member.photo
-                    ? `<img src="${member.photo}" alt="${member.name}">`
-                    : `<div class="cast-avatar-fallback">${initials}</div>`;
+                const photo = safeUrl(member.photo);
+
+                const avatar = photo
+                    ? `<img src="${photo}" alt="${escapeHtml(name)}">`
+                    : `<div class="cast-avatar-fallback">${escapeHtml(initials)}</div>`;
 
                 return `
                     <div class="cast-member">
                         <div class="cast-avatar">${avatar}</div>
-                        <div class="cast-name">${member.name}</div>
-                        <div class="cast-character">${member.character}</div>
+                        <div class="cast-name">${escapeHtml(name)}</div>
+                        <div class="cast-character">${escapeHtml(member.character)}</div>
                     </div>
                 `;
 
@@ -933,13 +993,15 @@ export async function showMovieDetails(node, opts = {}) {
 
     const url = posterUrlFor(node);
 
-    posterEl.innerHTML = url
-        ? `<img src="${url}" alt="${node.title}">`
-        : `<div id="movie-details-noposter">${node.title}</div>`;
+    posterEl.innerHTML = safeUrl(url)
+        ? `<img src="${safeUrl(url)}" alt="${escapeHtml(node.title)}">`
+        : `<div id="movie-details-noposter">${escapeHtml(node.title)}</div>`;
 
     // A blurred copy fills the frame either side of the
-    // (smaller) poster on phones (css/mobile.css).
-    if (url) posterEl.style.setProperty("--poster-bg", `url("${new URL(url, location.href).href}")`);
+    // (smaller) poster on phones (css/movieDetails.css, PHONES).
+    // (Quotes, brackets and backslashes are %-encoded so the
+    // link can't end the url("…") early.)
+    if (safeUrl(url)) posterEl.style.setProperty("--poster-bg", `url("${new URL(url, location.href).href.replace(/["'()\\]/g, c => "%" + c.charCodeAt(0).toString(16).toUpperCase())}")`);
     else posterEl.style.removeProperty("--poster-bg");
 
     kickerEl.textContent =

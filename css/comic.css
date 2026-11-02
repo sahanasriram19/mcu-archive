@@ -398,9 +398,7 @@
         border-radius:var(--radius);
     }
 
-    .view-panel-title{
-        font-size:22px;
-    }
+    /* (The title's phone size: css/panel.css.) */
 
     .view-panel-toggle{
         border-radius:4px;

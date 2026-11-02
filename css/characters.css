@@ -211,3 +211,32 @@ Character Journey Dropdown
     }
 
 }
+
+/*--------------------------------------------------
+  Phones (COMPACT_QUERY in js/responsive.js): the
+  Character Journeys list in the panel.
+
+  The panel's views are a 2-column grid on phones, so the
+  dropdown spans both columns (in one cell, its height
+  stretched the whole row), and long hero lists scroll
+  inside once open.
+--------------------------------------------------*/
+
+@media (max-width: 768px), (max-height: 500px){
+
+    .character-dropdown{
+        grid-column:1 / -1;
+    }
+
+    .character-dropdown.open > .collapse-inner{
+        max-height:220px;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .character-btn{
+        padding:6px 10px;
+        font-size:11px;
+    }
+
+}

@@ -6,8 +6,9 @@
 // camera, the connection renderer and the view panel so
 // they always agree.
 //
-// COMPACT_QUERY must match the media queries used in
-// css/mobile.css and css/panel.css: narrow screens
+// COMPACT_QUERY must match the phone media queries in the
+// CSS (panel.css, search.css, characters.css,
+// movieDetails.css, tour.css…): narrow screens
 // (phones in portrait, small tablets) OR short screens
 // (phones in landscape, which are wide but only ~340-430px
 // tall — the old max-width-only query missed them).

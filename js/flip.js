@@ -14,6 +14,8 @@
 // and off with the OS "reduce motion" setting.
 //==================================================
 
+import { safeUrl, safeCss } from "./escape.js";
+
 const DURATION = 950;                 // ms, each way (was 620)
 // Gentle start and a long, soft landing.
 const EASE = "cubic-bezier(.45,.05,.2,1)";
@@ -76,9 +78,11 @@ function px(r){
 
 function setFaces(posterUrl, colour, title){
 
-    const art = posterUrl
-        ? `<img src="${posterUrl}" alt="">`
-        : `<div class="flip-noposter" style="--c:${colour || "120,120,140"}"></div>`;
+    const src = safeUrl(posterUrl);
+
+    const art = src
+        ? `<img src="${src}" alt="">`
+        : `<div class="flip-noposter" style="--c:${safeCss(colour || "120,120,140")}"></div>`;
 
     front.innerHTML = art;
     backPoster.innerHTML = art;

@@ -557,6 +557,172 @@ function writeCachedLookup(node, entry) {
 
 }
 
+//--------------------------------------------------
+// DETAILS CACHE
+//
+// What a title's card shows from TMDB — the cast, the
+// trailer and where to watch it — used to be fetched again
+// every visit, the moment its card was opened. Now it's kept
+// in localStorage too, so a card you've opened before fills
+// in instantly:
+//
+//   • cast + trailer for 7 days (they rarely change)
+//   • where to watch for 1 day, per country (titles come
+//     and go from services)
+//
+// Only answers that actually came back are kept (a failed
+// request is tried again next time). Only the most recently
+// opened DETAILS_MAX titles are kept, so it can't grow
+// without limit. Bump the key's version to clear everyone's.
+//--------------------------------------------------
+
+const DETAILS_KEY = "mcu-archive:tmdb-details:v1";
+
+const INFO_TTL = 7 * 24 * 60 * 60 * 1000;
+const WATCH_TTL = 24 * 60 * 60 * 1000;
+
+const DETAILS_MAX = 150;
+
+let detailsCache = null;
+
+function loadDetailsCache() {
+
+    if (detailsCache) return detailsCache;
+
+    try {
+
+        detailsCache = JSON.parse(localStorage.getItem(DETAILS_KEY)) || {};
+
+    } catch (err) {
+
+        detailsCache = {};
+
+    }
+
+    return detailsCache;
+
+}
+
+let detailsSaveTimer = null;
+
+function saveDetailsSoon() {
+
+    clearTimeout(detailsSaveTimer);
+
+    detailsSaveTimer = setTimeout(() => {
+
+        const cache = loadDetailsCache();
+
+        // Oldest first out, past the limit.
+        const keys = Object.keys(cache);
+
+        if (keys.length > DETAILS_MAX) {
+
+            keys
+                .sort((a, b) => (cache[a].used || 0) - (cache[b].used || 0))
+                .slice(0, keys.length - DETAILS_MAX)
+                .forEach(k => delete cache[k]);
+
+        }
+
+        try {
+
+            localStorage.setItem(DETAILS_KEY, JSON.stringify(cache));
+
+        } catch (err) {
+
+            // Full: drop the older half and try once more.
+            try {
+
+                Object.keys(cache)
+                    .sort((a, b) => (cache[a].used || 0) - (cache[b].used || 0))
+                    .slice(0, Math.ceil(Object.keys(cache).length / 2))
+                    .forEach(k => delete cache[k]);
+
+                localStorage.setItem(DETAILS_KEY, JSON.stringify(cache));
+
+            } catch (err2) { /* blocked — fine, it just won't be remembered */ }
+
+        }
+
+    }, 400);
+
+}
+
+// By TMDB entry (not by our title id), so a title that's in
+// two worlds shares one entry.
+function detailsKeyFor(node) {
+
+    return node.tmdbEndpoint + "/" + node.tmdbId;
+
+}
+
+function readCachedDetails(node) {
+
+    const entry = loadDetailsCache()[detailsKeyFor(node)];
+
+    if (!entry) return {};
+
+    const now = Date.now();
+
+    const region = watchRegion();
+
+    const info = entry.info && now - entry.info.t < INFO_TTL ? entry.info : null;
+
+    const w = entry.watch && entry.watch[region];
+
+    const watch = w && now - w.t < WATCH_TTL ? w : null;
+
+    if (info || watch) {
+
+        entry.used = now;
+
+        saveDetailsSoon();
+
+    }
+
+    return { info, watch };
+
+}
+
+// `info` / `watch`: what was just fetched (null = nothing new).
+function writeCachedDetails(node, { info, watch }) {
+
+    if (!info && !watch) return;
+
+    const cache = loadDetailsCache();
+
+    const key = detailsKeyFor(node);
+
+    const entry = cache[key] || {};
+
+    const now = Date.now();
+
+    // (A failed cast or trailer request comes back as an
+    // empty list / null: not kept, so it's tried again.)
+    if (info && Array.isArray(info.cast) && info.cast.length) {
+
+        entry.info = { cast: info.cast, trailer: info.trailer || null, t: now };
+
+    }
+
+    if (watch) {
+
+        entry.watch = entry.watch || {};
+        entry.watch[watch.region || watchRegion()] = { data: watch, t: now };
+
+    }
+
+    if (!entry.info && !entry.watch) return;
+
+    entry.used = now;
+
+    cache[key] = entry;
+
+    saveDetailsSoon();
+
+}
+
 // Puts a match's details onto the node — shared by fresh
 // searches and cache hits so both behave identically.
 function applyMatch(node, { posterPath, overview, rating, id, endpoint }) {
@@ -766,27 +932,33 @@ export async function fetchDetails(node) {
 
 
         //--------------------------------------------------
-        // Fetch cast + trailer simultaneously.
+        // Fetch cast + trailer + where to watch together —
+        // or take them from the details cache (below) if
+        // they were fetched recently.
         //--------------------------------------------------
+
+        const cached = readCachedDetails(node);
 
         const [cast, trailer, watch] = await Promise.all([
 
-            fetchCast(
-                node.tmdbEndpoint,
-                node.tmdbId
-            ),
+            cached.info
+                ? cached.info.cast
+                : fetchCast(node.tmdbEndpoint, node.tmdbId),
 
-            fetchTrailer(
-                node.tmdbEndpoint,
-                node.tmdbId
-            ),
+            cached.info
+                ? cached.info.trailer
+                : fetchTrailer(node.tmdbEndpoint, node.tmdbId),
 
-            fetchWatchProviders(
-                node.tmdbEndpoint,
-                node.tmdbId
-            )
+            cached.watch
+                ? cached.watch.data
+                : fetchWatchProviders(node.tmdbEndpoint, node.tmdbId)
 
         ]);
+
+        writeCachedDetails(node, {
+            info: cached.info ? null : { cast, trailer },
+            watch: cached.watch ? null : watch
+        });
 
 
         //--------------------------------------------------
