@@ -77,8 +77,9 @@ const VIEW_HEIGHT = {
     chronology: { base: 150, spread: 0 },
     characters: { base: 110, spread: 240 },
     scatter:    { base: 120, spread: 800 },   // All Posters: a real volume
-    // Watched: every poster level, so the grid stays neat.
-    watched:    { base: 150, spread: 0 }
+    // Watched: each poster at its own height, so the wall
+    // feels loose rather than gridded.
+    watched:    { base: 120, spread: 260 }
 };
 
 // How much higher a poster rises while hovered.

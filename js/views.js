@@ -83,7 +83,7 @@ export const VIEWS = [
         edges: { mode: "none" },
         // pitch: tipped back less than the other maps, so the
         // grid reads like a shelf (WATCHED_PITCH in layout.js).
-        camera: { x: 0, y: 0, zoom: 0.2, fit: 0.84, pitch: 0.3, phonePitch: 0.3, minZoom: 0.03, maxZoom: 0.3, userMinZoom: 0.03 },
+        camera: { x: 0, y: 0, zoom: 0.2, fit: 0.78, pitch: 0.3, phonePitch: 0.3, minZoom: 0.03, maxZoom: 0.3, userMinZoom: 0.03 },
         phone: {
             // The whole grid on screen (it's laid out in the
             // screen's shape, so it fills it).

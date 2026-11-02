@@ -1410,49 +1410,86 @@ export function layoutScatter(nodes) {
 //--------------------------------------------------
 // WATCHED (MCU)
 //
-// Only the titles you've ticked off (js/watched.js), in a
-// tidy grid in the order they came out — a shelf of
-// everything you've seen. The rest are parked out of sight
-// (like the duplicates in All Posters). Laid out in the
-// screen's shape, so it fills it.
+// Only the titles you've ticked off (js/watched.js), in
+// chronological (story) order, laid out loosely: a trail
+// that winds left to right, then back right to left on the
+// next row, with every poster drifting a little off the
+// grid (and floating at its own height, js/depth.js), so it
+// feels like a wall of things you've seen rather than a
+// spreadsheet. The rest are parked out of sight (like the
+// duplicates in All Posters).
+//
+// Each world numbers its own story (`timeline` in its data
+// file), and those can't be compared across worlds, so the
+// trail follows the Avengers story first, then each other
+// world's in turn. A title that's in several worlds (No Way
+// Home, Deadpool & Wolverine…) sits where it falls in the
+// MCU's.
 //--------------------------------------------------
 
-const WATCHED_CELL_W = POSTER_W + 110;
+const WATCHED_CELL_W = POSTER_W + 190;
+
+// How far each poster may drift from its spot, as a share
+// of the gap between spots (kept small enough that two
+// neighbours drifting towards each other still don't touch).
+const WATCHED_DRIFT_X = 0.16;
+const WATCHED_DRIFT_Y = 0.12;
 
 // How far this view is tipped back — less than the other
-// maps, so the grid reads like a shelf (the same number is
-// the view's `pitch` / `phonePitch` in js/views.js).
+// maps, so the wall reads well (the same number is the
+// view's `pitch` / `phonePitch` in js/views.js).
 export const WATCHED_PITCH = 0.3;
 
 // Tipping the map back squashes the gaps between rows but not
 // the posters standing in them, so rows are spaced further
 // apart to make up for it.
-const watchedCellH = () => (POSTER_H + 110) / Math.cos(WATCHED_PITCH);
+const watchedCellH = () => (POSTER_H + 190) / Math.cos(WATCHED_PITCH);
+
+// The order worlds come in: the Avengers story first, then
+// the others as the panel lists them.
+const WATCHED_WORLD_ORDER = ["mcu", "xmen", "spider", "ff", "tv", "unscripted", "animated"];
+
+function watchedWorldRank(node) {
+
+    const i = WATCHED_WORLD_ORDER.indexOf(node.world || "mcu");
+
+    return i < 0 ? WATCHED_WORLD_ORDER.length : i;
+
+}
 
 export function layoutWatched(nodes) {
 
-    const seen = new Set();
-    const shown = [];
+    // One copy of each title: the one from the earliest world
+    // in the order above (the MCU's, if it's in the MCU).
+    const best = new Map();
 
     nodes.forEach(node => {
 
-        if (seen.has(node.id) || !isWatched(node.id)) {
+        if (node.isBranch || !isWatched(node.id)) return;
 
-            node.targetX = 100000;
-            node.targetY = 100000;
+        const was = best.get(node.id);
 
-            return;
+        if (!was || watchedWorldRank(node) < watchedWorldRank(was)) best.set(node.id, node);
 
-        }
+    });
 
-        seen.add(node.id);
-        shown.push(node);
+    const shown = [...best.values()];
+
+    const showing = new Set(shown);
+
+    nodes.forEach(node => {
+
+        if (showing.has(node)) return;
+
+        node.targetX = 100000;
+        node.targetY = 100000;
 
     });
 
     shown.sort((a, b) =>
-        (a.release || "9999").localeCompare(b.release || "9999") ||
-        String(a.title).localeCompare(String(b.title))
+        watchedWorldRank(a) - watchedWorldRank(b) ||
+        (a.timeline ?? 1e9) - (b.timeline ?? 1e9) ||
+        (a.release || "9999").localeCompare(b.release || "9999")
     );
 
     const N = shown.length;
@@ -1465,9 +1502,8 @@ export function layoutWatched(nodes) {
     const aspect = Math.min(2.6, Math.max(0.45, freeW / Math.max(1, window.innerHeight)));
 
     // How tall a row looks on screen (tipped back, the gap
-    // shrinks but the posters don't): about the poster plus
-    // its gap.
-    const rowOnScreen = POSTER_H + 110;
+    // shrinks but the posters don't).
+    const rowOnScreen = POSTER_H + 190;
 
     // (At least two to a row on a phone held upright, and no
     // more than four, so they stay big enough to read.)
@@ -1477,18 +1513,33 @@ export function layoutWatched(nodes) {
 
     const rows = Math.ceil(N / cols);
 
+    const cellH = watchedCellH();
+
     shown.forEach((node, i) => {
 
         const r = Math.floor(i / cols);
-        const c = i % cols;
 
-        // The last row, if it's short, sits in the middle.
+        // Every other row runs back the other way, so the
+        // trail winds down the screen without jumping back
+        // to the left edge.
+        const k = i % cols;
+
         const inRow = r === rows - 1 ? N - r * cols : cols;
+
+        const c = r % 2 ? inRow - 1 - k : k;
+
+        // A steady drift per title (the same every visit).
+        const dx = (hashOf(node.id + "wx") - 0.5) * 2 * WATCHED_DRIFT_X * WATCHED_CELL_W;
+        const dy = (hashOf(node.id + "wy") - 0.5) * 2 * WATCHED_DRIFT_Y * cellH;
+
+        // Alternate rows sit a little to one side, so the
+        // columns don't line up.
+        const stagger = (r % 2 ? 0.18 : -0.18) * WATCHED_CELL_W;
 
         node.layout = "watched";
 
-        node.targetX = (c - (inRow - 1) / 2) * WATCHED_CELL_W;
-        node.targetY = (r - (rows - 1) / 2) * watchedCellH();
+        node.targetX = (c - (inRow - 1) / 2) * WATCHED_CELL_W + stagger + dx;
+        node.targetY = (r - (rows - 1) / 2) * cellH + dy;
 
     });
 
