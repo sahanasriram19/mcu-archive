@@ -13,7 +13,33 @@
 
 const KEY = "mcu-archive:watched";
 
+//--------------------------------------------------
+// Old ids → the ones they became. Shows used to have an
+// entry per season (all with the same poster); now each
+// project has one, kept under its first season's id. A
+// season ticked before the merge counts for the show, and
+// an old link to a season opens the show (js/app.js).
+//--------------------------------------------------
+
+export const ID_ALIASES = {
+    daredevilbornagain2: "daredevilbornagain1",
+    whatif2: "whatif1",
+    whatif3: "whatif1",
+    iamgroot2: "iamgroot1"
+};
+
+export const canonicalId = id => ID_ALIASES[id] || id;
+
 let ids = load();
+
+// Saved under an old id? Move it across (once).
+if([...ids].some(id => ID_ALIASES[id])){
+
+    ids = new Set([...ids].map(canonicalId));
+
+    save();
+
+}
 
 function load(){
 

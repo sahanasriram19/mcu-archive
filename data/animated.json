@@ -775,7 +775,7 @@
     },
     {
         "id": "whatif1",
-        "title": "What If...? (Season 1)",
+        "title": "What If...?",
         "type": "show",
         "phase": 39,
         "saga": "marvel-studios",
@@ -803,7 +803,7 @@
     },
     {
         "id": "iamgroot1",
-        "title": "I Am Groot (Season 1)",
+        "title": "I Am Groot",
         "type": "special",
         "phase": 39,
         "saga": "marvel-studios",
@@ -846,20 +846,6 @@
         "poster": ""
     },
     {
-        "id": "iamgroot2",
-        "title": "I Am Groot (Season 2)",
-        "type": "special",
-        "phase": 39,
-        "saga": "marvel-studios",
-        "release": "2023-09-06",
-        "timeline": 54,
-        "colour": "230,60,80",
-        "characters": [
-            "Groot"
-        ],
-        "poster": ""
-    },
-    {
         "id": "legocodered",
         "title": "LEGO Marvel Avengers: Code Red",
         "type": "special",
@@ -872,20 +858,6 @@
             "Tony Stark",
             "Steve Rogers",
             "Natasha Romanoff"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "whatif2",
-        "title": "What If...? (Season 2)",
-        "type": "show",
-        "phase": 39,
-        "saga": "marvel-studios",
-        "release": "2023-12-22",
-        "timeline": 56,
-        "colour": "230,60,80",
-        "characters": [
-            "The Watcher"
         ],
         "poster": ""
     },
@@ -922,20 +894,6 @@
         "characters": [
             "Tony Stark",
             "Steve Rogers"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "whatif3",
-        "title": "What If...? (Season 3)",
-        "type": "show",
-        "phase": 39,
-        "saga": "marvel-studios",
-        "release": "2024-12-22",
-        "timeline": 59,
-        "colour": "230,60,80",
-        "characters": [
-            "The Watcher"
         ],
         "poster": ""
     },

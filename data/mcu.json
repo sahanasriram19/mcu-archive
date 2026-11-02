@@ -259,7 +259,7 @@
     },
     {
         "id": "iamgroot1",
-        "title": "I Am Groot (Season 1)",
+        "title": "I Am Groot",
         "type": "special",
         "phase": 2,
         "saga": "infinity",
@@ -609,7 +609,7 @@
     },
     {
         "id": "whatif1",
-        "title": "What If...? (Season 1)",
+        "title": "What If...?",
         "type": "show",
         "phase": 4,
         "saga": "multiverse",
@@ -969,7 +969,7 @@
     },
     {
         "id": "daredevilbornagain1",
-        "title": "Daredevil: Born Again (Season 1)",
+        "title": "Daredevil: Born Again",
         "type": "show",
         "phase": 5,
         "saga": "multiverse",
@@ -1036,20 +1036,6 @@
         "colour": "210,170,90",
         "characters": [
             "Simon Williams"
-        ],
-        "poster": ""
-    },
-    {
-        "id": "daredevilbornagain2",
-        "title": "Daredevil: Born Again (Season 2)",
-        "type": "show",
-        "phase": 6,
-        "saga": "multiverse",
-        "release": "2026-03-04",
-        "timeline": 71,
-        "colour": "150,20,20",
-        "characters": [
-            "Matt Murdock"
         ],
         "poster": ""
     },

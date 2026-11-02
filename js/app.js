@@ -34,6 +34,7 @@ import { readLink, onLinkChange, applyingLink } from "./links.js";
 import { showMovieDetails, hideMovieDetails, openDetailsId } from "./movieDetails.js";
 import { setSelectedCharacter } from "./characters/characterJourney.js";
 import { initTour } from "./tour.js";
+import { canonicalId } from "./watched.js";
 import "./watchedView.js";
 
 //==========================================
@@ -354,6 +355,9 @@ window.addEventListener("mcu:go-to-landing", () => {
 const TITLE_OPEN_DELAY = 900;   // ms, after the view has framed itself
 
 function findTitle(id){
+
+    // (An old link to a season that's now part of its show.)
+    id = canonicalId(id);
 
     return graph.nodes.find(n => n.id === id && !n.isBranch) ||
         allNodes().find(n => n.id === id);
