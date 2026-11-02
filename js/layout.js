@@ -16,6 +16,7 @@ import { getSelectedCharacter } from "./characters/characterJourney.js";
 import { isCompact, isPortraitPhone } from "./responsive.js";
 import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 import { PHASES_POSTER } from "./posterSize.js";
+import { isWatched } from "./watched.js";
 // (Only called while laying out, never as the module loads,
 // so importing back from depth.js is safe.)
 import { REST_PITCH, heightToMapScale } from "./depth.js";
@@ -1406,6 +1407,96 @@ export function layoutScatter(nodes) {
 
 }
 
+//--------------------------------------------------
+// WATCHED (MCU)
+//
+// Only the titles you've ticked off (js/watched.js), in a
+// tidy grid in the order they came out — a shelf of
+// everything you've seen. The rest are parked out of sight
+// (like the duplicates in All Posters). Laid out in the
+// screen's shape, so it fills it.
+//--------------------------------------------------
+
+const WATCHED_CELL_W = POSTER_W + 110;
+
+// How far this view is tipped back — less than the other
+// maps, so the grid reads like a shelf (the same number is
+// the view's `pitch` / `phonePitch` in js/views.js).
+export const WATCHED_PITCH = 0.3;
+
+// Tipping the map back squashes the gaps between rows but not
+// the posters standing in them, so rows are spaced further
+// apart to make up for it.
+const watchedCellH = () => (POSTER_H + 110) / Math.cos(WATCHED_PITCH);
+
+export function layoutWatched(nodes) {
+
+    const seen = new Set();
+    const shown = [];
+
+    nodes.forEach(node => {
+
+        if (seen.has(node.id) || !isWatched(node.id)) {
+
+            node.targetX = 100000;
+            node.targetY = 100000;
+
+            return;
+
+        }
+
+        seen.add(node.id);
+        shown.push(node);
+
+    });
+
+    shown.sort((a, b) =>
+        (a.release || "9999").localeCompare(b.release || "9999") ||
+        String(a.title).localeCompare(String(b.title))
+    );
+
+    const N = shown.length;
+
+    // The shape of the screen that's free: on a computer, not
+    // counting the panel down the left and the countdown down
+    // the right.
+    const freeW = isCompact() ? window.innerWidth : Math.max(320, window.innerWidth - 640);
+
+    const aspect = Math.min(2.6, Math.max(0.45, freeW / Math.max(1, window.innerHeight)));
+
+    // How tall a row looks on screen (tipped back, the gap
+    // shrinks but the posters don't): about the poster plus
+    // its gap.
+    const rowOnScreen = POSTER_H + 110;
+
+    // (At least two to a row on a phone held upright, and no
+    // more than four, so they stay big enough to read.)
+    const ideal = Math.round(Math.sqrt(N * aspect * rowOnScreen / WATCHED_CELL_W));
+
+    const cols = Math.max(1, Math.min(N, isPortraitPhone() ? Math.max(2, Math.min(4, ideal)) : ideal));
+
+    const rows = Math.ceil(N / cols);
+
+    shown.forEach((node, i) => {
+
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+
+        // The last row, if it's short, sits in the middle.
+        const inRow = r === rows - 1 ? N - r * cols : cols;
+
+        node.layout = "watched";
+
+        node.targetX = (c - (inRow - 1) / 2) * WATCHED_CELL_W;
+        node.targetY = (r - (rows - 1) / 2) * watchedCellH();
+
+    });
+
+    setHubs([]);
+    setBranchNodes([]);
+
+}
+
 //==================================================
 // REGISTRY
 //==================================================
@@ -1415,6 +1506,7 @@ export const LAYOUTS = {
     complete: layoutComplete,
     multiverse: layoutMultiverse,
     scatter: layoutScatter,
+    watched: layoutWatched,
     phases: layoutPhases,
     release: layoutRelease,
     chronology: layoutChronology,

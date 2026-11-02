@@ -235,7 +235,7 @@ function paintMap(c, camera){
     renderGround(c, camera);
 
     // All Posters should show posters without connection lines.
-    if (archive.view !== "scatter") {
+    if (archive.view !== "scatter" && archive.view !== "watched") {
         renderConnections(c, camera, graph);
     }
 

@@ -620,7 +620,9 @@ export function setView(key){
     // usual tilt, square on.
     const angle = !phoneCam ? cameraFor(view) : {};
 
-    camera.targetPitch = angle.pitch ?? REST_PITCH;
+    // (A view can also set its own tilt for phones,
+    // phonePitch — the Watched grid does.)
+    camera.targetPitch = angle.pitch ?? (phoneCam ? cameraFor(view).phonePitch : undefined) ?? REST_PITCH;
     camera.targetSpin = angle.spin ?? 0;
 
     if(phoneCam){

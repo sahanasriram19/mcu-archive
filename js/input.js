@@ -69,7 +69,7 @@ function isUiTarget(target){
     return !!target.closest(
         "#view-panel, .character-dropdown, .search-container, " +
         "#movie-search-results, #movie-details-overlay, " +
-        ".character-panel, #countdown, #watch-banner"
+        ".character-panel, #countdown, #watch-banner, #watched-empty"
     );
 
 }

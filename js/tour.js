@@ -283,7 +283,7 @@ function steps(){
             target: null,
             before: () => setPanelOpen(false),
             icon: ICON.poster,
-            body: `Tick the <span class="tour-tick">✓</span> on a title's card when you've seen it. Your progress shows beside each world in the panel, and the "watch before" lists show what you've still got left.<br><br>It's saved in this browser only.`
+            body: `Tick the <span class="tour-tick">✓</span> on a title's card when you've seen it. Everything you've ticked is collected under <b>MCU → Watched</b>, and your progress shows beside each world in the panel.<br><br>It's saved in this browser only.`
         },
 
         {

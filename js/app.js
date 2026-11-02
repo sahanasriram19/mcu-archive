@@ -34,6 +34,7 @@ import { readLink, onLinkChange, applyingLink } from "./links.js";
 import { showMovieDetails, hideMovieDetails, openDetailsId } from "./movieDetails.js";
 import { setSelectedCharacter } from "./characters/characterJourney.js";
 import { initTour } from "./tour.js";
+import "./watchedView.js";
 
 //==========================================
 // LANDING

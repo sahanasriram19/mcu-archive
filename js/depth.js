@@ -76,7 +76,9 @@ const VIEW_HEIGHT = {
     release:    { base: 150, spread: 0 },
     chronology: { base: 150, spread: 0 },
     characters: { base: 110, spread: 240 },
-    scatter:    { base: 120, spread: 800 }    // All Posters: a real volume
+    scatter:    { base: 120, spread: 800 },   // All Posters: a real volume
+    // Watched: every poster level, so the grid stays neat.
+    watched:    { base: 150, spread: 0 }
 };
 
 // How much higher a poster rises while hovered.
