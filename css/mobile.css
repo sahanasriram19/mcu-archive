@@ -33,6 +33,97 @@
          panel.css and would override it there.
     ----------------------------------------*/
 
+    /*----------------------------------------
+      0. Nav panel — smaller on phones
+
+      A slimmer bar and smaller text throughout.
+      Selectors start with #view-panel so they win
+      over comic.css, which loads after this file.
+    ----------------------------------------*/
+
+    #view-panel{
+        max-width:440px;
+        padding:6px 6px 6px 12px;
+    }
+
+    #view-panel .view-panel-header{
+        gap:8px;
+    }
+
+    #view-panel .view-panel-title{
+        font-size:17px;
+    }
+
+    #view-panel .view-panel-reset{
+        width:32px;
+        height:32px;
+    }
+
+    #view-panel .view-panel-reset svg{
+        width:15px;
+        height:15px;
+    }
+
+    #view-panel .view-panel-toggle{
+        min-height:32px;
+        padding:5px 11px;
+        gap:6px;
+        font-size:11.5px;
+    }
+
+    #view-panel .view-panel-chevron{
+        font-size:9px;
+    }
+
+    #view-panel.expanded .view-panel-content{
+        margin-top:8px;
+    }
+
+    #view-panel.expanded .view-panel-content-inner{
+        max-height:min(50vh, calc(100dvh - 110px - var(--keyboard-offset, 0px)));
+    }
+
+    #view-panel .view-panel-list{
+        margin-top:8px;
+    }
+
+    #view-panel .view-panel-section-head{
+        min-height:30px;
+        font-size:15px;
+    }
+
+    #view-panel .view-panel-section-progress{
+        font-size:10px;
+    }
+
+    #view-panel .view-panel-views{
+        gap:5px;
+    }
+
+    #view-panel .view-panel-btn{
+        min-height:34px;
+        padding:6px 10px;
+        font-size:11.5px;
+    }
+
+    #view-panel .character-btn{
+        padding:6px 10px;
+        font-size:11px;
+    }
+
+    /* (Stays 16px: any smaller and iPhones zoom the page
+       in when it's tapped. Just less padding.) */
+    #view-panel #movie-search{
+        min-height:38px;
+        padding:7px 12px;
+    }
+
+    #view-panel .search-result{
+        min-height:38px;
+        padding:8px 12px;
+        font-size:12.5px;
+    }
+
     #movie-search{
         min-height:44px;
         /* 16px stops iPhones zooming the whole page
@@ -125,20 +216,47 @@
         border-radius:20px 20px 0 0 !important;
     }
 
+    /* Smaller poster: a shorter frame with the whole poster
+       (still its real 2:3 shape, no crop) centred in it, and
+       a blurred, darkened copy of the same art filling the
+       frame either side — so no empty bars either. The URL
+       comes from js/movieDetails.js (--poster-bg). */
     #movie-details-poster{
+        position:relative;
         flex:0 0 auto !important;
         width:100%;
-        aspect-ratio:2 / 3;
-        max-height:58dvh;
+        height:clamp(170px, 32dvh, 270px);
+        aspect-ratio:auto;
+        max-height:none;
         min-height:0 !important;
+        padding:14px 0 10px;
+        overflow:hidden;
         background:#000;
     }
 
+    #movie-details-poster::before{
+        content:"";
+        position:absolute;
+        inset:-30px;
+        background:var(--poster-bg, none) center / cover no-repeat;
+        filter:blur(22px) brightness(.45) saturate(1.2);
+        transform:scale(1.1);
+    }
+
     #movie-details-poster img{
-        width:100% !important;
+        position:relative;
+        width:auto !important;
         height:100% !important;
+        aspect-ratio:2 / 3;
         object-fit:cover !important;
         object-position:center top !important;
+        border-radius:6px;
+        box-shadow:0 10px 26px rgba(0,0,0,.6);
+    }
+
+    /* The watch-list dropdown fits the narrower card. */
+    .watch-dropdown-menu{
+        min-width:min(240px, calc(100vw - 48px));
     }
 
     #movie-details-body{
@@ -219,7 +337,7 @@
 @media (max-width: 380px){
 
     #movie-details-poster{
-        max-height:50dvh;
+        height:clamp(150px, 28dvh, 220px);
     }
 
 }
@@ -256,6 +374,22 @@
         width:auto;
         max-height:none;
         aspect-ratio:2 / 3;
+        padding:0;
+    }
+
+    #movie-details-poster::before{
+        display:none;
+    }
+
+    /* Short screen: let the open panel use more of it. */
+    #view-panel.expanded .view-panel-content-inner{
+        max-height:calc(100dvh - 80px - var(--keyboard-offset, 0px));
+    }
+
+    #movie-details-poster img{
+        width:100% !important;
+        border-radius:0;
+        box-shadow:none;
     }
 
     #movie-details-body{

@@ -796,12 +796,15 @@ const PHASE_GAP_X = 1150;
 const PHASE_GAP_Y = 1100;
 
 // Rings are laid out a little taller than wide: tipped back
-// (js/depth.js REST_PITCH, cos ≈ 0.79, and a bit more for
+// (js/depth.js REST_PITCH, cos ≈ 0.70, and a bit more for
 // the row further away) they're squashed top
 // to bottom, so this brings them back to round on screen —
 // and keeps the posters down each side from stacking on
 // top of one another.
-const PHASE_RING_ROUND = 1.38;
+// (Tuned at the old 0.66 rad tilt; scaled with REST_PITCH so
+// the rings stay round if the tilt changes. A function, as
+// depth.js and this file import each other.)
+const phaseRingRound = () => 1.38 * Math.cos(0.66) / Math.cos(REST_PITCH);
 
 function phaseRingRadius(n) {
 
@@ -855,7 +858,7 @@ export function layoutPhases(nodes) {
 
             const R = radii[i];
 
-            const half = portrait ? R * PHASE_RING_ROUND : R;
+            const half = portrait ? R * phaseRingRound() : R;
 
             if (i > 0) at += half;
 
@@ -904,7 +907,7 @@ function phaseGrid(phaseKeys, groups, radii, rowSizes) {
 
         const width = ids.reduce((sum, j) => sum + radii[j] * 2, 0) + (count - 1) * PHASE_GAP_X;
 
-        const half = Math.max(...ids.map(j => radii[j])) * PHASE_RING_ROUND;
+        const half = Math.max(...ids.map(j => radii[j])) * phaseRingRound();
 
         rows.push({ ids, width, half });
 
@@ -1055,7 +1058,7 @@ function placePhaseRings(branches, groups) {
             node.layout = "phases";
 
             node.targetX = branch.x + Math.cos(angle) * radius;
-            node.targetY = branch.y + Math.sin(angle) * radius * PHASE_RING_ROUND;
+            node.targetY = branch.y + Math.sin(angle) * radius * phaseRingRound();
 
         });
 

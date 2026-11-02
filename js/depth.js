@@ -40,7 +40,9 @@ import { getSway } from "./sway.js";
 
 // Focal length, as a share of the larger screen side.
 // Smaller = stronger perspective.
-const FOCAL = 0.9;
+// (0.9 before: a touch stronger now, so the near side of
+// the tilted map comes towards you a little more.)
+const FOCAL = 0.82;
 
 // Depth (in screen px, after zoom) is eased off towards
 // this so that zooming right in doesn't stretch it out.
@@ -86,7 +88,8 @@ export const MAX_PITCH = 0.9;   // radians (~52°)
 
 // How far the map is tipped back when the archive opens
 // (and where T returns it to). 0 = flat.
-export const REST_PITCH = 0.66; // radians (~38°)
+// (Raised from 0.66 / ~38° so the map reads as more 3D.)
+export const REST_PITCH = 0.8;  // radians (~46°)
 
 // How far the map can be turned on the spot, either way
 // (drag with the right mouse button / Shift, or twist two

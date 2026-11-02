@@ -418,21 +418,21 @@ let openNode = null;
 //--------------------------------------------------
 // WHERE TO WATCH
 //
-// A button for each well-known service that has the title
-// where the viewer is — streaming it ("Watch on Netflix") or
-// renting / selling it ("Rent or buy on YouTube") — going by
-// TMDB's where-to-watch (data from JustWatch, fetched with the
-// cast and trailer, js/posters.js). The country comes from the
-// browser's time zone. Only what TMDB confirms gets a button:
-// no data, a service that isn't well known, or nothing there
-// at all — no button, just the trailer.
+// One "Where to watch" dropdown listing each well-known
+// service that has the title where the viewer is — streaming
+// it ("Stream") or renting / selling it ("Rent or buy") —
+// going by TMDB's where-to-watch (data from JustWatch, fetched
+// with the cast and trailer, js/posters.js). The country comes
+// from the browser's time zone. Only what TMDB confirms gets
+// listed: no data, a service that isn't well known, or nothing
+// there at all — no dropdown, just the trailer.
 //
-// Each button opens the title on that service where it can:
+// Each option opens the title on that service where it can:
 // Disney+ straight to the title (its ids are in
-// data/disneyplus.json, the same in every country; the app
-// opens instead on a phone that has it), the others a search
-// for it there, and Max (which has no search link) TMDB's page
-// that links straight to it.
+// data/disneyplus.json), Apple TV straight to the title's own
+// page (looked up on Apple's store, see appleTitleUrl below),
+// the others a search for it there, and Max (which has no
+// search link) TMDB's page that links straight to it.
 //--------------------------------------------------
 
 // (A few titles are stored as a full Disney+ link instead.)
@@ -447,12 +447,167 @@ fetch("./data/disneyplus.json")
 
         disneyIds = map || {};
 
-        if (openNode && openNode.detailsLoaded) renderWatchButtons(openNode);
+        if (openNode && openNode.detailsLoaded) renderWatchMenu(openNode);
 
     })
     .catch(() => {});
 
-// The well-known services, in the order their buttons go.
+//--------------------------------------------------
+// Apple TV: the title's own page.
+//
+// TMDB doesn't give Apple's id for a title, so it's looked up
+// on Apple's public store search (the iTunes Search API) by
+// name, checked against the year, in the viewer's country.
+// Its link (itunes.apple.com/…/movie/…/id123) opens the title
+// on tv.apple.com, or in the TV app on an Apple device.
+// The API has no CORS headers, so it's called the way Apple
+// documents for web pages: JSONP (a <script> with a callback).
+// Until it answers — or if it finds nothing — the option
+// opens Apple TV's search for the title instead.
+//--------------------------------------------------
+
+let jsonpSeq = 0;
+
+function jsonp(url, timeout = 6000){
+
+    return new Promise((resolve, reject) => {
+
+        const cb = `__mcuApple${Date.now()}_${jsonpSeq++}`;
+
+        const script = document.createElement("script");
+
+        const done = () => {
+
+            clearTimeout(timer);
+            delete window[cb];
+            script.remove();
+
+        };
+
+        const timer = setTimeout(() => { done(); reject(new Error("timeout")); }, timeout);
+
+        window[cb] = data => { done(); resolve(data); };
+
+        script.onerror = () => { done(); reject(new Error("network")); };
+
+        script.src = `${url}&callback=${cb}`;
+
+        document.head.appendChild(script);
+
+    });
+
+}
+
+// "Spider-Man: No Way Home" / "spider man no way home" → same key.
+const simplify = str => (str || "")
+    .toLowerCase()
+    .normalize("NFKD").replace(/[̀-ͯ]/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+// Best match from a list of Apple results: same name and year
+// first, then same year, then same name.
+function pickApple(results, name, year, nameOf, urlOf){
+
+    const want = simplify(name);
+
+    const y = +year || 0;
+
+    const yearOf = r => +(r.releaseDate || "").slice(0, 4) || 0;
+
+    const near = r => y && Math.abs(yearOf(r) - y) <= 1;
+
+    const same = r => simplify(nameOf(r)) === want;
+
+    const close = r => {
+
+        const n = simplify(nameOf(r));
+
+        return n.startsWith(want) || want.startsWith(n);
+
+    };
+
+    const hit =
+        results.find(r => same(r) && near(r)) ||
+        results.find(r => close(r) && near(r)) ||
+        results.find(r => same(r)) ||
+        (!y ? results.find(close) : null);
+
+    return hit ? urlOf(hit) : null;
+
+}
+
+// Shows: Apple sells them by season ("Loki, Season 1"), each
+// linking to the show's page — take the earliest season.
+async function appleShowUrl(name, year, country){
+
+    const term = encodeURIComponent(name);
+
+    const data = await jsonp(`https://itunes.apple.com/search?term=${term}&media=tvShow&entity=tvSeason&country=${country}&limit=25`);
+
+    const seasons = (data.results || [])
+        .filter(r => simplify(r.artistName) === simplify(name) || simplify(r.collectionName).startsWith(simplify(name)))
+        .sort((a, b) => (a.releaseDate || "").localeCompare(b.releaseDate || ""));
+
+    const first = seasons[0];
+
+    return first ? (first.collectionViewUrl || first.artistViewUrl || null) : null;
+
+}
+
+async function appleMovieUrl(name, year, country){
+
+    const term = encodeURIComponent(name);
+
+    const data = await jsonp(`https://itunes.apple.com/search?term=${term}&media=movie&entity=movie&country=${country}&limit=25`);
+
+    return pickApple(data.results || [], name, year, r => r.trackName, r => r.trackViewUrl);
+
+}
+
+const appleCache = new Map();   // node.id → Promise<url | null>
+
+function appleTitleUrl(node, name, year, region){
+
+    const key = `${node.id}|${region}`;
+
+    if (appleCache.has(key)) return appleCache.get(key);
+
+    const country = (region || "us").toLowerCase();
+
+    const isShow = node.type === "show";
+
+    const job = (async () => {
+
+        try {
+
+            // Specials can be listed either way on Apple.
+            const first = isShow
+                ? await appleShowUrl(name, year, country)
+                : await appleMovieUrl(name, year, country);
+
+            if (first) return first;
+
+            return isShow
+                ? await appleMovieUrl(name, year, country)
+                : await appleShowUrl(name, year, country);
+
+        } catch (err) {
+
+            return null;
+
+        }
+
+    })();
+
+    appleCache.set(key, job);
+
+    return job;
+
+}
+
+// The well-known services, in the order they're listed.
 // `match` is tested against TMDB's provider name; channels
 // sold through another store ("… Amazon Channel", "… Apple TV
 // Channel") are skipped, as they'd be mislabelled.
@@ -468,18 +623,56 @@ const SERVICES = [
     { key: "hulu",    label: "Hulu",        match: /^hulu\b/i,
       url: (node, q) => `https://www.hulu.com/search?q=${q}` },
     { key: "apple",   label: "Apple TV",    match: /apple tv|itunes/i,
-      url: (node, q) => `https://tv.apple.com/search?term=${q}` },
+      // (A search until the exact page is found, below.)
+      url: (node, q) => `https://tv.apple.com/search?term=${q}`,
+      exact: appleTitleUrl },
     { key: "youtube", label: "YouTube",     match: /youtube/i,
       url: (node, q, w, qy) => `https://www.youtube.com/results?search_query=${qy}` },
     { key: "google",  label: "Google Play", match: /google play/i,
       url: (node, q, w, qy) => `https://play.google.com/store/search?q=${qy}&c=movies` }
 ];
 
-// At most this many buttons, so the row stays tidy (streaming
-// ones first).
-const MAX_WATCH_BUTTONS = 4;
+//--------------------------------------------------
+// The dropdown itself: a button that opens a short list
+// of links. Closes on a pick, a click elsewhere, or Esc
+// (Esc then leaves the card open).
+//--------------------------------------------------
 
-function renderWatchButtons(node) {
+const CHEVRON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+
+function closeWatchMenu(){
+
+    const wrap = moreEl.querySelector(".watch-dropdown.open");
+
+    if (!wrap) return false;
+
+    wrap.classList.remove("open");
+    wrap.querySelector(".watch-dropdown-btn").setAttribute("aria-expanded", "false");
+
+    return true;
+
+}
+
+document.addEventListener("pointerdown", e => {
+
+    if (!e.target.closest || !e.target.closest(".watch-dropdown")) closeWatchMenu();
+
+});
+
+// Capture phase, so Esc closes just the menu, not the card.
+window.addEventListener("keydown", e => {
+
+    if (e.key === "Escape" && closeWatchMenu()) {
+
+        e.stopImmediatePropagation();
+
+        moreEl.querySelector(".watch-dropdown-btn")?.focus();
+
+    }
+
+}, true);
+
+function renderWatchMenu(node) {
 
     moreEl.innerHTML = "";
 
@@ -515,40 +708,102 @@ function renderWatchButtons(node) {
 
     });
 
-    const buttons = SERVICES
+    const options = SERVICES
         .filter(sv => found.has(sv.key))
-        .map(sv => ({ sv, kind: found.get(sv.key) }))
-        .sort((a, b) => (a.kind === "stream" ? 0 : 1) - (b.kind === "stream" ? 0 : 1))
-        .slice(0, MAX_WATCH_BUTTONS);
+        .map(sv => ({ sv, kind: found.get(sv.key), href: sv.url(node, q, w, qy) }))
+        .filter(o => o.href)
+        .sort((a, b) => (a.kind === "stream" ? 0 : 1) - (b.kind === "stream" ? 0 : 1));
 
-    buttons.forEach(({ sv, kind }) => {
+    if (!options.length) return;
 
-        const href = sv.url(node, q, w, qy);
+    const streams = options.filter(o => o.kind === "stream").length;
 
-        if (!href) return;
+    const wrap = document.createElement("div");
+
+    wrap.className = "watch-dropdown";
+
+    wrap.innerHTML = `
+        <button type="button" class="watch-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+            <span>${streams ? "Where to watch" : "Rent or buy"}</span>
+            <span class="watch-dropdown-count">${options.length}</span>
+            ${CHEVRON}
+        </button>
+        <div class="watch-dropdown-menu" role="menu"></div>
+    `;
+
+    const btn = wrap.querySelector(".watch-dropdown-btn");
+    const menu = wrap.querySelector(".watch-dropdown-menu");
+
+    options.forEach(({ sv, kind, href }) => {
 
         const a = document.createElement("a");
 
-        a.className = "watch-service " + sv.key;
+        a.className = "watch-option " + sv.key;
+        a.setAttribute("role", "menuitem");
         a.target = "_blank";
         a.rel = "noopener";
         a.href = href;
 
-        a.textContent = kind === "stream" ? `Watch on ${sv.label}` : `Rent or buy on ${sv.label}`;
+        a.innerHTML = `
+            <span class="watch-option-dot" aria-hidden="true"></span>
+            <span class="watch-option-name">${sv.label}</span>
+            <span class="watch-option-kind">${kind === "stream" ? "Stream" : "Rent or buy"}</span>
+        `;
 
         a.title = kind === "stream"
             ? `${node.title} is streaming on ${sv.label} (${w.region})`
             : `Rent or buy ${node.title} on ${sv.label} (${w.region})`;
 
-        moreEl.appendChild(a);
+        a.addEventListener("click", () => closeWatchMenu());
+
+        // Swap the search link for the title's own page once
+        // it's been found (Apple TV).
+        if (sv.exact) {
+
+            sv.exact(node, name, year, w.region).then(url => {
+
+                if (url && a.isConnected) a.href = url;
+
+            });
+
+        }
+
+        menu.appendChild(a);
 
     });
+
+    btn.addEventListener("click", () => {
+
+        const open = !wrap.classList.contains("open");
+
+        wrap.classList.toggle("open", open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+
+        if (!open) return;
+
+        // Line it up with the button's right edge instead if
+        // it would run off the side of the card (phones).
+        wrap.classList.remove("align-right");
+
+        const box = bodyEl.getBoundingClientRect();
+
+        if (menu.getBoundingClientRect().right > box.right - 8) wrap.classList.add("align-right");
+
+        // If the list runs past the bottom of the card,
+        // scroll the card down just enough to show all of it.
+        const below = menu.getBoundingClientRect().bottom - (box.bottom - 12);
+
+        if (below > 0) bodyEl.scrollBy({ top: below, behavior: "smooth" });
+
+    });
+
+    moreEl.appendChild(wrap);
 
 }
 
 function renderExtras(node) {
 
-    renderWatchButtons(node);
+    renderWatchMenu(node);
 
     if (node.trailerUrl) {
 
@@ -650,6 +905,11 @@ export async function showMovieDetails(node, opts = {}) {
     posterEl.innerHTML = url
         ? `<img src="${url}" alt="${node.title}">`
         : `<div id="movie-details-noposter">${node.title}</div>`;
+
+    // A blurred copy fills the frame either side of the
+    // (smaller) poster on phones (css/mobile.css).
+    if (url) posterEl.style.setProperty("--poster-bg", `url("${new URL(url, location.href).href}")`);
+    else posterEl.style.removeProperty("--poster-bg");
 
     kickerEl.textContent =
         node.type === "show" ? "Disney+ Series" :

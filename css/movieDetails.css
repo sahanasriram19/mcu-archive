@@ -137,42 +137,152 @@
     transform:translateY(-1px);
 }
 
-/* Where to watch (js/movieDetails.js renderWatchButtons):
-   one button per service that has the title where the viewer
-   is, each in that service's colour. */
+/* Where to watch (js/movieDetails.js renderWatchMenu): one
+   dropdown listing each service that has the title where the
+   viewer is, each with a dot in that service's colour. */
 #movie-details-more{
     display:contents;
 }
 
-.watch-service{
+.watch-dropdown{
+    position:relative;
+    display:inline-block;
+}
+
+.watch-dropdown-btn{
     display:inline-flex;
     align-items:center;
-    padding:9px 18px;
+    gap:8px;
+    padding:9px 12px 9px 16px;
     border-radius:4px;
+    border:1px solid rgba(255,255,255,.2);
     background:#2b3445;
-    border:1px solid transparent;
     color:white;
+    font:inherit;
     font-size:13px;
     font-weight:600;
-    text-decoration:none;
     letter-spacing:.02em;
+    cursor:pointer;
     box-shadow:3px 3px 0 var(--ink, #000);
     transition:filter var(--transition), transform var(--transition);
 }
 
-.watch-service:hover{
+.watch-dropdown-btn:hover,
+.watch-dropdown.open .watch-dropdown-btn{
     filter:brightness(1.15);
     transform:translate(-1px, -1px);
 }
 
-.watch-service.disney{ background:linear-gradient(135deg, #0b2ea8, #1a6dd8); }
-.watch-service.netflix{ background:#e50914; }
-.watch-service.prime{ background:#1a98ff; }
-.watch-service.max{ background:#002be7; }
-.watch-service.hulu{ background:#1ce783; color:#06120b; }
-.watch-service.apple{ background:#111; border-color:rgba(255,255,255,.3); }
-.watch-service.youtube{ background:#ff0033; }
-.watch-service.google{ background:#01875f; }
+.watch-dropdown-btn:focus-visible{
+    outline:2px solid rgba(255,255,255,.7);
+    outline-offset:2px;
+}
+
+/* How many services: a small badge. */
+.watch-dropdown-count{
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    display:inline-grid;
+    place-items:center;
+    border-radius:999px;
+    background:rgba(255,255,255,.14);
+    font-size:11px;
+    font-variant-numeric:tabular-nums;
+}
+
+.watch-dropdown-btn svg{
+    width:14px;
+    height:14px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.4;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    transition:transform .2s ease;
+}
+
+.watch-dropdown.open .watch-dropdown-btn svg{
+    transform:rotate(180deg);
+}
+
+.watch-dropdown-menu{
+    position:absolute;
+    top:calc(100% + 8px);
+    left:0;
+    z-index:5;
+    min-width:230px;
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,.14);
+    background:var(--paper-2, #1c212c);
+    box-shadow:5px 5px 0 var(--ink, #000);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-4px);
+    transition:opacity .15s ease, transform .15s ease, visibility 0s linear .15s;
+}
+
+.watch-dropdown.align-right .watch-dropdown-menu{
+    left:auto;
+    right:0;
+}
+
+.watch-dropdown.open .watch-dropdown-menu{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+    transition:opacity .15s ease, transform .15s ease, visibility 0s;
+}
+
+.watch-option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:4px;
+    color:white;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:600;
+}
+
+.watch-option:hover,
+.watch-option:focus-visible{
+    background:rgba(255,255,255,.08);
+    outline:none;
+}
+
+.watch-option-dot{
+    flex:0 0 auto;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#8a94a6;
+    box-shadow:0 0 0 2px rgba(255,255,255,.08);
+}
+
+.watch-option-kind{
+    margin-left:auto;
+    padding-left:12px;
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--muted, #9aa3b2);
+    white-space:nowrap;
+}
+
+/* Each service's colour. */
+.watch-option.disney  .watch-option-dot{ background:linear-gradient(135deg, #0b2ea8, #1a6dd8); }
+.watch-option.netflix .watch-option-dot{ background:#e50914; }
+.watch-option.prime   .watch-option-dot{ background:#1a98ff; }
+.watch-option.max     .watch-option-dot{ background:#002be7; }
+.watch-option.hulu    .watch-option-dot{ background:#1ce783; }
+.watch-option.apple   .watch-option-dot{ background:#f5f5f7; }
+.watch-option.youtube .watch-option-dot{ background:#ff0033; }
+.watch-option.google  .watch-option-dot{ background:#01875f; }
 
 /* Trailer, Watched and Copy link sit in one row. */
 #movie-details-actions{
