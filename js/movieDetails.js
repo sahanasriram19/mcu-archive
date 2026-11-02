@@ -498,25 +498,32 @@ function jsonp(url, timeout = 6000){
 
 }
 
-// "Spider-Man: No Way Home" / "spider man no way home" → same key.
+// "Spider-Man: No Way Home" / "spider man no way home" → same
+// key. Apple's store also names a lot of these "Marvel Studios'
+// Black Panther" or "Iron Man (2008)", so those bits go too.
 const simplify = str => (str || "")
     .toLowerCase()
     .normalize("NFKD").replace(/[̀-ͯ]/g, "")
+    .replace(/[’‘]/g, "'")
+    .replace(/^\s*(marvel studios'?s?|marvel'?s|marvel)\s+/, "")
+    .replace(/\s*[\(\[][^\)\]]*[\)\]]\s*/g, " ")
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-// Best match from a list of Apple results: same name and year
-// first, then same year, then same name.
-function pickApple(results, name, year, nameOf, urlOf){
+const yearOf = r => +(r.releaseDate || "").slice(0, 4) || 0;
+
+// Best match from a list of Apple results (they come in
+// Apple's own relevance order): same name and year first,
+// then a name that contains the other and the year, then the
+// same name in any year.
+function pickApple(results, name, year, nameOf){
 
     const want = simplify(name);
 
     const y = +year || 0;
 
-    const yearOf = r => +(r.releaseDate || "").slice(0, 4) || 0;
-
-    const near = r => y && Math.abs(yearOf(r) - y) <= 1;
+    const near = r => !y || !yearOf(r) || Math.abs(yearOf(r) - y) <= 1;
 
     const same = r => simplify(nameOf(r)) === want;
 
@@ -524,30 +531,56 @@ function pickApple(results, name, year, nameOf, urlOf){
 
         const n = simplify(nameOf(r));
 
-        return n.startsWith(want) || want.startsWith(n);
+        return !!n && (n.includes(want) || want.includes(n));
 
     };
 
-    const hit =
-        results.find(r => same(r) && near(r)) ||
+    return results.find(r => same(r) && near(r)) ||
         results.find(r => close(r) && near(r)) ||
-        results.find(r => same(r)) ||
-        (!y ? results.find(close) : null);
+        results.find(same) ||
+        null;
 
-    return hit ? urlOf(hit) : null;
+}
+
+async function appleSearch(params, country){
+
+    const data = await jsonp(`https://itunes.apple.com/search?${params}&country=${country}&limit=50`);
+
+    return (data && data.results) || [];
+
+}
+
+async function appleMovieUrl(name, year, country){
+
+    const term = encodeURIComponent(name);
+
+    const results = await appleSearch(`term=${term}&media=movie&entity=movie`, country);
+
+    const hit = pickApple(results, name, year, r => r.trackName);
+
+    return hit ? hit.trackViewUrl : null;
 
 }
 
 // Shows: Apple sells them by season ("Loki, Season 1"), each
-// linking to the show's page — take the earliest season.
+// linking to the show — take the earliest matching season.
 async function appleShowUrl(name, year, country){
 
     const term = encodeURIComponent(name);
 
-    const data = await jsonp(`https://itunes.apple.com/search?term=${term}&media=tvShow&entity=tvSeason&country=${country}&limit=25`);
+    const results = await appleSearch(`term=${term}&media=tvShow&entity=tvSeason`, country);
 
-    const seasons = (data.results || [])
-        .filter(r => simplify(r.artistName) === simplify(name) || simplify(r.collectionName).startsWith(simplify(name)))
+    const want = simplify(name);
+
+    const seasons = results
+        .filter(r => {
+
+            const show = simplify(r.artistName);
+            const season = simplify((r.collectionName || "").replace(/,?\s*(season|series|vol\.?|volume)\b.*$/i, ""));
+
+            return show === want || season === want;
+
+        })
         .sort((a, b) => (a.releaseDate || "").localeCompare(b.releaseDate || ""));
 
     const first = seasons[0];
@@ -556,17 +589,7 @@ async function appleShowUrl(name, year, country){
 
 }
 
-async function appleMovieUrl(name, year, country){
-
-    const term = encodeURIComponent(name);
-
-    const data = await jsonp(`https://itunes.apple.com/search?term=${term}&media=movie&entity=movie&country=${country}&limit=25`);
-
-    return pickApple(data.results || [], name, year, r => r.trackName, r => r.trackViewUrl);
-
-}
-
-const appleCache = new Map();   // node.id → Promise<url | null>
+const appleCache = new Map();   // "id|region" → Promise<url | null>
 
 function appleTitleUrl(node, name, year, region){
 
@@ -578,26 +601,46 @@ function appleTitleUrl(node, name, year, region){
 
     const isShow = node.type === "show";
 
+    // Movies first for films, seasons first for shows (specials
+    // can be listed either way); the viewer's own country, then
+    // the US store (Apple sends a link from another store on to
+    // the viewer's own where it has the title).
+    const tries = [];
+
+    for (const c of country === "us" ? ["us"] : [country, "us"]) {
+
+        tries.push(isShow ? [appleShowUrl, c] : [appleMovieUrl, c]);
+        tries.push(isShow ? [appleMovieUrl, c] : [appleShowUrl, c]);
+
+    }
+
     const job = (async () => {
 
-        try {
+        for (const [find, c] of tries) {
 
-            // Specials can be listed either way on Apple.
-            const first = isShow
-                ? await appleShowUrl(name, year, country)
-                : await appleMovieUrl(name, year, country);
+            try {
 
-            if (first) return first;
+                const url = await find(name, year, c);
 
-            return isShow
-                ? await appleMovieUrl(name, year, country)
-                : await appleShowUrl(name, year, country);
+                if (url) {
 
-        } catch (err) {
+                    console.debug(`[Apple TV] ${name} (${year}) → ${url}`);
 
-            return null;
+                    return url;
+
+                }
+
+            } catch (err) {
+
+                console.warn(`[Apple TV] lookup failed (${c}):`, err.message);
+
+            }
 
         }
+
+        console.debug(`[Apple TV] no match for ${name} (${year}); using search`);
+
+        return null;
 
     })();
 
@@ -755,13 +798,54 @@ function renderWatchMenu(node) {
 
         a.addEventListener("click", () => closeWatchMenu());
 
-        // Swap the search link for the title's own page once
-        // it's been found (Apple TV).
+        // Apple TV: the title's own page, looked up on Apple's
+        // store (above). The link is swapped in as soon as it's
+        // found; if it's clicked before then, a new tab opens
+        // at once and is sent on when the lookup answers (or to
+        // the search, if it finds nothing or takes too long).
         if (sv.exact) {
 
-            sv.exact(node, name, year, w.region).then(url => {
+            let exactUrl = null;
+            let settled = false;
+
+            const lookup = sv.exact(node, name, year, w.region).then(url => {
+
+                settled = true;
+                exactUrl = url;
 
                 if (url && a.isConnected) a.href = url;
+
+                return url;
+
+            });
+
+            a.addEventListener("click", e => {
+
+                if (settled) return;
+
+                e.preventDefault();
+
+                const tab = window.open("about:blank", "_blank");
+
+                const fallback = href;
+
+                Promise.race([lookup, new Promise(r => setTimeout(() => r(null), 4000))]).then(url => {
+
+                    const go = url || exactUrl || fallback;
+
+                    if (tab && !tab.closed) {
+
+                        try { tab.opener = null; } catch (err) {}
+
+                        tab.location.href = go;
+
+                    } else {
+
+                        window.open(go, "_blank", "noopener");
+
+                    }
+
+                });
 
             });
 
