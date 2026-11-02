@@ -725,7 +725,6 @@ function renderWatchMenu(node) {
     wrap.innerHTML = `
         <button type="button" class="watch-dropdown-btn" aria-haspopup="true" aria-expanded="false">
             <span>${streams ? "Where to watch" : "Rent or buy"}</span>
-            <span class="watch-dropdown-count">${options.length}</span>
             ${CHEVRON}
         </button>
         <div class="watch-dropdown-menu" role="menu"></div>

@@ -111,11 +111,14 @@
         font-size:11px;
     }
 
-    /* (Stays 16px: any smaller and iPhones zoom the page
-       in when it's tapped. Just less padding.) */
+    /* Shorter search bar. (Text stays 16px: any smaller
+       and iPhones zoom the page in when it's tapped.) */
     #view-panel #movie-search{
-        min-height:38px;
-        padding:7px 12px;
+        min-height:0;
+        height:32px;
+        padding:4px 10px;
+        line-height:1.2;
+        border-radius:4px;
     }
 
     #view-panel .search-result{
@@ -274,8 +277,12 @@
         padding-right:0;
     }
 
+    /* Bebas Neue (css/comic.css) runs small, so it needs
+       a bigger size than plain text to read as a title. */
     #movie-details-title{
-        font-size:19px !important;
+        font-size:32px !important;
+        line-height:1 !important;
+        margin-bottom:8px;
     }
 
     #movie-details-overview{
@@ -397,7 +404,7 @@
     }
 
     #movie-details-title{
-        font-size:18px !important;
+        font-size:28px !important;
     }
 
 }
