@@ -1,0 +1,353 @@
+/*==================================================
+  WELCOME TOUR (js/tour.js)
+
+  A spotlight — a see-through box whose enormous shadow
+  darkens everything else — glides from one thing to the
+  next, with a comic caption card beside it.
+==================================================*/
+
+#tour{
+    position:fixed;
+    inset:0;
+    z-index:200;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .35s ease, visibility 0s linear .35s;
+}
+
+#tour.show{
+    pointer-events:auto;
+    opacity:1;
+    visibility:visible;
+    transition:opacity .35s ease, visibility 0s;
+}
+
+/* The hole. */
+.tour-spot{
+    position:absolute;
+    top:0;
+    left:0;
+    width:0;
+    height:0;
+    border-radius:10px;
+    box-shadow:
+        0 0 0 2px rgba(230,36,41,.9),
+        0 0 28px 4px rgba(230,36,41,.35),
+        0 0 0 200vmax rgba(4,6,10,.72);
+    transition:
+        transform .55s cubic-bezier(.22,.8,.24,1),
+        width .55s cubic-bezier(.22,.8,.24,1),
+        height .55s cubic-bezier(.22,.8,.24,1),
+        border-radius .55s ease;
+    pointer-events:none;
+    animation:tour-pulse 2.4s ease-in-out infinite;
+}
+
+/* No target: shrunk away, the whole screen dimmed, no ring. */
+.tour-spot.none{
+    animation:none;
+    box-shadow:0 0 0 200vmax rgba(4,6,10,.72);
+}
+
+@keyframes tour-pulse{
+    0%, 100%{
+        box-shadow:
+            0 0 0 2px rgba(230,36,41,.9),
+            0 0 28px 4px rgba(230,36,41,.35),
+            0 0 0 200vmax rgba(4,6,10,.72);
+    }
+    50%{
+        box-shadow:
+            0 0 0 3px rgba(230,36,41,1),
+            0 0 40px 10px rgba(230,36,41,.45),
+            0 0 0 200vmax rgba(4,6,10,.72);
+    }
+}
+
+/* The card. */
+.tour-card{
+    position:absolute;
+    top:0;
+    left:0;
+    width:min(340px, calc(100vw - 24px));
+    padding:18px 18px 14px;
+    border-radius:var(--radius, 6px);
+    border:1px solid var(--edge, rgba(255,255,255,.14));
+    border-top:3px solid var(--accent, #e62429);
+    background-color:var(--paper, #151922);
+    background-image:var(--halftone, none);
+    background-size:6px 6px;
+    box-shadow:6px 6px 0 var(--ink, #000);
+    color:var(--text, #fff);
+    font-family:Inter, Arial, sans-serif;
+    transition:transform .55s cubic-bezier(.22,.8,.24,1);
+}
+
+.tour-card.centered{
+    width:min(380px, calc(100vw - 24px));
+}
+
+/* Each step's text fades up as it changes. */
+.tour-card > :not(.tour-foot){
+    transition:opacity .3s ease, transform .3s ease;
+}
+
+.tour-card:not(.in) > :not(.tour-foot){
+    opacity:0;
+    transform:translateY(6px);
+    transition:none;
+}
+
+.tour-icon{
+    width:40px;
+    height:40px;
+    margin-bottom:10px;
+    display:grid;
+    place-items:center;
+    border-radius:8px;
+    background:rgba(230,36,41,.16);
+    color:var(--accent, #e62429);
+}
+
+.tour-icon svg,
+.tour-list svg{
+    width:22px;
+    height:22px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.tour-step{
+    font-size:11px;
+    font-weight:700;
+    color:var(--accent, #e62429);
+    margin-bottom:4px;
+}
+
+.tour-title{
+    margin:0 0 8px;
+    font-family:var(--display, Impact, sans-serif);
+    font-size:28px;
+    font-weight:400;
+    letter-spacing:.01em;
+    line-height:1;
+}
+
+.tour-body{
+    font-size:13.5px;
+    line-height:1.55;
+    color:rgba(255,255,255,.82);
+}
+
+.tour-body b{
+    color:#fff;
+    font-weight:600;
+}
+
+.tour-list{
+    margin:2px 0 0;
+    padding:0;
+    list-style:none;
+    display:grid;
+    gap:10px;
+}
+
+.tour-list li{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+}
+
+.tour-list svg{
+    flex:0 0 auto;
+    width:20px;
+    height:20px;
+    margin-top:1px;
+    color:var(--accent, #e62429);
+}
+
+.tour-dot{
+    flex:0 0 auto;
+    width:20px;
+    height:20px;
+    display:grid;
+    place-items:center;
+}
+
+.tour-dot::before{
+    content:"";
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    border:2px solid var(--accent, #e62429);
+}
+
+.tour-tick{
+    display:inline-grid;
+    place-items:center;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.5);
+    font-size:11px;
+    vertical-align:-4px;
+}
+
+/* Dots + buttons. */
+.tour-foot{
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.tour-dots{
+    display:flex;
+    gap:5px;
+}
+
+.tour-dots span{
+    width:6px;
+    height:6px;
+    border-radius:999px;
+    background:rgba(255,255,255,.2);
+    transition:width .3s ease, background .3s ease;
+}
+
+.tour-dots span.past{
+    background:rgba(230,36,41,.5);
+}
+
+.tour-dots span.on{
+    width:18px;
+    background:var(--accent, #e62429);
+}
+
+.tour-buttons{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.tour-buttons button{
+    font:inherit;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    border-radius:4px;
+    padding:8px 12px;
+}
+
+.tour-skip{
+    border:none;
+    background:none;
+    color:var(--muted, #9aa3b2);
+    padding-left:4px !important;
+    padding-right:4px !important;
+}
+
+.tour-skip:hover{
+    color:#fff;
+}
+
+.tour-back{
+    border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+}
+
+.tour-next{
+    border:1px solid var(--accent, #e62429);
+    background:var(--accent, #e62429);
+    color:#fff;
+    box-shadow:3px 3px 0 var(--ink, #000);
+    transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.tour-next:hover{
+    transform:translate(-1px, -1px);
+    box-shadow:4px 4px 0 var(--ink, #000);
+}
+
+.tour-buttons button:focus-visible{
+    outline:2px solid rgba(255,255,255,.75);
+    outline-offset:2px;
+}
+
+/*--------------------------------------------------
+  The "?" button in the panel (ui/panel.js): plays the
+  tour again. Same round style as the reset button.
+--------------------------------------------------*/
+
+.view-panel-help{
+    flex:0 0 auto;
+    width:30px;
+    height:30px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.04);
+    color:rgba(255,255,255,.75);
+    font:600 14px/1 Inter, Arial, sans-serif;
+    cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+}
+
+.view-panel-help:hover{
+    border-color:rgba(230,36,41,.7);
+    background:rgba(230,36,41,.2);
+    color:#fff;
+}
+
+.view-panel-help:focus-visible{
+    outline:2px solid rgba(255,255,255,.7);
+    outline-offset:3px;
+}
+
+/*--------------------------------------------------
+  Phones
+--------------------------------------------------*/
+
+@media (max-width: 768px), (max-height: 500px){
+
+    .tour-card{
+        padding:14px 14px 12px;
+    }
+
+    .tour-title{
+        font-size:24px;
+    }
+
+    .tour-body{
+        font-size:13px;
+    }
+
+    #view-panel .view-panel-help{
+        width:32px;
+        height:32px;
+        font-size:13px;
+    }
+
+}
+
+/*--------------------------------------------------
+  Reduced motion: jumps instead of glides
+--------------------------------------------------*/
+
+@media (prefers-reduced-motion: reduce){
+
+    .tour-spot,
+    .tour-card,
+    .tour-card > *{
+        transition:none !important;
+        animation:none !important;
+    }
+
+}

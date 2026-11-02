@@ -34,6 +34,9 @@ panel.innerHTML = `
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 3.5v4.6h4.6"/><circle cx="12" cy="12" r="2.2"/></svg>
         </button>
 
+        <!-- Plays the welcome tour again (js/tour.js). -->
+        <button class="view-panel-help" type="button" title="How to use the archive" aria-label="How to use the archive">?</button>
+
         <button class="view-panel-toggle" type="button" aria-expanded="false" aria-controls="view-panel-content">
             <span class="view-panel-current"></span>
             <span class="view-panel-chevron" aria-hidden="true">&#9662;</span>
@@ -84,6 +87,12 @@ const list = panel.querySelector(".view-panel-list");
 const toggle = panel.querySelector(".view-panel-toggle");
 const currentLabel = panel.querySelector(".view-panel-current");
 const titleBtn = panel.querySelector(".view-panel-title");
+
+panel.querySelector(".view-panel-help").addEventListener("click", () => {
+
+    window.dispatchEvent(new Event("mcu:start-tour"));
+
+});
 
 function setExpanded(open){
 

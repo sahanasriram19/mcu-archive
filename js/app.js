@@ -33,6 +33,7 @@ import { updateDepth } from "./depth.js";
 import { readLink, onLinkChange, applyingLink } from "./links.js";
 import { showMovieDetails, hideMovieDetails, openDetailsId } from "./movieDetails.js";
 import { setSelectedCharacter } from "./characters/characterJourney.js";
+import { initTour } from "./tour.js";
 
 //==========================================
 // LANDING
@@ -79,6 +80,9 @@ graphReady.then(initUpcoming);
 
 // Cards lean towards the mouse (js/tilt.js).
 initTilt();
+
+// The welcome tour for first-time visitors (js/tour.js).
+initTour();
 
 // The landing page's 3D scroll fly-through (js/intro.js),
 // built from the MCU titles once they've loaded.
@@ -279,6 +283,10 @@ async function enter(viewKey, opts = {}){
     }
 
     mapShown = true;
+
+    // First visit: the welcome tour starts once the map has
+    // opened out (js/tour.js).
+    window.dispatchEvent(new Event("mcu:archive-entered"));
 
     // The map opens tipped back (js/depth.js) — setView()
     // above sets each view's own angle. It starts flat, so
