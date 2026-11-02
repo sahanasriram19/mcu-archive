@@ -457,22 +457,27 @@ fetch("./data/disneyplus.json")
 //
 // Apple TV pages are addressed by Apple's own id
 // (tv.apple.com/sg/movie/iron-man/umc.cmc.…), which TMDB
-// doesn't give. Wikidata does: it records each film's TMDB id
-// alongside its Apple TV id, and its query service can be
-// called from a web page. (Apple's own store search can't be
-// used for this any more: it returns old iTunes Store links,
-// which Apple now just redirects to the Apple TV home page.)
+// doesn't give. Wikidata does: its entry for a film holds the
+// film's TMDB id and its Apple TV id. So:
 //
-// If Wikidata has no Apple TV id for a title, the option opens
-// TMDB's where-to-watch page for it instead, whose Apple TV
-// logo goes straight to the title.
+//   1. find the Wikidata entry with this TMDB id (its search
+//      API, which allows calls from web pages),
+//   2. read the entry and take the Apple TV id from it — any
+//      value shaped like "umc.cmc.…", so this doesn't depend
+//      on knowing which Wikidata property holds it.
+//
+// (Apple's own store search can't be used for this: it only
+// returns old iTunes Store links, which Apple now redirects
+// to the Apple TV home page.)
+//
+// If nothing's found, the option opens Apple TV's search for
+// the title in the viewer's country.
 //--------------------------------------------------
 
-const WIKIDATA_SPARQL = "https://query.wikidata.org/sparql";
+const WIKIDATA_API = "https://www.wikidata.org/w/api.php";
 
-// Wikidata properties: TMDB movie / TV ids, Apple TV movie /
-// show ids.
-const WD = { tmdbMovie: "P4947", tmdbTv: "P4983", appleMovie: "P9586", appleShow: "P9751" };
+// Wikidata properties holding TMDB's movie / TV ids.
+const WD_TMDB = { movie: "P4947", tv: "P4983" };
 
 const slugify = str => (str || "")
     .toLowerCase()
@@ -481,35 +486,55 @@ const slugify = str => (str || "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "title";
 
+async function wikidataGet(params, signal){
+
+    const res = await fetch(`${WIKIDATA_API}?${params}&format=json&origin=*`, { signal });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    return res.json();
+
+}
+
 async function appleIdFromWikidata(endpoint, tmdbId){
 
-    const tmdbProp = endpoint === "tv" ? WD.tmdbTv : WD.tmdbMovie;
-
-    const query = `SELECT ?movie ?show WHERE {
-        ?item wdt:${tmdbProp} "${String(tmdbId).replace(/"/g, "")}" .
-        OPTIONAL { ?item wdt:${WD.appleMovie} ?movie }
-        OPTIONAL { ?item wdt:${WD.appleShow} ?show }
-    } LIMIT 5`;
+    const prop = WD_TMDB[endpoint] || WD_TMDB.movie;
 
     const ctrl = new AbortController();
 
-    const timer = setTimeout(() => ctrl.abort(), 6000);
+    const timer = setTimeout(() => ctrl.abort(), 8000);
 
     try {
 
-        const res = await fetch(`${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(query)}`, {
-            headers: { Accept: "application/sparql-results+json" },
-            signal: ctrl.signal
-        });
+        // 1. The entry (or entries) with this TMDB id.
+        const search = await wikidataGet(
+            `action=query&list=search&srlimit=3&srsearch=${encodeURIComponent(`haswbstatement:${prop}=${tmdbId}`)}`,
+            ctrl.signal
+        );
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const ids = ((search.query && search.query.search) || []).map(r => r.title).filter(t => /^Q\d+$/.test(t));
 
-        const data = await res.json();
+        if (!ids.length) return null;
 
-        for (const row of (data.results && data.results.bindings) || []) {
+        // 2. Its claims: the first "umc.cmc.…" value is the
+        // Apple TV id.
+        const data = await wikidataGet(`action=wbgetentities&props=claims&ids=${ids.join("|")}`, ctrl.signal);
 
-            if (row.movie && row.movie.value) return { kind: "movie", id: row.movie.value };
-            if (row.show && row.show.value) return { kind: "show", id: row.show.value };
+        for (const q of ids) {
+
+            const claims = (data.entities && data.entities[q] && data.entities[q].claims) || {};
+
+            for (const list of Object.values(claims)) {
+
+                for (const c of list) {
+
+                    const v = c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value;
+
+                    if (typeof v === "string" && /^umc\.cmc\.[a-z0-9]+$/i.test(v)) return v;
+
+                }
+
+            }
 
         }
 
@@ -525,22 +550,26 @@ async function appleIdFromWikidata(endpoint, tmdbId){
 
 const appleCache = new Map();   // "endpoint/id|region" → Promise<url | null>
 
-function appleTitleUrl(node, name, year, region, w){
-
-    if (!node.tmdbId || !node.tmdbEndpoint) return Promise.resolve(w && w.link || null);
-
-    const key = `${node.tmdbEndpoint}/${node.tmdbId}|${region}`;
-
-    if (appleCache.has(key)) return appleCache.get(key);
+function appleTitleUrl(node, name, year, region){
 
     const country = (region || "us").toLowerCase();
 
+    const search = `https://tv.apple.com/${country}/search?term=${encodeURIComponent(name)}`;
+
+    if (!node.tmdbId || !node.tmdbEndpoint) return Promise.resolve(search);
+
+    const key = `${node.tmdbEndpoint}/${node.tmdbId}|${country}`;
+
+    if (appleCache.has(key)) return appleCache.get(key);
+
+    const kind = node.tmdbEndpoint === "tv" ? "show" : "movie";
+
     const job = appleIdFromWikidata(node.tmdbEndpoint, node.tmdbId)
-        .then(found => {
+        .then(id => {
 
-            if (found) {
+            if (id) {
 
-                const url = `https://tv.apple.com/${country}/${found.kind}/${slugify(name)}/${found.id}`;
+                const url = `https://tv.apple.com/${country}/${kind}/${slugify(name)}/${id}`;
 
                 console.debug(`[Apple TV] ${name} → ${url}`);
 
@@ -548,16 +577,18 @@ function appleTitleUrl(node, name, year, region, w){
 
             }
 
-            console.debug(`[Apple TV] no Apple TV id on Wikidata for ${name} (TMDB ${node.tmdbEndpoint}/${node.tmdbId}); using TMDB's where-to-watch page`);
+            console.debug(`[Apple TV] no Apple TV id on Wikidata for ${name} (TMDB ${node.tmdbEndpoint}/${node.tmdbId}); using Apple TV search`);
 
-            return (w && w.link) || null;
+            return search;
 
         })
         .catch(err => {
 
             console.warn(`[Apple TV] Wikidata lookup failed for ${name}:`, err.message);
 
-            return (w && w.link) || null;
+            appleCache.delete(key);   // try again next time
+
+            return search;
 
         });
 
@@ -584,7 +615,7 @@ const SERVICES = [
       url: (node, q) => `https://www.hulu.com/search?q=${q}` },
     { key: "apple",   label: "Apple TV",    match: /apple tv|itunes/i,
       // (A search until the exact page is found, below.)
-      url: (node, q) => `https://tv.apple.com/search?term=${q}`,
+      url: (node, q, w) => `https://tv.apple.com/${(w.region || "us").toLowerCase()}/search?term=${q}`,
       exact: appleTitleUrl },
     { key: "youtube", label: "YouTube",     match: /youtube/i,
       url: (node, q, w, qy) => `https://www.youtube.com/results?search_query=${qy}` },
@@ -725,7 +756,7 @@ function renderWatchMenu(node) {
             let exactUrl = null;
             let settled = false;
 
-            const lookup = sv.exact(node, name, year, w.region, w).then(url => {
+            const lookup = sv.exact(node, name, year, w.region).then(url => {
 
                 settled = true;
                 exactUrl = url;
@@ -746,7 +777,7 @@ function renderWatchMenu(node) {
 
                 const fallback = href;
 
-                Promise.race([lookup, new Promise(r => setTimeout(() => r(null), 4000))]).then(url => {
+                Promise.race([lookup, new Promise(r => setTimeout(() => r(null), 8000))]).then(url => {
 
                     const go = url || exactUrl || fallback;
 
