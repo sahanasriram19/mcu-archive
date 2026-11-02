@@ -455,194 +455,111 @@ fetch("./data/disneyplus.json")
 //--------------------------------------------------
 // Apple TV: the title's own page.
 //
-// TMDB doesn't give Apple's id for a title, so it's looked up
-// on Apple's public store search (the iTunes Search API) by
-// name, checked against the year, in the viewer's country.
-// Its link (itunes.apple.com/…/movie/…/id123) opens the title
-// on tv.apple.com, or in the TV app on an Apple device.
-// The API has no CORS headers, so it's called the way Apple
-// documents for web pages: JSONP (a <script> with a callback).
-// Until it answers — or if it finds nothing — the option
-// opens Apple TV's search for the title instead.
+// Apple TV pages are addressed by Apple's own id
+// (tv.apple.com/sg/movie/iron-man/umc.cmc.…), which TMDB
+// doesn't give. Wikidata does: it records each film's TMDB id
+// alongside its Apple TV id, and its query service can be
+// called from a web page. (Apple's own store search can't be
+// used for this any more: it returns old iTunes Store links,
+// which Apple now just redirects to the Apple TV home page.)
+//
+// If Wikidata has no Apple TV id for a title, the option opens
+// TMDB's where-to-watch page for it instead, whose Apple TV
+// logo goes straight to the title.
 //--------------------------------------------------
 
-let jsonpSeq = 0;
+const WIKIDATA_SPARQL = "https://query.wikidata.org/sparql";
 
-function jsonp(url, timeout = 6000){
+// Wikidata properties: TMDB movie / TV ids, Apple TV movie /
+// show ids.
+const WD = { tmdbMovie: "P4947", tmdbTv: "P4983", appleMovie: "P9586", appleShow: "P9751" };
 
-    return new Promise((resolve, reject) => {
-
-        const cb = `__mcuApple${Date.now()}_${jsonpSeq++}`;
-
-        const script = document.createElement("script");
-
-        const done = () => {
-
-            clearTimeout(timer);
-            delete window[cb];
-            script.remove();
-
-        };
-
-        const timer = setTimeout(() => { done(); reject(new Error("timeout")); }, timeout);
-
-        window[cb] = data => { done(); resolve(data); };
-
-        script.onerror = () => { done(); reject(new Error("network")); };
-
-        script.src = `${url}&callback=${cb}`;
-
-        document.head.appendChild(script);
-
-    });
-
-}
-
-// "Spider-Man: No Way Home" / "spider man no way home" → same
-// key. Apple's store also names a lot of these "Marvel Studios'
-// Black Panther" or "Iron Man (2008)", so those bits go too.
-const simplify = str => (str || "")
+const slugify = str => (str || "")
     .toLowerCase()
     .normalize("NFKD").replace(/[̀-ͯ]/g, "")
-    .replace(/[’‘]/g, "'")
-    .replace(/^\s*(marvel studios'?s?|marvel'?s|marvel)\s+/, "")
-    .replace(/\s*[\(\[][^\)\]]*[\)\]]\s*/g, " ")
     .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "title";
 
-const yearOf = r => +(r.releaseDate || "").slice(0, 4) || 0;
+async function appleIdFromWikidata(endpoint, tmdbId){
 
-// Best match from a list of Apple results (they come in
-// Apple's own relevance order): same name and year first,
-// then a name that contains the other and the year, then the
-// same name in any year.
-function pickApple(results, name, year, nameOf){
+    const tmdbProp = endpoint === "tv" ? WD.tmdbTv : WD.tmdbMovie;
 
-    const want = simplify(name);
+    const query = `SELECT ?movie ?show WHERE {
+        ?item wdt:${tmdbProp} "${String(tmdbId).replace(/"/g, "")}" .
+        OPTIONAL { ?item wdt:${WD.appleMovie} ?movie }
+        OPTIONAL { ?item wdt:${WD.appleShow} ?show }
+    } LIMIT 5`;
 
-    const y = +year || 0;
+    const ctrl = new AbortController();
 
-    const near = r => !y || !yearOf(r) || Math.abs(yearOf(r) - y) <= 1;
+    const timer = setTimeout(() => ctrl.abort(), 6000);
 
-    const same = r => simplify(nameOf(r)) === want;
+    try {
 
-    const close = r => {
+        const res = await fetch(`${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(query)}`, {
+            headers: { Accept: "application/sparql-results+json" },
+            signal: ctrl.signal
+        });
 
-        const n = simplify(nameOf(r));
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        return !!n && (n.includes(want) || want.includes(n));
+        const data = await res.json();
 
-    };
+        for (const row of (data.results && data.results.bindings) || []) {
 
-    return results.find(r => same(r) && near(r)) ||
-        results.find(r => close(r) && near(r)) ||
-        results.find(same) ||
-        null;
+            if (row.movie && row.movie.value) return { kind: "movie", id: row.movie.value };
+            if (row.show && row.show.value) return { kind: "show", id: row.show.value };
 
-}
+        }
 
-async function appleSearch(params, country){
+        return null;
 
-    const data = await jsonp(`https://itunes.apple.com/search?${params}&country=${country}&limit=50`);
+    } finally {
 
-    return (data && data.results) || [];
+        clearTimeout(timer);
 
-}
-
-async function appleMovieUrl(name, year, country){
-
-    const term = encodeURIComponent(name);
-
-    const results = await appleSearch(`term=${term}&media=movie&entity=movie`, country);
-
-    const hit = pickApple(results, name, year, r => r.trackName);
-
-    return hit ? hit.trackViewUrl : null;
+    }
 
 }
 
-// Shows: Apple sells them by season ("Loki, Season 1"), each
-// linking to the show — take the earliest matching season.
-async function appleShowUrl(name, year, country){
+const appleCache = new Map();   // "endpoint/id|region" → Promise<url | null>
 
-    const term = encodeURIComponent(name);
+function appleTitleUrl(node, name, year, region, w){
 
-    const results = await appleSearch(`term=${term}&media=tvShow&entity=tvSeason`, country);
+    if (!node.tmdbId || !node.tmdbEndpoint) return Promise.resolve(w && w.link || null);
 
-    const want = simplify(name);
-
-    const seasons = results
-        .filter(r => {
-
-            const show = simplify(r.artistName);
-            const season = simplify((r.collectionName || "").replace(/,?\s*(season|series|vol\.?|volume)\b.*$/i, ""));
-
-            return show === want || season === want;
-
-        })
-        .sort((a, b) => (a.releaseDate || "").localeCompare(b.releaseDate || ""));
-
-    const first = seasons[0];
-
-    return first ? (first.collectionViewUrl || first.artistViewUrl || null) : null;
-
-}
-
-const appleCache = new Map();   // "id|region" → Promise<url | null>
-
-function appleTitleUrl(node, name, year, region){
-
-    const key = `${node.id}|${region}`;
+    const key = `${node.tmdbEndpoint}/${node.tmdbId}|${region}`;
 
     if (appleCache.has(key)) return appleCache.get(key);
 
     const country = (region || "us").toLowerCase();
 
-    const isShow = node.type === "show";
+    const job = appleIdFromWikidata(node.tmdbEndpoint, node.tmdbId)
+        .then(found => {
 
-    // Movies first for films, seasons first for shows (specials
-    // can be listed either way); the viewer's own country, then
-    // the US store (Apple sends a link from another store on to
-    // the viewer's own where it has the title).
-    const tries = [];
+            if (found) {
 
-    for (const c of country === "us" ? ["us"] : [country, "us"]) {
+                const url = `https://tv.apple.com/${country}/${found.kind}/${slugify(name)}/${found.id}`;
 
-        tries.push(isShow ? [appleShowUrl, c] : [appleMovieUrl, c]);
-        tries.push(isShow ? [appleMovieUrl, c] : [appleShowUrl, c]);
+                console.debug(`[Apple TV] ${name} → ${url}`);
 
-    }
-
-    const job = (async () => {
-
-        for (const [find, c] of tries) {
-
-            try {
-
-                const url = await find(name, year, c);
-
-                if (url) {
-
-                    console.debug(`[Apple TV] ${name} (${year}) → ${url}`);
-
-                    return url;
-
-                }
-
-            } catch (err) {
-
-                console.warn(`[Apple TV] lookup failed (${c}):`, err.message);
+                return url;
 
             }
 
-        }
+            console.debug(`[Apple TV] no Apple TV id on Wikidata for ${name} (TMDB ${node.tmdbEndpoint}/${node.tmdbId}); using TMDB's where-to-watch page`);
 
-        console.debug(`[Apple TV] no match for ${name} (${year}); using search`);
+            return (w && w.link) || null;
 
-        return null;
+        })
+        .catch(err => {
 
-    })();
+            console.warn(`[Apple TV] Wikidata lookup failed for ${name}:`, err.message);
+
+            return (w && w.link) || null;
+
+        });
 
     appleCache.set(key, job);
 
@@ -808,7 +725,7 @@ function renderWatchMenu(node) {
             let exactUrl = null;
             let settled = false;
 
-            const lookup = sv.exact(node, name, year, w.region).then(url => {
+            const lookup = sv.exact(node, name, year, w.region, w).then(url => {
 
                 settled = true;
                 exactUrl = url;
