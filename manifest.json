@@ -1,0 +1,20 @@
+
+{
+  "name": "MCU Archive",
+  "short_name": "MCU Archive",
+  "description": "Explore the Marvel Cinematic Universe",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#090B10",
+  "theme_color": "#090B10",
+  "icons": [
+    {
+      "src": "assets/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
