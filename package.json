@@ -1,0 +1,43 @@
+{
+  "name": "mcu-archive",
+  "version": "1.0.0",
+  "description": "MCU Archive Desktop Application",
+  "main": "main.js",
+  "author": "MCU Archive",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "png-to-ico": "^3.0.2"
+  },
+  "build": {
+    "appId": "com.mcuarchive.desktop",
+    "productName": "MCU Archive",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.html",
+      "css/**/*",
+      "js/**/*",
+      "assets/**/*",
+      "data/**/*",
+      "ui/**/*",
+      "manifest.json",
+      "main.js",
+      "package.json"
+    ],
+    "win": {
+    "target": "nsis",
+    "icon": "assets/app-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
