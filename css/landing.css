@@ -918,3 +918,65 @@
     transition: none;
     pointer-events: none;
 }
+
+/*--------------------------------------------------
+  Windows desktop application download
+--------------------------------------------------*/
+
+.desktop-install-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    margin-top: 22px;
+    padding: 13px 28px;
+
+    border: 1px solid rgba(230,36,41,.65);
+    border-radius: 999px;
+
+    background: rgba(230,36,41,.12);
+
+    color: #fff;
+    font-family: inherit;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+
+    box-shadow: 0 0 22px rgba(230,36,41,.2);
+
+    transition:
+        background .25s ease,
+        box-shadow .25s ease,
+        transform .25s ease;
+}
+
+.desktop-install-button:hover {
+    background: rgba(230,36,41,.28);
+    box-shadow: 0 0 30px rgba(230,36,41,.45);
+    transform: translateY(-2px);
+}
+
+.desktop-install-button:active {
+    transform: scale(.97);
+}
+
+.desktop-install-button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
+.desktop-install-button span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+@media (max-width: 600px) {
+    .desktop-install-button {
+        margin-top: 18px;
+        padding: 12px 22px;
+        font-size: .75rem;
+    }
+}
