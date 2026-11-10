@@ -36,6 +36,7 @@
     "icon": "assets/app-icon.ico"
     },
     "nsis": {
+      "artifactName": "MCU-Archive-Setup.exe",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
