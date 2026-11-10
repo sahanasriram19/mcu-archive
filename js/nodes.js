@@ -13,6 +13,7 @@ import { graph } from "./graph.js";
 import { camera } from "./camera.js";
 import { swayOffset } from "./sway.js";
 import { isWatched } from "./watched.js";
+import { onWatchlist } from "./watchlist.js";
 import { projectNode, project, viewAngles, focalLength, liftOf } from "./depth.js";
 import { posterSizeFor } from "./posterSize.js";
 import { markMapDirty } from "./redraw.js";
@@ -698,6 +699,20 @@ export function renderNodes(ctx, camera, nodes){
         }
 
         //----------------------------------
+        // Watchlist (js/watchlist.js): a small red
+        // bookmark hanging from the poster's
+        // top-left corner (the tick has the right).
+        //----------------------------------
+
+        if(onWatchlist(node.id)){
+
+            const w = onScreenWidth * (1 + LIFT_SCALE * lift);
+
+            if(w >= 28) drawWatchlistBadge(ctx, x + floatX - w / 2, y + floatY - w * 0.75, w);
+
+        }
+
+        //----------------------------------
         // Watch-list outline around the poster
         // (hovering only enlarges it — no
         // outline).
@@ -810,6 +825,43 @@ function drawWatchedBadge(ctx, cornerX, cornerY, posterWidth){
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.strokeStyle = "#fff";
+    ctx.stroke();
+
+    ctx.restore();
+
+}
+
+// The "watchlist" bookmark: a ribbon hanging from the
+// poster's top edge near its top-left corner (cornerX,
+// cornerY), sized to the poster like the watched tick.
+function drawWatchlistBadge(ctx, cornerX, cornerY, posterWidth){
+
+    const r = Math.min(15, posterWidth * 0.1);
+
+    const left = cornerX + r * 0.6;
+    const top = cornerY;
+    const bw = r * 1.5;
+    const bh = r * 2.3;
+
+    ctx.save();
+
+    ctx.globalCompositeOperation = "source-over";
+
+    // Ribbon with a notch cut into its bottom.
+    ctx.beginPath();
+    ctx.moveTo(left, top);
+    ctx.lineTo(left + bw, top);
+    ctx.lineTo(left + bw, top + bh);
+    ctx.lineTo(left + bw / 2, top + bh - r * 0.6);
+    ctx.lineTo(left, top + bh);
+    ctx.closePath();
+
+    ctx.fillStyle = "#E62429";
+    ctx.fill();
+
+    ctx.lineWidth = Math.max(1, r * 0.16);
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(0,0,0,.55)";
     ctx.stroke();
 
     ctx.restore();

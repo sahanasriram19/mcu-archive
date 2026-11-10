@@ -162,6 +162,8 @@ function mapNeedsDrawing(camera){
 }
 
 window.addEventListener("mcu:watched-changed", markMapDirty);
+// (The watchlist bookmark on posters, js/nodes.js.)
+window.addEventListener("mcu:watchlist-changed", markMapDirty);
 window.addEventListener("mcu:view-changed", markMapDirty);
 window.addEventListener("resize", markMapDirty);
 
