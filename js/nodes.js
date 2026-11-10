@@ -795,11 +795,24 @@ export function renderNodes(ctx, camera, nodes){
 
 }
 
+// How big the watched tick and the watchlist bookmark are:
+// they grow with the poster up to 15px, then stay that size
+// — but never drop below BADGE_MIN_SHARE of the poster's
+// width, so zoomed right in they keep growing with it
+// instead of shrinking to a speck in the corner.
+const BADGE_MIN_SHARE = 15 / 264;
+
+function badgeRadius(posterWidth){
+
+    return Math.max(Math.min(15, posterWidth * 0.1), posterWidth * BADGE_MIN_SHARE);
+
+}
+
 // The "watched" tick, tucked into the poster's top-right
 // corner (cornerX, cornerY) and sized to the poster.
 function drawWatchedBadge(ctx, cornerX, cornerY, posterWidth){
 
-    const r = Math.min(15, posterWidth * 0.1);
+    const r = badgeRadius(posterWidth);
 
     const cx = cornerX - r * 1.35;
     const cy = cornerY + r * 1.35;
@@ -836,7 +849,7 @@ function drawWatchedBadge(ctx, cornerX, cornerY, posterWidth){
 // cornerY), sized to the poster like the watched tick.
 function drawWatchlistBadge(ctx, cornerX, cornerY, posterWidth){
 
-    const r = Math.min(15, posterWidth * 0.1);
+    const r = badgeRadius(posterWidth);
 
     const left = cornerX + r * 0.6;
     const top = cornerY;
