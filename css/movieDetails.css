@@ -98,8 +98,8 @@
     text-transform:uppercase;
     color:var(--accent);
     margin-bottom:18px;
-    /* Kept clear of the watched and close buttons. */
-    padding-right:84px;
+    /* Kept clear of the watchlist, watched and close buttons. */
+    padding-right:128px;
 }
 
 #movie-details-title{
@@ -270,6 +270,7 @@
 .watch-option.apple   .watch-option-dot{ background:#f5f5f7; }
 .watch-option.youtube .watch-option-dot{ background:#ff0033; }
 .watch-option.google  .watch-option-dot{ background:#01875f; }
+.watch-option.more    .watch-option-dot{ background:rgba(255,255,255,.35); }
 
 /* Trailer, Watched and Copy link sit in one row. */
 #movie-details-actions{
@@ -365,6 +366,60 @@
 }
 
 #movie-details-watched.on:hover{
+    background:#ff3338;
+    border-color:#ff3338;
+}
+
+/* Watchlist: a bookmark in a circle, beside the watched
+   tick (or in its place for a title not out yet, .solo).
+   Outlined until it's on your watchlist, then filled red. */
+#movie-details-watchlist{
+    position:absolute;
+    top:20px;
+    right:108px;
+    width:32px;
+    height:32px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.45);
+    background:rgba(0,0,0,.45);
+    color:rgba(255,255,255,.75);
+    cursor:pointer;
+    z-index:2;
+    transition:background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+#movie-details-watchlist.solo{
+    right:64px;
+}
+
+#movie-details-watchlist svg{
+    width:15px;
+    height:15px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.4;
+    stroke-linejoin:round;
+}
+
+#movie-details-watchlist:hover{
+    border-color:#fff;
+    color:#fff;
+}
+
+#movie-details-watchlist.on{
+    background:#E62429;
+    border-color:#E62429;
+    color:#fff;
+}
+
+#movie-details-watchlist.on svg{
+    fill:currentColor;
+}
+
+#movie-details-watchlist.on:hover{
     background:#ff3338;
     border-color:#ff3338;
 }
@@ -704,6 +759,17 @@
         right:64px;
         width:38px;
         height:38px;
+    }
+
+    #movie-details-overlay #movie-details-watchlist{
+        top:16px;
+        right:112px;
+        width:38px;
+        height:38px;
+    }
+
+    #movie-details-overlay #movie-details-watchlist.solo{
+        right:64px;
     }
 
     /* Where to watch: fits the narrower card. */

@@ -241,7 +241,8 @@ export function renderConnections(ctx, camera, graph){
 
     const currentView = getCurrentView();
 
-    if(currentView === "release" || currentView === "chronology"){
+    if(currentView === "release" || currentView === "chronology" ||
+        currentView === "watchlist" || currentView === "watchlistChrono"){
 
         renderTimeline(ctx, camera, graph);
 
@@ -444,8 +445,11 @@ function renderTimeline(ctx, camera, graph){
     // The spine
     //------------------------------------
 
+    // (Titles parked out of sight — the Watchlist trails
+    // leave out everything not on your list — aren't part
+    // of it.)
     const movies = [...graph.nodes]
-        .filter(n => !n.isBranch)
+        .filter(n => !n.isBranch && Math.abs(n.targetX) < 50000)
         .sort((a,b)=>a[along]-b[along]);
 
     if(!movies.length) return;

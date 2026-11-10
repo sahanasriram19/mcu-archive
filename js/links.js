@@ -193,7 +193,8 @@ function parse(hash){
 
     if(world === ALL_WORLDS){
 
-        if(view !== "complete" && view !== "scatter" && view !== "watched") return null;
+        if(view !== "complete" && view !== "scatter" && view !== "watched" &&
+            view !== "watchlist" && view !== "watchlistChrono") return null;
 
     } else if(!WORLDS[world] || viewDef.allOnly){
 

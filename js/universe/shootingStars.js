@@ -6,6 +6,7 @@
 
 import { ctx } from "./renderer.js";
 import { universe } from "./state.js";
+import { starsHidden } from "./stars.js";
 
 function random(min, max) {
 
@@ -90,7 +91,49 @@ function spawn(star) {
 
 //==================================================
 
+//==================================================
+// THE JUMP INTO THE ARCHIVE (js/warp.js)
+//
+// Shooting stars are part of the jump: any crossing the
+// screen as it starts are handed over to it (where they
+// are, which way they're going) and carry on there,
+// speeding up with it, alongside a shower of new ones. The
+// sky's own copies wait meanwhile (hidden with the stars),
+// and start again afterwards.
+//==================================================
+
+export function captureShootingStars() {
+
+    const found = [];
+
+    universe.shootingStars.forEach(star => {
+
+        if (!star.active) return;
+
+        found.push({
+            x: star.x, y: star.y,
+            vx: star.vx, vy: star.vy,
+            length: star.length,
+            thickness: star.thickness,
+            brightness: star.brightness
+        });
+
+        // The jump draws it from here on.
+        star.active = false;
+        star.timer = random(120, 700);
+
+    });
+
+    return found;
+
+}
+
+//==================================================
+
 export function drawShootingStars() {
+
+    // (During the jump, which draws them itself.)
+    if (starsHidden()) return;
 
     ctx.save();
 

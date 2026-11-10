@@ -709,7 +709,7 @@ const GROW_TIER_STEP = 260;    // ms between rings of titles
 const GROW_SPREAD = 1750;      // ms across the whole map, for other views
 
 // The combined map's opening pull-back (see 3. above).
-const PULLBACK_MS = 3200;      // how long the pull-back takes
+export const PULLBACK_MS = 3200;      // how long the pull-back takes (search glides at the same pace, ui/search.js)
 const PULLBACK_EARLY = 450;    // starts this long before the middle map's last titles sprout
 
 let growTimers = [];
@@ -742,7 +742,9 @@ function stopGrowth(){
 
 let cameraTween = null;
 
-function tweenCamera(to, duration, delay){
+// (Also used by the search box, ui/search.js, to glide to
+// a title at the same pace.)
+export function tweenCamera(to, duration, delay){
 
     const token = {};
 

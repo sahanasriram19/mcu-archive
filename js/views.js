@@ -93,6 +93,39 @@ export const VIEWS = [
     },
 
     {
+        // Your watchlist (js/watchlist.js) as a trail of what
+        // to watch next, in release order — the same timeline
+        // as Release Order, holding only the titles you've
+        // added (layout.js layoutWatchlistRelease). Only on the
+        // combined MCU, like Watched. (js/watchlistView.js
+        // keeps it up to date and shows a note when it's empty.)
+        key: "watchlist",
+        label: "Watchlist · Release",
+        layout: "watchlistRelease",
+        allOnly: true,
+        edges: { mode: "timelineTrail" },
+        camera: { x: 700, y: -40, zoom: 0.34, pitch: 0.8, spin: -0.56 },
+        phone: {
+            portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
+            landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }
+        }
+    },
+
+    {
+        // The same, in story order (layoutWatchlistChronology).
+        key: "watchlistChrono",
+        label: "Watchlist · Chronological",
+        layout: "watchlistChronology",
+        allOnly: true,
+        edges: { mode: "timelineTrail" },
+        camera: { x: 700, y: -40, zoom: 0.34, pitch: 0.8, spin: -0.56 },
+        phone: {
+            portrait:  { fit: 0.9,  axis: "width",  anchor: "top",  maxZoom: 0.32 },
+            landscape: { fit: 0.9,  axis: "height", anchor: "left", maxZoom: 0.42 }
+        }
+    },
+
+    {
         key: "phases",
         label: "Phases",
         layout: "phases",

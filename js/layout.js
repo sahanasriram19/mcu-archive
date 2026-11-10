@@ -11,12 +11,13 @@
 // exactly the same layout instead of drifting.
 //==================================================
 
-import { setBranchNodes, setHubs } from "./graph.js";
+import { setBranchNodes, setHubs, worldNodes } from "./graph.js";
 import { getSelectedCharacter } from "./characters/characterJourney.js";
 import { isCompact, isPortraitPhone } from "./responsive.js";
 import { groupName, getWorld, ALL_WORLDS } from "./worlds.js";
 import { PHASES_POSTER } from "./posterSize.js";
 import { isWatched } from "./watched.js";
+import { onWatchlist } from "./watchlist.js";
 // (Only called while laying out, never as the module loads,
 // so importing back from depth.js is safe.)
 import { REST_PITCH, heightToMapScale } from "./depth.js";
@@ -585,12 +586,13 @@ const MULTIVERSE_GAP = 700;
 const MULTIVERSE_STEP = 150;
 const MULTIVERSE_SPREAD = 1.8;
 
-// Marvel TV top right, Marvel Unscripted bottom left.
+// Spider-Man top right, Marvel TV bottom right, Marvel
+// Unscripted bottom left.
 const MULTIVERSE_CORNERS = {
     xmen: [-1, -1],
-    tv: [1, -1],
+    spider: [1, -1],
     unscripted: [-1, 1],
-    spider: [1, 1]
+    tv: [1, 1]
 };
 
 const MULTIVERSE_TOP = "ff";
@@ -1548,6 +1550,120 @@ export function layoutWatched(nodes) {
 
 }
 
+//--------------------------------------------------
+// WATCHLIST (MCU)
+//
+// The titles you've added to your watchlist
+// (js/watchlist.js) as a trail of what to watch next: the
+// same two-row timeline as Release Order / Chronological
+// Order, with its spine and branch sticks, but holding only
+// your titles. However you added them, they're put in
+// order:
+//
+//   • release — by release date
+//   • chronological — in story order. Each world numbers
+//     its own story (`timeline`), and those can't be
+//     compared across worlds, so (as in Watched) the
+//     Avengers story comes first, then each other world's
+//     in turn. A title that's in several worlds sits where
+//     it falls in the MCU's.
+//
+// The rest are parked out of sight, as in Watched.
+//--------------------------------------------------
+
+function watchlistTitles(nodes) {
+
+    // One copy of each title (the earliest world's, as in
+    // Watched).
+    const best = new Map();
+
+    nodes.forEach(node => {
+
+        if (node.isBranch || !onWatchlist(node.id)) return;
+
+        const was = best.get(node.id);
+
+        if (!was || watchedWorldRank(node) < watchedWorldRank(was)) best.set(node.id, node);
+
+    });
+
+    const shown = [...best.values()];
+
+    const showing = new Set(shown);
+
+    nodes.forEach(node => {
+
+        if (showing.has(node)) return;
+
+        node.targetX = 100000;
+        node.targetY = 100000;
+
+    });
+
+    setHubs([]);
+
+    if (!shown.length) setBranchNodes([]);
+
+    return shown;
+
+}
+
+export function layoutWatchlistRelease(nodes) {
+
+    const shown = watchlistTitles(nodes);
+
+    if (!shown.length) return;
+
+    layoutTimeline(
+
+        shown,
+        (a, b) => (a.release || "9999").localeCompare(b.release || "9999") ||
+            watchedWorldRank(a) - watchedWorldRank(b),
+        // (Titles from different worlds sit side by side
+        // here, so the spine is marked by year, not phase.)
+        releaseYears,
+        null
+
+    );
+
+}
+
+// Where a title falls in story order: the MCU's place for
+// it if it's in the MCU at all (the Defenders shows sit on
+// the combined map as Marvel TV titles, but they're part of
+// the Avengers story too), otherwise its own world's.
+function storyPlace(node) {
+
+    const mcu = (worldNodes.mcu || []).find(n => n.id === node.id);
+
+    return mcu
+        ? { rank: 0, timeline: mcu.timeline ?? 1e9 }
+        : { rank: watchedWorldRank(node), timeline: node.timeline ?? 1e9 };
+
+}
+
+export function layoutWatchlistChronology(nodes) {
+
+    const shown = watchlistTitles(nodes);
+
+    if (!shown.length) return;
+
+    const place = new Map(shown.map(n => [n, storyPlace(n)]));
+
+    layoutTimeline(
+
+        shown,
+        (a, b) =>
+            place.get(a).rank - place.get(b).rank ||
+            place.get(a).timeline - place.get(b).timeline ||
+            (a.release || "9999").localeCompare(b.release || "9999"),
+        members => phaseLabel(members),
+        releaseYears
+
+    );
+
+}
+
 //==================================================
 // REGISTRY
 //==================================================
@@ -1558,6 +1674,8 @@ export const LAYOUTS = {
     multiverse: layoutMultiverse,
     scatter: layoutScatter,
     watched: layoutWatched,
+    watchlistRelease: layoutWatchlistRelease,
+    watchlistChronology: layoutWatchlistChronology,
     phases: layoutPhases,
     release: layoutRelease,
     chronology: layoutChronology,

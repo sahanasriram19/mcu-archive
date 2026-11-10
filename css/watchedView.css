@@ -1,10 +1,12 @@
 /*==================================================
   WATCHED VIEW: the note shown while nothing's ticked
-  yet (js/watchedView.js). A comic caption box in the
+  yet (js/watchedView.js) — and the same note for an
+  empty Watchlist (js/watchlistView.js). A comic caption box in the
   middle of the sky.
 ==================================================*/
 
-#watched-empty{
+#watched-empty,
+#watchlist-empty{
     position:fixed;
     left:50%;
     top:50%;
@@ -26,7 +28,8 @@
     transition:opacity .35s ease, transform .35s ease, visibility 0s linear .35s;
 }
 
-#watched-empty.show{
+#watched-empty.show,
+#watchlist-empty.show{
     opacity:1;
     visibility:visible;
     transform:translate(-50%, -50%);
@@ -53,7 +56,8 @@
     stroke-linejoin:round;
 }
 
-#watched-empty h3{
+#watched-empty h3,
+#watchlist-empty h3{
     margin:0 0 8px;
     font-family:var(--display, Impact, sans-serif);
     font-size:28px;
@@ -62,7 +66,8 @@
     line-height:1;
 }
 
-#watched-empty p{
+#watched-empty p,
+#watchlist-empty p{
     margin:0 0 16px;
     font-size:13.5px;
     line-height:1.55;
@@ -78,6 +83,16 @@
     border:1.5px solid rgba(255,255,255,.5);
     font-size:11px;
     vertical-align:-4px;
+}
+
+/* The Watchlist note's little bookmark in its text. */
+.watchlist-empty-mark svg{
+    width:11px;
+    height:11px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.4;
+    stroke-linejoin:round;
 }
 
 .watched-empty-go{
@@ -102,7 +117,8 @@
 /* Phones: above the slim panel bar along the bottom. */
 @media (max-width: 768px), (max-height: 500px){
 
-    #watched-empty{
+    #watched-empty,
+    #watchlist-empty{
         top:44%;
     }
 

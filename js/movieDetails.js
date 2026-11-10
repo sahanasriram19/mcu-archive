@@ -8,11 +8,12 @@
 // poster image whenever TMDB has them.
 //==================================================
 
-import { fetchDetails } from "./posters.js";
+import { fetchDetails, watchRegion } from "./posters.js";
 import { watchListFor, startWatchFocus, isUpcoming, releaseTime } from "./upcoming.js";
 import { groupName, WORLDS } from "./worlds.js";
 import { canFlip, flipOpen, flipClose, hideFlipper, goodRect } from "./flip.js";
 import { isWatched, toggleWatched } from "./watched.js";
+import { onWatchlist, toggleWatchlist } from "./watchlist.js";
 import { setLinkTitle, copyLink } from "./links.js";
 import { watchScroll } from "./scrollHints.js";
 import { escapeHtml, safeUrl, safeCss } from "./escape.js";
@@ -25,6 +26,9 @@ overlay.innerHTML = `
         <button id="movie-details-close" aria-label="Close">&times;</button>
         <button type="button" id="movie-details-watched" aria-pressed="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.6 3.6 7.4-8.2"/></svg>
+        </button>
+        <button type="button" id="movie-details-watchlist" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16l-5-3.6L7 20z"/></svg>
         </button>
         <div id="movie-details-poster"></div>
         <div id="movie-details-body">
@@ -55,6 +59,7 @@ const moreEl = overlay.querySelector("#movie-details-more");
 const castEl = overlay.querySelector("#movie-details-cast");
 const watchEl = overlay.querySelector("#movie-details-watch");
 const watchedBtn = overlay.querySelector("#movie-details-watched");
+const watchlistBtn = overlay.querySelector("#movie-details-watchlist");
 const shareBtn = overlay.querySelector("#movie-details-share");
 const bodyEl = overlay.querySelector("#movie-details-body");
 
@@ -104,6 +109,44 @@ function renderWatchedButton(node){
 watchedBtn.addEventListener("click", () => {
 
     if(openNode) toggleWatched(openNode.id);
+
+});
+
+//--------------------------------------------------
+// Watchlist (js/watchlist.js): a bookmark beside the
+// watched tick. Titles not out yet can go on it too (to
+// watch once they're out); cancelled ones can't.
+//--------------------------------------------------
+
+function renderWatchlistButton(node){
+
+    watchlistBtn.style.display = node.status === "cancelled" ? "none" : "";
+
+    // Takes the watched tick's place when that isn't shown
+    // (titles not out yet).
+    watchlistBtn.classList.toggle("solo", isUpcoming(node));
+
+    const on = onWatchlist(node.id);
+
+    watchlistBtn.classList.toggle("on", on);
+    watchlistBtn.setAttribute("aria-pressed", on ? "true" : "false");
+
+    const label = on ? "On your watchlist (click to remove)" : "Add to watchlist";
+
+    watchlistBtn.title = label;
+    watchlistBtn.setAttribute("aria-label", label);
+
+}
+
+watchlistBtn.addEventListener("click", () => {
+
+    if(openNode) toggleWatchlist(openNode.id);
+
+});
+
+window.addEventListener("mcu:watchlist-changed", () => {
+
+    if(openNode) renderWatchlistButton(openNode);
 
 });
 
@@ -448,7 +491,7 @@ fetch("./data/disneyplus.json")
 
         disneyIds = map || {};
 
-        if (openNode && openNode.detailsLoaded) renderWatchMenu(openNode);
+        if (openNode) renderWatchMenu(openNode);
 
     })
     .catch(() => {});
@@ -725,9 +768,13 @@ function renderWatchMenu(node) {
 
     if (node.status === "cancelled" || isUpcoming(node)) return;
 
-    const w = node.watch;
+    // Every title that's out gets the dropdown. With nothing
+    // from TMDB (no match, no data for this country, or only
+    // services not listed above) it still offers Disney+ when
+    // the title is there, and always a page of every service.
+    const w = node.watch || { region: watchRegion(), link: null, offers: [] };
 
-    if (!w || !w.offers || !w.offers.length) return;
+    const region = w.region || watchRegion();
 
     // "Spider-Man (1967)" → "Spider-Man"; with the year for
     // the stores that sell all sorts.
@@ -755,15 +802,28 @@ function renderWatchMenu(node) {
 
     });
 
+    // On Disney+ (its id is in data/disneyplus.json) but not
+    // listed by TMDB here: still offer it.
+    if (!found.has("disney") && disneyIds[node.id]) found.set("disney", "stream");
+
     const options = SERVICES
         .filter(sv => found.has(sv.key))
         .map(sv => ({ sv, kind: found.get(sv.key), href: sv.url(node, q, w, qy) }))
         .filter(o => o.href)
         .sort((a, b) => (a.kind === "stream" ? 0 : 1) - (b.kind === "stream" ? 0 : 1));
 
-    if (!options.length) return;
-
     const streams = options.filter(o => o.kind === "stream").length;
+    const sells = options.length - streams;
+
+    // Last: every service that has it in this country — TMDB's
+    // where-to-watch page for the title, or a JustWatch search
+    // when TMDB has no page for it.
+    const allHref = w.link ||
+        (node.tmdbId && node.tmdbEndpoint
+            ? `https://www.themoviedb.org/${node.tmdbEndpoint}/${node.tmdbId}/watch?locale=${region}`
+            : `https://www.justwatch.com/${region.toLowerCase()}/search?q=${q}`);
+
+    options.push({ sv: { key: "more", label: "All services" }, kind: "more", href: allHref });
 
     const wrap = document.createElement("div");
 
@@ -771,7 +831,7 @@ function renderWatchMenu(node) {
 
     wrap.innerHTML = `
         <button type="button" class="watch-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-            <span>${streams ? "Where to watch" : "Rent or buy"}</span>
+            <span>${!streams && sells ? "Rent or buy" : "Where to watch"}</span>
             ${CHEVRON}
         </button>
         <div class="watch-dropdown-menu" role="menu"></div>
@@ -793,12 +853,14 @@ function renderWatchMenu(node) {
         a.innerHTML = `
             <span class="watch-option-dot" aria-hidden="true"></span>
             <span class="watch-option-name">${escapeHtml(sv.label)}</span>
-            <span class="watch-option-kind">${kind === "stream" ? "Stream" : "Rent or buy"}</span>
+            <span class="watch-option-kind">${kind === "stream" ? "Stream" : kind === "more" ? "Compare" : "Rent or buy"}</span>
         `;
 
         a.title = kind === "stream"
-            ? `${node.title} is streaming on ${sv.label} (${w.region})`
-            : `Rent or buy ${node.title} on ${sv.label} (${w.region})`;
+            ? `${node.title} is streaming on ${sv.label} (${region})`
+            : kind === "more"
+                ? `Every service with ${node.title} (${region})`
+                : `Rent or buy ${node.title} on ${sv.label} (${region})`;
 
         a.addEventListener("click", () => closeWatchMenu());
 
@@ -812,7 +874,7 @@ function renderWatchMenu(node) {
             let exactUrl = null;
             let settled = false;
 
-            const lookup = sv.exact(node, name, year, w.region).then(url => {
+            const lookup = sv.exact(node, name, year, region).then(url => {
 
                 settled = true;
                 exactUrl = url;
@@ -1047,6 +1109,8 @@ export async function showMovieDetails(node, opts = {}) {
     metaEl.textContent = metaParts.join("  ·  ");
 
     renderWatchedButton(node);
+
+    renderWatchlistButton(node);
 
     overviewEl.textContent = node.overview ||
         "No synopsis yet.";

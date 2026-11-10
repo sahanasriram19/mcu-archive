@@ -1,5 +1,6 @@
 import { graph } from "../js/graph.js";
 import { camera } from "../js/camera.js";
+import { tweenCamera, PULLBACK_MS } from "../js/viewManager.js";
 import { isCompact } from "../js/responsive.js";
 import { escapeHtml } from "../js/escape.js";
 
@@ -189,11 +190,18 @@ export function initMovieSearch(){
 
         selectedNode=node;
 
-        camera.targetX=node.x;
-        camera.targetY=node.y;
+        // Glide in to it slowly, easing in and out, at the
+        // same pace as the pull-back to every world after
+        // entering the archive (viewManager.js PULLBACK_MS),
+        // so you can follow where it's going. Scrolling or
+        // dragging meanwhile takes over, as there.
         // Close enough to see the poster clearly, but on a
         // phone not so close that it overflows the screen.
-        camera.targetZoom=isCompact() ? 0.6 : 0.95;
+        tweenCamera(
+            { x: node.x, y: node.y, zoom: isCompact() ? 0.6 : 0.95 },
+            PULLBACK_MS,
+            0
+        );
 
         results=[];
 

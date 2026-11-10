@@ -75,6 +75,9 @@ const VIEW_HEIGHT = {
     // the spine and its labels.
     release:    { base: 150, spread: 0 },
     chronology: { base: 150, spread: 0 },
+    // (The Watchlist trails are the same timeline.)
+    watchlist:       { base: 150, spread: 0 },
+    watchlistChrono: { base: 150, spread: 0 },
     characters: { base: 110, spread: 240 },
     scatter:    { base: 120, spread: 800 },   // All Posters: a real volume
     // Watched: each poster at its own height, so the wall

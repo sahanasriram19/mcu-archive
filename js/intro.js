@@ -11,8 +11,9 @@
 // caption names it). A final "Coming soon" chapter holds
 // the titles not out yet. A title that belongs to two
 // worlds (Deadpool & Wolverine, Tom Holland's Spider-Man
-// films, the cartoons) appears once, in the first world
-// that has it. At the end, the
+// films, the cartoons, The Fantastic Four: First Steps)
+// appears in each of them, so every world's chapter has
+// all of its titles. At the end, the
 // way into the archive appears.
 //
 // How it works: #landing is a scroll container. Its
@@ -281,15 +282,32 @@ export function initIntro(nodes, onEnter){
         landing.scrollBy({ top: Math.round(window.innerHeight * 0.9), behavior: "smooth" })
     );
 
-    // Every world's titles, each once (the MCU copy of a
-    // shared title comes first, so that's the one kept).
-    const seen = new Set();
+    // Every world's titles, each once per world: a title
+    // shared by two worlds shows in both chapters. (Titles
+    // not out yet go in the one "Coming Soon" chapter, each
+    // once — the MCU copy comes first, so that's the one kept.)
+    const seenInWorld = new Set();
+    const seenUpcoming = new Set();
 
     const titles = nodes.filter(n => {
 
-        if(n.isBranch || n.status === "cancelled" || seen.has(n.id)) return false;
+        if(n.isBranch || n.status === "cancelled") return false;
 
-        seen.add(n.id);
+        if(isUpcoming(n)){
+
+            if(seenUpcoming.has(n.id)) return false;
+
+            seenUpcoming.add(n.id);
+
+            return true;
+
+        }
+
+        const key = n.world + "/" + n.id;
+
+        if(seenInWorld.has(key)) return false;
+
+        seenInWorld.add(key);
 
         return true;
 
@@ -301,10 +319,13 @@ export function initIntro(nodes, onEnter){
     // One chapter per world. Within a world, titles go phase
     // by phase (or era by era), each in the order it began,
     // then by release date.
+    // (Keyed by world too: the same group number never
+    // appears in two worlds, but this keeps it safe.)
     const eraStart = {};
 
     released.forEach(n => {
-        if(!eraStart[n.phase] || n.release < eraStart[n.phase]) eraStart[n.phase] = n.release;
+        const k = n.world + "/" + n.phase;
+        if(!eraStart[k] || n.release < eraStart[k]) eraStart[k] = n.release;
     });
 
     const groups = WORLD_CHAPTERS
@@ -314,7 +335,7 @@ export function initIntro(nodes, onEnter){
             members: released
                 .filter(n => n.world === ch.world)
                 .sort((a, b) =>
-                    eraStart[a.phase].localeCompare(eraStart[b.phase]) ||
+                    eraStart[a.world + "/" + a.phase].localeCompare(eraStart[b.world + "/" + b.phase]) ||
                     a.phase - b.phase ||
                     a.release.localeCompare(b.release))
         }))

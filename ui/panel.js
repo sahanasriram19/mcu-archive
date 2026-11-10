@@ -203,11 +203,13 @@ const SECTIONS = [
         // poster scattered over the whole screen.
         world: ALL_WORLDS,
         title: "MCU",
-        views: ["complete", "scatter", "watched"],
+        views: ["complete", "scatter", "watched", "watchlist", "watchlistChrono"],
         labels: {
             complete: "Complete MCU",
             scatter: "All Posters",
-            watched: "Watched"
+            watched: "Watched",
+            watchlist: "Watchlist · Release",
+            watchlistChrono: "Watchlist · Chronological"
         },
         heroes: []
     },

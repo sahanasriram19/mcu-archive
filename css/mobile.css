@@ -305,6 +305,17 @@
         height:38px;
     }
 
+    #movie-details-watchlist{
+        top:16px;
+        right:112px;
+        width:38px;
+        height:38px;
+    }
+
+    #movie-details-watchlist.solo{
+        right:64px;
+    }
+
     #movie-details-overlay #movie-details-cast-list{
         gap:10px;
         -webkit-overflow-scrolling:touch;

@@ -8,7 +8,7 @@
 // they always agree.
 //
 //   Timelines (Release / Chronological / Character
-//   Journeys)                          300
+//   Journeys / both Watchlists)        300
 //   Complete mind maps                 320, a little bigger
 //                                      on each outer ring
 //   Phases                             360: its rings are
@@ -26,7 +26,8 @@ export const PHASES_POSTER = 360;
 
 export function posterSizeFor(node, view){
 
-    if(view === "release" || view === "chronology" || view === "characters") return TIMELINE_POSTER;
+    if(view === "release" || view === "chronology" || view === "characters" ||
+        view === "watchlist" || view === "watchlistChrono") return TIMELINE_POSTER;
 
     if(view === "complete") return POSTER_BASE + Math.min(node.ring || 0, 4) * 35;
 

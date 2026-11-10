@@ -18,6 +18,11 @@
 // map up with it). Entered from anywhere else, it's the
 // plain jump with no logo.
 //
+// Shooting stars are part of it too: any already crossing
+// the screen carry on, speeding up with the jump, and a
+// shower of new ones bursts out from the middle and shoots
+// past you, more and faster as it builds to the flash.
+//
 // Drawn on its own canvas laid over everything. Off with
 // the OS "reduce motion" setting.
 //==================================================
@@ -27,6 +32,49 @@ const STREAK_COUNT = 320;
 // At most this many of the landing page's own stars become
 // streaks (the biggest first).
 const MAX_STAR_STREAKS = 600;
+
+// Shooting stars: how many new ones burst out during the
+// rush (more of them towards the end, as it speeds up).
+const METEOR_COUNT = 16;
+const METEOR_FADE_IN_MS = 160;
+
+// One shooting star, drawn as in the sky
+// (js/universe/shootingStars.js): a tail fading out behind
+// a bright, glowing head. (x, y) is the head; (dx, dy) the
+// way it's going (unit length).
+function drawMeteor(x, y, dx, dy, length, thickness, brightness, alpha){
+
+    if(alpha <= 0.01) return;
+
+    const tx = x - dx * length, ty = y - dy * length;
+
+    const g = ctx.createLinearGradient(tx, ty, x, y);
+
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(0.35, `rgba(170,210,255,${brightness * 0.35 * alpha})`);
+    g.addColorStop(1, `rgba(255,255,255,${brightness * alpha})`);
+
+    ctx.strokeStyle = g;
+    ctx.lineWidth = thickness;
+
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 14);
+
+    glow.addColorStop(0, `rgba(255,255,255,${alpha})`);
+    glow.addColorStop(0.4, `rgba(170,220,255,${0.45 * alpha})`);
+    glow.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = glow;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+}
 
 function hexToRgb(hex){
 
@@ -72,11 +120,14 @@ export function canWarp(){
 //              become the first streaks, so the real stars
 //              round the logo are what stretch out and rush
 //              past you
+//   meteors  — shooting stars crossing the screen right now
+//              (captureShootingStars in shootingStars.js):
+//              they carry on as part of the jump
 //
 // Returns { peak, done }: `peak` resolves at the full flash
 // with where the logo is then ({x, y, width}, or null
 // without one), `done` when the light has faded away.
-export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
+export function playWarp({ logo = null, followTo = null, stars = [], meteors = [] } = {}){
 
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -139,6 +190,32 @@ export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
         d: 0.04 + Math.random() * 0.9,
         hue: Math.random() < 0.25 ? "255,190,170" : (Math.random() < 0.5 ? "190,220,255" : "255,255,255"),
         seed: false
+    })));
+
+    // Shooting stars: the ones already crossing the screen
+    // keep going their own way (faster and faster), and new
+    // ones burst out from near the middle and shoot
+    // outwards past you, joining in more often as the jump
+    // builds.
+    const shooting = meteors.map(m => {
+
+        const v = Math.hypot(m.vx, m.vy) || 1;
+
+        return {
+            real: true, x: m.x, y: m.y,
+            dx: m.vx / v, dy: m.vy / v, v,
+            length: m.length, thickness: m.thickness, brightness: m.brightness,
+            born: 0
+        };
+
+    }).concat(Array.from({ length: METEOR_COUNT }, (_, i) => ({
+        real: false,
+        a: Math.random() * Math.PI * 2,
+        d: 0.06 + Math.random() * 0.22,
+        length: 90 + Math.random() * 70,
+        thickness: 2 + Math.random() * 1.5,
+        brightness: 0.75 + Math.random() * 0.25,
+        born: RUSH_MS * (0.05 + 0.85 * Math.pow(i / (METEOR_COUNT - 1), 0.75)) + Math.random() * 120
     })));
 
     canvas.classList.add("show");
@@ -250,6 +327,53 @@ export function playWarp({ logo = null, followTo = null, stars = [] } = {}){
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
+
+            }
+
+            //----------------------------------
+            // Shooting stars, over the streaks
+            //----------------------------------
+
+            for(const m of shooting){
+
+                if(m.gone || t < m.born) continue;
+
+                const age = t - m.born;
+
+                const alpha = Math.min(1, age / METEOR_FADE_IN_MS);
+
+                let x, y, dx, dy;
+
+                if(m.real){
+
+                    // Its own way, faster as the jump builds
+                    // (v is per 60th of a second).
+                    const k = m.v * dt * 60 * (1 + speed * 0.9);
+
+                    m.x += m.dx * k;
+                    m.y += m.dy * k;
+
+                    x = m.x; y = m.y; dx = m.dx; dy = m.dy;
+
+                    if(x < -600 || x > w + 600 || y < -600 || y > h + 600){ m.gone = true; continue; }
+
+                } else {
+
+                    // Straight out from the middle, like the
+                    // streaks but quicker.
+                    m.d *= 1 + (1.1 + speed * 1.4) * dt;
+
+                    if(m.d > 1.35){ m.gone = true; continue; }
+
+                    dx = Math.cos(m.a); dy = Math.sin(m.a);
+
+                    x = cx + dx * m.d * reach;
+                    y = cy + dy * m.d * reach;
+
+                }
+
+                // Tails stretch as the jump speeds up.
+                drawMeteor(x, y, dx, dy, m.length * (1 + p * 1.8), m.thickness, m.brightness, alpha);
 
             }
 

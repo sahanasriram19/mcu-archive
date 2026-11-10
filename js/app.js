@@ -28,6 +28,7 @@ import { initTilt } from "./tilt.js";
 import { warmPosters } from "./nodes.js";
 import { canWarp, playWarp } from "./warp.js";
 import { captureStars, setStarsHidden } from "./universe/stars.js";
+import { captureShootingStars } from "./universe/shootingStars.js";
 import { updateSway, swayOffset } from "./sway.js";
 import { updateDepth } from "./depth.js";
 import { readLink, onLinkChange, applyingLink } from "./links.js";
@@ -36,6 +37,7 @@ import { setSelectedCharacter } from "./characters/characterJourney.js";
 import { initTour } from "./tour.js";
 import { canonicalId } from "./watched.js";
 import "./watchedView.js";
+import "./watchlistView.js";
 
 //==========================================
 // LANDING
@@ -210,9 +212,13 @@ async function enter(viewKey, opts = {}){
         // own copies while the jump draws them rushing past.
         const stars = await captureStars();
 
+        // ...and any shooting stars crossing the screen carry
+        // on as part of the jump, with a shower of new ones.
+        const meteors = captureShootingStars();
+
         setStarsHidden(true);
 
-        const at = await playWarp({ logo: endLogo, followTo: hubOnScreen, stars }).peak;
+        const at = await playWarp({ logo: endLogo, followTo: hubOnScreen, stars, meteors }).peak;
 
         // Behind the full flash: the archive's own stars back.
         setStarsHidden(false);
