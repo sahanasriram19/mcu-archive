@@ -19,7 +19,7 @@ import { graph, edgesTimelineTrail, setEdges } from "./graph.js";
 import { getCurrentView, getWorld, resetView, setWorldView } from "./viewManager.js";
 import { LAYOUTS } from "./layout.js";
 import { ALL_WORLDS } from "./worlds.js";
-import { onWatchlist } from "./watchList.js";
+import { onWatchlist } from "./watchlist.js";
 import { markMapDirty } from "./redraw.js";
 
 // Each Watchlist view and its layout (views.js).
