@@ -19,9 +19,10 @@
 // plain jump with no logo.
 //
 // Shooting stars on screen as it starts are part of it too:
-// like the stars, they get pulled into the rush and stream
-// out past you, keeping their bright head and tail. (No
-// extra ones are added — only those already there.)
+// each one dissolves where it is into a scatter of tiny
+// sparks along its trail, and the sparks stream out past
+// you with the stars. (No extra ones are added — only those
+// already there.)
 //
 // Drawn on its own canvas laid over everything. Off with
 // the OS "reduce motion" setting.
@@ -33,9 +34,10 @@ const STREAK_COUNT = 320;
 // streaks (the biggest first).
 const MAX_STAR_STREAKS = 600;
 
-// How long a shooting star takes to turn from its own
-// heading to rushing straight out from the centre.
-const METEOR_TURN_MS = 350;
+// How long a shooting star takes to dissolve into its
+// sparks, and roughly how many sparks per 10px of trail.
+const METEOR_DISSOLVE_MS = 420;
+const SPARKS_PER_10PX = 1.4;
 
 // One shooting star, drawn as in the sky
 // (js/universe/shootingStars.js): a tail fading out behind
@@ -191,19 +193,46 @@ export function playWarp({ logo = null, followTo = null, stars = [], meteors = [
         seed: false
     })));
 
-    // Shooting stars that were on screen: each starts where
-    // it was (as a direction and distance from the centre,
-    // like a streak) and is pulled into the rush the same
-    // way the stars are.
+    // Shooting stars that were on screen: each one fades
+    // out where it is, and as it does, sparks scattered
+    // along its trail fade in and become streaks like the
+    // stars (brightest and biggest at the head, fainter and
+    // smaller down the tail).
     const shooting = meteors.map(m => {
 
         const v = Math.hypot(m.vx, m.vy) || 1;
 
+        const hx = m.vx / v, hy = m.vy / v;
+
+        const count = Math.max(6, Math.round(m.length / 10 * SPARKS_PER_10PX));
+
+        for(let i = 0; i < count; i++){
+
+            // 0 at the head, 1 at the end of the tail.
+            const k = Math.pow(Math.random(), 1.4);
+
+            const jitter = (Math.random() - 0.5) * (2 + m.thickness * 2);
+
+            const sx = m.x - hx * m.length * k - hy * jitter;
+            const sy = m.y - hy * m.length * k + hx * jitter;
+
+            const dx = sx - cx, dy = sy - cy;
+
+            streaks.push({
+                a: Math.atan2(dy, dx),
+                d: Math.max(0.005, Math.hypot(dx, dy) / reach),
+                hue: Math.random() < 0.6 ? "255,255,255" : "190,220,255",
+                r: (0.5 + Math.random() * 0.7) * (1.2 - k) * Math.max(1, m.thickness * 0.5),
+                glow: 0,
+                seed: true,
+                // Fades in as its shooting star fades out.
+                spark: (1 - k * 0.7) * m.brightness
+            });
+
+        }
+
         return {
-            a: Math.atan2(m.y - cy, m.x - cx),
-            d: Math.max(0.005, Math.hypot(m.x - cx, m.y - cy) / reach),
-            // The way it was heading, to turn from.
-            hx: m.vx / v, hy: m.vy / v,
+            x: m.x, y: m.y, hx, hy,
             length: m.length, thickness: m.thickness, brightness: m.brightness
         };
 
@@ -267,6 +296,7 @@ export function playWarp({ logo = null, followTo = null, stars = [], meteors = [
 
                     s.seed = false;
                     s.glow = 0;
+                    s.spark = 0;
 
                     continue;
 
@@ -283,9 +313,13 @@ export function playWarp({ logo = null, followTo = null, stars = [], meteors = [
                 // A real star starts fully bright, at its own size
                 // (a zero-length round line is a dot); the others
                 // fade in as the jump speeds up.
-                const alpha = s.seed
+                let alpha = s.seed
                     ? Math.min(1, s.d * 8)
                     : Math.min(1, 0.25 + p * 0.9) * Math.min(1, s.d * 3);
+
+                // (A shooting star's spark appears as its
+                // shooting star dissolves.)
+                if(s.spark) alpha *= s.spark * Math.min(1, t / METEOR_DISSOLVE_MS);
 
                 // A coloured glow: its halo first, a wide soft
                 // trail in its colour, under the bright core.
@@ -325,34 +359,17 @@ export function playWarp({ logo = null, followTo = null, stars = [], meteors = [
             // Shooting stars, over the streaks
             //----------------------------------
 
-            for(const m of shooting){
+            // Each fades out where it is (its sparks, among
+            // the streaks above, fading in as it goes).
+            const dissolve = 1 - Math.min(1, t / METEOR_DISSOLVE_MS);
 
-                if(m.gone) continue;
+            if(dissolve > 0){
 
-                // Out from the centre exactly as the streaks
-                // move; off the edge, it's gone.
-                m.d *= 1 + speed * dt;
+                for(const m of shooting){
 
-                if(m.d > 1.4){ m.gone = true; continue; }
+                    drawMeteor(m.x, m.y, m.hx, m.hy, m.length, m.thickness, m.brightness, dissolve * dissolve);
 
-                const rx = Math.cos(m.a), ry = Math.sin(m.a);
-
-                const x = cx + rx * m.d * reach;
-                const y = cy + ry * m.d * reach;
-
-                // Its tail swings round from the way it was
-                // flying to point back at the centre.
-                const turn = Math.min(1, t / METEOR_TURN_MS);
-
-                let dx = m.hx + (rx - m.hx) * turn;
-                let dy = m.hy + (ry - m.hy) * turn;
-
-                const len = Math.hypot(dx, dy) || 1;
-
-                dx /= len; dy /= len;
-
-                // Tails stretch as the jump speeds up.
-                drawMeteor(x, y, dx, dy, m.length * (1 + p * 1.8), m.thickness, m.brightness, 1);
+                }
 
             }
 
