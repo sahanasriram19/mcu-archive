@@ -96,10 +96,11 @@ function spawn(star) {
 //
 // Shooting stars are part of the jump: any crossing the
 // screen as it starts are handed over to it (where they
-// are, which way they're going) and carry on there,
-// speeding up with it, alongside a shower of new ones. The
-// sky's own copies wait meanwhile (hidden with the stars),
-// and start again afterwards.
+// are, which way they're going) and get pulled into the
+// rush like the stars. No others appear: every shooting
+// star in the sky starts a fresh wait as the jump begins,
+// so none can fire during it or while the flash fades into
+// the archive.
 //==================================================
 
 export function captureShootingStars() {
@@ -108,7 +109,15 @@ export function captureShootingStars() {
 
     universe.shootingStars.forEach(star => {
 
-        if (!star.active) return;
+        // A fresh wait for every one (whether it's
+        // crossing now or about to), so none appears
+        // until well after you've arrived.
+        const wasActive = star.active;
+
+        star.active = false;
+        star.timer = random(120, 700);
+
+        if (!wasActive) return;
 
         found.push({
             x: star.x, y: star.y,
@@ -118,9 +127,7 @@ export function captureShootingStars() {
             brightness: star.brightness
         });
 
-        // The jump draws it from here on.
-        star.active = false;
-        star.timer = random(120, 700);
+        // (The jump draws it from here on.)
 
     });
 
