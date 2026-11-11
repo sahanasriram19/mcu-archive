@@ -535,6 +535,15 @@ function phoneCamera(cfg){
 // A view's camera settings for the current world: views.js
 // can give a world its own (e.g. X-Men's Eras view fits the
 // screen, while MCU Phases keeps its fixed zoom).
+// The tilt the current view opened at (setView).
+let viewPitch = REST_PITCH;
+
+export function openingPitch(){
+
+    return viewPitch;
+
+}
+
 function cameraFor(view){
 
     const own = view.worlds && view.worlds[getWorld()];
@@ -623,6 +632,9 @@ export function setView(key){
     // (A view can also set its own tilt for phones,
     // phonePitch — the Watched grid does.)
     camera.targetPitch = angle.pitch ?? (phoneCam ? cameraFor(view).phonePitch : undefined) ?? REST_PITCH;
+
+    // (Remembered for the T key, input.js, to tip back to.)
+    viewPitch = camera.targetPitch;
     camera.targetSpin = angle.spin ?? 0;
 
     if(phoneCam){

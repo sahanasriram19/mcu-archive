@@ -7,6 +7,12 @@
 // camera for that view.
 //==================================================
 
+// How far Complete MCU is tipped back (radians; 0 is flat).
+// A little less than the other maps (REST_PITCH in
+// depth.js, 0.8 ≈ 46°), so zoomed out the posters standing
+// up off the map don't run into each other.
+const COMPLETE_PITCH = 0.65;   // ≈ 37°
+
 export const VIEWS = [
 
     {
@@ -22,7 +28,7 @@ export const VIEWS = [
         // (minZoom / userMinZoom: low enough for the bigger,
         // star-shaped maps — the Avengers one especially — to
         // fit whole.)
-        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.92, minZoom: 0.04, maxZoom: 0.4, userMinZoom: 0.04 },
+        camera: { x: 0, y: 0, zoom: 0.12, fit: 0.92, minZoom: 0.04, maxZoom: 0.4, userMinZoom: 0.04, pitch: COMPLETE_PITCH },
         // The combined "Complete MCU" map (every world side by
         // side) is much bigger, so it starts further out and
         // can be zoomed out further. `centre` frames the middle
@@ -44,11 +50,11 @@ export const VIEWS = [
             // (phoneFit / phoneMinZoom: on a phone the whole
             // combined map fits between the countdown bar and
             // the panel, with a margin round it.)
-            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 0.875, phoneFit: 0.88, phoneMinZoom: 0.005 } },
+            all: { camera: { x: 0, y: 0, zoom: 0.05, fit: 1, minZoom: 0.015, maxZoom: 0.4, centre: true, fillMinZoom: 0.875, phoneFit: 0.88, phoneMinZoom: 0.005, pitch: COMPLETE_PITCH } },
             // Each standalone world uses the same layout shape as
             // its map in Complete MCU, and fits that layout to screen.
-            animated: { camera: { x: 0, y: 0, zoom: 0.06, fit: 0.92, minZoom: 0.035, maxZoom: 0.4, userMinZoom: 0.035 } },
-            spider: { camera: { x: 0, y: 0, zoom: 0.08, fit: 0.92, minZoom: 0.045, maxZoom: 0.4, userMinZoom: 0.045 } }
+            animated: { camera: { x: 0, y: 0, zoom: 0.06, fit: 0.92, minZoom: 0.035, maxZoom: 0.4, userMinZoom: 0.035, pitch: COMPLETE_PITCH } },
+            spider: { camera: { x: 0, y: 0, zoom: 0.08, fit: 0.92, minZoom: 0.045, maxZoom: 0.4, userMinZoom: 0.045, pitch: COMPLETE_PITCH } }
         }
     },
 

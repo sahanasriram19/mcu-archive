@@ -1,6 +1,6 @@
 import { camera } from "./camera.js";
 import { graph } from "./graph.js";
-import { getCurrentView, focusPhase, refitView, focusWorld } from "./viewManager.js";
+import { getCurrentView, focusPhase, refitView, focusWorld, openingPitch } from "./viewManager.js";
 import { getNodeAtScreenPoint } from "./nodeHitTest.js";
 import { showMovieDetails } from "./movieDetails.js";
 import { nodeScreenRect } from "./nodes.js";
@@ -690,7 +690,7 @@ window.addEventListener("keydown", e => {
     // (And turned back square, either way.)
     camera.targetSpin = 0;
 
-    camera.targetPitch = camera.targetPitch > 0.05 ? 0 : REST_PITCH;
+    camera.targetPitch = camera.targetPitch > 0.05 ? 0 : openingPitch();
 
 });
 
