@@ -18,10 +18,10 @@
 // map up with it). Entered from anywhere else, it's the
 // plain jump with no logo.
 //
-// Shooting stars are part of it too: any already crossing
-// the screen carry on, speeding up with the jump, and a
-// shower of new ones bursts out from the middle and shoots
-// past you, more and faster as it builds to the flash.
+// Shooting stars on screen as it starts are part of it too:
+// like the stars, they get pulled into the rush and stream
+// out past you, keeping their bright head and tail. (No
+// extra ones are added — only those already there.)
 //
 // Drawn on its own canvas laid over everything. Off with
 // the OS "reduce motion" setting.
@@ -33,10 +33,9 @@ const STREAK_COUNT = 320;
 // streaks (the biggest first).
 const MAX_STAR_STREAKS = 600;
 
-// Shooting stars: how many new ones burst out during the
-// rush (more of them towards the end, as it speeds up).
-const METEOR_COUNT = 16;
-const METEOR_FADE_IN_MS = 160;
+// How long a shooting star takes to turn from its own
+// heading to rushing straight out from the centre.
+const METEOR_TURN_MS = 350;
 
 // One shooting star, drawn as in the sky
 // (js/universe/shootingStars.js): a tail fading out behind
@@ -192,31 +191,23 @@ export function playWarp({ logo = null, followTo = null, stars = [], meteors = [
         seed: false
     })));
 
-    // Shooting stars: the ones already crossing the screen
-    // keep going their own way (faster and faster), and new
-    // ones burst out from near the middle and shoot
-    // outwards past you, joining in more often as the jump
-    // builds.
+    // Shooting stars that were on screen: each starts where
+    // it was (as a direction and distance from the centre,
+    // like a streak) and is pulled into the rush the same
+    // way the stars are.
     const shooting = meteors.map(m => {
 
         const v = Math.hypot(m.vx, m.vy) || 1;
 
         return {
-            real: true, x: m.x, y: m.y,
-            dx: m.vx / v, dy: m.vy / v, v,
-            length: m.length, thickness: m.thickness, brightness: m.brightness,
-            born: 0
+            a: Math.atan2(m.y - cy, m.x - cx),
+            d: Math.max(0.005, Math.hypot(m.x - cx, m.y - cy) / reach),
+            // The way it was heading, to turn from.
+            hx: m.vx / v, hy: m.vy / v,
+            length: m.length, thickness: m.thickness, brightness: m.brightness
         };
 
-    }).concat(Array.from({ length: METEOR_COUNT }, (_, i) => ({
-        real: false,
-        a: Math.random() * Math.PI * 2,
-        d: 0.06 + Math.random() * 0.22,
-        length: 90 + Math.random() * 70,
-        thickness: 2 + Math.random() * 1.5,
-        brightness: 0.75 + Math.random() * 0.25,
-        born: RUSH_MS * (0.05 + 0.85 * Math.pow(i / (METEOR_COUNT - 1), 0.75)) + Math.random() * 120
-    })));
+    });
 
     canvas.classList.add("show");
 
@@ -336,44 +327,32 @@ export function playWarp({ logo = null, followTo = null, stars = [], meteors = [
 
             for(const m of shooting){
 
-                if(m.gone || t < m.born) continue;
+                if(m.gone) continue;
 
-                const age = t - m.born;
+                // Out from the centre exactly as the streaks
+                // move; off the edge, it's gone.
+                m.d *= 1 + speed * dt;
 
-                const alpha = Math.min(1, age / METEOR_FADE_IN_MS);
+                if(m.d > 1.4){ m.gone = true; continue; }
 
-                let x, y, dx, dy;
+                const rx = Math.cos(m.a), ry = Math.sin(m.a);
 
-                if(m.real){
+                const x = cx + rx * m.d * reach;
+                const y = cy + ry * m.d * reach;
 
-                    // Its own way, faster as the jump builds
-                    // (v is per 60th of a second).
-                    const k = m.v * dt * 60 * (1 + speed * 0.9);
+                // Its tail swings round from the way it was
+                // flying to point back at the centre.
+                const turn = Math.min(1, t / METEOR_TURN_MS);
 
-                    m.x += m.dx * k;
-                    m.y += m.dy * k;
+                let dx = m.hx + (rx - m.hx) * turn;
+                let dy = m.hy + (ry - m.hy) * turn;
 
-                    x = m.x; y = m.y; dx = m.dx; dy = m.dy;
+                const len = Math.hypot(dx, dy) || 1;
 
-                    if(x < -600 || x > w + 600 || y < -600 || y > h + 600){ m.gone = true; continue; }
-
-                } else {
-
-                    // Straight out from the middle, like the
-                    // streaks but quicker.
-                    m.d *= 1 + (1.1 + speed * 1.4) * dt;
-
-                    if(m.d > 1.35){ m.gone = true; continue; }
-
-                    dx = Math.cos(m.a); dy = Math.sin(m.a);
-
-                    x = cx + dx * m.d * reach;
-                    y = cy + dy * m.d * reach;
-
-                }
+                dx /= len; dy /= len;
 
                 // Tails stretch as the jump speeds up.
-                drawMeteor(x, y, dx, dy, m.length * (1 + p * 1.8), m.thickness, m.brightness, alpha);
+                drawMeteor(x, y, dx, dy, m.length * (1 + p * 1.8), m.thickness, m.brightness, 1);
 
             }
 
