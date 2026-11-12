@@ -1,0 +1,52 @@
+# Builds the Mac version of MCU Archive on one of GitHub's
+# Macs and adds it to a release as MCU-Archive-Mac.dmg
+# (one download that runs on both Apple Silicon and Intel
+# Macs).
+#
+# Runs by itself whenever you publish a release. To add it
+# to a release that's already out: GitHub → Actions →
+# "Build Mac app" → Run workflow, and type the release's
+# tag (e.g. v1.1.0).
+
+name: Build Mac app
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to add the Mac app to (e.g. v1.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    runs-on: macos-latest
+
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # No Apple Developer certificate: signed "ad-hoc"
+      # (identity "-" in package.json), which Apple Silicon
+      # Macs need to open it at all.
+      - name: Build
+        run: npx electron-builder --mac --publish never
+
+      - name: Add to the release
+        run: gh release upload "$TAG" release/MCU-Archive-Mac.dmg --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

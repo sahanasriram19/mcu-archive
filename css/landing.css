@@ -860,6 +860,7 @@
 #landing.warping.from-logo #intro-stage,
 #landing.warping.from-logo #landing-card,
 #landing.warping.from-logo #intro-skip,
+#landing.warping.from-logo .app-get,
 #landing.warping.from-logo .portal-beacon,
 #landing.warping.from-logo .portal-cta,
 #landing.warping.from-logo .end-logo-img {
@@ -923,60 +924,77 @@
   Windows desktop application download
 --------------------------------------------------*/
 
-.desktop-install-button {
+/* Get the desktop app: a small glass pill in the top-right
+   corner of the hero, styled like the Skip button
+   (#intro-skip), with a link each for Windows and Mac. It
+   makes way for Skip, which takes the same corner, once the
+   fly-through starts. */
+.app-get {
+    position: absolute;
+    top: max(20px, env(safe-area-inset-top));
+    right: max(20px, env(safe-area-inset-right));
+    z-index: 2;
+
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    gap: 8px;
 
-    margin-top: 22px;
-    padding: 13px 28px;
-
-    border: 1px solid rgba(230,36,41,.65);
+    padding: 8px 15px;
+    border: 1px solid rgba(255,255,255,.2);
     border-radius: 999px;
+    background: rgba(17,22,30,.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 
-    background: rgba(230,36,41,.12);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
 
+    transition: opacity .3s ease, transform .3s ease;
+}
+
+.app-get-label {
+    color: rgba(255,255,255,.6);
+}
+
+.app-get-label span {
+    color: #E62429;
+    margin-right: 2px;
+}
+
+.app-get-sep {
+    color: rgba(255,255,255,.35);
+}
+
+.app-get a {
     color: #fff;
-    font-family: inherit;
-    font-size: .85rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
     text-decoration: none;
-
-    box-shadow: 0 0 22px rgba(230,36,41,.2);
-
-    transition:
-        background .25s ease,
-        box-shadow .25s ease,
-        transform .25s ease;
+    border-radius: 4px;
+    transition: color .2s ease;
 }
 
-.desktop-install-button:hover {
-    background: rgba(230,36,41,.28);
-    box-shadow: 0 0 30px rgba(230,36,41,.45);
-    transform: translateY(-2px);
+.app-get a:hover {
+    color: #ff4a4f;
 }
 
-.desktop-install-button:active {
-    transform: scale(.97);
-}
-
-.desktop-install-button:focus-visible {
+.app-get a:focus-visible {
     outline: 2px solid #fff;
-    outline-offset: 4px;
+    outline-offset: 3px;
 }
 
-.desktop-install-button span {
-    font-size: 1.2rem;
-    line-height: 1;
+/* The fly-through has started: Skip takes the corner. */
+#intro-skip.show ~ .app-get {
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
 }
 
 @media (max-width: 600px) {
-    .desktop-install-button {
-        margin-top: 18px;
-        padding: 12px 22px;
-        font-size: .75rem;
+    .app-get {
+        top: max(14px, env(safe-area-inset-top));
+        right: max(14px, env(safe-area-inset-right));
+        padding: 7px 12px;
+        gap: 6px;
+        font-size: 12px;
     }
 }
