@@ -860,7 +860,6 @@
 #landing.warping.from-logo #intro-stage,
 #landing.warping.from-logo #landing-card,
 #landing.warping.from-logo #intro-skip,
-#landing.warping.from-logo .app-get,
 #landing.warping.from-logo .portal-beacon,
 #landing.warping.from-logo .portal-cta,
 #landing.warping.from-logo .end-logo-img {
@@ -924,16 +923,12 @@
   Windows desktop application download
 --------------------------------------------------*/
 
-/* Get the desktop app: a small glass pill in the top-right
-   corner of the hero, styled like the Skip button
-   (#intro-skip), with a link each for Windows and Mac. It
-   makes way for Skip, which takes the same corner, once the
-   fly-through starts. */
+/* Get the desktop app: a small glass pill above the scroll
+   button, styled like the Skip button (#intro-skip), with a
+   link each for Windows and Mac. (It fades with the rest of
+   the hero as the fly-through starts.) */
 .app-get {
-    position: absolute;
-    top: max(20px, env(safe-area-inset-top));
-    right: max(20px, env(safe-area-inset-right));
-    z-index: 2;
+    margin-top: 22px;
 
     display: inline-flex;
     align-items: center;
@@ -950,7 +945,6 @@
     font-size: 13px;
     font-weight: 600;
 
-    transition: opacity .3s ease, transform .3s ease;
 }
 
 .app-get-label {
@@ -982,17 +976,9 @@
     outline-offset: 3px;
 }
 
-/* The fly-through has started: Skip takes the corner. */
-#intro-skip.show ~ .app-get {
-    opacity: 0;
-    transform: translateY(-6px);
-    pointer-events: none;
-}
-
 @media (max-width: 600px) {
     .app-get {
-        top: max(14px, env(safe-area-inset-top));
-        right: max(14px, env(safe-area-inset-right));
+        margin-top: 18px;
         padding: 7px 12px;
         gap: 6px;
         font-size: 12px;

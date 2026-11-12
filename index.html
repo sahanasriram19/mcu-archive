@@ -282,6 +282,22 @@
                     Scroll down to fly through them.
                 </p>
 
+                <!-- The desktop app, Windows and Mac (always the
+                     newest release): a small pill above the scroll
+                     button (css/landing.css). -->
+                <div class="app-get" role="group" aria-label="Get the desktop app">
+                    <span class="app-get-label"><span aria-hidden="true">↓</span> Get the app</span>
+                    <a
+                        href="https://github.com/sahanasriram19/mcu-archive/releases/latest/download/MCU-Archive-Setup.exe"
+                        aria-label="Download MCU Archive for Windows"
+                    >Windows</a>
+                    <span class="app-get-sep" aria-hidden="true">·</span>
+                    <a
+                        href="https://github.com/sahanasriram19/mcu-archive/releases/latest/download/MCU-Archive-Mac.dmg"
+                        aria-label="Download MCU Archive for Mac"
+                    >Mac</a>
+                </div>
+
                 <!-- The way in: scroll through the MCU first; the
                      Enter button waits at the end (#intro-end).
                      Clicking this starts the scroll for you. -->
@@ -300,23 +316,6 @@
 
             <!-- Shown once the fly-through has started. -->
             <button id="intro-skip" type="button">Skip to the archive &rarr;</button>
-
-            <!-- The desktop app, Windows and Mac (always the
-                 newest release): a small pill in the top-right
-                 corner, which makes way for the Skip button once
-                 the fly-through starts (css/landing.css). -->
-            <div class="app-get" role="group" aria-label="Get the desktop app">
-                <span class="app-get-label"><span aria-hidden="true">↓</span> Get the app</span>
-                <a
-                    href="https://github.com/sahanasriram19/mcu-archive/releases/latest/download/MCU-Archive-Setup.exe"
-                    aria-label="Download MCU Archive for Windows"
-                >Windows</a>
-                <span class="app-get-sep" aria-hidden="true">·</span>
-                <a
-                    href="https://github.com/sahanasriram19/mcu-archive/releases/latest/download/MCU-Archive-Mac.dmg"
-                    aria-label="Download MCU Archive for Mac"
-                >Mac</a>
-            </div>
 
         </div>
 
