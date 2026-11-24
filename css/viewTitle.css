@@ -1,0 +1,80 @@
+/*==================================================
+  VIEW TITLE CARD (js/viewTitle.js)
+
+  The view's name, big in the middle of the screen with its
+  world small above, each time a view opens. It appears,
+  holds a moment, then shrinks back and fades into the sky
+  as the camera eases out — like a film's title card.
+  Under the panel (z-index 30) and the jump's flash (100),
+  so on entering it emerges as the light fades.
+==================================================*/
+
+#view-title {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 6vw;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#view-title.play {
+    animation: view-title-card var(--view-title-ms, 2400ms) cubic-bezier(.3, 0, .2, 1) forwards;
+}
+
+.view-title-kicker {
+    font-size: clamp(.75rem, 1.5vw, 1rem);
+    font-weight: 700;
+    letter-spacing: .5em;
+    /* (letter-spacing adds space after the last letter too;
+       this keeps it truly centred) */
+    margin-right: -.5em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+}
+
+.view-title-name {
+    margin-top: .1em;
+    font-family: var(--display, "Bebas Neue", Impact, "Arial Narrow", sans-serif);
+    font-size: clamp(3.2rem, 10vw, 9rem);
+    line-height: .92;
+    letter-spacing: .04em;
+    color: #fff;
+    text-shadow:
+        0 0 28px rgba(230,36,41,.55),
+        0 0 70px rgba(230,36,41,.25),
+        0 4px 18px rgba(0,0,0,.6);
+}
+
+/* Fades in slightly large, settles, holds, then sinks back
+   into the sky as the map comes into view. */
+@keyframes view-title-card {
+    0%   { opacity: 0; transform: scale(1.1);  filter: blur(6px); }
+    14%  { opacity: 1; transform: scale(1.02); filter: blur(0); }
+    38%  { opacity: 1; transform: scale(1);    filter: blur(0); }
+    100% { opacity: 0; transform: scale(.7);   filter: blur(10px); }
+}
+
+/* Phones: a little smaller, so longer names (Complete
+   Fantastic Four) fit on two lines. */
+@media (max-width: 600px) {
+    .view-title-name { font-size: clamp(2.6rem, 13vw, 4rem); }
+    .view-title-kicker { letter-spacing: .35em; margin-right: -.35em; }
+}
+
+/* Reduced motion: just a fade, no zoom or blur. */
+@media (prefers-reduced-motion: reduce) {
+    @keyframes view-title-card {
+        0%   { opacity: 0; }
+        14%  { opacity: 1; }
+        38%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+}

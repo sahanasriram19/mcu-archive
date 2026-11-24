@@ -38,6 +38,7 @@ import { initTour } from "./tour.js";
 import { canonicalId } from "./watched.js";
 import "./watchedView.js";
 import "./watchlistView.js";
+import "./viewTitle.js";
 
 //==========================================
 // LANDING

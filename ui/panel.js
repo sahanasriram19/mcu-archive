@@ -383,6 +383,22 @@ const SECTIONS = [
 
 ];
 
+// A view's name as the panel shows it, and its world's
+// heading — for the title card that shows as a view opens
+// (js/viewTitle.js). Falls back to the view's own label.
+export function viewNames(world, view){
+
+    const section = SECTIONS.find(s => s.world === world);
+
+    const v = VIEWS.find(x => x.key === view);
+
+    return {
+        world: section ? section.title : "",
+        view: (section && section.labels && section.labels[view]) || (v && v.label) || ""
+    };
+
+}
+
 let selectedHeroLabel = "";
 
 // Prefix for the phone bar label outside the MCU.
